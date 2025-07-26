@@ -8,385 +8,364 @@
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #e8f5e8 0%, #f0f8ff 100%);
             margin: 0;
             padding: 20px;
             min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
         
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
+        .profile-card {
+            max-width: 350px;
+            width: 100%;
             background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border-radius: 25px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
             overflow: hidden;
+            position: relative;
         }
         
-        .header {
+        .card-header {
             background: linear-gradient(135deg, #4CAF50, #45a049);
-            color: white;
-            padding: 30px;
+            padding: 30px 25px 80px 25px;
             text-align: center;
             position: relative;
         }
         
-        .header h1 {
+        .welcome-text {
+            color: white;
             margin: 0;
-            font-size: 2.5em;
-            font-weight: 300;
+            font-size: 16px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
         
-        .header .subtitle {
-            opacity: 0.9;
-            margin-top: 10px;
-            font-size: 1.1em;
+        .cannabis-icon {
+            font-size: 20px;
+        }
+        
+        .profile-avatar {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            border: 4px solid white;
+            position: absolute;
+            bottom: -45px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #a78bfa, #60a5fa);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: white;
+            overflow: hidden;
+        }
+        
+        .card-content {
+            padding: 60px 25px 25px 25px;
+        }
+        
+        .profile-info {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .info-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+        
+        .info-item:last-child {
+            border-bottom: none;
+        }
+        
+        .info-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 15px;
+            color: #666;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .info-content {
+            flex: 1;
+        }
+        
+        .info-label {
+            color: #888;
+            font-size: 12px;
+            margin-bottom: 2px;
+        }
+        
+        .info-value {
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .user-type-badge {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+            margin: 2px 2px 2px 0;
+        }
+        
+        .action-buttons {
+            padding: 20px 25px 25px 25px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        
+        .btn-edit {
+            background: #f5f5f5;
+            color: #666;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .btn-edit:hover {
+            background: #eeeeee;
+            transform: translateY(-2px);
+        }
+        
+        .btn-download {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .btn-download:hover {
+            background: #45a049;
+            transform: translateY(-2px);
         }
         
         .logout-btn {
             position: absolute;
-            top: 20px;
-            right: 20px;
+            top: 15px;
+            right: 15px;
             background: rgba(255,255,255,0.2);
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 25px;
+            padding: 8px 15px;
+            border-radius: 20px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 12px;
             transition: all 0.3s ease;
         }
         
         .logout-btn:hover {
             background: rgba(255,255,255,0.3);
-            transform: translateY(-2px);
         }
         
-        .profile-content {
-            padding: 40px;
-        }
-        
-        .profile-card {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 30px;
-            margin-bottom: 30px;
-            border-left: 5px solid #4CAF50;
-        }
-        
-        .profile-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 0;
-            border-bottom: 1px solid #e9ecef;
-        }
-        
-        .profile-row:last-child {
-            border-bottom: none;
-        }
-        
-        .profile-label {
-            font-weight: 600;
-            color: #495057;
-            font-size: 1.1em;
-            min-width: 150px;
-        }
-        
-        .profile-value {
-            color: #6c757d;
-            font-size: 1.1em;
-            text-align: right;
-            flex: 1;
-        }
-        
-        .badge {
-            display: inline-block;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.9em;
-            font-weight: 500;
-            margin: 2px;
-        }
-        
-        .badge-success {
-            background: #d4edda;
-            color: #155724;
-        }
-        
-        .badge-info {
-            background: #d1ecf1;
-            color: #0c5460;
-        }
-        
-        .badge-warning {
-            background: #fff3cd;
-            color: #856404;
-        }
-        
-        .badge-secondary {
-            background: #e2e3e5;
-            color: #6c757d;
-        }
-        
-        .status-icon {
-            font-size: 1.2em;
-            margin-right: 8px;
-        }
-        
-        .action-buttons {
-            display: flex;
-            gap: 15px;
-            margin-top: 30px;
-            flex-wrap: wrap;
-        }
-        
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 500;
-            text-decoration: none;
-            display: inline-block;
-            text-align: center;
-            transition: all 0.3s ease;
-            min-width: 140px;
-        }
-        
-        .btn-primary {
-            background: #007bff;
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background: #0056b3;
-            transform: translateY(-2px);
-        }
-        
-        .btn-success {
-            background: #28a745;
-            color: white;
-        }
-        
-        .btn-success:hover {
-            background: #1e7e34;
-            transform: translateY(-2px);
-        }
-        
-        .btn-outline {
-            background: transparent;
-            border: 2px solid #6c757d;
-            color: #6c757d;
-        }
-        
-        .btn-outline:hover {
-            background: #6c757d;
-            color: white;
-        }
-        
-        .welcome-message {
-            background: linear-gradient(135deg, #ffeaa7, #fab1a0);
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 30px;
-            text-align: center;
-            border: none;
-        }
-        
-        .welcome-message h2 {
-            margin: 0 0 10px 0;
-            color: #2d3436;
-            font-size: 1.8em;
-        }
-        
-        .welcome-message p {
-            margin: 0;
-            color: #636e72;
-            font-size: 1.1em;
-        }
-        
+        /* Edit Mode Styles */
         .edit-input {
-            border: 2px solid #007bff;
-            border-radius: 5px;
-            padding: 8px;
-            font-size: 1em;
+            border: 2px solid #4CAF50;
+            border-radius: 8px;
+            padding: 6px 10px;
+            font-size: 14px;
             width: 100%;
-            max-width: 300px;
+            margin-top: 2px;
         }
         
         .edit-select {
-            border: 2px solid #007bff;
-            border-radius: 5px;
-            padding: 8px;
-            font-size: 1em;
-            max-width: 200px;
+            border: 2px solid #4CAF50;
+            border-radius: 8px;
+            padding: 6px 10px;
+            font-size: 14px;
+            width: 100%;
+            margin-top: 2px;
+        }
+        
+        .user-type-checkbox {
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .user-type-checkbox input {
+            width: auto;
+            margin: 0;
         }
         
         .save-cancel-btns {
             display: none;
             gap: 10px;
-            margin-top: 20px;
+            padding: 15px 25px;
         }
         
         .btn-save {
-            background: #28a745;
+            background: #4CAF50;
             color: white;
-            padding: 8px 16px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
+            flex: 1;
         }
         
         .btn-cancel {
-            background: #6c757d;
+            background: #f44336;
             color: white;
-            padding: 8px 16px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        
-        .user-type-checkbox {
-            margin: 5px;
+            flex: 1;
         }
 
-        @media (max-width: 600px) {
-            .container {
+        @media (max-width: 400px) {
+            .profile-card {
                 margin: 10px;
-                border-radius: 10px;
+                max-width: none;
             }
             
-            .header {
-                padding: 20px;
+            .card-header {
+                padding: 25px 20px 70px 20px;
             }
             
-            .header h1 {
-                font-size: 2em;
+            .profile-avatar {
+                width: 80px;
+                height: 80px;
+                bottom: -40px;
             }
             
-            .profile-content {
-                padding: 20px;
-            }
-            
-            .profile-row {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 5px;
-            }
-            
-            .profile-value {
-                text-align: left;
-            }
-            
-            .action-buttons {
-                flex-direction: column;
-            }
-            
-            .btn {
-                width: 100%;
+            .card-content {
+                padding: 50px 20px 20px 20px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
+    <div class="profile-card">
+        <div class="card-header">
             <button class="logout-btn" onclick="location.href='/logout'">
                 🚪 ออกจากระบบ
             </button>
-            <div style="display: flex; align-items: center; justify-content: center; gap: 15px;">
-                <img src="/attached_assets/budt_boy_logo.png" alt="Budt.Boy Logo" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;">
-                <h1>โปรไฟล์ของฉัน</h1>
+            <h1 class="welcome-text">
+                <span class="cannabis-icon">🌿</span>
+                ยินดีต้อนรับ<br>คุณ <span id="displayUsername">Budt.Boy</span>!
+            </h1>
+            <div class="profile-avatar" id="profileAvatar">
+                👤
             </div>
-            <div class="subtitle">ข้อมูลส่วนตัวและการตั้งค่าบัญชี</div>
         </div>
         
-        <div class="profile-content">
-            <div class="welcome-message">
-                <h2>🎉 ยินดีต้อนรับ คุณ <span id="displayUsername"></span>!</h2>
-                <p>เข้าสู่ระบบเรียบร้อยแล้ว พร้อมใช้งาน Cannabis App</p>
-            </div>
-            
-            <div class="profile-card">
-                <h3 style="margin-top: 0; color: #2c5530; font-size: 1.5em;">📋 ข้อมูลบัญชี</h3>
-                
-                <div class="profile-row">
-                    <div class="profile-label">👤 ชื่อผู้ใช้:</div>
-                    <div class="profile-value">
-                        <span id="username-display">-</span>
-                        <input type="text" id="username-edit" class="edit-input" style="display: none;">
+        <div class="card-content">
+            <ul class="profile-info">
+                <li class="info-item">
+                    <div class="info-icon">👤</div>
+                    <div class="info-content">
+                        <div class="info-label">ชื่อผู้ใช้</div>
+                        <div class="info-value">
+                            <span id="username-display">-</span>
+                            <input type="text" id="username-edit" class="edit-input" style="display: none;">
+                        </div>
                     </div>
-                </div>
+                </li>
                 
-                <div class="profile-row">
-                    <div class="profile-label">📧 อีเมล:</div>
-                    <div class="profile-value">
-                        <span id="email-display">-</span>
-                        <input type="email" id="email-edit" class="edit-input" style="display: none;">
+                <li class="info-item">
+                    <div class="info-icon">📧</div>
+                    <div class="info-content">
+                        <div class="info-label">อีเมล</div>
+                        <div class="info-value">
+                            <span id="email-display">-</span>
+                            <input type="email" id="email-edit" class="edit-input" style="display: none;">
+                        </div>
                     </div>
-                </div>
+                </li>
                 
-                <div class="profile-row">
-                    <div class="profile-label">✅ สถานะยืนยัน:</div>
-                    <div class="profile-value" id="verification-status">-</div>
-                </div>
-                
-                <div class="profile-row">
-                    <div class="profile-label">📅 วันที่สมัคร:</div>
-                    <div class="profile-value" id="created-date">-</div>
-                </div>
-                
-                <div class="profile-row">
-                    <div class="profile-label">🎂 ปีเกิด:</div>
-                    <div class="profile-value">
-                        <span id="birth-year-display">-</span>
-                        <input type="number" id="birth-year-edit" class="edit-input" min="1900" max="2024" style="display: none;">
+                <li class="info-item">
+                    <div class="info-icon">✅</div>
+                    <div class="info-content">
+                        <div class="info-label" id="status-label">สถานะยืนยัน</div>
+                        <div class="info-value" id="verification-status">รอยืนยัน</div>
                     </div>
-                </div>
-            </div>
-            
-            <div class="profile-card">
-                <h3 style="margin-top: 0; color: #2c5530; font-size: 1.5em;">🏷️ ประเภทผู้ใช้</h3>
-                <div id="user-types-display" style="margin-top: 15px;">
-                    <!-- User types will be loaded here -->
-                </div>
-                <div id="user-types-edit" style="margin-top: 15px; display: none;">
-                    <label class="user-type-checkbox">
-                        <input type="checkbox" id="is_consumer_edit"> 👥 ผู้บริโภค (Consumer)
-                    </label><br>
-                    <label class="user-type-checkbox">
-                        <input type="checkbox" id="is_grower_edit"> 🌱 ผู้ปลูก (Grower)
-                    </label><br>
-                    <label class="user-type-checkbox">
-                        <input type="checkbox" id="is_budtender_edit"> 🏪 บัดเทนเดอร์ (Budtender)
-                    </label>
-                </div>
+                </li>
                 
-                <div class="save-cancel-btns" id="saveCancelBtns">
-                    <button class="btn-save" onclick="saveProfile()">💾 บันทึก</button>
-                    <button class="btn-cancel" onclick="cancelEdit()">❌ ยกเลิก</button>
-                </div>
-            </div>
-            
-            <div class="action-buttons">
-                <button class="btn btn-primary" onclick="toggleEditMode()" id="editBtn">
-                    ✏️ แก้ไขโปรไฟล์
-                </button>
-                <a href="/add-buds" class="btn btn-success">
-                    🌿 เพิ่มดอกที่คุณมี
-                </a>
-                <a href="/" class="btn btn-outline">
-                    📝 ลงทะเบียนผู้ใช้ใหม่
-                </a>
-                <a href="/users" class="btn btn-outline">
-                    👥 ดูรายชื่อผู้ใช้
-                </a>
-                <button class="btn btn-outline" onclick="location.reload()">
-                    🔄 รีเฟรชข้อมูล
-                </button>
-            </div></div>
+                <li class="info-item">
+                    <div class="info-icon">🏷️</div>
+                    <div class="info-content">
+                        <div class="info-label">ประเภทผู้ใช้</div>
+                        <div class="info-value">
+                            <div id="user-types-display">
+                                <!-- User types will be loaded here -->
+                            </div>
+                            <div id="user-types-edit" style="display: none;">
+                                <div class="user-type-checkbox">
+                                    <input type="checkbox" id="is_consumer_edit">
+                                    <label>👥 ผู้บริโภค</label>
+                                </div>
+                                <div class="user-type-checkbox">
+                                    <input type="checkbox" id="is_grower_edit">
+                                    <label>🌱 ผู้ปลูก</label>
+                                </div>
+                                <div class="user-type-checkbox">
+                                    <input type="checkbox" id="is_budtender_edit">
+                                    <label>🏪 บัดเทนเดอร์</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                
+                <li class="info-item">
+                    <div class="info-icon">📅</div>
+                    <div class="info-content">
+                        <div class="info-label">ปีเกิด</div>
+                        <div class="info-value">
+                            <span id="birth-year-display">-</span>
+                            <input type="number" id="birth-year-edit" class="edit-input" min="1900" max="2024" style="display: none;">
+                        </div>
+                    </div>
+                </li>
+                
+                <li class="info-item">
+                    <div class="info-icon">📅</div>
+                    <div class="info-content">
+                        <div class="info-label">สมัครเมื่อ</div>
+                        <div class="info-value" id="created-date">-</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="save-cancel-btns" id="saveCancelBtns">
+            <button class="btn btn-save" onclick="saveProfile()">💾 บันทึก</button>
+            <button class="btn btn-cancel" onclick="cancelEdit()">❌ ยกเลิก</button>
+        </div>
+        
+        <div class="action-buttons">
+            <button class="btn btn-edit" onclick="toggleEditMode()" id="editBtn">
+                ✏️ แก้ไขโปรไฟล์
+            </button>
+            <a href="/add-buds" class="btn btn-download">
+                ⬇️ เพิ่มดอกที่คุณมี
+            </a>
         </div>
     </div>
 
@@ -394,7 +373,6 @@
         // Load user profile data
         async function loadProfile() {
             try {
-                // Get current user info from session (we'll need to create an endpoint for this)
                 const response = await fetch('/api/profile');
                 if (response.ok) {
                     const data = await response.json();
@@ -423,66 +401,76 @@
             
             // Verification status
             const verificationStatus = document.getElementById('verification-status');
+            const statusLabel = document.getElementById('status-label');
             if (user.is_verified) {
-                verificationStatus.innerHTML = '<span class="status-icon">✅</span><span class="badge badge-success">ยืนยันแล้ว</span>';
+                verificationStatus.innerHTML = '<span class="user-type-badge">ยืนยันแล้ว</span>';
+                statusLabel.textContent = 'สถานะยืนยัน';
             } else {
-                verificationStatus.innerHTML = '<span class="status-icon">⏳</span><span class="badge badge-warning">รอยืนยัน</span>';
+                verificationStatus.innerHTML = '<span style="color: #ff9800;">รอยืนยัน</span>';
+                statusLabel.textContent = 'สถานะยืนยัน';
             }
             
             // Created date
             if (user.created_at) {
                 const date = new Date(user.created_at);
                 document.getElementById('created-date').textContent = date.toLocaleDateString('th-TH', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric'
                 });
             }
             
             // Birth year
-            document.getElementById('birth-year-display').textContent = user.birth_year || 'ไม่ระบุ';
+            document.getElementById('birth-year-display').textContent = user.birth_year ? 
+                (user.birth_year + 543) + ' พ.ศ.' : 'ไม่ระบุ';
             
             // User types display
             const userTypesDiv = document.getElementById('user-types-display');
             let userTypes = [];
             
-            if (user.is_consumer) userTypes.push('<span class="badge badge-info">👥 ผู้บริโภค (Consumer)</span>');
-            if (user.is_grower) userTypes.push('<span class="badge badge-success">🌱 ผู้ปลูก (Grower)</span>');
-            if (user.is_budtender) userTypes.push('<span class="badge badge-secondary">🏪 บัดเทนเดอร์ (Budtender)</span>');
+            if (user.is_consumer) userTypes.push('<span class="user-type-badge">👥 ผู้บริโภค</span>');
+            if (user.is_grower) userTypes.push('<span class="user-type-badge">🌱 ผู้ปลูก</span>');
+            if (user.is_budtender) userTypes.push('<span class="user-type-badge">🏪 บัดเทนเดอร์</span>');
             
             if (userTypes.length > 0) {
                 userTypesDiv.innerHTML = userTypes.join(' ');
             } else {
-                userTypesDiv.innerHTML = '<span class="badge badge-secondary">ไม่มีประเภทที่ระบุ</span>';
+                userTypesDiv.innerHTML = '<span style="color: #999;">ไม่มีประเภทที่ระบุ</span>';
             }
             
             // Set user type checkboxes
             document.getElementById('is_consumer_edit').checked = user.is_consumer || false;
             document.getElementById('is_grower_edit').checked = user.is_grower || false;
             document.getElementById('is_budtender_edit').checked = user.is_budtender || false;
+            
+            // Update avatar with first letter of username
+            const avatar = document.getElementById('profileAvatar');
+            if (user.username) {
+                avatar.textContent = user.username.charAt(0).toUpperCase();
+            }
         }
 
         function toggleEditMode() {
             const isEditing = document.getElementById('username-edit').style.display !== 'none';
             
             if (isEditing) {
-                // Switch to view mode
                 cancelEdit();
             } else {
                 // Switch to edit mode
                 document.getElementById('username-display').style.display = 'none';
-                document.getElementById('username-edit').style.display = 'inline-block';
+                document.getElementById('username-edit').style.display = 'block';
                 
                 document.getElementById('email-display').style.display = 'none';
-                document.getElementById('email-edit').style.display = 'inline-block';
+                document.getElementById('email-edit').style.display = 'block';
                 
                 document.getElementById('birth-year-display').style.display = 'none';
-                document.getElementById('birth-year-edit').style.display = 'inline-block';
+                document.getElementById('birth-year-edit').style.display = 'block';
                 
                 document.getElementById('user-types-display').style.display = 'none';
                 document.getElementById('user-types-edit').style.display = 'block';
                 
                 document.getElementById('saveCancelBtns').style.display = 'flex';
+                document.querySelector('.action-buttons').style.display = 'none';
                 document.getElementById('editBtn').textContent = '❌ ยกเลิกแก้ไข';
             }
         }
@@ -502,6 +490,7 @@
             document.getElementById('user-types-edit').style.display = 'none';
             
             document.getElementById('saveCancelBtns').style.display = 'none';
+            document.querySelector('.action-buttons').style.display = 'flex';
             document.getElementById('editBtn').textContent = '✏️ แก้ไขโปรไฟล์';
             
             // Reset form values
@@ -531,7 +520,7 @@
                 
                 if (response.ok) {
                     alert('✅ บันทึกข้อมูลสำเร็จ!');
-                    loadProfile(); // Reload profile data
+                    loadProfile();
                     cancelEdit();
                 } else {
                     alert('❌ เกิดข้อผิดพลาด: ' + result.error);

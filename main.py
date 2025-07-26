@@ -64,6 +64,7 @@ def create_tables():
                     is_budtender BOOLEAN DEFAULT FALSE,
                     is_consumer BOOLEAN DEFAULT TRUE,
                     birth_year INTEGER NULL,
+                    profile_image_url VARCHAR(255) NULL,
                     is_verified BOOLEAN DEFAULT FALSE,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
@@ -185,7 +186,7 @@ def list_users():
             cur = conn.cursor()
             cur.execute("""
                 SELECT id, username, email, is_grower, is_budtender, is_consumer, 
-                       birth_year, created_at, is_verified, grow_license_file_url 
+                       birth_year, created_at, is_verified, grow_license_file_url, profile_image_url 
                 FROM users ORDER BY created_at DESC
             """)
             users = cur.fetchall()
@@ -202,7 +203,8 @@ def list_users():
                     'birth_year': user[6],
                     'created_at': user[7].strftime('%Y-%m-%d %H:%M:%S') if user[7] else None,
                     'is_verified': user[8],
-                    'grow_license_file_url': user[9]
+                    'grow_license_file_url': user[9],
+                    'profile_image_url': user[10]
                 })
             
             return jsonify(users_list)
@@ -216,7 +218,7 @@ def list_users():
 
 @app.route('/register_user', methods=['POST'])
 def register_user():
-    # Handle file upload
+    # Handle license file upload
     license_file_url = None
     if 'grow_license_file' in request.files:
         file = request.files['grow_license_file']
@@ -228,6 +230,19 @@ def register_user():
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(file_path)
             license_file_url = file_path
+    
+    # Handle profile image upload
+    profile_image_url = None
+    if 'profile_image' in request.files:
+        file = request.files['profile_image']
+        if file and file.filename != '' and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            # Add timestamp to filename to avoid conflicts
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_')
+            filename = timestamp + 'profile_' + filename
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(file_path)
+            profile_image_url = file_path
     
     # Get form data
     username = request.form.get('username')
@@ -249,13 +264,14 @@ def register_user():
             # Insert user
             cur.execute("""
                 INSERT INTO users (username, email, password_hash, is_grower, grow_license_file_url, 
-                                 is_budtender, is_consumer, birth_year, is_verified)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                                 is_budtender, is_consumer, birth_year, profile_image_url, is_verified)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 RETURNING id
             """, (
                 username, email, password_hash, is_grower, license_file_url,
                 is_budtender, is_consumer,
                 int(birth_year) if birth_year else None,
+                profile_image_url,
                 False  # Not verified initially
             ))
             

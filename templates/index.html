@@ -131,8 +131,8 @@
 </head>
 <body>
     <div class="container">
-        <h1>🌿 Cannabis App - User Management System</h1>
-        <p>ระบบจัดการผู้ใช้สำหรับแอปพลิเคชัน Cannabis พร้อม AI Chatbot</p>
+        <h1>🌿 Budt.Boy สวัสดีครับ</h1>
+        <p>สร้างคอนเนคชั่นสายเขียวกับ Budt.boy</p>
     </div>
 
     <div class="container">
@@ -186,6 +186,12 @@
                 <label for="birth_year">ปีเกิด:</label>
                 <input type="number" id="birth_year" name="birth_year" min="1900" max="2024">
                 <div class="note">ใช้สำหรับตรวจสอบอายุ (ไม่บังคับ)</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="profile_image">รูปโปรไฟล์:</label>
+                <input type="file" id="profile_image" name="profile_image" accept=".png,.jpg,.jpeg">
+                <div class="note">รองรับไฟล์: PNG, JPG, JPEG (ขนาดไม่เกิน 16MB)</div>
             </div>
             
             <button type="submit" class="register-button">🎯 ยืนยันการลงทะเบียน</button>
@@ -256,6 +262,12 @@
             const growerFile = document.getElementById('grow_license_file').files[0];
             if (growerFile && document.getElementById('is_grower').checked) {
                 formData.append('grow_license_file', growerFile);
+            }
+            
+            // Add profile image if provided
+            const profileImage = document.getElementById('profile_image').files[0];
+            if (profileImage) {
+                formData.append('profile_image', profileImage);
             }
             
             try {

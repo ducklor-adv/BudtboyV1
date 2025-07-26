@@ -84,6 +84,79 @@ def create_tables():
                 );
             """)
             
+            # Create strain_names table for autocomplete
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS strain_names (
+                    id SERIAL PRIMARY KEY,
+                    name_th VARCHAR(255),
+                    name_en VARCHAR(255) NOT NULL,
+                    strain_type VARCHAR(50) CHECK (strain_type IN ('Indica', 'Sativa', 'Hybrid')),
+                    is_popular BOOLEAN DEFAULT FALSE,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                );
+            """)
+            
+            # Insert sample strain names if table is empty
+            cur.execute("SELECT COUNT(*) FROM strain_names")
+            count = cur.fetchone()[0]
+            
+            if count == 0:
+                sample_strains = [
+                    # Popular Indica strains
+                    ('คุช', 'Kush', 'Indica', True),
+                    ('โอจี คุช', 'OG Kush', 'Indica', True),
+                    ('กรานด์แด๊ดดี้ เพอร์เปิล', 'Granddaddy Purple', 'Indica', True),
+                    ('บับเบิล คุช', 'Bubble Kush', 'Indica', True),
+                    ('นอร์เทิร์น ไลท์', 'Northern Lights', 'Indica', True),
+                    ('แอฟกานิสถาน', 'Afghanistan', 'Indica', True),
+                    ('เบอร์รี่ ไวท์', 'Berry White', 'Indica', True),
+                    ('ชอคโกแลต คุช', 'Chocolate Kush', 'Indica', True),
+                    
+                    # Popular Sativa strains
+                    ('แจ็ค เฮอเรอร์', 'Jack Herer', 'Sativa', True),
+                    ('เกรีน แครค', 'Green Crack', 'Sativa', True),
+                    ('ดูร์บัน พอยซัน', 'Durban Poison', 'Sativa', True),
+                    ('ซุปเปอร์ เลมอน เฮซ', 'Super Lemon Haze', 'Sativa', True),
+                    ('ซาวร์ ดีเซล', 'Sour Diesel', 'Sativa', True),
+                    ('แอมเนเซีย เฮซ', 'Amnesia Haze', 'Sativa', True),
+                    ('ทานจีรีน ดรีม', 'Tangerine Dream', 'Sativa', True),
+                    ('มาวี', 'Maui Wowie', 'Sativa', True),
+                    
+                    # Popular Hybrid strains
+                    ('บลู ดรีม', 'Blue Dream', 'Hybrid', True),
+                    ('จีเอสซี', 'Girl Scout Cookies', 'Hybrid', True),
+                    ('ไวท์ วิโดว์', 'White Widow', 'Hybrid', True),
+                    ('พายน์แอปเปิล เอ็กซ์เพรส', 'Pineapple Express', 'Hybrid', True),
+                    ('เชอร์เบิร์ต', 'Sherbet', 'Hybrid', True),
+                    ('เจลาโต้', 'Gelato', 'Hybrid', True),
+                    ('เวดดิ้ง เค้ก', 'Wedding Cake', 'Hybrid', True),
+                    ('รันท์ซ', 'Runtz', 'Hybrid', True),
+                    ('คุกกี้ส์', 'Cookies', 'Hybrid', True),
+                    ('โดซิโดส', 'Do-Si-Dos', 'Hybrid', True),
+                    
+                    # Thai local strains
+                    ('ไทยสติ๊ก', 'Thai Stick', 'Sativa', True),
+                    ('ช้างไทย', 'Thai Elephant', 'Sativa', False),
+                    ('กัญชาไทย', 'Thai Cannabis', 'Sativa', False),
+                    ('สายพันธุ์เหนือ', 'Northern Thai', 'Sativa', False),
+                    ('สายพันธุ์อีสาน', 'Isaan Strain', 'Sativa', False),
+                    
+                    # Additional popular strains
+                    ('เอไอเค-47', 'AK-47', 'Hybrid', True),
+                    ('สกายวอคเกอร์', 'Skywalker', 'Hybrid', True),
+                    ('พิงค์ คุช', 'Pink Kush', 'Indica', True),
+                    ('เพอร์เปิล เฮซ', 'Purple Haze', 'Sativa', True),
+                    ('โกลเด้น โกท', 'Golden Goat', 'Hybrid', True),
+                    ('เชอร์รี่ พาย', 'Cherry Pie', 'Hybrid', True),
+                    ('สต្រอเบอรี่ โคฟ', 'Strawberry Cough', 'Sativa', True),
+                    ('แลมบ์สเบรด', 'Lamb\'s Bread', 'Sativa', True),
+                ]
+                
+                cur.executemany("""
+                    INSERT INTO strain_names (name_th, name_en, strain_type, is_popular)
+                    VALUES (%s, %s, %s, %s)
+                """, sample_strains)
+            
             # Create buds_data table
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS buds_data (
@@ -120,6 +193,9 @@ def create_tables():
             
             # Create index for better performance
             cur.execute("""
+                CREATE INDEX IF NOT EXISTS idx_strain_names_th ON strain_names(name_th);
+                CREATE INDEX IF NOT EXISTS idx_strain_names_en ON strain_names(name_en);
+                CREATE INDEX IF NOT EXISTS idx_strain_names_popular ON strain_names(is_popular);
                 CREATE INDEX IF NOT EXISTS idx_buds_strain_name_th ON buds_data(strain_name_th);
                 CREATE INDEX IF NOT EXISTS idx_buds_strain_name_en ON buds_data(strain_name_en);
                 CREATE INDEX IF NOT EXISTS idx_buds_strain_type ON buds_data(strain_type);
@@ -836,7 +912,7 @@ def delete_bud(bud_id):
 
 @app.route('/api/strains/autocomplete', methods=['GET'])
 def autocomplete_strains():
-    """Get strain names for autocomplete"""
+    """Get strain names for autocomplete from strain_names table"""
     query = request.args.get('q', '').strip()
     lang = request.args.get('lang', 'both')  # 'th', 'en', or 'both'
     
@@ -851,12 +927,12 @@ def autocomplete_strains():
             suggestions = []
             
             if lang in ['th', 'both']:
-                # Search Thai names
+                # Search Thai names from strain_names table (prioritize popular strains)
                 cur.execute("""
-                    SELECT DISTINCT strain_name_th 
-                    FROM buds_data 
-                    WHERE strain_name_th ILIKE %s 
-                    ORDER BY strain_name_th 
+                    SELECT DISTINCT name_th 
+                    FROM strain_names 
+                    WHERE name_th ILIKE %s AND name_th IS NOT NULL
+                    ORDER BY is_popular DESC, name_th 
                     LIMIT 10
                 """, (f'%{query}%',))
                 
@@ -865,18 +941,46 @@ def autocomplete_strains():
                         suggestions.append(row[0])
             
             if lang in ['en', 'both']:
-                # Search English names
+                # Search English names from strain_names table (prioritize popular strains)
                 cur.execute("""
-                    SELECT DISTINCT strain_name_en 
-                    FROM buds_data 
-                    WHERE strain_name_en ILIKE %s 
-                    ORDER BY strain_name_en 
+                    SELECT DISTINCT name_en 
+                    FROM strain_names 
+                    WHERE name_en ILIKE %s AND name_en IS NOT NULL
+                    ORDER BY is_popular DESC, name_en 
                     LIMIT 10
                 """, (f'%{query}%',))
                 
                 for row in cur.fetchall():
                     if row[0] and row[0] not in suggestions:
                         suggestions.append(row[0])
+            
+            # If not enough suggestions from strain_names, also search buds_data
+            if len(suggestions) < 8:
+                if lang in ['th', 'both']:
+                    cur.execute("""
+                        SELECT DISTINCT strain_name_th 
+                        FROM buds_data 
+                        WHERE strain_name_th ILIKE %s AND strain_name_th IS NOT NULL
+                        ORDER BY strain_name_th 
+                        LIMIT %s
+                    """, (f'%{query}%', 10 - len(suggestions)))
+                    
+                    for row in cur.fetchall():
+                        if row[0] and row[0] not in suggestions:
+                            suggestions.append(row[0])
+                
+                if lang in ['en', 'both']:
+                    cur.execute("""
+                        SELECT DISTINCT strain_name_en 
+                        FROM buds_data 
+                        WHERE strain_name_en ILIKE %s AND strain_name_en IS NOT NULL
+                        ORDER BY strain_name_en 
+                        LIMIT %s
+                    """, (f'%{query}%', 10 - len(suggestions)))
+                    
+                    for row in cur.fetchall():
+                        if row[0] and row[0] not in suggestions:
+                            suggestions.append(row[0])
             
             return jsonify(suggestions[:10])  # Limit to 10 suggestions
             

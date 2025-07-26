@@ -16,7 +16,8 @@ app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
 app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
-app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_USERNAME')
+app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_USERNAME', 'noreply@cannabisapp.com')
+app.config['MAIL_USE_SSL'] = False
 
 # File upload configuration
 app.config['UPLOAD_FOLDER'] = 'uploads'
@@ -95,10 +96,16 @@ def generate_verification_token():
 
 def send_verification_email(email, username, token):
     try:
+        # Check if email configuration is available
+        if not app.config['MAIL_USERNAME'] or not app.config['MAIL_PASSWORD']:
+            print("Email configuration not found - skipping email send")
+            return False
+            
         verification_url = url_for('verify_email', token=token, _external=True)
         msg = Message(
-            'ยืนยันการลงทะเบียน - Cannabis App',
+            subject='ยืนยันการลงทะเบียน - Cannabis App',
             recipients=[email],
+            sender=app.config['MAIL_DEFAULT_SENDER'],
             html=f"""
             <h2>สวัสดี {username}!</h2>
             <p>ขอบคุณที่ลงทะเบียนกับ Cannabis App</p>
@@ -111,6 +118,7 @@ def send_verification_email(email, username, token):
             """
         )
         mail.send(msg)
+        print(f"Verification email sent successfully to {email}")
         return True
     except Exception as e:
         print(f"Error sending email: {e}")
@@ -260,6 +268,16 @@ def register_user():
     if conn:
         try:
             cur = conn.cursor()
+            
+            # Check if username or email already exists
+            cur.execute("SELECT id FROM users WHERE username = %s OR email = %s", (username, email))
+            existing_user = cur.fetchone()
+            
+            if existing_user:
+                return jsonify({
+                    'success': False, 
+                    'error': 'ชื่อผู้ใช้หรืออีเมลนี้ถูกใช้ไปแล้ว'
+                }), 400
             
             # Insert user
             cur.execute("""

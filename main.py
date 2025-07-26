@@ -95,6 +95,16 @@ def create_tables():
                 );
             """)
             
+            # Create breeders table for autocomplete
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS breeders (
+                    id SERIAL PRIMARY KEY,
+                    name VARCHAR(255) UNIQUE NOT NULL,
+                    is_popular BOOLEAN DEFAULT FALSE,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                );
+            """)
+            
             # Insert all 456 strain names if table is empty
             cur.execute("SELECT COUNT(*) FROM strain_names")
             count = cur.fetchone()[0]
@@ -575,6 +585,160 @@ def create_tables():
                     VALUES (%s, %s, %s)
                 """, all_strains)
             
+            # Insert breeder names if table is empty
+            cur.execute("SELECT COUNT(*) FROM breeders")
+            breeder_count = cur.fetchone()[0]
+            
+            if breeder_count == 0:
+                # All breeders from the file
+                all_breeders = [
+                    ('303 Seeds', False),
+                    ('707 Seed Bank', False),
+                    ('710 Genetics', False),
+                    ('Ace Seeds', False),
+                    ('Aficionado Seeds', False),
+                    ('Alpine Seeds', False),
+                    ('Anesia Seeds', False),
+                    ('Apex Seeds', False),
+                    ('Archive Seed Bank', False),
+                    ('Atlas Seeds', False),
+                    ('Attitude Seedbank', False),
+                    ('Authentic Genetics', False),
+                    ('Auto Seeds', False),
+                    ('BC Bud Depot', False),
+                    ('BOG Seeds', False),
+                    ('Barney\'s Farm', True),
+                    ('BeLeaf Cannabis Genetics', False),
+                    ('Big Buddha Seeds', False),
+                    ('Blimburn Seeds', False),
+                    ('Bodhi Seeds', False),
+                    ('Brothers Grimm Seeds', False),
+                    ('Buddha Seeds', False),
+                    ('CBD Crew', False),
+                    ('Cali Connection', False),
+                    ('Cannabiogen', False),
+                    ('Cannarado Genetics', False),
+                    ('Capulator', False),
+                    ('Clearwater Genetics', False),
+                    ('Compound Genetics', False),
+                    ('Connoisseur Genetics', False),
+                    ('Cookies Fam Genetics', True),
+                    ('Cookies Seed Bank', False),
+                    ('Crockett Family Farms', False),
+                    ('Crop King Seeds', False),
+                    ('DJ Short / Old World Genetics', False),
+                    ('DNA Genetics', True),
+                    ('Delicious Seeds', False),
+                    ('Dinafem Seeds', True),
+                    ('Dirty Bird Genetics', False),
+                    ('Dominion Seed Company', False),
+                    ('Dr Underground', False),
+                    ('Dr. Blaze', False),
+                    ('Duke Diamond\'s Vault', False),
+                    ('Dutch Passion', True),
+                    ('Dynasty Genetics', False),
+                    ('Elev8 Seeds', False),
+                    ('Emerald Triangle Seeds', False),
+                    ('Envy Genetics', False),
+                    ('Ethos Genetics', False),
+                    ('Ethos Seeds', False),
+                    ('Exotic Genetix', False),
+                    ('Fast Buds', True),
+                    ('Fast Buds 420', False),
+                    ('Fast Flowers', False),
+                    ('Feminized Seeds Co', False),
+                    ('Flash Seeds', False),
+                    ('FreeWorld Genetics', False),
+                    ('Freeborn Selections', False),
+                    ('Fresh Coast Genetics', False),
+                    ('G13 Labs', False),
+                    ('GTR (Grow the Revolution)', False),
+                    ('Gage Green Group', False),
+                    ('Gorilla Glue Genetics', False),
+                    ('Green Bodhi', False),
+                    ('Green House Seed Company', True),
+                    ('Greenthumb Seeds', False),
+                    ('Growers Choice Seeds', False),
+                    ('Heavyweight Seeds', False),
+                    ('Homegrown Cannabis Co', False),
+                    ('House of Dankness', False),
+                    ('Humboldt Seed Company', False),
+                    ('Humboldt Seed Organization', False),
+                    ('ILGM (I Love Growing Marijuana)', False),
+                    ('In House Genetics', False),
+                    ('Jordan of the Islands', False),
+                    ('Jungle Boys Genetics', True),
+                    ('Kalashnikov Seeds', False),
+                    ('Kannabia Seeds', False),
+                    ('Karma Genetics', False),
+                    ('Kera Seeds', False),
+                    ('Khalifa Genetics', False),
+                    ('LIT Farms', False),
+                    ('Liontree Genetics', False),
+                    ('Lovin In Her Eyes', False),
+                    ('MSNL (Marijuana Seeds NL)', False),
+                    ('Magus Genetics', False),
+                    ('Mandala Seeds', False),
+                    ('Medical Seeds', False),
+                    ('Mephisto Genetics', True),
+                    ('Ministry of Cannabis', False),
+                    ('Mosca Seeds', False),
+                    ('Mr. Nice Seedbank', True),
+                    ('Next Generation Seeds', False),
+                    ('Night Owl Seeds', False),
+                    ('Nirvana Seeds', True),
+                    ('OG Raskal Genetics', False),
+                    ('Ocean Grown Seeds', False),
+                    ('Oni Seed Co', False),
+                    ('Paradise Seeds', True),
+                    ('Philosopher Seeds', False),
+                    ('Positronics Seeds', False),
+                    ('Premium Cultivars', False),
+                    ('Purple City Genetics', False),
+                    ('Pyramid Seeds', False),
+                    ('Rare Dankness', False),
+                    ('Raw Genetics', False),
+                    ('Resin Seeds', False),
+                    ('Ripper Seeds', False),
+                    ('Royal Queen Seeds', True),
+                    ('Seed Junky Genetics', False),
+                    ('Seed Stockers', False),
+                    ('Seed Supreme', False),
+                    ('Seedsman', True),
+                    ('Sensi Seeds', True),
+                    ('Serious Seeds', False),
+                    ('Sherbinski\'s Genetics', False),
+                    ('Sin City Seeds', False),
+                    ('Snow High Seeds', False),
+                    ('Solfire Gardens', False),
+                    ('Spliff Seeds', False),
+                    ('Square One Genetics', False),
+                    ('Sub Rosa Seed', False),
+                    ('Subcool Seeds (TGA)', False),
+                    ('Super Sativa Seed Club', False),
+                    ('Sweet Seeds', True),
+                    ('Symbiotic Genetics', False),
+                    ('T.H. Seeds', False),
+                    ('Tangled Roots Genetics', False),
+                    ('Terphogz (Zkittlez)', False),
+                    ('Tiki Madman', False),
+                    ('Top Dawg Genetics', False),
+                    ('Top Shelf Elite Seeds', False),
+                    ('Tropical Seeds Company', False),
+                    ('Twenty20 Mendocino', False),
+                    ('Urban Legends Genetics', False),
+                    ('Vision Seeds', False),
+                    ('Wolfpack Selections', False),
+                    ('Yieldmonger Genetics', False),
+                    ('Zamnesia', False),
+                    ('Zmoothiez', False),
+                ]
+                
+                cur.executemany("""
+                    INSERT INTO breeders (name, is_popular)
+                    VALUES (%s, %s)
+                """, all_breeders)
+            
             # Create buds_data table
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS buds_data (
@@ -614,6 +778,8 @@ def create_tables():
                 CREATE INDEX IF NOT EXISTS idx_strain_names_th ON strain_names(name_th);
                 CREATE INDEX IF NOT EXISTS idx_strain_names_en ON strain_names(name_en);
                 CREATE INDEX IF NOT EXISTS idx_strain_names_popular ON strain_names(is_popular);
+                CREATE INDEX IF NOT EXISTS idx_breeders_name ON breeders(name);
+                CREATE INDEX IF NOT EXISTS idx_breeders_popular ON breeders(is_popular);
                 CREATE INDEX IF NOT EXISTS idx_buds_strain_name_th ON buds_data(strain_name_th);
                 CREATE INDEX IF NOT EXISTS idx_buds_strain_name_en ON buds_data(strain_name_en);
                 CREATE INDEX IF NOT EXISTS idx_buds_strain_type ON buds_data(strain_type);
@@ -1374,6 +1540,62 @@ def add_strain():
             
         except Exception as e:
             conn.rollback()
+            return jsonify({'error': str(e)}), 500
+        finally:
+            cur.close()
+            conn.close()
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+@app.route('/api/breeders/search', methods=['GET'])
+def search_breeders():
+    """Search breeder names with autocomplete suggestions"""
+    query = request.args.get('q', '').strip()
+    limit = int(request.args.get('limit', 15))
+    
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            
+            suggestions = []
+            
+            if query:
+                # Search with query - case-insensitive partial matching
+                cur.execute("""
+                    SELECT name, is_popular
+                    FROM breeders 
+                    WHERE name ILIKE %s
+                    ORDER BY is_popular DESC, 
+                             CASE WHEN name ILIKE %s THEN 0 ELSE 1 END,
+                             name
+                    LIMIT %s
+                """, (f'%{query}%', f'{query}%', limit))
+                
+                for row in cur.fetchall():
+                    suggestions.append({
+                        'name': row[0],
+                        'is_popular': row[1]
+                    })
+            else:
+                # No query - return popular breeders first
+                cur.execute("""
+                    SELECT name, is_popular
+                    FROM breeders 
+                    ORDER BY is_popular DESC, name
+                    LIMIT %s
+                """, (limit,))
+                
+                for row in cur.fetchall():
+                    suggestions.append({
+                        'name': row[0],
+                        'is_popular': row[1]
+                    })
+            
+            return jsonify(suggestions)
+            
+        except Exception as e:
+            print(f"Error in search_breeders: {e}")
             return jsonify({'error': str(e)}), 500
         finally:
             cur.close()

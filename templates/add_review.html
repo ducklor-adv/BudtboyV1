@@ -220,6 +220,73 @@
             100% { transform: rotate(360deg); }
         }
 
+        .effects-category {
+            margin-bottom: 25px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border: 1px solid #e9ecef;
+        }
+
+        .effects-category-title {
+            margin: 0 0 15px 0;
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .effects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 8px;
+        }
+
+        .effect-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 13px;
+        }
+
+        .effect-item:hover {
+            border-color: #ff9800;
+            background: #fff3cd;
+        }
+
+        .effect-item input[type="checkbox"] {
+            margin: 0;
+            width: 16px;
+            height: 16px;
+        }
+
+        .effect-item input[type="checkbox"]:checked + label {
+            font-weight: 600;
+        }
+
+        .effect-item input[type="checkbox"]:checked {
+            accent-color: #ff9800;
+        }
+
+        .effect-item.selected {
+            background: #fff3cd;
+            border-color: #ff9800;
+        }
+
+        .effect-item label {
+            cursor: pointer;
+            margin: 0;
+            flex: 1;
+            font-size: 13px;
+        }
+
         @media (max-width: 600px) {
             .container {
                 margin: 10px;
@@ -236,6 +303,15 @@
             
             .aroma-flavors {
                 grid-template-columns: 1fr 1fr;
+            }
+
+            .effects-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .effect-item {
+                font-size: 12px;
+                padding: 6px 10px;
             }
         }
     </style>
@@ -330,12 +406,11 @@
                     </div>
                 </div>
                 
-                <!-- คะแนนย่อย -->
+                <!-- คะแนนกลิ่น -->
                 <div class="form-group">
-                    <label class="form-label">📊 คะแนนรายละเอียด</label>
+                    <label class="form-label">📊 คะแนนกลิ่น</label>
                     <div class="rating-group">
                         <div class="rating-item">
-                            <label>กลิ่น</label>
                             <div class="star-rating" data-rating="aroma">
                                 <span class="star" data-value="1">★</span>
                                 <span class="star" data-value="2">★</span>
@@ -345,16 +420,198 @@
                             </div>
                             <input type="hidden" id="aromaRating">
                         </div>
-                        <div class="rating-item">
-                            <label>ผลที่รู้สึก</label>
-                            <div class="star-rating" data-rating="effects">
-                                <span class="star" data-value="1">★</span>
-                                <span class="star" data-value="2">★</span>
-                                <span class="star" data-value="3">★</span>
-                                <span class="star" data-value="4">★</span>
-                                <span class="star" data-value="5">★</span>
+                    </div>
+                </div>
+
+                <!-- ผลกระทบที่รู้สึก -->
+                <div class="form-group">
+                    <label class="form-label">🧠 ผลกระทบที่รู้สึก (เลือกได้หลายตัว)</label>
+                    
+                    <!-- ผลกระทบต่อจิตใจ (เชิงบวก) -->
+                    <div class="effects-category">
+                        <h4 class="effects-category-title">🌟 ผลกระทบต่อจิตใจ (เชิงบวก)</h4>
+                        <div class="effects-grid" id="mentalPositiveEffects">
+                            <div class="effect-item">
+                                <input type="checkbox" value="สุขใจ" id="mental_pos_happy">
+                                <label for="mental_pos_happy">😊 สุขใจ</label>
                             </div>
-                            <input type="hidden" id="effectsRating">
+                            <div class="effect-item">
+                                <input type="checkbox" value="ผ่อนคลาย" id="mental_pos_relaxed">
+                                <label for="mental_pos_relaxed">😌 ผ่อนคลาย</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="สร้างสรรค์" id="mental_pos_creative">
+                                <label for="mental_pos_creative">🎨 สร้างสรรค์</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="ร่าเริง" id="mental_pos_cheerful">
+                                <label for="mental_pos_cheerful">🎉 ร่าเริง</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="เบิกบาน" id="mental_pos_euphoric">
+                                <label for="mental_pos_euphoric">✨ เบิกบาน</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="โฟกัส" id="mental_pos_focused">
+                                <label for="mental_pos_focused">🎯 โฟกัส</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="ตื่นตัว" id="mental_pos_alert">
+                                <label for="mental_pos_alert">⚡ ตื่นตัว</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="คิดลึก" id="mental_pos_thoughtful">
+                                <label for="mental_pos_thoughtful">🤔 คิดลึก</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="หลับง่าย" id="mental_pos_sleepy">
+                                <label for="mental_pos_sleepy">😴 หลับง่าย</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="เพลิดเพลิน" id="mental_pos_enjoyable">
+                                <label for="mental_pos_enjoyable">🎈 เพลิดเพลิน</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ผลกระทบต่อจิตใจ (เชิงลบ) -->
+                    <div class="effects-category">
+                        <h4 class="effects-category-title">⚠️ ผลกระทบต่อจิตใจ (เชิงลบ)</h4>
+                        <div class="effects-grid" id="mentalNegativeEffects">
+                            <div class="effect-item">
+                                <input type="checkbox" value="วิตก" id="mental_neg_anxious">
+                                <label for="mental_neg_anxious">😰 วิตก</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="พารานอยด์" id="mental_neg_paranoid">
+                                <label for="mental_neg_paranoid">👁️ พารานอยด์</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="แพนิค" id="mental_neg_panic">
+                                <label for="mental_neg_panic">😱 แพนิค</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="สับสน" id="mental_neg_confused">
+                                <label for="mental_neg_confused">🤯 สับสน</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="ความจำสั้น" id="mental_neg_memory">
+                                <label for="mental_neg_memory">🧠 ความจำสั้น</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="สมาธิหาย" id="mental_neg_unfocused">
+                                <label for="mental_neg_unfocused">💭 สมาธิหาย</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="หลอน" id="mental_neg_hallucination">
+                                <label for="mental_neg_hallucination">👻 หลอน</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="ง่วงหนัก" id="mental_neg_drowsy">
+                                <label for="mental_neg_drowsy">🥱 ง่วงหนัก</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="ซึมเศร้า" id="mental_neg_depressed">
+                                <label for="mental_neg_depressed">😔 ซึมเศร้า</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="หงุดหงิด" id="mental_neg_irritated">
+                                <label for="mental_neg_irritated">😤 หงุดหงิด</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ผลกระทบทางร่างกาย (เชิงบวก) -->
+                    <div class="effects-category">
+                        <h4 class="effects-category-title">💪 ผลกระทบทางร่างกาย (เชิงบวก)</h4>
+                        <div class="effects-grid" id="physicalPositiveEffects">
+                            <div class="effect-item">
+                                <input type="checkbox" value="บรรเทาปวด" id="physical_pos_pain_relief">
+                                <label for="physical_pos_pain_relief">🩹 บรรเทาปวด</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="คลายกล้าม" id="physical_pos_muscle_relax">
+                                <label for="physical_pos_muscle_relax">💆 คลายกล้าม</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="ต้านอักเสบ" id="physical_pos_anti_inflammatory">
+                                <label for="physical_pos_anti_inflammatory">🛡️ ต้านอักเสบ</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="หลับง่าย" id="physical_pos_sleep">
+                                <label for="physical_pos_sleep">🛌 หลับง่าย</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="คลายเกร็ง" id="physical_pos_tension_relief">
+                                <label for="physical_pos_tension_relief">🤲 คลายเกร็ง</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="ต้านคลื่นไส้" id="physical_pos_anti_nausea">
+                                <label for="physical_pos_anti_nausea">🤢 ต้านคลื่นไส้</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="กระตุ้นกิน" id="physical_pos_appetite">
+                                <label for="physical_pos_appetite">🍽️ กระตุ้นกิน</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="ผ่อนคลาย" id="physical_pos_relaxation">
+                                <label for="physical_pos_relaxation">🧘 ผ่อนคลาย</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="สดชื่น" id="physical_pos_refreshed">
+                                <label for="physical_pos_refreshed">🌿 สดชื่น</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="สุขภาพลำไส้" id="physical_pos_digestive">
+                                <label for="physical_pos_digestive">🦠 สุขภาพลำไส้</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ผลกระทบทางร่างกาย (เชิงลบ) -->
+                    <div class="effects-category">
+                        <h4 class="effects-category-title">⛔ ผลกระทบทางร่างกาย (เชิงลบ)</h4>
+                        <div class="effects-grid" id="physicalNegativeEffects">
+                            <div class="effect-item">
+                                <input type="checkbox" value="ปากแห้ง" id="physical_neg_dry_mouth">
+                                <label for="physical_neg_dry_mouth">👄 ปากแห้ง</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="ตาแดง" id="physical_neg_red_eyes">
+                                <label for="physical_neg_red_eyes">👁️ ตาแดง</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="ตาแห้ง" id="physical_neg_dry_eyes">
+                                <label for="physical_neg_dry_eyes">👀 ตาแห้ง</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="เวียนหัว" id="physical_neg_dizzy">
+                                <label for="physical_neg_dizzy">💫 เวียนหัว</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="ใจเต้นเร็ว" id="physical_neg_heart_rate">
+                                <label for="physical_neg_heart_rate">💓 ใจเต้นเร็ว</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="ความดันตก" id="physical_neg_blood_pressure">
+                                <label for="physical_neg_blood_pressure">📉 ความดันตก</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="มือสั่น" id="physical_neg_tremor">
+                                <label for="physical_neg_tremor">🤝 มือสั่น</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="เหงื่อออก" id="physical_neg_sweating">
+                                <label for="physical_neg_sweating">💦 เหงื่อออก</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="คลื่นไส้" id="physical_neg_nausea">
+                                <label for="physical_neg_nausea">🤮 คลื่นไส้</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="ไอ/เจ็บคอ" id="physical_neg_cough">
+                                <label for="physical_neg_cough">🤧 ไอ/เจ็บคอ</label>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -376,8 +633,7 @@
     <script>
         let ratings = {
             overall: 0,
-            aroma: 0,
-            effects: 0
+            aroma: 0
         };
 
         // Load available buds for review
@@ -442,6 +698,18 @@
             }
         });
 
+        // Effects selection
+        document.addEventListener('change', function(e) {
+            if (e.target.type === 'checkbox' && e.target.closest('.effect-item')) {
+                const item = e.target.closest('.effect-item');
+                if (e.target.checked) {
+                    item.classList.add('selected');
+                } else {
+                    item.classList.remove('selected');
+                }
+            }
+        });
+
         // Form submission
         document.getElementById('reviewForm').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -469,6 +737,13 @@
                 showError('กรุณาเขียนสรุปสั้น ๆ');
                 return;
             }
+
+            // Check if at least one effect is selected
+            const selectedEffects = document.querySelectorAll('.effect-item input[type="checkbox"]:checked');
+            if (selectedEffects.length === 0) {
+                showError('กรุณาเลือกผลกระทบที่รู้สึกอย่างน้อย 1 ตัว');
+                return;
+            }
             
             // Disable submit button and show loading
             submitBtn.disabled = true;
@@ -478,13 +753,17 @@
                 // Collect selected aroma flavors
                 const aromaCheckboxes = document.querySelectorAll('#aromaFlavors input[type="checkbox"]:checked');
                 const aromaFlavors = Array.from(aromaCheckboxes).map(cb => cb.value);
+
+                // Collect selected effects
+                const effectCheckboxes = document.querySelectorAll('.effect-item input[type="checkbox"]:checked');
+                const selectedEffects = Array.from(effectCheckboxes).map(cb => cb.value);
                 
                 const reviewData = {
                     bud_reference_id: document.getElementById('budSelect').value,
                     overall_rating: ratings.overall,
                     aroma_flavors: aromaFlavors,
                     aroma_rating: ratings.aroma || null,
-                    effects_rating: ratings.effects || null,
+                    selected_effects: selectedEffects,
                     short_summary: document.getElementById('shortSummary').value.trim(),
                     full_review_content: document.getElementById('fullReview').value.trim() || null
                 };

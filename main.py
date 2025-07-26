@@ -784,7 +784,7 @@ def create_tables():
                     overall_rating SMALLINT CHECK (overall_rating >= 1 AND overall_rating <= 5),
                     aroma_flavors TEXT[] DEFAULT '{}',
                     aroma_rating SMALLINT CHECK (aroma_rating >= 1 AND aroma_rating <= 5),
-                    effects_rating SMALLINT CHECK (effects_rating >= 1 AND effects_rating <= 5),
+                    selected_effects TEXT[] DEFAULT '{}',
                     short_summary VARCHAR(200),
                     full_review_content TEXT,
                     review_images TEXT[] DEFAULT '{}',
@@ -933,7 +933,7 @@ def get_user_reviews():
         user_id = session.get('user_id')
         cur.execute("""
             SELECT r.id, r.overall_rating, r.short_summary, r.full_review_content, 
-                   r.aroma_rating, r.effects_rating, r.aroma_flavors, r.review_images,
+                   r.aroma_rating, r.selected_effects, r.aroma_flavors, r.review_images,
                    r.created_at, r.updated_at,
                    b.strain_name_en, b.strain_name_th, b.breeder
             FROM reviews r
@@ -950,7 +950,7 @@ def get_user_reviews():
                 'short_summary': row[2],
                 'full_review_content': row[3],
                 'aroma_rating': row[4],
-                'effects_rating': row[5],
+                'selected_effects': row[5] if row[5] else [],
                 'aroma_flavors': row[6] if row[6] else [],
                 'review_images': row[7] if row[7] else [],
                 'created_at': row[8].strftime('%Y-%m-%d %H:%M:%S') if row[8] else None,
@@ -1866,7 +1866,7 @@ def get_reviews():
             # Build query with filters
             query = """
                 SELECT r.id, r.overall_rating, r.short_summary, r.full_review_content,
-                       r.aroma_rating, r.effects_rating, r.aroma_flavors, r.review_images,
+                       r.aroma_rating, r.selected_effects, r.aroma_flavors, r.review_images,
                        r.created_at, r.updated_at,
                        b.strain_name_en, b.strain_name_th, b.breeder,
                        u.username as reviewer_name
@@ -1900,7 +1900,7 @@ def get_reviews():
                     'short_summary': review[2],
                     'full_review_content': review[3],
                     'aroma_rating': review[4],
-                    'effects_rating': review[5],
+                    'selected_effects': review[5] if review[5] else [],
                     'aroma_flavors': review[6] if review[6] else [],
                     'review_images': review[7] if review[7] else [],
                     'created_at': review[8].strftime('%Y-%m-%d %H:%M:%S') if review[8] else None,
@@ -1957,7 +1957,7 @@ def add_review():
             cur.execute("""
                 INSERT INTO reviews (
                     bud_reference_id, reviewer_id, overall_rating, aroma_flavors,
-                    aroma_rating, effects_rating, short_summary, full_review_content,
+                    aroma_rating, selected_effects, short_summary, full_review_content,
                     review_images
                 ) VALUES (
                     %s, %s, %s, %s, %s, %s, %s, %s, %s
@@ -1968,7 +1968,7 @@ def add_review():
                 data.get('overall_rating'),
                 data.get('aroma_flavors', []),
                 data.get('aroma_rating'),
-                data.get('effects_rating'),
+                data.get('selected_effects', []),
                 data.get('short_summary'),
                 data.get('full_review_content'),
                 data.get('review_images', [])
@@ -2019,14 +2019,14 @@ def update_review(review_id):
             cur.execute("""
                 UPDATE reviews SET
                     overall_rating = %s, aroma_flavors = %s, aroma_rating = %s,
-                    effects_rating = %s, short_summary = %s, full_review_content = %s,
+                    selected_effects = %s, short_summary = %s, full_review_content = %s,
                     review_images = %s, updated_at = CURRENT_TIMESTAMP
                 WHERE id = %s
             """, (
                 data.get('overall_rating'),
                 data.get('aroma_flavors', []),
                 data.get('aroma_rating'),
-                data.get('effects_rating'),
+                data.get('selected_effects', []),
                 data.get('short_summary'),
                 data.get('full_review_content'),
                 data.get('review_images', []),

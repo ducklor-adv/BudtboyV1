@@ -1,0 +1,264 @@
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cannabis App - User Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1, h2 {
+            color: #2c5530;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .users-table th, .users-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .users-table th {
+            background-color: #f2f2f2;
+        }
+        .checkbox-group {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+        }
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+        }
+        .checkbox-item input[type="checkbox"] {
+            width: auto;
+            margin-right: 5px;
+        }
+        .message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌿 Cannabis App - User Management System</h1>
+        <p>ระบบจัดการผู้ใช้สำหรับแอปพลิเคชัน Cannabis พร้อม AI Chatbot</p>
+    </div>
+
+    <div class="container">
+        <h2>เพิ่มผู้ใช้ใหม่</h2>
+        <form id="userForm">
+            <div class="form-group">
+                <label for="username">ชื่อผู้ใช้:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">อีเมล:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">รหัสผ่าน:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="birth_year">ปีเกิด:</label>
+                <input type="number" id="birth_year" name="birth_year" min="1900" max="2024">
+            </div>
+            
+            <div class="form-group">
+                <label for="grow_license_file_url">URL ใบอนุญาตปลูก:</label>
+                <input type="url" id="grow_license_file_url" name="grow_license_file_url">
+            </div>
+            
+            <div class="form-group">
+                <label>ประเภทผู้ใช้:</label>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="is_grower" name="is_grower">
+                        <label for="is_grower">ผู้ปลูก (Grower)</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="is_budtender" name="is_budtender">
+                        <label for="is_budtender">บัดเทนเดอร์ (Budtender)</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="is_consumer" name="is_consumer" checked>
+                        <label for="is_consumer">ผู้บริโภค (Consumer)</label>
+                    </div>
+                </div>
+            </div>
+            
+            <button type="submit">เพิ่มผู้ใช้</button>
+        </form>
+        
+        <div id="message"></div>
+    </div>
+
+    <div class="container">
+        <h2>รายชื่อผู้ใช้ในระบบ</h2>
+        <button onclick="loadUsers()">โหลดข้อมูลผู้ใช้</button>
+        
+        <table class="users-table" id="usersTable" style="display: none;">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>ชื่อผู้ใช้</th>
+                    <th>อีเมล</th>
+                    <th>ผู้ปลูก</th>
+                    <th>บัดเทนเดอร์</th>
+                    <th>ผู้บริโภค</th>
+                    <th>ปีเกิด</th>
+                    <th>สร้างเมื่อ</th>
+                </tr>
+            </thead>
+            <tbody id="usersTableBody">
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Simple password hashing (for demo - use proper hashing in production)
+        function simpleHash(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                const char = str.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash; // Convert to 32bit integer
+            }
+            return Math.abs(hash).toString();
+        }
+
+        // Add user form submission
+        document.getElementById('userForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const userData = {
+                username: formData.get('username'),
+                email: formData.get('email'),
+                password_hash: simpleHash(formData.get('password')),
+                birth_year: formData.get('birth_year') ? parseInt(formData.get('birth_year')) : null,
+                grow_license_file_url: formData.get('grow_license_file_url') || null,
+                is_grower: formData.get('is_grower') === 'on',
+                is_budtender: formData.get('is_budtender') === 'on',
+                is_consumer: formData.get('is_consumer') === 'on'
+            };
+            
+            try {
+                const response = await fetch('/add_user', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(userData)
+                });
+                
+                const result = await response.json();
+                const messageDiv = document.getElementById('message');
+                
+                if (response.ok) {
+                    messageDiv.innerHTML = '<div class="message success">เพิ่มผู้ใช้สำเร็จ!</div>';
+                    document.getElementById('userForm').reset();
+                    document.getElementById('is_consumer').checked = true; // Reset default
+                } else {
+                    messageDiv.innerHTML = `<div class="message error">เกิดข้อผิดพลาด: ${result.error}</div>`;
+                }
+            } catch (error) {
+                document.getElementById('message').innerHTML = `<div class="message error">เกิดข้อผิดพลาด: ${error.message}</div>`;
+            }
+        });
+
+        // Load users function
+        async function loadUsers() {
+            try {
+                const response = await fetch('/users');
+                const users = await response.json();
+                
+                if (response.ok) {
+                    const tableBody = document.getElementById('usersTableBody');
+                    const table = document.getElementById('usersTable');
+                    
+                    tableBody.innerHTML = '';
+                    
+                    users.forEach(user => {
+                        const row = tableBody.insertRow();
+                        row.innerHTML = `
+                            <td>${user.id}</td>
+                            <td>${user.username}</td>
+                            <td>${user.email}</td>
+                            <td>${user.is_grower ? '✅' : '❌'}</td>
+                            <td>${user.is_budtender ? '✅' : '❌'}</td>
+                            <td>${user.is_consumer ? '✅' : '❌'}</td>
+                            <td>${user.birth_year || 'ไม่ระบุ'}</td>
+                            <td>${user.created_at || 'ไม่ระบุ'}</td>
+                        `;
+                    });
+                    
+                    table.style.display = 'table';
+                } else {
+                    alert('เกิดข้อผิดพลาดในการโหลดข้อมูล: ' + users.error);
+                }
+            } catch (error) {
+                alert('เกิดข้อผิดพลาดในการโหลดข้อมูล: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>

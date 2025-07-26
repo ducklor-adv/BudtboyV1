@@ -336,12 +336,22 @@
             reviewsList.innerHTML = reviews.map(review => `
                 <div class="item-card">
                     <div class="item-header">
-                        <div class="item-name">${review.strain_name || 'ไม่ระบุชื่อดอก'}</div>
+                        <div class="item-name">${review.strain_name_en || 'ไม่ระบุชื่อดอก'} ${review.strain_name_th ? `(${review.strain_name_th})` : ''}</div>
                         <div class="item-date">${formatDate(review.created_at)}</div>
                     </div>
                     <div class="item-details">
-                        <div class="rating-stars">${'⭐'.repeat(review.rating || 0)}</div>
-                        <p style="margin-top: 10px; margin-bottom: 0;">${review.review_text || 'ไม่มีข้อความรีวิว'}</p>
+                        <div class="rating-stars">
+                            ${'⭐'.repeat(review.overall_rating || 0)}
+                            ${review.aroma_rating ? ` | กลิ่น: ${'⭐'.repeat(review.aroma_rating)}` : ''}
+                            ${review.effects_rating ? ` | ผลกระทบ: ${'⭐'.repeat(review.effects_rating)}` : ''}
+                        </div>
+                        <p style="margin-top: 10px; margin-bottom: 0; font-weight: 600;">${review.short_summary || 'ไม่มีสรุป'}</p>
+                        ${review.full_review_content ? `<p style="margin-top: 8px; margin-bottom: 0; color: #666; font-size: 13px;">${review.full_review_content}</p>` : ''}
+                        ${review.aroma_flavors && review.aroma_flavors.length > 0 ? `
+                            <div style="margin-top: 8px;">
+                                <small style="color: #888;">กลิ่น: ${review.aroma_flavors.join(', ')}</small>
+                            </div>
+                        ` : ''}
                     </div>
                 </div>
             `).join('');

@@ -1,0 +1,537 @@
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cannabis App - เพิ่มรีวิว</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e8f5e8 0%, #f0f8ff 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #ff9800, #ff6f00);
+            padding: 20px 30px;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .header-title {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .form-container {
+            padding: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+        
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #ff9800;
+            box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.1);
+        }
+        
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .rating-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .rating-item {
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        .star-rating {
+            display: flex;
+            gap: 3px;
+            margin-top: 5px;
+        }
+        
+        .star {
+            font-size: 20px;
+            color: #ddd;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+        
+        .star.active, .star:hover {
+            color: #ffd700;
+        }
+        
+        .aroma-flavors {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .aroma-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .aroma-item:hover {
+            background: #e9ecef;
+        }
+        
+        .aroma-item.selected {
+            background: #fff3cd;
+            border: 2px solid #ff9800;
+        }
+        
+        .aroma-item input[type="checkbox"] {
+            margin: 0;
+            width: auto;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #ff9800, #ff6f00);
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 152, 0, 0.3);
+        }
+        
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .success-message {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .loading {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #ffffff;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .form-container {
+                padding: 20px;
+            }
+            
+            .rating-group {
+                flex-direction: column;
+            }
+            
+            .aroma-flavors {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="/activity" class="back-btn">← กลับ</a>
+            <div class="header-title">
+                <h1>⭐ เพิ่มรีวิว</h1>
+            </div>
+            <div style="width: 60px;"></div>
+        </div>
+        
+        <div class="form-container">
+            <div id="errorMessage" class="error-message" style="display: none;"></div>
+            <div id="successMessage" class="success-message" style="display: none;"></div>
+            
+            <form id="reviewForm">
+                <!-- เลือกดอกที่จะรีวิว -->
+                <div class="form-group">
+                    <label class="form-label">🌸 เลือกดอกที่ต้องการรีวิว</label>
+                    <select id="budSelect" class="form-select" required>
+                        <option value="">-- เลือกดอก --</option>
+                    </select>
+                </div>
+                
+                <!-- คะแนนรวม -->
+                <div class="form-group">
+                    <label class="form-label">⭐ คะแนนรวม</label>
+                    <div class="star-rating" data-rating="overall">
+                        <span class="star" data-value="1">★</span>
+                        <span class="star" data-value="2">★</span>
+                        <span class="star" data-value="3">★</span>
+                        <span class="star" data-value="4">★</span>
+                        <span class="star" data-value="5">★</span>
+                    </div>
+                    <input type="hidden" id="overallRating" required>
+                </div>
+                
+                <!-- สรุปสั้น ๆ -->
+                <div class="form-group">
+                    <label class="form-label">📝 สรุปสั้น ๆ (เช่น "กลิ่นส้มชัด สดชื่น")</label>
+                    <input type="text" id="shortSummary" class="form-input" maxlength="200" 
+                           placeholder="อธิบายสั้น ๆ เกี่ยวกับดอกนี้" required>
+                </div>
+                
+                <!-- กลิ่นและรส -->
+                <div class="form-group">
+                    <label class="form-label">👃 กลิ่นและรส (เลือกได้หลายตัว)</label>
+                    <div class="aroma-flavors" id="aromaFlavors">
+                        <div class="aroma-item">
+                            <input type="checkbox" value="citrus" id="aroma_citrus">
+                            <label for="aroma_citrus">🍊 ซิตรัส</label>
+                        </div>
+                        <div class="aroma-item">
+                            <input type="checkbox" value="sweet" id="aroma_sweet">
+                            <label for="aroma_sweet">🍯 หวาน</label>
+                        </div>
+                        <div class="aroma-item">
+                            <input type="checkbox" value="earthy" id="aroma_earthy">
+                            <label for="aroma_earthy">🌍 ดิน</label>
+                        </div>
+                        <div class="aroma-item">
+                            <input type="checkbox" value="pine" id="aroma_pine">
+                            <label for="aroma_pine">🌲 สน</label>
+                        </div>
+                        <div class="aroma-item">
+                            <input type="checkbox" value="floral" id="aroma_floral">
+                            <label for="aroma_floral">🌸 ดอกไม้</label>
+                        </div>
+                        <div class="aroma-item">
+                            <input type="checkbox" value="spicy" id="aroma_spicy">
+                            <label for="aroma_spicy">🌶️ เผ็ด</label>
+                        </div>
+                        <div class="aroma-item">
+                            <input type="checkbox" value="berry" id="aroma_berry">
+                            <label for="aroma_berry">🫐 เบอร์รี่</label>
+                        </div>
+                        <div class="aroma-item">
+                            <input type="checkbox" value="mint" id="aroma_mint">
+                            <label for="aroma_mint">🌿 มินต์</label>
+                        </div>
+                        <div class="aroma-item">
+                            <input type="checkbox" value="diesel" id="aroma_diesel">
+                            <label for="aroma_diesel">⛽ ดีเซล</label>
+                        </div>
+                        <div class="aroma-item">
+                            <input type="checkbox" value="cheese" id="aroma_cheese">
+                            <label for="aroma_cheese">🧀 ชีส</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- คะแนนย่อย -->
+                <div class="form-group">
+                    <label class="form-label">📊 คะแนนรายละเอียด</label>
+                    <div class="rating-group">
+                        <div class="rating-item">
+                            <label>กลิ่น</label>
+                            <div class="star-rating" data-rating="aroma">
+                                <span class="star" data-value="1">★</span>
+                                <span class="star" data-value="2">★</span>
+                                <span class="star" data-value="3">★</span>
+                                <span class="star" data-value="4">★</span>
+                                <span class="star" data-value="5">★</span>
+                            </div>
+                            <input type="hidden" id="aromaRating">
+                        </div>
+                        <div class="rating-item">
+                            <label>ผลที่รู้สึก</label>
+                            <div class="star-rating" data-rating="effects">
+                                <span class="star" data-value="1">★</span>
+                                <span class="star" data-value="2">★</span>
+                                <span class="star" data-value="3">★</span>
+                                <span class="star" data-value="4">★</span>
+                                <span class="star" data-value="5">★</span>
+                            </div>
+                            <input type="hidden" id="effectsRating">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- รีวิวเต็ม -->
+                <div class="form-group">
+                    <label class="form-label">📖 เนื้อหารีวิวเต็ม</label>
+                    <textarea id="fullReview" class="form-textarea" 
+                              placeholder="เล่าประสบการณ์การใช้งานของคุณ เช่น ผลกระทบ อาการข้างเคียง เหมาะสำหรับเวลาไหน ฯลฯ"></textarea>
+                </div>
+                
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    ⭐ เพิ่มรีวิว
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let ratings = {
+            overall: 0,
+            aroma: 0,
+            effects: 0
+        };
+
+        // Load available buds for review
+        async function loadBuds() {
+            try {
+                const response = await fetch('/api/buds/for-review');
+                if (response.ok) {
+                    const data = await response.json();
+                    populateBudSelect(data.buds || []);
+                } else {
+                    console.error('Failed to load buds');
+                }
+            } catch (error) {
+                console.error('Error loading buds:', error);
+            }
+        }
+
+        function populateBudSelect(buds) {
+            const select = document.getElementById('budSelect');
+            select.innerHTML = '<option value="">-- เลือกดอก --</option>';
+            
+            buds.forEach(bud => {
+                const option = document.createElement('option');
+                option.value = bud.id;
+                option.textContent = `${bud.strain_name_en || 'ไม่ระบุชื่อ'} ${bud.strain_name_th ? `(${bud.strain_name_th})` : ''} - ${bud.breeder || 'ไม่ระบุผู้พัฒนา'}`;
+                select.appendChild(option);
+            });
+        }
+
+        // Star rating functionality
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('star')) {
+                const ratingGroup = e.target.closest('.star-rating');
+                const ratingType = ratingGroup.getAttribute('data-rating');
+                const value = parseInt(e.target.getAttribute('data-value'));
+                
+                // Update rating value
+                ratings[ratingType] = value;
+                document.getElementById(ratingType + 'Rating').value = value;
+                
+                // Update visual stars
+                const stars = ratingGroup.querySelectorAll('.star');
+                stars.forEach((star, index) => {
+                    if (index < value) {
+                        star.classList.add('active');
+                    } else {
+                        star.classList.remove('active');
+                    }
+                });
+            }
+        });
+
+        // Aroma flavor selection
+        document.getElementById('aromaFlavors').addEventListener('change', function(e) {
+            if (e.target.type === 'checkbox') {
+                const item = e.target.closest('.aroma-item');
+                if (e.target.checked) {
+                    item.classList.add('selected');
+                } else {
+                    item.classList.remove('selected');
+                }
+            }
+        });
+
+        // Form submission
+        document.getElementById('reviewForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const errorDiv = document.getElementById('errorMessage');
+            const successDiv = document.getElementById('successMessage');
+            
+            // Hide previous messages
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+            
+            // Validate form
+            if (!document.getElementById('budSelect').value) {
+                showError('กรุณาเลือกดอกที่ต้องการรีวิว');
+                return;
+            }
+            
+            if (!ratings.overall) {
+                showError('กรุณาให้คะแนนรวม');
+                return;
+            }
+            
+            if (!document.getElementById('shortSummary').value.trim()) {
+                showError('กรุณาเขียนสรุปสั้น ๆ');
+                return;
+            }
+            
+            // Disable submit button and show loading
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<div class="loading"><div class="spinner"></div> กำลังบันทึก...</div>';
+            
+            try {
+                // Collect selected aroma flavors
+                const aromaCheckboxes = document.querySelectorAll('#aromaFlavors input[type="checkbox"]:checked');
+                const aromaFlavors = Array.from(aromaCheckboxes).map(cb => cb.value);
+                
+                const reviewData = {
+                    bud_reference_id: document.getElementById('budSelect').value,
+                    overall_rating: ratings.overall,
+                    aroma_flavors: aromaFlavors,
+                    aroma_rating: ratings.aroma || null,
+                    effects_rating: ratings.effects || null,
+                    short_summary: document.getElementById('shortSummary').value.trim(),
+                    full_review_content: document.getElementById('fullReview').value.trim() || null
+                };
+                
+                const response = await fetch('/api/reviews', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(reviewData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showSuccess('เพิ่มรีวิวสำเร็จ! กำลังกลับไปหน้ากิจกรรม...');
+                    setTimeout(() => {
+                        window.location.href = '/activity';
+                    }, 2000);
+                } else {
+                    showError(result.error || 'เกิดข้อผิดพลาดในการบันทึกรีวิว');
+                }
+            } catch (error) {
+                console.error('Error submitting review:', error);
+                showError('เกิดข้อผิดพลาดในการเชื่อมต่อ');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '⭐ เพิ่มรีวิว';
+            }
+        });
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            successDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // Load buds when page loads
+        window.addEventListener('load', loadBuds);
+    </script>
+</body>
+</html>

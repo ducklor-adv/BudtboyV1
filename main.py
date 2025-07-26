@@ -775,6 +775,24 @@ def create_tables():
                 );
             """)
 
+            # Create reviews table
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS reviews (
+                    id SERIAL PRIMARY KEY,
+                    bud_reference_id INTEGER REFERENCES buds_data(id) ON DELETE CASCADE,
+                    reviewer_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                    overall_rating SMALLINT CHECK (overall_rating >= 1 AND overall_rating <= 5),
+                    aroma_flavors TEXT[] DEFAULT '{}',
+                    aroma_rating SMALLINT CHECK (aroma_rating >= 1 AND aroma_rating <= 5),
+                    effects_rating SMALLINT CHECK (effects_rating >= 1 AND effects_rating <= 5),
+                    short_summary VARCHAR(200),
+                    full_review_content TEXT,
+                    review_images TEXT[] DEFAULT '{}',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                );
+            """)
+
             # Create index for better performance
             cur.execute("""
                 CREATE INDEX IF NOT EXISTS idx_strain_names_th ON strain_names(name_th);
@@ -786,6 +804,9 @@ def create_tables():
                 CREATE INDEX IF NOT EXISTS idx_buds_strain_name_en ON buds_data(strain_name_en);
                 CREATE INDEX IF NOT EXISTS idx_buds_strain_type ON buds_data(strain_type);
                 CREATE INDEX IF NOT EXISTS idx_buds_grower_id ON buds_data(grower_id);
+                CREATE INDEX IF NOT EXISTS idx_reviews_bud_id ON reviews(bud_reference_id);
+                CREATE INDEX IF NOT EXISTS idx_reviews_reviewer_id ON reviews(reviewer_id);
+                CREATE INDEX IF NOT EXISTS idx_reviews_rating ON reviews(overall_rating);
             """)
 
             conn.commit()
@@ -910,10 +931,34 @@ def get_user_reviews():
         cur = conn.cursor()
 
         user_id = session.get('user_id')
-        # สำหรับตอนนี้ return empty array เพราะยังไม่มีตาราง reviews
-        # cur.execute("SELECT strain_name, rating, review_text, created_at FROM reviews WHERE user_id = %s ORDER BY created_at DESC", (user_id,))
+        cur.execute("""
+            SELECT r.id, r.overall_rating, r.short_summary, r.full_review_content, 
+                   r.aroma_rating, r.effects_rating, r.aroma_flavors, r.review_images,
+                   r.created_at, r.updated_at,
+                   b.strain_name_en, b.strain_name_th, b.breeder
+            FROM reviews r
+            JOIN buds_data b ON r.bud_reference_id = b.id
+            WHERE r.reviewer_id = %s 
+            ORDER BY r.created_at DESC
+        """, (user_id,))
 
-        reviews = []  # ชั่วคราวให้เป็น array ว่าง
+        reviews = []
+        for row in cur.fetchall():
+            reviews.append({
+                'id': row[0],
+                'overall_rating': row[1],
+                'short_summary': row[2],
+                'full_review_content': row[3],
+                'aroma_rating': row[4],
+                'effects_rating': row[5],
+                'aroma_flavors': row[6] if row[6] else [],
+                'review_images': row[7] if row[7] else [],
+                'created_at': row[8].strftime('%Y-%m-%d %H:%M:%S') if row[8] else None,
+                'updated_at': row[9].strftime('%Y-%m-%d %H:%M:%S') if row[9] else None,
+                'strain_name_en': row[10],
+                'strain_name_th': row[11],
+                'breeder': row[12]
+            })
 
         cur.close()
         conn.close()
@@ -1805,6 +1850,294 @@ def uploaded_file(filename):
     """Serve uploaded files"""
     from flask import send_from_directory
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+@app.route('/api/reviews', methods=['GET'])
+def get_reviews():
+    """Get all reviews with optional filtering"""
+    bud_id = request.args.get('bud_id')
+    reviewer_id = request.args.get('reviewer_id')
+    min_rating = request.args.get('min_rating')
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+
+            # Build query with filters
+            query = """
+                SELECT r.id, r.overall_rating, r.short_summary, r.full_review_content,
+                       r.aroma_rating, r.effects_rating, r.aroma_flavors, r.review_images,
+                       r.created_at, r.updated_at,
+                       b.strain_name_en, b.strain_name_th, b.breeder,
+                       u.username as reviewer_name
+                FROM reviews r
+                JOIN buds_data b ON r.bud_reference_id = b.id
+                JOIN users u ON r.reviewer_id = u.id
+                WHERE 1=1
+            """
+            params = []
+
+            if bud_id:
+                query += " AND r.bud_reference_id = %s"
+                params.append(bud_id)
+            if reviewer_id:
+                query += " AND r.reviewer_id = %s"
+                params.append(reviewer_id)
+            if min_rating:
+                query += " AND r.overall_rating >= %s"
+                params.append(min_rating)
+
+            query += " ORDER BY r.created_at DESC"
+
+            cur.execute(query, params)
+            reviews = cur.fetchall()
+
+            reviews_list = []
+            for review in reviews:
+                reviews_list.append({
+                    'id': review[0],
+                    'overall_rating': review[1],
+                    'short_summary': review[2],
+                    'full_review_content': review[3],
+                    'aroma_rating': review[4],
+                    'effects_rating': review[5],
+                    'aroma_flavors': review[6] if review[6] else [],
+                    'review_images': review[7] if review[7] else [],
+                    'created_at': review[8].strftime('%Y-%m-%d %H:%M:%S') if review[8] else None,
+                    'updated_at': review[9].strftime('%Y-%m-%d %H:%M:%S') if review[9] else None,
+                    'strain_name_en': review[10],
+                    'strain_name_th': review[11],
+                    'breeder': review[12],
+                    'reviewer_name': review[13]
+                })
+
+            return jsonify(reviews_list)
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+        finally:
+            cur.close()
+            conn.close()
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+@app.route('/api/reviews', methods=['POST'])
+def add_review():
+    """Add new review"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'ไม่ได้เข้าสู่ระบบ'}), 401
+
+    data = request.get_json()
+    user_id = session['user_id']
+
+    # Required fields validation
+    required_fields = ['bud_reference_id', 'overall_rating', 'short_summary']
+    for field in required_fields:
+        if not data.get(field):
+            return jsonify({'error': f'กรุณากรอก {field}'}), 400
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+
+            # Check if bud exists
+            cur.execute("SELECT id FROM buds_data WHERE id = %s", (data.get('bud_reference_id'),))
+            if not cur.fetchone():
+                return jsonify({'error': 'ไม่พบข้อมูลดอกที่อ้างอิง'}), 400
+
+            # Check if user already reviewed this bud
+            cur.execute("""
+                SELECT id FROM reviews 
+                WHERE bud_reference_id = %s AND reviewer_id = %s
+            """, (data.get('bud_reference_id'), user_id))
+            
+            if cur.fetchone():
+                return jsonify({'error': 'คุณได้รีวิวดอกนี้แล้ว'}), 400
+
+            cur.execute("""
+                INSERT INTO reviews (
+                    bud_reference_id, reviewer_id, overall_rating, aroma_flavors,
+                    aroma_rating, effects_rating, short_summary, full_review_content,
+                    review_images
+                ) VALUES (
+                    %s, %s, %s, %s, %s, %s, %s, %s, %s
+                ) RETURNING id
+            """, (
+                data.get('bud_reference_id'),
+                user_id,
+                data.get('overall_rating'),
+                data.get('aroma_flavors', []),
+                data.get('aroma_rating'),
+                data.get('effects_rating'),
+                data.get('short_summary'),
+                data.get('full_review_content'),
+                data.get('review_images', [])
+            ))
+
+            review_id = cur.fetchone()[0]
+            conn.commit()
+
+            return jsonify({
+                'success': True,
+                'message': 'เพิ่มรีวิวสำเร็จ',
+                'review_id': review_id
+            }), 201
+
+        except Exception as e:
+            conn.rollback()
+            return jsonify({'error': str(e)}), 500
+        finally:
+            cur.close()
+            conn.close()
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+@app.route('/api/reviews/<int:review_id>', methods=['PUT'])
+def update_review(review_id):
+    """Update existing review"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'ไม่ได้เข้าสู่ระบบ'}), 401
+
+    data = request.get_json()
+    user_id = session['user_id']
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+
+            # Check if user has permission to update
+            cur.execute("SELECT reviewer_id FROM reviews WHERE id = %s", (review_id,))
+            result = cur.fetchone()
+
+            if not result:
+                return jsonify({'error': 'ไม่พบรีวิว'}), 404
+
+            if result[0] != user_id:
+                return jsonify({'error': 'ไม่มีสิทธิ์แก้ไขรีวิวนี้'}), 403
+
+            cur.execute("""
+                UPDATE reviews SET
+                    overall_rating = %s, aroma_flavors = %s, aroma_rating = %s,
+                    effects_rating = %s, short_summary = %s, full_review_content = %s,
+                    review_images = %s, updated_at = CURRENT_TIMESTAMP
+                WHERE id = %s
+            """, (
+                data.get('overall_rating'),
+                data.get('aroma_flavors', []),
+                data.get('aroma_rating'),
+                data.get('effects_rating'),
+                data.get('short_summary'),
+                data.get('full_review_content'),
+                data.get('review_images', []),
+                review_id
+            ))
+
+            conn.commit()
+
+            return jsonify({
+                'success': True,
+                'message': 'อัพเดทรีวิวสำเร็จ'
+            })
+
+        except Exception as e:
+            conn.rollback()
+            return jsonify({'error': str(e)}), 500
+        finally:
+            cur.close()
+            conn.close()
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+@app.route('/api/reviews/<int:review_id>', methods=['DELETE'])
+def delete_review(review_id):
+    """Delete review"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'ไม่ได้เข้าสู่ระบบ'}), 401
+
+    user_id = session['user_id']
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+
+            # Check if user has permission to delete
+            cur.execute("SELECT reviewer_id FROM reviews WHERE id = %s", (review_id,))
+            result = cur.fetchone()
+
+            if not result:
+                return jsonify({'error': 'ไม่พบรีวิว'}), 404
+
+            if result[0] != user_id:
+                return jsonify({'error': 'ไม่มีสิทธิ์ลบรีวิวนี้'}), 403
+
+            cur.execute("DELETE FROM reviews WHERE id = %s", (review_id,))
+            conn.commit()
+
+            return jsonify({
+                'success': True,
+                'message': 'ลบรีวิวสำเร็จ'
+            })
+
+        except Exception as e:
+            conn.rollback()
+            return jsonify({'error': str(e)}), 500
+        finally:
+            cur.close()
+            conn.close()
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+@app.route('/api/buds/for-review')
+def get_buds_for_review():
+    """Get all buds available for review"""
+    if not is_authenticated():
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("""
+                SELECT id, strain_name_en, strain_name_th, breeder, strain_type,
+                       thc_percentage, cbd_percentage, created_at
+                FROM buds_data 
+                ORDER BY created_at DESC
+            """)
+
+            buds = []
+            for row in cur.fetchall():
+                buds.append({
+                    'id': row[0],
+                    'strain_name_en': row[1],
+                    'strain_name_th': row[2],
+                    'breeder': row[3],
+                    'strain_type': row[4],
+                    'thc_percentage': float(row[5]) if row[5] else None,
+                    'cbd_percentage': float(row[6]) if row[6] else None,
+                    'created_at': row[7].strftime('%Y-%m-%d') if row[7] else None
+                })
+
+            cur.close()
+            conn.close()
+            return jsonify({'buds': buds})
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+        finally:
+            if cur:
+                cur.close()
+            if conn:
+                conn.close()
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+@app.route('/add-review')
+def add_review_page():
+    # Check if user is logged in
+    if 'user_id' not in session:
+        return redirect('/auth')
+    return render_template('add_review.html')
 
 @app.route('/users')
 def list_users():

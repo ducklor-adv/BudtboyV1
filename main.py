@@ -754,7 +754,10 @@ def create_tables():
                     top_terpenes_1 VARCHAR(100),
                     top_terpenes_2 VARCHAR(100),
                     top_terpenes_3 VARCHAR(100),
-                    effect VARCHAR(50) CHECK (effect IN ('ผ่อนคลาย', 'สนุกสนาน', 'สงบ', 'เพิ่มจินตนาการ')),
+                    mental_effects_positive TEXT,
+                    mental_effects_negative TEXT,
+                    physical_effects_positive TEXT,
+                    physical_effects_negative TEXT,
                     recommended_time VARCHAR(20) CHECK (recommended_time IN ('กลางวัน', 'กลางคืน', 'ตลอดวัน')),
                     grow_method VARCHAR(30) CHECK (grow_method IN ('Indoor', 'Outdoor', 'Greenhouse', 'Hydroponic')),
                     harvest_date DATE,
@@ -784,7 +787,6 @@ def create_tables():
                 CREATE INDEX IF NOT EXISTS idx_buds_strain_name_en ON buds_data(strain_name_en);
                 CREATE INDEX IF NOT EXISTS idx_buds_strain_type ON buds_data(strain_type);
                 CREATE INDEX IF NOT EXISTS idx_buds_grower_id ON buds_data(grower_id);
-                CREATE INDEX IF NOT EXISTS idx_buds_effect ON buds_data(effect);
             """)
             
             conn.commit()
@@ -1200,23 +1202,26 @@ def get_buds():
                     'top_terpenes_1': bud[9],
                     'top_terpenes_2': bud[10],
                     'top_terpenes_3': bud[11],
-                    'effect': bud[12],
-                    'recommended_time': bud[13],
-                    'grow_method': bud[14],
-                    'harvest_date': bud[15].strftime('%Y-%m-%d') if bud[15] else None,
-                    'batch_number': bud[16],
-                    'grower_id': bud[17],
-                    'grower_license_verified': bud[18],
-                    'fertilizer_type': bud[19],
-                    'flowering_type': bud[20],
-                    'image_1_url': bud[21],
-                    'image_2_url': bud[22],
-                    'image_3_url': bud[23],
-                    'image_4_url': bud[24],
-                    'created_at': bud[25].strftime('%Y-%m-%d %H:%M:%S') if bud[25] else None,
-                    'updated_at': bud[26].strftime('%Y-%m-%d %H:%M:%S') if bud[26] else None,
-                    'created_by': bud[27],
-                    'grower_name': bud[28]
+                    'mental_effects_positive': bud[12],
+                    'mental_effects_negative': bud[13],
+                    'physical_effects_positive': bud[14],
+                    'physical_effects_negative': bud[15],
+                    'recommended_time': bud[16],
+                    'grow_method': bud[17],
+                    'harvest_date': bud[18].strftime('%Y-%m-%d') if bud[18] else None,
+                    'batch_number': bud[19],
+                    'grower_id': bud[20],
+                    'grower_license_verified': bud[21],
+                    'fertilizer_type': bud[22],
+                    'flowering_type': bud[23],
+                    'image_1_url': bud[24],
+                    'image_2_url': bud[25],
+                    'image_3_url': bud[26],
+                    'image_4_url': bud[27],
+                    'created_at': bud[28].strftime('%Y-%m-%d %H:%M:%S') if bud[28] else None,
+                    'updated_at': bud[29].strftime('%Y-%m-%d %H:%M:%S') if bud[29] else None,
+                    'created_by': bud[30],
+                    'grower_name': bud[31]
                 })
             
             return jsonify(buds_list)
@@ -1253,12 +1258,14 @@ def add_bud():
                     strain_name_th, strain_name_en, breeder, strain_type,
                     thc_percentage, cbd_percentage, grade, aroma_flavor,
                     top_terpenes_1, top_terpenes_2, top_terpenes_3,
-                    effect, recommended_time, grow_method, harvest_date,
+                    mental_effects_positive, mental_effects_negative,
+                    physical_effects_positive, physical_effects_negative,
+                    recommended_time, grow_method, harvest_date,
                     batch_number, grower_id, grower_license_verified,
                     fertilizer_type, flowering_type, created_by
                 ) VALUES (
                     %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
                 ) RETURNING id
             """, (
                 data.get('strain_name_th'),
@@ -1272,7 +1279,10 @@ def add_bud():
                 data.get('top_terpenes_1'),
                 data.get('top_terpenes_2'),
                 data.get('top_terpenes_3'),
-                data.get('effect'),
+                data.get('mental_effects_positive'),
+                data.get('mental_effects_negative'),
+                data.get('physical_effects_positive'),
+                data.get('physical_effects_negative'),
                 data.get('recommended_time'),
                 data.get('grow_method'),
                 data.get('harvest_date'),
@@ -1333,7 +1343,9 @@ def update_bud(bud_id):
                     strain_name_th = %s, strain_name_en = %s, breeder = %s,
                     strain_type = %s, thc_percentage = %s, cbd_percentage = %s,
                     grade = %s, aroma_flavor = %s, top_terpenes_1 = %s,
-                    top_terpenes_2 = %s, top_terpenes_3 = %s, effect = %s,
+                    top_terpenes_2 = %s, top_terpenes_3 = %s, 
+                    mental_effects_positive = %s, mental_effects_negative = %s,
+                    physical_effects_positive = %s, physical_effects_negative = %s,
                     recommended_time = %s, grow_method = %s, harvest_date = %s,
                     batch_number = %s, grower_id = %s, grower_license_verified = %s,
                     fertilizer_type = %s, flowering_type = %s,
@@ -1351,7 +1363,10 @@ def update_bud(bud_id):
                 data.get('top_terpenes_1'),
                 data.get('top_terpenes_2'),
                 data.get('top_terpenes_3'),
-                data.get('effect'),
+                data.get('mental_effects_positive'),
+                data.get('mental_effects_negative'),
+                data.get('physical_effects_positive'),
+                data.get('physical_effects_negative'),
                 data.get('recommended_time'),
                 data.get('grow_method'),
                 data.get('harvest_date'),

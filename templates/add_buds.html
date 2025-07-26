@@ -426,6 +426,145 @@
             background: #c82333;
         }
 
+        /* Effects Selector Styles */
+        .effects-selector {
+            width: 100%;
+        }
+
+        .selected-effects {
+            min-height: 40px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 8px;
+            background: white;
+            cursor: pointer;
+            margin-bottom: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .selected-effects:hover {
+            border-color: #4CAF50;
+        }
+
+        .selected-effects .placeholder {
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        .effect-tag {
+            background: #4CAF50;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 15px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .effect-tag.negative {
+            background: #dc3545;
+        }
+
+        .effect-tag .remove-btn {
+            background: rgba(255, 255, 255, 0.3);
+            border: none;
+            color: white;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            font-size: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .effect-tag .remove-btn:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .effects-categories {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .effects-categories.active {
+            display: block;
+        }
+
+        .effect-category {
+            margin-bottom: 20px;
+        }
+
+        .effect-category:last-child {
+            margin-bottom: 0;
+        }
+
+        .category-title {
+            font-weight: 600;
+            color: #2c5530;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 14px;
+        }
+
+        .effect-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .effect-btn {
+            background: white;
+            border: 1px solid #e9ecef;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #495057;
+        }
+
+        .effect-btn:hover {
+            background: #e8f5e8;
+            border-color: #4CAF50;
+            color: #2c5530;
+        }
+
+        .effect-btn.selected {
+            background: #4CAF50;
+            border-color: #4CAF50;
+            color: white;
+        }
+
+        .effect-btn.negative {
+            background: white;
+            border: 1px solid #e9ecef;
+            color: #dc3545;
+        }
+
+        .effect-btn.negative:hover {
+            background: #fdedee;
+            border-color: #dc3545;
+            color: #a71d2a;
+        }
+
+        .effect-btn.negative.selected {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: white;
+        }
+
         @media (max-width: 768px) {
             .form-row {
                 flex-direction: column;
@@ -549,10 +688,10 @@
                                 <div id="selected-flavors" class="selected-flavors">
                                     <span class="placeholder">คลิกเพื่อเลือกกลิ่นและรส...</span>
                                 </div>
-                                
+
                                 <!-- Hidden input to store selected values -->
                                 <textarea id="aroma_flavor" name="aroma_flavor" style="display: none;"></textarea>
-                                
+
                                 <!-- Flavor categories -->
                                 <div class="flavor-categories">
                                     <div class="flavor-category">
@@ -679,7 +818,7 @@
                                 <option value="ฮิวมูเลน (Humulene)">ฮิวมูเลน (Humulene) - ฮ็อปส์/ไม้ → ลดอยากอาหาร, ต้านอักเสบ</option>
                                 <option value="เทอร์พินอลีน (Terpinolene)">เทอร์พินอลีน (Terpinolene) - ดอกไม้/สนหวาน → กระตุ้นเบา, ต้านอนุมูลฯ</option>
                                 <option value="โอซิมีน (Ocimene)">โอซิมีน (Ocimene) - ดอกไม้หวาน → ขยายหลอดลม, ต้านไวรัส</option>
-                                <option value="ยูคาลิปตอล / 1,8‑ซิเนออล (Eucalyptol)">ยูคาลิปตอล / 1,8‑ซิเนออล (Eucalyptol) - เมนทอล/ยูคาลิปตัส → สดชื่น, ต้านจุลชีพ</option>
+                                <option value="ยูคาลิปตอล / 1,8‑ซิเนออล (Eucalyptol)">ยูคาลิปตอล / 1,8‑ซิเนออล (Eucalyptol) - เมนทอล/ยูคาลิปตัส → สดชื่น,ต้านจุลชีพ</option>
                                 <option value="เนโรลิดอล (Nerolidol)">เนโรลิดอล (Nerolidol) - ชาเขียว/ไม้ → ผ่อนคลายกล้ามเนื้อ</option>
                                 <option value="บิซาโบลอล (Bisabolol)">บิซาโบลอล (Bisabolol) - คาโมมายล์ → ปกป้องผิว, ต้านอักเสบ</option>
                                 <option value="ฟาร์นีซีน (Farnesene)">ฟาร์นีซีน (Farnesene) - แอปเปิ้ลเขียว → ต้านแบคทีเรีย</option>
@@ -745,16 +884,102 @@
                     </div>
 
                     <div class="form-row">
-                        <div class="form-group">
-                            <label for="effect">ผลกระทบ</label>
-                            <select id="effect" name="effect">
-                                <option value="">เลือกผลกระทบ</option>
-                                <option value="ผ่อนคลาย">ผ่อนคลาย</option>
-                                <option value="สนุกสนาน">สนุกสนาน</option>
-                                <option value="สงบ">สงบ</option>
-                                <option value="เพิ่มจินตนาการ">เพิ่มจินตนาการ</option>
-                            </select>
+                        <div class="form-group full-width effects-selector">
+                            <label>ผลกระทบต่อจิตใจ (เชิงบวก)</label>
+                            <div id="selected-mental-positive" class="selected-effects">
+                                <span class="placeholder">เลือกผลกระทบเชิงบวก...</span>
+                            </div>
+                            <textarea id="mental_effects_positive" name="mental_effects_positive" style="display: none;"></textarea>
+                            <div class="effects-categories">
+                                <div class="effect-options">
+                                    <button type="button" class="effect-btn" data-effect="สุขใจ">สุขใจ</button>
+                                    <button type="button" class="effect-btn" data-effect="ผ่อนคลาย">ผ่อนคลาย</button>
+                                    <button type="button" class="effect-btn" data-effect="สร้างสรรค์">สร้างสรรค์</button>
+                                    <button type="button" class="effect-btn" data-effect="ร่าเริง">ร่าเริง</button>
+                                    <button type="button" class="effect-btn" data-effect="เบิกบาน">เบิกบาน</button>
+                                    <button type="button" class="effect-btn" data-effect="โฟกัส">โฟกัส</button>
+                                    <button type="button" class="effect-btn" data-effect="ตื่นตัว">ตื่นตัว</button>
+                                    <button type="button" class="effect-btn" data-effect="คิดลึก">คิดลึก</button>
+                                    <button type="button" class="effect-btn" data-effect="หลับง่าย">หลับง่าย</button>
+                                    <button type="button" class="effect-btn" data-effect="เพลิดเพลิน">เพลิดเพลิน</button>
+                                </div>
+                            </div>
                         </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group full-width effects-selector">
+                            <label>ผลกระทบต่อจิตใจ (เชิงลบ)</label>
+                            <div id="selected-mental-negative" class="selected-effects">
+                                <span class="placeholder">เลือกผลกระทบเชิงลบ...</span>
+                            </div>
+                            <textarea id="mental_effects_negative" name="mental_effects_negative" style="display: none;"></textarea>
+                            <div class="effects-categories">
+                                <div class="effect-options">
+                                    <button type="button" class="effect-btn negative" data-effect="วิตก">วิตก</button>
+                                    <button type="button" class="effect-btn negative" data-effect="พารานอยด์">พารานอยด์</button>
+                                    <button type="button" class="effect-btn negative" data-effect="แพนิค">แพนิค</button>
+                                    <button type="button" class="effect-btn negative" data-effect="สับสน">สับสน</button>
+                                    <button type="button" class="effect-btn negative" data-effect="ความจำสั้น">ความจำสั้น</button>
+                                    <button type="button" class="effect-btn negative" data-effect="สมาธิหาย">สมาธิหาย</button>
+                                    <button type="button" class="effect-btn negative" data-effect="หลอน">หลอน</button>
+                                    <button type="button" class="effect-btn negative" data-effect="ง่วงหนัก">ง่วงหนัก</button>
+                                    <button type="button" class="effect-btn negative" data-effect="ซึมเศร้า">ซึมเศร้า</button>
+                                    <button type="button" class="effect-btn negative" data-effect="หงุดหงิด">หงุดหงิด</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group full-width effects-selector">
+                            <label>ผลกระทบทางร่างกาย (เชิงบวก)</label>
+                            <div id="selected-physical-positive" class="selected-effects">
+                                <span class="placeholder">เลือกผลกระทบเชิงบวก...</span>
+                            </div>
+                            <textarea id="physical_effects_positive" name="physical_effects_positive" style="display: none;"></textarea>
+                            <div class="effects-categories">
+                                <div class="effect-options">
+                                    <button type="button" class="effect-btn" data-effect="บรรเทาปวด">บรรเทาปวด</button>
+                                    <button type="button" class="effect-btn" data-effect="คลายกล้าม">คลายกล้าม</button>
+                                    <button type="button" class="effect-btn" data-effect="ต้านอักเสบ">ต้านอักเสบ</button>
+                                    <button type="button" class="effect-btn" data-effect="หลับง่าย">หลับง่าย</button>
+                                    <button type="button" class="effect-btn" data-effect="คลายเกร็ง">คลายเกร็ง</button>
+                                    <button type="button" class="effect-btn" data-effect="ต้านคลื่นไส้">ต้านคลื่นไส้</button>
+                                    <button type="button" class="effect-btn" data-effect="กระตุ้นกิน">กระตุ้นกิน</button>
+                                    <button type="button" class="effect-btn" data-effect="ผ่อนคลาย">ผ่อนคลาย</button>
+                                    <button type="button" class="effect-btn" data-effect="สดชื่น">สดชื่น</button>
+                                    <button type="button" class="effect-btn" data-effect="สุขภาพลำไส้">สุขภาพลำไส้</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group full-width effects-selector">
+                            <label>ผลกระทบทางร่างกาย (เชิงลบ)</label>
+                            <div id="selected-physical-negative" class="selected-effects">
+                                <span class="placeholder">เลือกผลกระทบเชิงลบ...</span>
+                            </div>
+                            <textarea id="physical_effects_negative" name="physical_effects_negative" style="display: none;"></textarea>
+                            <div class="effects-categories">
+                                <div class="effect-options">
+                                    <button type="button" class="effect-btn negative" data-effect="ปากแห้ง">ปากแห้ง</button>
+                                    <button type="button" class="effect-btn negative" data-effect="ตาแดง">ตาแดง</button>
+                                    <button type="button" class="effect-btn negative" data-effect="ตาแห้ง">ตาแห้ง</button>
+                                    <button type="button" class="effect-btn negative" data-effect="เวียนหัว">เวียนหัว</button>
+                                    <button type="button" class="effect-btn negative" data-effect="ใจเต้นเร็ว">ใจเต้นเร็ว</button>
+                                    <button type="button" class="effect-btn negative" data-effect="ความดันตก">ความดันตก</button>
+                                    <button type="button" class="effect-btn negative" data-effect="มือสั่น">มือสั่น</button>
+                                    <button type="button" class="effect-btn negative" data-effect="เหงื่อออก">เหงื่อออก</button>
+                                    <button type="button" class="effect-btn negative" data-effect="คลื่นไส้">คลื่นไส้</button>
+                                    <button type="button" class="effect-btn negative" data-effect="ไอ/เจ็บคอ">ไอ/เจ็บคอ</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
                         <div class="form-group">
                             <label for="recommended_time">เวลาที่แนะนำ</label>
                             <select id="recommended_time" name="recommended_time">
@@ -1167,7 +1392,7 @@
             const flavorCategoriesDiv = document.querySelector('.flavor-categories');
             const hiddenInput = document.getElementById('aroma_flavor');
             const flavorButtons = document.querySelectorAll('.flavor-btn');
-            
+
             let selectedFlavors = [];
 
             // Toggle categories visibility when clicking on selected flavors area
@@ -1186,7 +1411,7 @@
             flavorButtons.forEach(button => {
                 button.addEventListener('click', function() {
                     const flavor = this.getAttribute('data-flavor');
-                    
+
                     if (selectedFlavors.includes(flavor)) {
                         // Remove flavor
                         selectedFlavors = selectedFlavors.filter(f => f !== flavor);
@@ -1196,7 +1421,7 @@
                         selectedFlavors.push(flavor);
                         this.classList.add('selected');
                     }
-                    
+
                     updateSelectedFlavorsDisplay();
                 });
             });
@@ -1215,7 +1440,7 @@
                             <button type="button" class="remove-btn" onclick="removeFlavor('${flavor}')">×</button>
                         </div>`
                     ).join('');
-                    
+
                     selectedFlavorsDiv.innerHTML = tagsHtml + 
                         `<button type="button" class="clear-all-btn" onclick="clearAllFlavors()">ล้างทั้งหมด</button>`;
                 }
@@ -1234,6 +1459,144 @@
                 updateSelectedFlavorsDisplay();
             };
         }
+
+        // Effects Selector functionality
+        function initializeEffectsSelectors() {
+            const effectsSelectors = [
+                {
+                    selectedId: 'selected-mental-positive',
+                    hiddenId: 'mental_effects_positive',
+                    categoryClass: '.effects-categories',
+                    buttonClass: '.effect-btn:not(.negative)'
+                },
+                {
+                    selectedId: 'selected-mental-negative',
+                    hiddenId: 'mental_effects_negative',
+                    categoryClass: '.effects-categories',
+                    buttonClass: '.effect-btn.negative'
+                },
+                {
+                    selectedId: 'selected-physical-positive',
+                    hiddenId: 'physical_effects_positive',
+                    categoryClass: '.effects-categories',
+                    buttonClass: '.effect-btn:not(.negative)'
+                },
+                {
+                    selectedId: 'selected-physical-negative',
+                    hiddenId: 'physical_effects_negative',
+                    categoryClass: '.effects-categories',
+                    buttonClass: '.effect-btn.negative'
+                }
+            ];
+
+            effectsSelectors.forEach(selector => {
+                initializeEffectSelector(selector);
+            });
+        }
+
+        function initializeEffectSelector(config) {
+            const selectedDiv = document.getElementById(config.selectedId);
+            const hiddenInput = document.getElementById(config.hiddenId);
+            const categoriesDiv = selectedDiv.nextElementSibling.nextElementSibling; // Skip hidden textarea
+            const effectButtons = categoriesDiv.querySelectorAll('.effect-btn');
+
+            let selectedEffects = [];
+
+            // Toggle categories visibility when clicking on selected effects area
+            selectedDiv.addEventListener('click', function() {
+                // Close other effect selectors
+                document.querySelectorAll('.effects-categories').forEach(cat => {
+                    if (cat !== categoriesDiv) {
+                        cat.classList.remove('active');
+                    }
+                });
+                categoriesDiv.classList.toggle('active');
+            });
+
+            // Handle effect button clicks
+            effectButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const effect = this.getAttribute('data-effect');
+
+                    if (selectedEffects.includes(effect)) {
+                        // Remove effect
+                        selectedEffects = selectedEffects.filter(f => f !== effect);
+                        this.classList.remove('selected');
+                    } else {
+                        // Add effect
+                        selectedEffects.push(effect);
+                        this.classList.add('selected');
+                    }
+
+                    updateSelectedEffectsDisplay();
+                });
+            });
+
+            function updateSelectedEffectsDisplay() {
+                // Update hidden input
+                hiddenInput.value = selectedEffects.join(', ');
+
+                // Update display
+                if (selectedEffects.length === 0) {
+                    const placeholder = selectedDiv.querySelector('.placeholder');
+                    if (placeholder) {
+                        selectedDiv.innerHTML = `<span class="placeholder">${placeholder.textContent}</span>`;
+                    }
+                } else {
+                    const isNegative = config.selectedId.includes('negative');
+                    const tagsHtml = selectedEffects.map(effect => 
+                        `<div class="effect-tag ${isNegative ? 'negative' : ''}">
+                            ${effect}
+                            <button type="button" class="remove-btn" onclick="removeEffect('${config.selectedId}', '${effect}')">×</button>
+                        </div>`
+                    ).join('');
+
+                    selectedDiv.innerHTML = tagsHtml + 
+                        `<button type="button" class="clear-all-btn" onclick="clearAllEffects('${config.selectedId}')">ล้างทั้งหมด</button>`;
+                }
+            }
+
+            // Store functions for global access
+            window[`removeEffect_${config.selectedId.replace(/-/g, '_')}`] = function(effect) {
+                selectedEffects = selectedEffects.filter(f => f !== effect);
+                effectButtons.forEach(btn => {
+                    if (btn.getAttribute('data-effect') === effect) {
+                        btn.classList.remove('selected');
+                    }
+                });
+                updateSelectedEffectsDisplay();
+            };
+
+            window[`clearAllEffects_${config.selectedId.replace(/-/g, '_')}`] = function() {
+                selectedEffects = [];
+                effectButtons.forEach(btn => btn.classList.remove('selected'));
+                updateSelectedEffectsDisplay();
+            };
+        }
+
+        // Global functions for removing effects
+        window.removeEffect = function(selectorId, effect) {
+            const functionName = `removeEffect_${selectorId.replace(/-/g, '_')}`;
+            if (window[functionName]) {
+                window[functionName](effect);
+            }
+        };
+
+        window.clearAllEffects = function(selectorId) {
+            const functionName = `clearAllEffects_${selectorId.replace(/-/g, '_')}`;
+            if (window[functionName]) {
+                window[functionName]();
+            }
+        };
+
+        // Close effects categories when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.effects-selector')) {
+                document.querySelectorAll('.effects-categories').forEach(cat => {
+                    cat.classList.remove('active');
+                });
+            }
+        });
 
         function showAlert(message, type = 'success') {
             const alertContainer = document.getElementById('alertContainer');

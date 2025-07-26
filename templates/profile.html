@@ -207,6 +207,51 @@
             font-size: 1.1em;
         }
         
+        .edit-input {
+            border: 2px solid #007bff;
+            border-radius: 5px;
+            padding: 8px;
+            font-size: 1em;
+            width: 100%;
+            max-width: 300px;
+        }
+        
+        .edit-select {
+            border: 2px solid #007bff;
+            border-radius: 5px;
+            padding: 8px;
+            font-size: 1em;
+            max-width: 200px;
+        }
+        
+        .save-cancel-btns {
+            display: none;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .btn-save {
+            background: #28a745;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .btn-cancel {
+            background: #6c757d;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .user-type-checkbox {
+            margin: 5px;
+        }
+
         @media (max-width: 600px) {
             .container {
                 margin: 10px;
@@ -266,12 +311,18 @@
                 
                 <div class="profile-row">
                     <div class="profile-label">👤 ชื่อผู้ใช้:</div>
-                    <div class="profile-value" id="username">-</div>
+                    <div class="profile-value">
+                        <span id="username-display">-</span>
+                        <input type="text" id="username-edit" class="edit-input" style="display: none;">
+                    </div>
                 </div>
                 
                 <div class="profile-row">
                     <div class="profile-label">📧 อีเมล:</div>
-                    <div class="profile-value" id="email">-</div>
+                    <div class="profile-value">
+                        <span id="email-display">-</span>
+                        <input type="email" id="email-edit" class="edit-input" style="display: none;">
+                    </div>
                 </div>
                 
                 <div class="profile-row">
@@ -286,22 +337,44 @@
                 
                 <div class="profile-row">
                     <div class="profile-label">🎂 ปีเกิด:</div>
-                    <div class="profile-value" id="birth-year">-</div>
+                    <div class="profile-value">
+                        <span id="birth-year-display">-</span>
+                        <input type="number" id="birth-year-edit" class="edit-input" min="1900" max="2024" style="display: none;">
+                    </div>
                 </div>
             </div>
             
             <div class="profile-card">
                 <h3 style="margin-top: 0; color: #2c5530; font-size: 1.5em;">🏷️ ประเภทผู้ใช้</h3>
-                <div id="user-types" style="margin-top: 15px;">
+                <div id="user-types-display" style="margin-top: 15px;">
                     <!-- User types will be loaded here -->
+                </div>
+                <div id="user-types-edit" style="margin-top: 15px; display: none;">
+                    <label class="user-type-checkbox">
+                        <input type="checkbox" id="is_consumer_edit"> 👥 ผู้บริโภค (Consumer)
+                    </label><br>
+                    <label class="user-type-checkbox">
+                        <input type="checkbox" id="is_grower_edit"> 🌱 ผู้ปลูก (Grower)
+                    </label><br>
+                    <label class="user-type-checkbox">
+                        <input type="checkbox" id="is_budtender_edit"> 🏪 บัดเทนเดอร์ (Budtender)
+                    </label>
+                </div>
+                
+                <div class="save-cancel-btns" id="saveCancelBtns">
+                    <button class="btn-save" onclick="saveProfile()">💾 บันทึก</button>
+                    <button class="btn-cancel" onclick="cancelEdit()">❌ ยกเลิก</button>
                 </div>
             </div>
             
             <div class="action-buttons">
+                <button class="btn btn-primary" onclick="toggleEditMode()" id="editBtn">
+                    ✏️ แก้ไขโปรไฟล์
+                </button>
                 <a href="/" class="btn btn-success">
                     📝 ลงทะเบียนผู้ใช้ใหม่
                 </a>
-                <a href="/users" class="btn btn-primary">
+                <a href="/users" class="btn btn-outline">
                     👥 ดูรายชื่อผู้ใช้
                 </a>
                 <button class="btn btn-outline" onclick="location.reload()">
@@ -328,10 +401,19 @@
             }
         }
 
+        let currentUserData = {};
+
         function displayProfile(user) {
-            document.getElementById('username').textContent = user.username || '-';
+            currentUserData = user;
+            
+            document.getElementById('username-display').textContent = user.username || '-';
             document.getElementById('displayUsername').textContent = user.username || 'ผู้ใช้';
-            document.getElementById('email').textContent = user.email || '-';
+            document.getElementById('email-display').textContent = user.email || '-';
+            
+            // Set edit form values
+            document.getElementById('username-edit').value = user.username || '';
+            document.getElementById('email-edit').value = user.email || '';
+            document.getElementById('birth-year-edit').value = user.birth_year || '';
             
             // Verification status
             const verificationStatus = document.getElementById('verification-status');
@@ -352,10 +434,10 @@
             }
             
             // Birth year
-            document.getElementById('birth-year').textContent = user.birth_year || 'ไม่ระบุ';
+            document.getElementById('birth-year-display').textContent = user.birth_year || 'ไม่ระบุ';
             
-            // User types
-            const userTypesDiv = document.getElementById('user-types');
+            // User types display
+            const userTypesDiv = document.getElementById('user-types-display');
             let userTypes = [];
             
             if (user.is_consumer) userTypes.push('<span class="badge badge-info">👥 ผู้บริโภค (Consumer)</span>');
@@ -366,6 +448,91 @@
                 userTypesDiv.innerHTML = userTypes.join(' ');
             } else {
                 userTypesDiv.innerHTML = '<span class="badge badge-secondary">ไม่มีประเภทที่ระบุ</span>';
+            }
+            
+            // Set user type checkboxes
+            document.getElementById('is_consumer_edit').checked = user.is_consumer || false;
+            document.getElementById('is_grower_edit').checked = user.is_grower || false;
+            document.getElementById('is_budtender_edit').checked = user.is_budtender || false;
+        }
+
+        function toggleEditMode() {
+            const isEditing = document.getElementById('username-edit').style.display !== 'none';
+            
+            if (isEditing) {
+                // Switch to view mode
+                cancelEdit();
+            } else {
+                // Switch to edit mode
+                document.getElementById('username-display').style.display = 'none';
+                document.getElementById('username-edit').style.display = 'inline-block';
+                
+                document.getElementById('email-display').style.display = 'none';
+                document.getElementById('email-edit').style.display = 'inline-block';
+                
+                document.getElementById('birth-year-display').style.display = 'none';
+                document.getElementById('birth-year-edit').style.display = 'inline-block';
+                
+                document.getElementById('user-types-display').style.display = 'none';
+                document.getElementById('user-types-edit').style.display = 'block';
+                
+                document.getElementById('saveCancelBtns').style.display = 'flex';
+                document.getElementById('editBtn').textContent = '❌ ยกเลิกแก้ไข';
+            }
+        }
+
+        function cancelEdit() {
+            // Switch back to view mode
+            document.getElementById('username-display').style.display = 'inline';
+            document.getElementById('username-edit').style.display = 'none';
+            
+            document.getElementById('email-display').style.display = 'inline';
+            document.getElementById('email-edit').style.display = 'none';
+            
+            document.getElementById('birth-year-display').style.display = 'inline';
+            document.getElementById('birth-year-edit').style.display = 'none';
+            
+            document.getElementById('user-types-display').style.display = 'block';
+            document.getElementById('user-types-edit').style.display = 'none';
+            
+            document.getElementById('saveCancelBtns').style.display = 'none';
+            document.getElementById('editBtn').textContent = '✏️ แก้ไขโปรไฟล์';
+            
+            // Reset form values
+            displayProfile(currentUserData);
+        }
+
+        async function saveProfile() {
+            const updatedData = {
+                username: document.getElementById('username-edit').value,
+                email: document.getElementById('email-edit').value,
+                birth_year: document.getElementById('birth-year-edit').value,
+                is_consumer: document.getElementById('is_consumer_edit').checked,
+                is_grower: document.getElementById('is_grower_edit').checked,
+                is_budtender: document.getElementById('is_budtender_edit').checked
+            };
+
+            try {
+                const response = await fetch('/api/update_profile', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updatedData)
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert('✅ บันทึกข้อมูลสำเร็จ!');
+                    loadProfile(); // Reload profile data
+                    cancelEdit();
+                } else {
+                    alert('❌ เกิดข้อผิดพลาด: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error saving profile:', error);
+                alert('❌ เกิดข้อผิดพลาดในการบันทึกข้อมูล');
             }
         }
 

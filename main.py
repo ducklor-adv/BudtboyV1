@@ -372,6 +372,73 @@ def get_profile():
     else:
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
+@app.route('/api/update_profile', methods=['POST'])
+def update_profile():
+    if 'user_id' not in session:
+        return jsonify({'error': 'ไม่ได้เข้าสู่ระบบ'}), 401
+    
+    user_id = session['user_id']
+    data = request.get_json()
+    
+    username = data.get('username')
+    email = data.get('email')
+    birth_year = data.get('birth_year')
+    is_consumer = data.get('is_consumer', False)
+    is_grower = data.get('is_grower', False)
+    is_budtender = data.get('is_budtender', False)
+    
+    if not username or not email:
+        return jsonify({'error': 'กรุณากรอกชื่อผู้ใช้และอีเมล'}), 400
+    
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            
+            # Check if username or email already exists (excluding current user)
+            cur.execute("""
+                SELECT id FROM users 
+                WHERE (username = %s OR email = %s) AND id != %s
+            """, (username, email, user_id))
+            existing_user = cur.fetchone()
+            
+            if existing_user:
+                return jsonify({
+                    'error': 'ชื่อผู้ใช้หรืออีเมลนี้ถูกใช้โดยผู้ใช้อื่นแล้ว'
+                }), 400
+            
+            # Update user profile
+            cur.execute("""
+                UPDATE users 
+                SET username = %s, email = %s, birth_year = %s, 
+                    is_consumer = %s, is_grower = %s, is_budtender = %s
+                WHERE id = %s
+            """, (
+                username, email, 
+                int(birth_year) if birth_year else None,
+                is_consumer, is_grower, is_budtender, user_id
+            ))
+            
+            conn.commit()
+            
+            # Update session data
+            session['username'] = username
+            session['email'] = email
+            
+            return jsonify({
+                'success': True,
+                'message': 'อัพเดทโปรไฟล์สำเร็จ'
+            })
+            
+        except Exception as e:
+            conn.rollback()
+            return jsonify({'error': str(e)}), 500
+        finally:
+            cur.close()
+            conn.close()
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
 @app.route('/users')
 def list_users():
     conn = get_db_connection()

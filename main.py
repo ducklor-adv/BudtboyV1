@@ -834,6 +834,60 @@ def delete_bud(bud_id):
     else:
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
+@app.route('/api/strains/autocomplete', methods=['GET'])
+def autocomplete_strains():
+    """Get strain names for autocomplete"""
+    query = request.args.get('q', '').strip()
+    lang = request.args.get('lang', 'both')  # 'th', 'en', or 'both'
+    
+    if len(query) < 2:  # Require at least 2 characters
+        return jsonify([])
+    
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            
+            suggestions = []
+            
+            if lang in ['th', 'both']:
+                # Search Thai names
+                cur.execute("""
+                    SELECT DISTINCT strain_name_th 
+                    FROM buds_data 
+                    WHERE strain_name_th ILIKE %s 
+                    ORDER BY strain_name_th 
+                    LIMIT 10
+                """, (f'%{query}%',))
+                
+                for row in cur.fetchall():
+                    if row[0] and row[0] not in suggestions:
+                        suggestions.append(row[0])
+            
+            if lang in ['en', 'both']:
+                # Search English names
+                cur.execute("""
+                    SELECT DISTINCT strain_name_en 
+                    FROM buds_data 
+                    WHERE strain_name_en ILIKE %s 
+                    ORDER BY strain_name_en 
+                    LIMIT 10
+                """, (f'%{query}%',))
+                
+                for row in cur.fetchall():
+                    if row[0] and row[0] not in suggestions:
+                        suggestions.append(row[0])
+            
+            return jsonify(suggestions[:10])  # Limit to 10 suggestions
+            
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+        finally:
+            cur.close()
+            conn.close()
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     """Serve uploaded files"""

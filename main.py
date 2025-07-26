@@ -983,14 +983,14 @@ def get_user_buds():
         user_id = session.get('user_id')
         cur.execute("""
             SELECT b.id, b.strain_name_en, b.strain_name_th, b.breeder, b.thc_percentage, 
-                   b.cbd_percentage, b.strain_type, b.created_at,
+                   b.cbd_percentage, b.strain_type, b.created_at, b.image_1_url,
                    COALESCE(AVG(r.overall_rating), 0) as avg_rating,
                    COUNT(r.id) as review_count
             FROM buds_data b
             LEFT JOIN reviews r ON b.id = r.bud_reference_id
             WHERE b.created_by = %s 
             GROUP BY b.id, b.strain_name_en, b.strain_name_th, b.breeder, 
-                     b.thc_percentage, b.cbd_percentage, b.strain_type, b.created_at
+                     b.thc_percentage, b.cbd_percentage, b.strain_type, b.created_at, b.image_1_url
             ORDER BY b.created_at DESC
         """, (user_id,))
 
@@ -1005,8 +1005,9 @@ def get_user_buds():
                 'cbd_percentage': row[5],
                 'strain_type': row[6],
                 'created_at': row[7].strftime('%Y-%m-%d %H:%M:%S') if row[7] else None,
-                'avg_rating': float(row[8]) if row[8] else 0,
-                'review_count': row[9]
+                'image_1_url': f'/uploads/{row[8].split("/")[-1]}' if row[8] else None,
+                'avg_rating': float(row[9]) if row[9] else 0,
+                'review_count': row[10]
             })
 
         cur.close()

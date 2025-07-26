@@ -210,6 +210,26 @@
                 gap: 15px;
                 align-items: stretch;
             }
+
+            .bud-main-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .bud-image-container {
+                width: 100px;
+                height: 100px;
+                align-self: center;
+            }
+
+            .bud-report-section {
+                align-self: center;
+            }
+
+            .bud-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
         }
         .bud-subtitle {
             color: #6c757d;
@@ -227,13 +247,85 @@
             border-radius: 12px;
             display: inline-block;
         }
+        .bud-main-content {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .bud-image-section {
+            flex-shrink: 0;
+        }
+
+        .bud-image-container {
+            width: 120px;
+            height: 120px;
+            border: 3px solid #ffd700;
+            border-radius: 15px;
+            overflow: hidden;
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .bud-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .bud-image-placeholder {
+            font-size: 48px;
+            color: #4CAF50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+        }
+
+        .bud-info-section {
+            flex: 1;
+        }
+
+        .bud-report-section {
+            flex-shrink: 0;
+            display: flex;
+            align-items: flex-start;
+            padding-top: 10px;
+        }
+
+        .bud-report-btn {
+            background: linear-gradient(135deg, #ff4757, #ff3742);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3);
+            border: 2px solid #ff4757;
+        }
+
+        .bud-report-btn:hover {
+            background: linear-gradient(135deg, #ff3742, #ff2f3a);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 71, 87, 0.4);
+        }
+
         .bud-actions {
             display: flex;
             gap: 8px;
             margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
         }
 
-        .report-btn, .edit-btn, .delete-btn {
+        .view-reviews-btn, .edit-btn, .delete-btn {
             flex: 1;
             padding: 8px 12px;
             border: none;
@@ -247,13 +339,33 @@
             display: inline-block;
         }
 
-        .report-btn {
-            background: #2196F3;
+        .view-reviews-btn {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
             color: white;
         }
 
-        .report-btn:hover {
-            background: #1976D2;
+        .view-reviews-btn:hover {
+            background: linear-gradient(135deg, #45a049, #3d8b40);
+            transform: translateY(-1px);
+        }
+
+        .edit-btn {
+            background: #6c757d;
+            color: white;
+        }
+
+        .edit-btn:hover {
+            background: #5a6268;
+            transform: translateY(-1px);
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background: #c82333;
             transform: translateY(-1px);
         }
     </style>
@@ -344,30 +456,47 @@
 
             budsList.innerHTML = buds.map(bud => `
                 <div class="item-card">
-                    <div class="item-header">
-                        <div class="item-name">${bud.strain_name_en || 'ไม่ระบุชื่อ'} ${bud.strain_name_th ? `(${bud.strain_name_th})` : ''}</div>
-                        <div class="item-date">${formatDate(bud.created_at)}</div>
-                    </div>
-                    <div class="item-details">
-                        <p><strong>Bud ID:</strong> ${bud.id}</p>
-                        <p><strong>ผู้พัฒนา:</strong> ${bud.breeder || 'ไม่ระบุ'}</p>
-                        <p><strong>ประเภท:</strong> ${bud.strain_type || 'ไม่ระบุ'}</p>
-                        <p><strong>THC:</strong> ${bud.thc_percentage || 'ไม่ระบุ'}% | <strong>CBD:</strong> ${bud.cbd_percentage || 'ไม่ระบุ'}%</p>
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;">
-                            <div class="rating-info">
-                                <span style="color: #ffd700; font-size: 16px;">${'⭐'.repeat(Math.round(bud.avg_rating))}</span>
-                                <span style="color: #666; font-size: 14px; margin-left: 5px;">
-                                    ${bud.avg_rating > 0 ? `${bud.avg_rating.toFixed(1)} (${bud.review_count} รีวิว)` : 'ยังไม่มีรีวิว'}
-                                </span>
+                    <div class="bud-main-content">
+                        <div class="bud-image-section">
+                            <div class="bud-image-container">
+                                ${bud.image_1_url ? 
+                                    `<img src="${bud.image_1_url}" alt="รูปดอก ${bud.strain_name_en}" class="bud-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                     <div class="bud-image-placeholder" style="display: none;">🌿</div>` :
+                                    `<div class="bud-image-placeholder">🌿</div>`
+                                }
                             </div>
-                            <button class="view-reviews-btn" onclick="window.location.href='/bud-reviews?bud_id=${bud.id}'" 
-                                    style="background: linear-gradient(135deg, #4CAF50, #45a049); color: white; border: none; padding: 8px 12px; border-radius: 15px; font-size: 12px; cursor: pointer; transition: all 0.3s ease;">
-                                📋 ดูรีวิวทั้งหมด
-                            </button>
+                        </div>
+                        
+                        <div class="bud-info-section">
+                            <div class="item-header">
+                                <div class="item-name">${bud.strain_name_en || 'ไม่ระบุชื่อ'} ${bud.strain_name_th ? `(${bud.strain_name_th})` : ''}</div>
+                                <div class="item-date">${formatDate(bud.created_at)}</div>
+                            </div>
+                            <div class="item-details">
+                                <p><strong>Bud ID:</strong> ${bud.id}</p>
+                                <p><strong>ผู้พัฒนา:</strong> ${bud.breeder || 'ไม่ระบุ'}</p>
+                                <p><strong>ประเภท:</strong> ${bud.strain_type || 'ไม่ระบุ'}</p>
+                                <p><strong>THC:</strong> ${bud.thc_percentage || 'ไม่ระบุ'}% | <strong>CBD:</strong> ${bud.cbd_percentage || 'ไม่ระบุ'}%</p>
+                                <div class="rating-info" style="margin-top: 10px;">
+                                    <span style="color: #ffd700; font-size: 16px;">${'⭐'.repeat(Math.round(bud.avg_rating))}</span>
+                                    <span style="color: #666; font-size: 14px; margin-left: 5px;">
+                                        ${bud.avg_rating > 0 ? `${bud.avg_rating.toFixed(1)} (${bud.review_count} รีวิว)` : 'ยังไม่มีรีวิว'}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bud-report-section">
+                            <a href="/bud-report?id=${bud.id}" class="bud-report-btn">
+                                📊 Bud Report
+                            </a>
                         </div>
                     </div>
+                    
                     <div class="bud-actions">
-                        <a href="/bud-report?id=${bud.id}" class="report-btn">📊 Bud Report</a>
+                        <button class="view-reviews-btn" onclick="window.location.href='/bud-reviews?bud_id=${bud.id}'">
+                            📋 ดูรีวิวทั้งหมด
+                        </button>
                         <button class="edit-btn" onclick="editBud(${bud.id})">✏️ แก้ไข</button>
                         <button class="delete-btn" onclick="deleteBud(${bud.id})">🗑️ ลบ</button>
                     </div>

@@ -212,6 +212,88 @@
             font-style: italic;
         }
 
+        /* Autocomplete Styles */
+        .autocomplete-container {
+            position: relative;
+        }
+
+        .suggestions-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+
+        .suggestion-item {
+            padding: 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #f8f9fa;
+            transition: background-color 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .suggestion-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+
+        .suggestion-item.selected {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .suggestion-main {
+            font-weight: 500;
+        }
+
+        .suggestion-meta {
+            font-size: 12px;
+            color: #6c757d;
+            display: flex;
+            gap: 8px;
+        }
+
+        .suggestion-item.selected .suggestion-meta {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .popular-badge {
+            background: #ffc107;
+            color: #212529;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .strain-type-badge {
+            background: #6f42c1;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+        }
+
+        .no-suggestions {
+            padding: 12px;
+            text-align: center;
+            color: #6c757d;
+            font-style: italic;
+        }
+
         @media (max-width: 768px) {
             .form-row {
                 flex-direction: column;
@@ -252,15 +334,21 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label for="strain_name_en">ชื่อสายพันธุ์ (อังกฤษ) <span class="required">*</span></label>
-                            <select id="strain_name_en" name="strain_name_en" required>
-                                <option value="">เลือกชื่อสายพันธุ์ (อังกฤษ)</option>
-                            </select>
+                            <div class="autocomplete-container">
+                                <input type="text" id="strain_name_en" name="strain_name_en" 
+                                       placeholder="พิมพ์ชื่อสายพันธุ์ภาษาอังกฤษ..." required
+                                       autocomplete="off">
+                                <div id="suggestions_en" class="suggestions-list"></div>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label for="strain_name_th">ชื่อสายพันธุ์ (ไทย)</label>
-                            <select id="strain_name_th" name="strain_name_th">
-                                <option value="">เลือกชื่อสายพันธุ์ (ไทย)</option>
-                            </select>
+                            <div class="autocomplete-container">
+                                <input type="text" id="strain_name_th" name="strain_name_th" 
+                                       placeholder="พิมพ์ชื่อสายพันธุ์ภาษาไทย..."
+                                       autocomplete="off">
+                                <div id="suggestions_th" class="suggestions-list"></div>
+                            </div>
                         </div>
                     </div>
 
@@ -463,44 +551,184 @@
     </div>
 
     <script>
-        // Load strain names for dropdowns
-        async function loadStrainDropdowns() {
-            try {
-                // Load English strains
-                const enResponse = await fetch('/api/strains/list?lang=en');
-                if (enResponse.ok) {
-                    const enStrains = await enResponse.json();
-                    const enSelect = document.getElementById('strain_name_en');
-                    
-                    enStrains.forEach(strain => {
-                        const option = document.createElement('option');
-                        option.value = strain;
-                        option.textContent = strain;
-                        enSelect.appendChild(option);
-                    });
+        // Autocomplete functionality
+        class StrainAutocomplete {
+            constructor(inputId, suggestionsId, language) {
+                this.input = document.getElementById(inputId);
+                this.suggestionsContainer = document.getElementById(suggestionsId);
+                this.language = language;
+                this.suggestions = [];
+                this.selectedIndex = -1;
+                this.searchTimeout = null;
+
+                this.init();
+            }
+
+            init() {
+                this.input.addEventListener('input', (e) => this.handleInput(e));
+                this.input.addEventListener('keydown', (e) => this.handleKeydown(e));
+                this.input.addEventListener('focus', (e) => this.handleFocus(e));
+                this.input.addEventListener('blur', (e) => this.handleBlur(e));
+            }
+
+            handleInput(e) {
+                const query = e.target.value.trim();
+                
+                // Clear previous timeout
+                if (this.searchTimeout) {
+                    clearTimeout(this.searchTimeout);
                 }
 
-                // Load Thai strains
-                const thResponse = await fetch('/api/strains/list?lang=th');
-                if (thResponse.ok) {
-                    const thStrains = await thResponse.json();
-                    const thSelect = document.getElementById('strain_name_th');
-                    
-                    thStrains.forEach(strain => {
-                        const option = document.createElement('option');
-                        option.value = strain;
-                        option.textContent = strain;
-                        thSelect.appendChild(option);
-                    });
+                // Debounce search - wait 300ms after user stops typing
+                this.searchTimeout = setTimeout(() => {
+                    this.searchStrains(query);
+                }, 300);
+            }
+
+            handleKeydown(e) {
+                if (!this.suggestionsContainer.style.display || this.suggestionsContainer.style.display === 'none') {
+                    return;
                 }
-            } catch (error) {
-                console.error('Error loading strain options:', error);
+
+                const items = this.suggestionsContainer.querySelectorAll('.suggestion-item');
+                
+                switch (e.key) {
+                    case 'ArrowDown':
+                        e.preventDefault();
+                        this.selectedIndex = Math.min(this.selectedIndex + 1, items.length - 1);
+                        this.updateSelection(items);
+                        break;
+                    case 'ArrowUp':
+                        e.preventDefault();
+                        this.selectedIndex = Math.max(this.selectedIndex - 1, -1);
+                        this.updateSelection(items);
+                        break;
+                    case 'Enter':
+                        e.preventDefault();
+                        if (this.selectedIndex >= 0 && items[this.selectedIndex]) {
+                            this.selectSuggestion(this.suggestions[this.selectedIndex]);
+                        }
+                        break;
+                    case 'Escape':
+                        this.hideSuggestions();
+                        break;
+                }
+            }
+
+            handleFocus(e) {
+                // Show popular strains when input is focused and empty
+                if (!e.target.value.trim()) {
+                    this.searchStrains('');
+                }
+            }
+
+            handleBlur(e) {
+                // Hide suggestions after a short delay to allow for clicking
+                setTimeout(() => {
+                    this.hideSuggestions();
+                }, 150);
+            }
+
+            updateSelection(items) {
+                items.forEach((item, index) => {
+                    item.classList.toggle('selected', index === this.selectedIndex);
+                });
+            }
+
+            async searchStrains(query) {
+                try {
+                    const response = await fetch(`/api/strains/search?q=${encodeURIComponent(query)}&lang=${this.language}&limit=10`);
+                    
+                    if (!response.ok) {
+                        throw new Error('Search failed');
+                    }
+
+                    this.suggestions = await response.json();
+                    this.displaySuggestions();
+                } catch (error) {
+                    console.error('Error fetching suggestions:', error);
+                    this.suggestions = [];
+                    this.displaySuggestions();
+                }
+            }
+
+            displaySuggestions() {
+                this.suggestionsContainer.innerHTML = '';
+                this.selectedIndex = -1;
+
+                if (this.suggestions.length === 0) {
+                    const noResults = document.createElement('div');
+                    noResults.className = 'no-suggestions';
+                    noResults.textContent = 'ไม่พบสายพันธุ์ที่ตรงกับคำค้นหา';
+                    this.suggestionsContainer.appendChild(noResults);
+                    this.showSuggestions();
+                    return;
+                }
+
+                this.suggestions.forEach((suggestion, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'suggestion-item';
+                    
+                    const mainDiv = document.createElement('div');
+                    mainDiv.className = 'suggestion-main';
+                    mainDiv.textContent = suggestion.name;
+                    
+                    const metaDiv = document.createElement('div');
+                    metaDiv.className = 'suggestion-meta';
+                    
+                    if (suggestion.is_popular) {
+                        const popularBadge = document.createElement('span');
+                        popularBadge.className = 'popular-badge';
+                        popularBadge.textContent = 'ยอดนิยม';
+                        metaDiv.appendChild(popularBadge);
+                    }
+                    
+                    if (suggestion.strain_type) {
+                        const typeBadge = document.createElement('span');
+                        typeBadge.className = 'strain-type-badge';
+                        typeBadge.textContent = suggestion.strain_type;
+                        metaDiv.appendChild(typeBadge);
+                    }
+
+                    item.appendChild(mainDiv);
+                    item.appendChild(metaDiv);
+                    
+                    item.addEventListener('click', () => {
+                        this.selectSuggestion(suggestion);
+                    });
+                    
+                    this.suggestionsContainer.appendChild(item);
+                });
+
+                this.showSuggestions();
+            }
+
+            selectSuggestion(suggestion) {
+                this.input.value = suggestion.name;
+                this.hideSuggestions();
+                
+                // Auto-fill strain type if available
+                if (suggestion.strain_type) {
+                    const strainTypeSelect = document.getElementById('strain_type');
+                    if (strainTypeSelect && strainTypeSelect.value === '') {
+                        strainTypeSelect.value = suggestion.strain_type;
+                    }
+                }
+            }
+
+            showSuggestions() {
+                this.suggestionsContainer.style.display = 'block';
+            }
+
+            hideSuggestions() {
+                this.suggestionsContainer.style.display = 'none';
             }
         }
 
-        // Initialize dropdown loading
+        // Initialize autocomplete for both fields
         document.addEventListener('DOMContentLoaded', function() {
-            loadStrainDropdowns();
+            new StrainAutocomplete('strain_name_en', 'suggestions_en', 'en');
+            new StrainAutocomplete('strain_name_th', 'suggestions_th', 'th');
         });
 
         function showAlert(message, type = 'success') {

@@ -910,48 +910,119 @@ def delete_bud(bud_id):
     else:
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
-@app.route('/api/strains/list', methods=['GET'])
-def get_strain_list():
-    """Get all strain names for dropdown"""
+@app.route('/api/strains/search', methods=['GET'])
+def search_strains():
+    """Search strain names with autocomplete suggestions"""
+    query = request.args.get('q', '').strip()
     lang = request.args.get('lang', 'both')  # 'th', 'en', or 'both'
+    limit = int(request.args.get('limit', 10))
     
     conn = get_db_connection()
     if conn:
         try:
             cur = conn.cursor()
             
-            strains = []
+            suggestions = []
             
-            if lang in ['en', 'both']:
-                # Get English names from strain_names table (prioritize popular strains)
-                cur.execute("""
-                    SELECT DISTINCT name_en 
-                    FROM strain_names 
-                    WHERE name_en IS NOT NULL
-                    ORDER BY is_popular DESC, name_en 
-                """)
+            if query:
+                # Search with query
+                if lang in ['en', 'both']:
+                    # Search English names with ILIKE for case-insensitive partial matching
+                    cur.execute("""
+                        SELECT name_en, is_popular, strain_type
+                        FROM strain_names 
+                        WHERE name_en IS NOT NULL 
+                        AND name_en ILIKE %s
+                        ORDER BY is_popular DESC, 
+                                 CASE WHEN name_en ILIKE %s THEN 0 ELSE 1 END,
+                                 name_en
+                        LIMIT %s
+                    """, (f'%{query}%', f'{query}%', limit))
+                    
+                    for row in cur.fetchall():
+                        if row[0]:
+                            suggestions.append({
+                                'name': row[0],
+                                'language': 'en',
+                                'is_popular': row[1],
+                                'strain_type': row[2]
+                            })
                 
-                for row in cur.fetchall():
-                    if row[0] and row[0] not in strains:
-                        strains.append(row[0])
-            
-            if lang in ['th', 'both']:
-                # Get Thai names from strain_names table (prioritize popular strains)
-                cur.execute("""
-                    SELECT DISTINCT name_th 
-                    FROM strain_names 
-                    WHERE name_th IS NOT NULL
-                    ORDER BY is_popular DESC, name_th 
-                """)
+                if lang in ['th', 'both']:
+                    # Search Thai names with ILIKE for case-insensitive partial matching
+                    cur.execute("""
+                        SELECT name_th, is_popular, strain_type
+                        FROM strain_names 
+                        WHERE name_th IS NOT NULL 
+                        AND name_th ILIKE %s
+                        ORDER BY is_popular DESC,
+                                 CASE WHEN name_th ILIKE %s THEN 0 ELSE 1 END,
+                                 name_th
+                        LIMIT %s
+                    """, (f'%{query}%', f'{query}%', limit))
+                    
+                    for row in cur.fetchall():
+                        if row[0]:
+                            suggestions.append({
+                                'name': row[0],
+                                'language': 'th',
+                                'is_popular': row[1],
+                                'strain_type': row[2]
+                            })
+            else:
+                # No query - return popular strains
+                if lang in ['en', 'both']:
+                    cur.execute("""
+                        SELECT name_en, is_popular, strain_type
+                        FROM strain_names 
+                        WHERE name_en IS NOT NULL AND is_popular = TRUE
+                        ORDER BY name_en
+                        LIMIT %s
+                    """, (limit,))
+                    
+                    for row in cur.fetchall():
+                        if row[0]:
+                            suggestions.append({
+                                'name': row[0],
+                                'language': 'en',
+                                'is_popular': row[1],
+                                'strain_type': row[2]
+                            })
                 
-                for row in cur.fetchall():
-                    if row[0] and row[0] not in strains:
-                        strains.append(row[0])
+                if lang in ['th', 'both']:
+                    cur.execute("""
+                        SELECT name_th, is_popular, strain_type
+                        FROM strain_names 
+                        WHERE name_th IS NOT NULL AND is_popular = TRUE
+                        ORDER BY name_th
+                        LIMIT %s
+                    """, (limit,))
+                    
+                    for row in cur.fetchall():
+                        if row[0]:
+                            suggestions.append({
+                                'name': row[0],
+                                'language': 'th',
+                                'is_popular': row[1],
+                                'strain_type': row[2]
+                            })
             
-            return jsonify(strains)
+            # Remove duplicates and sort by popularity then alphabetically
+            unique_suggestions = []
+            seen_names = set()
+            
+            for suggestion in suggestions:
+                if suggestion['name'] not in seen_names:
+                    unique_suggestions.append(suggestion)
+                    seen_names.add(suggestion['name'])
+            
+            # Sort: popular first, then alphabetically
+            unique_suggestions.sort(key=lambda x: (not x['is_popular'], x['name']))
+            
+            return jsonify(unique_suggestions[:limit])
             
         except Exception as e:
-            print(f"Error in get_strain_list: {e}")
+            print(f"Error in search_strains: {e}")
             return jsonify({'error': str(e)}), 500
         finally:
             cur.close()

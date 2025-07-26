@@ -207,53 +207,7 @@
             font-style: italic;
         }
 
-        .autocomplete-container {
-            position: relative;
-        }
-
-        .autocomplete-suggestions {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: white;
-            border: 1px solid #e9ecef;
-            border-top: none;
-            border-radius: 0 0 8px 8px;
-            max-height: 200px;
-            overflow-y: auto;
-            z-index: 1000;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            display: none;
-        }
-
-        .autocomplete-suggestions.show {
-            display: block;
-        }
-
-        .autocomplete-item {
-            padding: 12px 16px;
-            cursor: pointer;
-            border-bottom: 1px solid #f8f9fa;
-            transition: background-color 0.2s ease;
-        }
-
-        .autocomplete-item:hover {
-            background-color: #f8f9fa;
-        }
-
-        .autocomplete-item:last-child {
-            border-bottom: none;
-        }
-
-        .autocomplete-item.selected {
-            background-color: #4CAF50;
-            color: white;
-        }
-
-        .autocomplete-loading {
-            padding: 12px 16px;
-            text-align: center;
+        .loading-dropdown {
             color: #6c757d;
             font-style: italic;
         }
@@ -298,17 +252,15 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label for="strain_name_en">ชื่อสายพันธุ์ (อังกฤษ) <span class="required">*</span></label>
-                            <div class="autocomplete-container">
-                                <input type="text" id="strain_name_en" name="strain_name_en" required autocomplete="off">
-                                <div class="autocomplete-suggestions" id="suggestions-en"></div>
-                            </div>
+                            <select id="strain_name_en" name="strain_name_en" required>
+                                <option value="">เลือกชื่อสายพันธุ์ (อังกฤษ)</option>
+                            </select>
                         </div>
                         <div class="form-group">
-                            <label for="strain_name_th">ชื่อสายพันธุ์ (ไทย) <span class="required">*</span></label>
-                            <div class="autocomplete-container">
-                                <input type="text" id="strain_name_th" name="strain_name_th" required autocomplete="off">
-                                <div class="autocomplete-suggestions" id="suggestions-th"></div>
-                            </div>
+                            <label for="strain_name_th">ชื่อสายพันธุ์ (ไทย)</label>
+                            <select id="strain_name_th" name="strain_name_th">
+                                <option value="">เลือกชื่อสายพันธุ์ (ไทย)</option>
+                            </select>
                         </div>
                     </div>
 
@@ -511,158 +463,44 @@
     </div>
 
     <script>
-        // Autocomplete functionality
-        class AutoComplete {
-            constructor(inputId, suggestionsId, language) {
-                this.input = document.getElementById(inputId);
-                this.suggestionsContainer = document.getElementById(suggestionsId);
-                this.language = language;
-                this.selectedIndex = -1;
-                this.suggestions = [];
-                this.debounceTimer = null;
-                
-                this.init();
-            }
-            
-            init() {
-                this.input.addEventListener('input', (e) => this.handleInput(e));
-                this.input.addEventListener('keydown', (e) => this.handleKeydown(e));
-                this.input.addEventListener('blur', (e) => this.handleBlur(e));
-                this.input.addEventListener('focus', (e) => this.handleFocus(e));
-            }
-            
-            handleInput(e) {
-                const query = e.target.value.trim();
-                
-                // Clear previous timer
-                if (this.debounceTimer) {
-                    clearTimeout(this.debounceTimer);
-                }
-                
-                // Debounce the search
-                this.debounceTimer = setTimeout(() => {
-                    if (query.length >= 2) {
-                        this.fetchSuggestions(query);
-                    } else {
-                        this.hideSuggestions();
-                    }
-                }, 300);
-            }
-            
-            async fetchSuggestions(query) {
-                try {
-                    this.showLoading();
+        // Load strain names for dropdowns
+        async function loadStrainDropdowns() {
+            try {
+                // Load English strains
+                const enResponse = await fetch('/api/strains/list?lang=en');
+                if (enResponse.ok) {
+                    const enStrains = await enResponse.json();
+                    const enSelect = document.getElementById('strain_name_en');
                     
-                    const response = await fetch(`/api/strains/autocomplete?q=${encodeURIComponent(query)}&lang=${this.language}`);
-                    
-                    if (!response.ok) {
-                        throw new Error('Failed to fetch suggestions');
-                    }
-                    
-                    const suggestions = await response.json();
-                    this.displaySuggestions(suggestions);
-                } catch (error) {
-                    console.error('Error fetching suggestions:', error);
-                    this.hideSuggestions();
-                }
-            }
-            
-            showLoading() {
-                this.suggestionsContainer.innerHTML = '<div class="autocomplete-loading">กำลังค้นหา...</div>';
-                this.suggestionsContainer.classList.add('show');
-            }
-            
-            displaySuggestions(suggestions) {
-                this.suggestions = suggestions;
-                this.selectedIndex = -1;
-                
-                if (suggestions.length === 0) {
-                    this.suggestionsContainer.innerHTML = '<div class="autocomplete-loading">ไม่พบผลลัพธ์</div>';
-                } else {
-                    this.suggestionsContainer.innerHTML = suggestions
-                        .map((suggestion, index) => 
-                            `<div class="autocomplete-item" data-index="${index}">${suggestion}</div>`
-                        ).join('');
-                    
-                    // Add click handlers
-                    this.suggestionsContainer.querySelectorAll('.autocomplete-item').forEach((item, index) => {
-                        item.addEventListener('mousedown', (e) => {
-                            e.preventDefault(); // Prevent blur
-                            this.selectSuggestion(index);
-                        });
+                    enStrains.forEach(strain => {
+                        const option = document.createElement('option');
+                        option.value = strain;
+                        option.textContent = strain;
+                        enSelect.appendChild(option);
                     });
                 }
-                
-                this.suggestionsContainer.classList.add('show');
-            }
-            
-            handleKeydown(e) {
-                if (!this.suggestionsContainer.classList.contains('show')) {
-                    return;
+
+                // Load Thai strains
+                const thResponse = await fetch('/api/strains/list?lang=th');
+                if (thResponse.ok) {
+                    const thStrains = await thResponse.json();
+                    const thSelect = document.getElementById('strain_name_th');
+                    
+                    thStrains.forEach(strain => {
+                        const option = document.createElement('option');
+                        option.value = strain;
+                        option.textContent = strain;
+                        thSelect.appendChild(option);
+                    });
                 }
-                
-                switch (e.key) {
-                    case 'ArrowDown':
-                        e.preventDefault();
-                        this.selectedIndex = Math.min(this.selectedIndex + 1, this.suggestions.length - 1);
-                        this.updateSelection();
-                        break;
-                    case 'ArrowUp':
-                        e.preventDefault();
-                        this.selectedIndex = Math.max(this.selectedIndex - 1, -1);
-                        this.updateSelection();
-                        break;
-                    case 'Enter':
-                        e.preventDefault();
-                        if (this.selectedIndex >= 0) {
-                            this.selectSuggestion(this.selectedIndex);
-                        }
-                        break;
-                    case 'Escape':
-                        this.hideSuggestions();
-                        break;
-                }
-            }
-            
-            updateSelection() {
-                const items = this.suggestionsContainer.querySelectorAll('.autocomplete-item');
-                items.forEach((item, index) => {
-                    item.classList.toggle('selected', index === this.selectedIndex);
-                });
-            }
-            
-            selectSuggestion(index) {
-                if (index >= 0 && index < this.suggestions.length) {
-                    this.input.value = this.suggestions[index];
-                    this.hideSuggestions();
-                    this.input.focus();
-                }
-            }
-            
-            handleBlur(e) {
-                // Delay hiding to allow for click events
-                setTimeout(() => {
-                    this.hideSuggestions();
-                }, 150);
-            }
-            
-            handleFocus(e) {
-                const query = e.target.value.trim();
-                if (query.length >= 2) {
-                    this.fetchSuggestions(query);
-                }
-            }
-            
-            hideSuggestions() {
-                this.suggestionsContainer.classList.remove('show');
-                this.selectedIndex = -1;
+            } catch (error) {
+                console.error('Error loading strain options:', error);
             }
         }
-        
-        // Initialize autocomplete for both inputs
+
+        // Initialize dropdown loading
         document.addEventListener('DOMContentLoaded', function() {
-            new AutoComplete('strain_name_en', 'suggestions-en', 'en');
-            new AutoComplete('strain_name_th', 'suggestions-th', 'th');
+            loadStrainDropdowns();
         });
 
         function showAlert(message, type = 'success') {

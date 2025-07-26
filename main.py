@@ -910,81 +910,48 @@ def delete_bud(bud_id):
     else:
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
-@app.route('/api/strains/autocomplete', methods=['GET'])
-def autocomplete_strains():
-    """Get strain names for autocomplete from strain_names table"""
-    query = request.args.get('q', '').strip()
+@app.route('/api/strains/list', methods=['GET'])
+def get_strain_list():
+    """Get all strain names for dropdown"""
     lang = request.args.get('lang', 'both')  # 'th', 'en', or 'both'
-    
-    if len(query) < 2:  # Require at least 2 characters
-        return jsonify([])
     
     conn = get_db_connection()
     if conn:
         try:
             cur = conn.cursor()
             
-            suggestions = []
-            
-            if lang in ['th', 'both']:
-                # Search Thai names from strain_names table (prioritize popular strains)
-                cur.execute("""
-                    SELECT DISTINCT name_th 
-                    FROM strain_names 
-                    WHERE name_th ILIKE %s AND name_th IS NOT NULL
-                    ORDER BY is_popular DESC, name_th 
-                    LIMIT 10
-                """, (f'%{query}%',))
-                
-                for row in cur.fetchall():
-                    if row[0] and row[0] not in suggestions:
-                        suggestions.append(row[0])
+            strains = []
             
             if lang in ['en', 'both']:
-                # Search English names from strain_names table (prioritize popular strains)
+                # Get English names from strain_names table (prioritize popular strains)
                 cur.execute("""
                     SELECT DISTINCT name_en 
                     FROM strain_names 
-                    WHERE name_en ILIKE %s AND name_en IS NOT NULL
+                    WHERE name_en IS NOT NULL
                     ORDER BY is_popular DESC, name_en 
-                    LIMIT 10
-                """, (f'%{query}%',))
+                """)
                 
                 for row in cur.fetchall():
-                    if row[0] and row[0] not in suggestions:
-                        suggestions.append(row[0])
+                    if row[0] and row[0] not in strains:
+                        strains.append(row[0])
             
-            # If not enough suggestions from strain_names, also search buds_data
-            if len(suggestions) < 8:
-                if lang in ['th', 'both']:
-                    cur.execute("""
-                        SELECT DISTINCT strain_name_th 
-                        FROM buds_data 
-                        WHERE strain_name_th ILIKE %s AND strain_name_th IS NOT NULL
-                        ORDER BY strain_name_th 
-                        LIMIT %s
-                    """, (f'%{query}%', 10 - len(suggestions)))
-                    
-                    for row in cur.fetchall():
-                        if row[0] and row[0] not in suggestions:
-                            suggestions.append(row[0])
+            if lang in ['th', 'both']:
+                # Get Thai names from strain_names table (prioritize popular strains)
+                cur.execute("""
+                    SELECT DISTINCT name_th 
+                    FROM strain_names 
+                    WHERE name_th IS NOT NULL
+                    ORDER BY is_popular DESC, name_th 
+                """)
                 
-                if lang in ['en', 'both']:
-                    cur.execute("""
-                        SELECT DISTINCT strain_name_en 
-                        FROM buds_data 
-                        WHERE strain_name_en ILIKE %s AND strain_name_en IS NOT NULL
-                        ORDER BY strain_name_en 
-                        LIMIT %s
-                    """, (f'%{query}%', 10 - len(suggestions)))
-                    
-                    for row in cur.fetchall():
-                        if row[0] and row[0] not in suggestions:
-                            suggestions.append(row[0])
+                for row in cur.fetchall():
+                    if row[0] and row[0] not in strains:
+                        strains.append(row[0])
             
-            return jsonify(suggestions[:10])  # Limit to 10 suggestions
+            return jsonify(strains)
             
         except Exception as e:
+            print(f"Error in get_strain_list: {e}")
             return jsonify({'error': str(e)}), 500
         finally:
             cur.close()

@@ -810,6 +810,87 @@ def create_tables():
             """)
 
             conn.commit()
+            
+            # Insert sample bud data for existing users
+            try:
+                # Check if there are any users in the system
+                cur.execute("SELECT id FROM users LIMIT 5")
+                user_ids = [row[0] for row in cur.fetchall()]
+                
+                if user_ids:
+                    # Check if bud data already exists
+                    cur.execute("SELECT COUNT(*) FROM buds_data")
+                    bud_count = cur.fetchone()[0]
+                    
+                    if bud_count == 0:
+                        print("Adding sample bud data...")
+                        
+                        # Sample bud data for each user
+                        sample_buds = []
+                        for i, user_id in enumerate(user_ids):
+                            sample_buds.extend([
+                                # User's first bud
+                                (
+                                    f'บลูดรีม{i+1}', 'Blue Dream', 'Barney\'s Farm', 'Hybrid',
+                                    18.5, 1.2, 'A+', 'หวาน, เบอร์รี่, ซิตรัส',
+                                    'Myrcene', 'Limonene', 'Pinene',
+                                    'ผ่อนคลาย, สร้างสรรค์, สุขใจ', '',
+                                    'บรรเทาปวด, คลายกล้าม', 'ปากแห้ง',
+                                    'ตลอดวัน', 'Indoor', '2024-12-01',
+                                    f'BD2024-{i+1:03d}', user_id, True,
+                                    'Organic', 'Photoperiod', user_id
+                                ),
+                                # User's second bud
+                                (
+                                    f'โอจี คัช{i+1}', 'OG Kush', 'DNA Genetics', 'Indica',
+                                    22.3, 0.8, 'A', 'ดิน, สน, เผ็ด',
+                                    'Myrcene', 'Caryophyllene', 'Limonene',
+                                    'ผ่อนคลาย, หลับง่าย', 'ง่วงหนัก',
+                                    'บรรเทาปวด, หลับง่าย', 'ตาแดง, ปากแห้ง',
+                                    'กลางคืน', 'Indoor', '2024-11-15',
+                                    f'OG2024-{i+1:03d}', user_id, True,
+                                    'Chemical', 'Photoperiod', user_id
+                                ),
+                                # User's third bud  
+                                (
+                                    f'ไวท์ วิโดว์{i+1}', 'White Widow', 'Green House Seed Company', 'Hybrid',
+                                    20.1, 1.5, 'A+', 'หวาน, ดอกไม้, มินต์',
+                                    'Pinene', 'Myrcene', 'Limonene',
+                                    'ตื่นตัว, โฟกัส, เบิกบาน', '',
+                                    'ต้านอักเสบ, สดชื่น', 'ตาแห้ง',
+                                    'กลางวัน', 'Greenhouse', '2024-10-20',
+                                    f'WW2024-{i+1:03d}', user_id, True,
+                                    'Organic', 'Photoperiod', user_id
+                                )
+                            ])
+                        
+                        # Insert sample buds
+                        cur.executemany("""
+                            INSERT INTO buds_data (
+                                strain_name_th, strain_name_en, breeder, strain_type,
+                                thc_percentage, cbd_percentage, grade, aroma_flavor,
+                                top_terpenes_1, top_terpenes_2, top_terpenes_3,
+                                mental_effects_positive, mental_effects_negative,
+                                physical_effects_positive, physical_effects_negative,
+                                recommended_time, grow_method, harvest_date,
+                                batch_number, grower_id, grower_license_verified,
+                                fertilizer_type, flowering_type, created_by
+                            ) VALUES (
+                                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+                            )
+                        """, sample_buds)
+                        
+                        conn.commit()
+                        print(f"Added {len(sample_buds)} sample bud records for {len(user_ids)} users")
+                    else:
+                        print(f"Bud data already exists ({bud_count} records)")
+                else:
+                    print("No users found - skipping sample bud data")
+                    
+            except Exception as e:
+                print(f"Error adding sample bud data: {e}")
+            
             print("Tables created successfully")
         except Exception as e:
             print(f"Error creating tables: {e}")

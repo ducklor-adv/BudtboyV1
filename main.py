@@ -1587,7 +1587,6 @@ def add_strain():
     is_popular = data.get('is_popular', False)
 
     if not name_en:
-```python
         return jsonify({'error': 'กรุณากรอกชื่อภาษาอังกฤษ'}), 400
 
     conn = get_db_connection()

@@ -976,7 +976,7 @@ def get_user_buds():
 
         user_id = session.get('user_id')
         cur.execute("""
-            SELECT strain_name_en, strain_name_th, breeder, thc_percentage, 
+            SELECT id, strain_name_en, strain_name_th, breeder, thc_percentage, 
                    cbd_percentage, strain_type, created_at
             FROM buds_data
             WHERE created_by = %s 
@@ -986,13 +986,14 @@ def get_user_buds():
         buds = []
         for row in cur.fetchall():
             buds.append({
-                'strain_name_en': row[0],
-                'strain_name_th': row[1],
-                'breeder': row[2],
-                'thc_percentage': row[3],
-                'cbd_percentage': row[4],
-                'strain_type': row[5],
-                'created_at': row[6].strftime('%Y-%m-%d %H:%M:%S') if row[6] else None
+                'id': row[0],
+                'strain_name_en': row[1],
+                'strain_name_th': row[2],
+                'breeder': row[3],
+                'thc_percentage': row[4],
+                'cbd_percentage': row[5],
+                'strain_type': row[6],
+                'created_at': row[7].strftime('%Y-%m-%d %H:%M:%S') if row[7] else None
             })
 
         cur.close()

@@ -142,6 +142,20 @@ def index():
     # Check if user is logged in, if not redirect to auth page
     if 'user_id' not in session:
         return redirect('/auth')
+    return redirect('/profile')
+
+@app.route('/profile')
+def profile():
+    # Check if user is logged in, if not redirect to auth page
+    if 'user_id' not in session:
+        return redirect('/auth')
+    return render_template('profile.html')
+
+@app.route('/register')
+def register_page():
+    # Check if user is logged in, if not redirect to auth page
+    if 'user_id' not in session:
+        return redirect('/auth')
     return render_template('index.html')
 
 @app.route('/auth')
@@ -180,7 +194,8 @@ def login():
                 
                 return jsonify({
                     'success': True,
-                    'message': f'เข้าสู่ระบบสำเร็จ ยินดีต้อนรับ {username}!'
+                    'message': f'เข้าสู่ระบบสำเร็จ ยินดีต้อนรับ {username}!',
+                    'redirect': '/profile'
                 })
             else:
                 return jsonify({
@@ -238,7 +253,8 @@ def quick_signup():
             
             return jsonify({
                 'success': True,
-                'message': f'สมัครสมาชิกสำเร็จ! ยินดีต้อนรับ {username}'
+                'message': f'สมัครสมาชิกสำเร็จ! ยินดีต้อนรับ {username}',
+                'redirect': '/profile'
             })
             
         except Exception as e:
@@ -312,6 +328,49 @@ def verify_email(token):
             conn.close()
     else:
         return "ไม่สามารถเชื่อมต่อฐานข้อมูลได้"
+
+@app.route('/api/profile')
+def get_profile():
+    if 'user_id' not in session:
+        return jsonify({'error': 'ไม่ได้เข้าสู่ระบบ'}), 401
+    
+    user_id = session['user_id']
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("""
+                SELECT id, username, email, is_grower, is_budtender, is_consumer, 
+                       birth_year, created_at, is_verified, grow_license_file_url, profile_image_url 
+                FROM users WHERE id = %s
+            """, (user_id,))
+            user = cur.fetchone()
+            
+            if user:
+                user_data = {
+                    'id': user[0],
+                    'username': user[1],
+                    'email': user[2],
+                    'is_grower': user[3],
+                    'is_budtender': user[4],
+                    'is_consumer': user[5],
+                    'birth_year': user[6],
+                    'created_at': user[7].strftime('%Y-%m-%d %H:%M:%S') if user[7] else None,
+                    'is_verified': user[8],
+                    'grow_license_file_url': user[9],
+                    'profile_image_url': user[10]
+                }
+                return jsonify(user_data)
+            else:
+                return jsonify({'error': 'ไม่พบข้อมูลผู้ใช้'}), 404
+                
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+        finally:
+            cur.close()
+            conn.close()
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
 @app.route('/users')
 def list_users():

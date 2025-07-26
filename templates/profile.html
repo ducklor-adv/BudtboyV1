@@ -1,0 +1,376 @@
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cannabis App - โปรไฟล์ของฉัน</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+        
+        .header .subtitle {
+            opacity: 0.9;
+            margin-top: 10px;
+            font-size: 1.1em;
+        }
+        
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+        
+        .profile-content {
+            padding: 40px;
+        }
+        
+        .profile-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border-left: 5px solid #4CAF50;
+        }
+        
+        .profile-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .profile-row:last-child {
+            border-bottom: none;
+        }
+        
+        .profile-label {
+            font-weight: 600;
+            color: #495057;
+            font-size: 1.1em;
+            min-width: 150px;
+        }
+        
+        .profile-value {
+            color: #6c757d;
+            font-size: 1.1em;
+            text-align: right;
+            flex: 1;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 500;
+            margin: 2px;
+        }
+        
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .badge-info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .badge-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .badge-secondary {
+            background: #e2e3e5;
+            color: #6c757d;
+        }
+        
+        .status-icon {
+            font-size: 1.2em;
+            margin-right: 8px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            transition: all 0.3s ease;
+            min-width: 140px;
+        }
+        
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #1e7e34;
+            transform: translateY(-2px);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #6c757d;
+            color: #6c757d;
+        }
+        
+        .btn-outline:hover {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .welcome-message {
+            background: linear-gradient(135deg, #ffeaa7, #fab1a0);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+            border: none;
+        }
+        
+        .welcome-message h2 {
+            margin: 0 0 10px 0;
+            color: #2d3436;
+            font-size: 1.8em;
+        }
+        
+        .welcome-message p {
+            margin: 0;
+            color: #636e72;
+            font-size: 1.1em;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+                border-radius: 10px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .profile-content {
+                padding: 20px;
+            }
+            
+            .profile-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+            
+            .profile-value {
+                text-align: left;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <button class="logout-btn" onclick="location.href='/logout'">
+                🚪 ออกจากระบบ
+            </button>
+            <h1>🌿 โปรไฟล์ของฉัน</h1>
+            <div class="subtitle">ข้อมูลส่วนตัวและการตั้งค่าบัญชี</div>
+        </div>
+        
+        <div class="profile-content">
+            <div class="welcome-message">
+                <h2>🎉 ยินดีต้อนรับ คุณ <span id="displayUsername"></span>!</h2>
+                <p>เข้าสู่ระบบเรียบร้อยแล้ว พร้อมใช้งาน Cannabis App</p>
+            </div>
+            
+            <div class="profile-card">
+                <h3 style="margin-top: 0; color: #2c5530; font-size: 1.5em;">📋 ข้อมูลบัญชี</h3>
+                
+                <div class="profile-row">
+                    <div class="profile-label">👤 ชื่อผู้ใช้:</div>
+                    <div class="profile-value" id="username">-</div>
+                </div>
+                
+                <div class="profile-row">
+                    <div class="profile-label">📧 อีเมล:</div>
+                    <div class="profile-value" id="email">-</div>
+                </div>
+                
+                <div class="profile-row">
+                    <div class="profile-label">✅ สถานะยืนยัน:</div>
+                    <div class="profile-value" id="verification-status">-</div>
+                </div>
+                
+                <div class="profile-row">
+                    <div class="profile-label">📅 วันที่สมัคร:</div>
+                    <div class="profile-value" id="created-date">-</div>
+                </div>
+                
+                <div class="profile-row">
+                    <div class="profile-label">🎂 ปีเกิด:</div>
+                    <div class="profile-value" id="birth-year">-</div>
+                </div>
+            </div>
+            
+            <div class="profile-card">
+                <h3 style="margin-top: 0; color: #2c5530; font-size: 1.5em;">🏷️ ประเภทผู้ใช้</h3>
+                <div id="user-types" style="margin-top: 15px;">
+                    <!-- User types will be loaded here -->
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <a href="/" class="btn btn-success">
+                    📝 ลงทะเบียนผู้ใช้ใหม่
+                </a>
+                <a href="/users" class="btn btn-primary">
+                    👥 ดูรายชื่อผู้ใช้
+                </a>
+                <button class="btn btn-outline" onclick="location.reload()">
+                    🔄 รีเฟรชข้อมูล
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load user profile data
+        async function loadProfile() {
+            try {
+                // Get current user info from session (we'll need to create an endpoint for this)
+                const response = await fetch('/api/profile');
+                if (response.ok) {
+                    const data = await response.json();
+                    displayProfile(data);
+                } else {
+                    console.error('Failed to load profile');
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
+            }
+        }
+
+        function displayProfile(user) {
+            document.getElementById('username').textContent = user.username || '-';
+            document.getElementById('displayUsername').textContent = user.username || 'ผู้ใช้';
+            document.getElementById('email').textContent = user.email || '-';
+            
+            // Verification status
+            const verificationStatus = document.getElementById('verification-status');
+            if (user.is_verified) {
+                verificationStatus.innerHTML = '<span class="status-icon">✅</span><span class="badge badge-success">ยืนยันแล้ว</span>';
+            } else {
+                verificationStatus.innerHTML = '<span class="status-icon">⏳</span><span class="badge badge-warning">รอยืนยัน</span>';
+            }
+            
+            // Created date
+            if (user.created_at) {
+                const date = new Date(user.created_at);
+                document.getElementById('created-date').textContent = date.toLocaleDateString('th-TH', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            }
+            
+            // Birth year
+            document.getElementById('birth-year').textContent = user.birth_year || 'ไม่ระบุ';
+            
+            // User types
+            const userTypesDiv = document.getElementById('user-types');
+            let userTypes = [];
+            
+            if (user.is_consumer) userTypes.push('<span class="badge badge-info">👥 ผู้บริโภค (Consumer)</span>');
+            if (user.is_grower) userTypes.push('<span class="badge badge-success">🌱 ผู้ปลูก (Grower)</span>');
+            if (user.is_budtender) userTypes.push('<span class="badge badge-secondary">🏪 บัดเทนเดอร์ (Budtender)</span>');
+            
+            if (userTypes.length > 0) {
+                userTypesDiv.innerHTML = userTypes.join(' ');
+            } else {
+                userTypesDiv.innerHTML = '<span class="badge badge-secondary">ไม่มีประเภทที่ระบุ</span>';
+            }
+        }
+
+        // Load profile when page loads
+        window.addEventListener('load', loadProfile);
+    </script>
+</body>
+</html>

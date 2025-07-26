@@ -816,21 +816,21 @@ def create_tables():
             """)
 
             conn.commit()
-            
+
             # Insert sample bud data for existing users
             try:
                 # Check if there are any users in the system
                 cur.execute("SELECT id FROM users LIMIT 5")
                 user_ids = [row[0] for row in cur.fetchall()]
-                
+
                 if user_ids:
                     # Check if bud data already exists
                     cur.execute("SELECT COUNT(*) FROM buds_data")
                     bud_count = cur.fetchone()[0]
-                    
+
                     if bud_count == 0:
                         print("Adding sample bud data...")
-                        
+
                         # Sample bud data for each user
                         sample_buds = []
                         for i, user_id in enumerate(user_ids):
@@ -869,7 +869,7 @@ def create_tables():
                                     'Organic', 'Photoperiod', user_id
                                 )
                             ])
-                        
+
                         # Insert sample buds
                         cur.executemany("""
                             INSERT INTO buds_data (
@@ -886,17 +886,17 @@ def create_tables():
                                 %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
                             )
                         """, sample_buds)
-                        
+
                         conn.commit()
                         print(f"Added {len(sample_buds)} sample bud records for {len(user_ids)} users")
                     else:
                         print(f"Bud data already exists ({bud_count} records)")
                 else:
                     print("No users found - skipping sample bud data")
-                    
+
             except Exception as e:
                 print(f"Error adding sample bud data: {e}")
-            
+
             print("Tables created successfully")
         except Exception as e:
             print(f"Error creating tables: {e}")
@@ -2045,7 +2045,7 @@ def add_review():
                 SELECT id FROM reviews 
                 WHERE bud_reference_id = %s AND reviewer_id = %s
             """, (data.get('bud_reference_id'), user_id))
-            
+
             if cur.fetchone():
                 return jsonify({'error': 'คุณได้รีวิวดอกนี้แล้ว'}), 400
 
@@ -2309,49 +2309,6 @@ def get_buds_for_review():
             if conn:
                 conn.close()
     else:
-        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500</old_str>
-
-@app.route('/api/buds/for-review')
-def get_buds_for_review():
-    """Get all buds available for review"""
-    if not is_authenticated():
-        return jsonify({'error': 'Unauthorized'}), 401
-
-    conn = get_db_connection()
-    if conn:
-        try:
-            cur = conn.cursor()
-            cur.execute("""
-                SELECT id, strain_name_en, strain_name_th, breeder, strain_type,
-                       thc_percentage, cbd_percentage, created_at
-                FROM buds_data 
-                ORDER BY created_at DESC
-            """)
-
-            buds = []
-            for row in cur.fetchall():
-                buds.append({
-                    'id': row[0],
-                    'strain_name_en': row[1],
-                    'strain_name_th': row[2],
-                    'breeder': row[3],
-                    'strain_type': row[4],
-                    'thc_percentage': float(row[5]) if row[5] else None,
-                    'cbd_percentage': float(row[6]) if row[6] else None,
-                    'created_at': row[7].strftime('%Y-%m-%d') if row[7] else None
-                })
-
-            cur.close()
-            conn.close()
-            return jsonify({'buds': buds})
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
-        finally:
-            if cur:
-                cur.close()
-            if conn:
-                conn.close()
-    else:
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
 @app.route('/api/buds/<int:bud_id>/info')
@@ -2450,7 +2407,7 @@ def report_page():
     # Check if user is logged in
     if 'user_id' not in session:
         return redirect('/auth')
-    return render_template('report.html')</old_str>
+    return render_template('report.html')
 
 @app.route('/api/upload-images', methods=['POST'])
 def upload_images():
@@ -2460,7 +2417,7 @@ def upload_images():
 
     try:
         uploaded_urls = []
-        
+
         # Process up to 4 images
         for i in range(4):
             file_key = f'image_{i}'

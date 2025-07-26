@@ -2132,6 +2132,88 @@ def get_buds_for_review():
     else:
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
+@app.route('/api/buds/<int:bud_id>/info')
+def get_bud_info(bud_id):
+    """Get detailed bud information including grower info"""
+    if not is_authenticated():
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("""
+                SELECT b.id, b.strain_name_en, b.strain_name_th, b.breeder, 
+                       b.strain_type, b.thc_percentage, b.cbd_percentage, 
+                       b.grade, b.aroma_flavor, b.recommended_time, b.grow_method,
+                       b.harvest_date, b.batch_number, b.grower_license_verified,
+                       b.fertilizer_type, b.flowering_type, 
+                       b.image_1_url, b.image_2_url, b.image_3_url, b.image_4_url,
+                       b.created_at, b.grower_id,
+                       u.username as grower_name, u.is_grower
+                FROM buds_data b
+                LEFT JOIN users u ON b.grower_id = u.id
+                WHERE b.id = %s
+            """, (bud_id,))
+
+            result = cur.fetchone()
+            if not result:
+                return jsonify({
+                    'success': False,
+                    'error': f'ไม่พบข้อมูลดอก ID: {bud_id}'
+                }), 404
+
+            bud_info = {
+                'id': result[0],
+                'strain_name_en': result[1],
+                'strain_name_th': result[2],
+                'breeder': result[3],
+                'strain_type': result[4],
+                'thc_percentage': float(result[5]) if result[5] else None,
+                'cbd_percentage': float(result[6]) if result[6] else None,
+                'grade': result[7],
+                'aroma_flavor': result[8],
+                'recommended_time': result[9],
+                'grow_method': result[10],
+                'harvest_date': result[11].strftime('%Y-%m-%d') if result[11] else None,
+                'batch_number': result[12],
+                'grower_license_verified': result[13],
+                'fertilizer_type': result[14],
+                'flowering_type': result[15],
+                'image_1_url': result[16],
+                'image_2_url': result[17],
+                'image_3_url': result[18],
+                'image_4_url': result[19],
+                'created_at': result[20].strftime('%Y-%m-%d %H:%M:%S') if result[20] else None,
+                'grower_id': result[21],
+                'grower_name': result[22],
+                'is_grower': result[23]
+            }
+
+            cur.close()
+            conn.close()
+
+            return jsonify({
+                'success': True,
+                'bud': bud_info
+            })
+
+        except Exception as e:
+            return jsonify({
+                'success': False,
+                'error': f'เกิดข้อผิดพลาดในการตรวจสอบ: {str(e)}'
+            }), 500
+        finally:
+            if cur:
+                cur.close()
+            if conn:
+                conn.close()
+    else:
+        return jsonify({
+            'success': False,
+            'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'
+        }), 500
+
 @app.route('/add-review')
 def add_review_page():
     # Check if user is logged in

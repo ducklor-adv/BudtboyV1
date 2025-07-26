@@ -373,6 +373,116 @@
             text-align: center;
         }
 
+        .check-btn {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .check-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+        }
+
+        .check-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .bud-info {
+            margin-top: 15px;
+            padding: 20px;
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .bud-info.verified {
+            background: #d4edda;
+            border-color: #c3e6cb;
+        }
+
+        .bud-info.error {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+        }
+
+        .bud-details {
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+        }
+
+        .bud-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 2px solid #ddd;
+        }
+
+        .bud-text-info {
+            flex: 1;
+        }
+
+        .bud-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .bud-details-text {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .grower-info {
+            margin-top: 15px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+        }
+
+        .grower-name {
+            font-weight: 600;
+            color: #28a745;
+        }
+
+        .confirm-btn {
+            margin-top: 15px;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .confirm-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         @media (max-width: 600px) {
             .container {
                 margin: 10px;
@@ -440,10 +550,13 @@
             <form id="reviewForm">
                 <!-- เลือกดอกที่จะรีวิว -->
                 <div class="form-group">
-                    <label class="form-label">🌸 เลือกดอกที่ต้องการรีวิว</label>
-                    <select id="budSelect" class="form-select" required>
-                        <option value="">-- เลือกดอก --</option>
-                    </select>
+                    <label class="form-label">🌸 ใส่ Bud ID ที่ต้องการรีวิว</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="budIdInput" class="form-input" placeholder="ใส่ Bud ID เช่น 1, 2, 3..." style="flex: 1;">
+                        <button type="button" id="checkBudBtn" class="check-btn">🔍 ตรวจสอบ</button>
+                    </div>
+                    <div id="budInfo" class="bud-info" style="display: none;"></div>
+                    <input type="hidden" id="budSelect" required>
                 </div>
                 
                 <!-- คะแนนรวม -->
@@ -757,32 +870,150 @@
             aroma: 0
         };
 
-        // Load available buds for review
-        async function loadBuds() {
+        let verifiedBudId = null;
+        let currentBudInfo = null;
+
+        // Check bud information by ID
+        async function checkBudInfo(budId) {
+            const budInfo = document.getElementById('budInfo');
+            const checkBtn = document.getElementById('checkBudBtn');
+            
+            if (!budId || budId.trim() === '') {
+                budInfo.style.display = 'none';
+                return;
+            }
+
+            // Disable button and show loading
+            checkBtn.disabled = true;
+            checkBtn.innerHTML = '⏳ กำลังตรวจสอบ...';
+
             try {
-                const response = await fetch('/api/buds/for-review');
-                if (response.ok) {
-                    const data = await response.json();
-                    populateBudSelect(data.buds || []);
+                const response = await fetch(`/api/buds/${budId}/info`);
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    currentBudInfo = result.bud;
+                    displayBudInfo(result.bud, budInfo);
+                    budInfo.className = 'bud-info verified';
+                    budInfo.style.display = 'block';
                 } else {
-                    console.error('Failed to load buds');
+                    showBudError(result.error || 'ไม่พบข้อมูลดอกนี้', budInfo);
                 }
             } catch (error) {
-                console.error('Error loading buds:', error);
+                console.error('Error checking bud:', error);
+                showBudError('เกิดข้อผิดพลาดในการตรวจสอบ', budInfo);
+            } finally {
+                checkBtn.disabled = false;
+                checkBtn.innerHTML = '🔍 ตรวจสอบ';
             }
         }
 
-        function populateBudSelect(buds) {
-            const select = document.getElementById('budSelect');
-            select.innerHTML = '<option value="">-- เลือกดอก --</option>';
+        function displayBudInfo(bud, budInfo) {
+            const imageUrl = bud.image_1_url ? `/uploads/${bud.image_1_url.split('/').pop()}` : '';
             
-            buds.forEach(bud => {
-                const option = document.createElement('option');
-                option.value = bud.id;
-                option.textContent = `${bud.strain_name_en || 'ไม่ระบุชื่อ'} ${bud.strain_name_th ? `(${bud.strain_name_th})` : ''} - ${bud.breeder || 'ไม่ระบุผู้พัฒนา'}`;
-                select.appendChild(option);
+            budInfo.innerHTML = `
+                <div class="bud-details">
+                    ${imageUrl ? `<img src="${imageUrl}" alt="Bud Image" class="bud-image" onerror="this.style.display='none'">` : '<div class="bud-image" style="background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 24px;">🌿</div>'}
+                    <div class="bud-text-info">
+                        <div class="bud-name">${bud.strain_name_en || 'ไม่ระบุชื่อ'}</div>
+                        <div class="bud-details-text">
+                            <strong>ชื่อไทย:</strong> ${bud.strain_name_th || 'ไม่ระบุ'}<br>
+                            <strong>ผู้พัฒนา:</strong> ${bud.breeder || 'ไม่ระบุ'}<br>
+                            <strong>ประเภท:</strong> ${bud.strain_type || 'ไม่ระบุ'}<br>
+                            <strong>THC:</strong> ${bud.thc_percentage || 'ไม่ระบุ'}% | 
+                            <strong>CBD:</strong> ${bud.cbd_percentage || 'ไม่ระบุ'}%
+                        </div>
+                        <div class="grower-info">
+                            <div class="grower-name">👨‍🌾 เจ้าของดอก: ${bud.grower_name || 'ไม่ระบุ'}</div>
+                            ${bud.grower_license_verified ? '<div style="color: #28a745; font-size: 12px;">✅ มีใบอนุญาตปลูก</div>' : ''}
+                        </div>
+                        <button type="button" class="confirm-btn" onclick="confirmBud(${bud.id})">
+                            ✅ ยืนยันเพื่อเขียนรีวิว
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showBudError(message, budInfo) {
+            budInfo.innerHTML = `
+                <div style="text-align: center; color: #dc3545;">
+                    <div style="font-size: 48px; margin-bottom: 10px;">❌</div>
+                    <div style="font-weight: 600; margin-bottom: 5px;">ไม่พบข้อมูล</div>
+                    <div style="font-size: 14px;">${message}</div>
+                </div>
+            `;
+            budInfo.className = 'bud-info error';
+            budInfo.style.display = 'block';
+            verifiedBudId = null;
+            currentBudInfo = null;
+            toggleReviewForm(false);
+        }
+
+        function confirmBud(budId) {
+            verifiedBudId = budId;
+            document.getElementById('budSelect').value = budId;
+            
+            // Update bud info to show confirmed state
+            const budInfo = document.getElementById('budInfo');
+            const confirmBtn = budInfo.querySelector('.confirm-btn');
+            if (confirmBtn) {
+                confirmBtn.innerHTML = '✅ ยืนยันแล้ว';
+                confirmBtn.disabled = true;
+                confirmBtn.style.background = '#28a745';
+            }
+            
+            toggleReviewForm(true);
+            showSuccess('ยืนยันข้อมูลดอกเรียบร้อย สามารถเขียนรีวิวได้แล้ว!');
+        }
+
+        function toggleReviewForm(enable) {
+            const formElements = document.querySelectorAll('#reviewForm input, #reviewForm textarea, #reviewForm button, .star, .aroma-item, .effect-item');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            formElements.forEach(element => {
+                if (element === submitBtn) {
+                    element.disabled = !enable;
+                    element.style.opacity = enable ? '1' : '0.5';
+                } else if (element.classList.contains('star') || element.classList.contains('aroma-item') || element.classList.contains('effect-item')) {
+                    element.style.pointerEvents = enable ? 'auto' : 'none';
+                    element.style.opacity = enable ? '1' : '0.5';
+                }
+            });
+
+            // Hide/show review sections
+            const reviewSections = document.querySelectorAll('.form-group:not(:first-child)');
+            reviewSections.forEach(section => {
+                section.style.opacity = enable ? '1' : '0.5';
+                section.style.pointerEvents = enable ? 'auto' : 'none';
             });
         }
+
+        // Event listeners
+        document.getElementById('checkBudBtn').addEventListener('click', function() {
+            const budId = document.getElementById('budIdInput').value.trim();
+            checkBudInfo(budId);
+        });
+
+        document.getElementById('budIdInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const budId = this.value.trim();
+                checkBudInfo(budId);
+            }
+        });
+
+        document.getElementById('budIdInput').addEventListener('input', function() {
+            // Clear previous verification when input changes
+            verifiedBudId = null;
+            currentBudInfo = null;
+            document.getElementById('budSelect').value = '';
+            document.getElementById('budInfo').style.display = 'none';
+            toggleReviewForm(false);
+        });
+
+        // Make confirmBud globally accessible
+        window.confirmBud = confirmBud;
 
         // Star rating functionality
         document.addEventListener('click', function(e) {
@@ -844,8 +1075,8 @@
             successDiv.style.display = 'none';
             
             // Validate form
-            if (!document.getElementById('budSelect').value) {
-                showError('กรุณาเลือกดอกที่ต้องการรีวิว');
+            if (!verifiedBudId) {
+                showError('กรุณาใส่ Bud ID และยืนยันข้อมูลก่อนเขียนรีวิว');
                 return;
             }
             
@@ -883,7 +1114,7 @@
                 const selectedEffects = Array.from(effectCheckboxes).map(cb => cb.value);
                 
                 const reviewData = {
-                    bud_reference_id: document.getElementById('budSelect').value,
+                    bud_reference_id: verifiedBudId,
                     overall_rating: ratings.overall,
                     aroma_flavors: aromaFlavors,
                     aroma_rating: ratings.aroma || null,
@@ -1032,8 +1263,10 @@
             }
         }
 
-        // Load buds when page loads
-        window.addEventListener('load', loadBuds);
+        // Initialize form state when page loads
+        window.addEventListener('load', function() {
+            toggleReviewForm(false); // Disable form initially
+        });
     </script>
 </body>
 </html>

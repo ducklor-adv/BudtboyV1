@@ -306,6 +306,12 @@
             margin-bottom: 15px;
         }
 
+        .bud-main-content {
+            display: flex;
+            gap: 20px;
+            flex: 1;
+        }
+
         .bud-image-display {
             flex-shrink: 0;
             width: 150px;
@@ -366,15 +372,15 @@
 
         .bud-actions {
             display: flex;
+            flex-direction: column;
             gap: 8px;
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid #eee;
+            width: 120px;
+            flex-shrink: 0;
         }
 
         .action-btn {
-            flex: 1;
-            padding: 8px 12px;
+            width: 100%;
+            padding: 10px 12px;
             border: none;
             border-radius: 20px;
             cursor: pointer;
@@ -514,34 +520,36 @@
                     </div>
 
                     <div class="bud-content">
-                        <div class="bud-image-display">
-                            ${bud.image_1_url ? 
-                                `<img src="${bud.image_1_url}" alt="รูปดอก ${bud.strain_name_en}" class="bud-display-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                 <div class="bud-image-placeholder" style="display: none;">🌿</div>` :
-                                `<div class="bud-image-placeholder">🌿</div>`
-                            }
-                        </div>
-                        
-                        <div class="bud-info">
-                            <div class="bud-detail"><strong>Bud ID:</strong> ${bud.id}</div>
-                            <div class="bud-detail"><strong>ผู้พัฒนา:</strong> ${bud.breeder || 'ไม่ระบุ'}</div>
-                            <div class="bud-detail"><strong>ประเภท:</strong> ${bud.strain_type || 'ไม่ระบุ'}</div>
-                            <div class="bud-detail"><strong>THC:</strong> ${bud.thc_percentage || 'ไม่ระบุ'}% | <strong>CBD:</strong> ${bud.cbd_percentage || 'ไม่ระบุ'}%</div>
-                            <div class="rating-section">
-                                <span class="rating-stars">${'⭐'.repeat(Math.round(bud.avg_rating))}</span>
-                                <span class="rating-text">
-                                    ${bud.avg_rating > 0 ? `${bud.avg_rating.toFixed(1)} (${bud.review_count} รีวิว)` : 'ยังไม่มีรีวิว'}
-                                </span>
+                        <div class="bud-main-content">
+                            <div class="bud-image-display">
+                                ${bud.image_1_url ? 
+                                    `<img src="${bud.image_1_url}" alt="รูปดอก ${bud.strain_name_en}" class="bud-display-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                     <div class="bud-image-placeholder" style="display: none;">🌿</div>` :
+                                    `<div class="bud-image-placeholder">🌿</div>`
+                                }
+                            </div>
+                            
+                            <div class="bud-info">
+                                <div class="bud-detail"><strong>Bud ID:</strong> ${bud.id}</div>
+                                <div class="bud-detail"><strong>ผู้พัฒนา:</strong> ${bud.breeder || 'ไม่ระบุ'}</div>
+                                <div class="bud-detail"><strong>ประเภท:</strong> ${bud.strain_type || 'ไม่ระบุ'}</div>
+                                <div class="bud-detail"><strong>THC:</strong> ${bud.thc_percentage || 'ไม่ระบุ'}% | <strong>CBD:</strong> ${bud.cbd_percentage || 'ไม่ระบุ'}%</div>
+                                <div class="rating-section">
+                                    <span class="rating-stars">${'⭐'.repeat(Math.round(bud.avg_rating))}</span>
+                                    <span class="rating-text">
+                                        ${bud.avg_rating > 0 ? `${bud.avg_rating.toFixed(1)} (${bud.review_count} รีวิว)` : 'ยังไม่มีรีวิว'}
+                                    </span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="bud-actions">
-                        <button class="action-btn primary" onclick="window.location.href='/bud-reviews?bud_id=${bud.id}'">
-                            📋 ดูรีวิว
-                        </button>
-                        <button class="action-btn secondary" onclick="editBud(${bud.id})">✏️ แก้ไข</button>
-                        <button class="action-btn danger" onclick="deleteBud(${bud.id})">🗑️ ลบ</button>
+                        
+                        <div class="bud-actions">
+                            <button class="action-btn primary" onclick="window.location.href='/bud-reviews?bud_id=${bud.id}'">
+                                📋 ดูรีวิว
+                            </button>
+                            <button class="action-btn secondary" onclick="editBud(${bud.id})">✏️ แก้ไข</button>
+                            <button class="action-btn danger" onclick="deleteBud(${bud.id})">🗑️ ลบ</button>
+                        </div>
                     </div>
                 </div>
             `).join('');
@@ -619,6 +627,35 @@
                 'auto': '🔵 Auto'
             };
             return types[type] || '❓ ไม่ระบุ';
+        }
+
+        function editBud(budId) {
+            // Redirect to edit page or show edit modal
+            window.location.href = `/edit-bud?id=${budId}`;
+        }
+
+        function deleteBud(budId) {
+            if (confirm('คุณแน่ใจหรือไม่ที่จะลบดอกนี้? การกระทำนี้ไม่สามารถย้อนกลับได้')) {
+                fetch(`/api/buds/${budId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('ลบดอกสำเร็จ');
+                        loadBuds(); // Reload the list
+                    } else {
+                        alert('เกิดข้อผิดพลาด: ' + (data.error || 'ไม่สามารถลบได้'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('เกิดข้อผิดพลาดในการลบ');
+                });
+            }
         }
 
         // Load data when page loads

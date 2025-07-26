@@ -978,6 +978,9 @@ def get_user_buds():
 
     try:
         conn = get_db_connection()
+        if not conn:
+            return jsonify({'error': 'Database connection failed'}), 500
+            
         cur = conn.cursor()
 
         user_id = session.get('user_id')
@@ -1001,8 +1004,8 @@ def get_user_buds():
                 'strain_name_en': row[1],
                 'strain_name_th': row[2],
                 'breeder': row[3],
-                'thc_percentage': row[4],
-                'cbd_percentage': row[5],
+                'thc_percentage': float(row[4]) if row[4] else None,
+                'cbd_percentage': float(row[5]) if row[5] else None,
                 'strain_type': row[6],
                 'created_at': row[7].strftime('%Y-%m-%d %H:%M:%S') if row[7] else None,
                 'image_1_url': f'/uploads/{row[8].split("/")[-1]}' if row[8] else None,
@@ -1015,6 +1018,7 @@ def get_user_buds():
 
         return jsonify({'buds': buds})
     except Exception as e:
+        print(f"Error in get_user_buds: {e}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/user_reviews')

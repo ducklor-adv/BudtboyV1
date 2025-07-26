@@ -2184,6 +2184,90 @@ def delete_review(review_id):
     else:
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
+@app.route('/api/all-buds-report')
+def get_all_buds_report():
+    """Get comprehensive report of all buds with ratings and review counts"""
+    if not is_authenticated():
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        cur.execute("""
+            SELECT b.id, b.strain_name_en, b.strain_name_th, b.breeder, b.strain_type,
+                   b.thc_percentage, b.cbd_percentage, b.grade, b.aroma_flavor,
+                   b.top_terpenes_1, b.top_terpenes_2, b.top_terpenes_3,
+                   b.mental_effects_positive, b.mental_effects_negative,
+                   b.physical_effects_positive, b.physical_effects_negative,
+                   b.recommended_time, b.grow_method, b.harvest_date, b.batch_number,
+                   b.grower_id, b.grower_license_verified, b.fertilizer_type, 
+                   b.flowering_type, b.created_at, b.updated_at,
+                   u.username as grower_name, u.is_grower,
+                   COALESCE(AVG(r.overall_rating), 0) as avg_rating,
+                   COUNT(r.id) as review_count
+            FROM buds_data b
+            LEFT JOIN users u ON b.grower_id = u.id
+            LEFT JOIN reviews r ON b.id = r.bud_reference_id
+            GROUP BY b.id, b.strain_name_en, b.strain_name_th, b.breeder, b.strain_type,
+                     b.thc_percentage, b.cbd_percentage, b.grade, b.aroma_flavor,
+                     b.top_terpenes_1, b.top_terpenes_2, b.top_terpenes_3,
+                     b.mental_effects_positive, b.mental_effects_negative,
+                     b.physical_effects_positive, b.physical_effects_negative,
+                     b.recommended_time, b.grow_method, b.harvest_date, b.batch_number,
+                     b.grower_id, b.grower_license_verified, b.fertilizer_type, 
+                     b.flowering_type, b.created_at, b.updated_at,
+                     u.username, u.is_grower
+            ORDER BY b.created_at DESC
+        """)
+
+        buds = []
+        for row in cur.fetchall():
+            buds.append({
+                'id': row[0],
+                'strain_name_en': row[1],
+                'strain_name_th': row[2],
+                'breeder': row[3],
+                'strain_type': row[4],
+                'thc_percentage': float(row[5]) if row[5] else None,
+                'cbd_percentage': float(row[6]) if row[6] else None,
+                'grade': row[7],
+                'aroma_flavor': row[8],
+                'top_terpenes_1': row[9],
+                'top_terpenes_2': row[10],
+                'top_terpenes_3': row[11],
+                'mental_effects_positive': row[12],
+                'mental_effects_negative': row[13],
+                'physical_effects_positive': row[14],
+                'physical_effects_negative': row[15],
+                'recommended_time': row[16],
+                'grow_method': row[17],
+                'harvest_date': row[18].strftime('%Y-%m-%d') if row[18] else None,
+                'batch_number': row[19],
+                'grower_id': row[20],
+                'grower_license_verified': row[21],
+                'fertilizer_type': row[22],
+                'flowering_type': row[23],
+                'created_at': row[24].strftime('%Y-%m-%d %H:%M:%S') if row[24] else None,
+                'updated_at': row[25].strftime('%Y-%m-%d %H:%M:%S') if row[25] else None,
+                'grower_name': row[26],
+                'is_grower': row[27],
+                'avg_rating': float(row[28]) if row[28] else 0,
+                'review_count': row[29]
+            })
+
+        cur.close()
+        conn.close()
+
+        return jsonify({'buds': buds})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()</old_str>
+
 @app.route('/api/buds/for-review')
 def get_buds_for_review():
     """Get all buds available for review"""
@@ -2317,6 +2401,13 @@ def bud_reviews_page():
     if 'user_id' not in session:
         return redirect('/auth')
     return render_template('bud_reviews.html')
+
+@app.route('/report')
+def report_page():
+    # Check if user is logged in
+    if 'user_id' not in session:
+        return redirect('/auth')
+    return render_template('report.html')</old_str>
 
 @app.route('/api/upload-images', methods=['POST'])
 def upload_images():

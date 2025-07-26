@@ -1,0 +1,582 @@
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cannabis App - รายงานข้อมูลดอกทั้งหมด</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e8f5e8 0%, #f0f8ff 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            padding: 20px 30px;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .header-title {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+        
+        .summary-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-left: 4px solid #2196F3;
+        }
+        
+        .summary-number {
+            font-size: 32px;
+            font-weight: 600;
+            color: #2196F3;
+            margin-bottom: 5px;
+        }
+        
+        .summary-label {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .controls {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .filter-select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .export-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .export-btn:hover {
+            background: #218838;
+            transform: translateY(-1px);
+        }
+        
+        .table-container {
+            padding: 30px;
+            overflow-x: auto;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        
+        .data-table th {
+            background: #f8f9fa;
+            padding: 12px 8px;
+            text-align: left;
+            border-bottom: 2px solid #dee2e6;
+            font-weight: 600;
+            color: #495057;
+            white-space: nowrap;
+        }
+        
+        .data-table td {
+            padding: 12px 8px;
+            border-bottom: 1px solid #dee2e6;
+            vertical-align: top;
+        }
+        
+        .data-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .strain-name {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .strain-type {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+        }
+        
+        .type-indica {
+            background: #e8eaf6;
+            color: #3f51b5;
+        }
+        
+        .type-sativa {
+            background: #e8f5e9;
+            color: #4caf50;
+        }
+        
+        .type-hybrid {
+            background: #fff3e0;
+            color: #ff9800;
+        }
+        
+        .rating-display {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .rating-stars {
+            color: #ffd700;
+            font-size: 16px;
+        }
+        
+        .rating-number {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .review-count {
+            color: #666;
+            font-size: 12px;
+        }
+        
+        .thc-cbd-display {
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        
+        .thc {
+            color: #ff6b6b;
+            font-weight: 600;
+        }
+        
+        .cbd {
+            color: #4ecdc4;
+            font-weight: 600;
+        }
+        
+        .grade-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+        }
+        
+        .grade-a-plus {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .grade-a {
+            background: #cce5ff;
+            color: #0066cc;
+        }
+        
+        .grade-b-plus {
+            background: #fff2cc;
+            color: #996600;
+        }
+        
+        .grade-b {
+            background: #ffe6cc;
+            color: #cc6600;
+        }
+        
+        .grade-c {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .grower-info {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .verified-grower {
+            color: #28a745;
+            font-weight: 600;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: #666;
+        }
+        
+        .error {
+            text-align: center;
+            padding: 60px;
+            color: #dc3545;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px;
+            color: #666;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .summary-cards {
+                grid-template-columns: repeat(2, 1fr);
+                padding: 20px;
+                gap: 15px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .filter-group {
+                justify-content: center;
+            }
+            
+            .table-container {
+                padding: 20px;
+            }
+            
+            .data-table {
+                font-size: 12px;
+            }
+            
+            .data-table th,
+            .data-table td {
+                padding: 8px 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="/profile" class="back-btn">← กลับ</a>
+            <div class="header-title">
+                <h1>📊 รายงานข้อมูลดอกทั้งหมด</h1>
+            </div>
+            <div style="width: 60px;"></div>
+        </div>
+        
+        <div class="summary-cards" id="summaryCards">
+            <div class="summary-card">
+                <div class="summary-number" id="totalBuds">-</div>
+                <div class="summary-label">จำนวนดอกทั้งหมด</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-number" id="totalReviews">-</div>
+                <div class="summary-label">รีวิวทั้งหมด</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-number" id="avgRating">-</div>
+                <div class="summary-label">คะแนนเฉลี่ย</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-number" id="totalGrowers">-</div>
+                <div class="summary-label">จำนวนผู้ปลูก</div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <div class="filter-group">
+                <label>กรองตามประเภท:</label>
+                <select id="strainTypeFilter" class="filter-select">
+                    <option value="">ทั้งหมด</option>
+                    <option value="Indica">Indica</option>
+                    <option value="Sativa">Sativa</option>
+                    <option value="Hybrid">Hybrid</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label>กรองตามเกรด:</label>
+                <select id="gradeFilter" class="filter-select">
+                    <option value="">ทั้งหมด</option>
+                    <option value="A+">A+</option>
+                    <option value="A">A</option>
+                    <option value="B+">B+</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                </select>
+            </div>
+            
+            <button id="exportBtn" class="export-btn" onclick="exportToCSV()">
+                📥 ส่งออก CSV
+            </button>
+        </div>
+        
+        <div class="table-container">
+            <div id="loadingMessage" class="loading">กำลังโหลดข้อมูล...</div>
+            <div id="errorMessage" class="error" style="display: none;"></div>
+            
+            <table id="dataTable" class="data-table" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>ชื่อดอก</th>
+                        <th>ชื่อไทย</th>
+                        <th>ผู้พัฒนา</th>
+                        <th>ประเภท</th>
+                        <th>THC/CBD</th>
+                        <th>เกรด</th>
+                        <th>คะแนนเฉลี่ย</th>
+                        <th>จำนวนรีวิว</th>
+                        <th>ผู้ปลูก</th>
+                        <th>วันที่เพิ่ม</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let allBudsData = [];
+        let filteredData = [];
+        
+        window.addEventListener('load', async () => {
+            await loadAllBudsData();
+            setupFilters();
+        });
+        
+        async function loadAllBudsData() {
+            try {
+                const response = await fetch('/api/all-buds-report');
+                if (response.ok) {
+                    const data = await response.json();
+                    allBudsData = data.buds || [];
+                    filteredData = [...allBudsData];
+                    
+                    updateSummaryCards();
+                    displayTable();
+                    
+                    document.getElementById('loadingMessage').style.display = 'none';
+                    document.getElementById('dataTable').style.display = 'table';
+                } else {
+                    throw new Error('Failed to load data');
+                }
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('loadingMessage').style.display = 'none';
+                document.getElementById('errorMessage').style.display = 'block';
+                document.getElementById('errorMessage').textContent = 'เกิดข้อผิดพลาดในการโหลดข้อมูล';
+            }
+        }
+        
+        function updateSummaryCards() {
+            const totalBuds = allBudsData.length;
+            const totalReviews = allBudsData.reduce((sum, bud) => sum + (bud.review_count || 0), 0);
+            const ratingsSum = allBudsData.reduce((sum, bud) => sum + ((bud.avg_rating || 0) * (bud.review_count || 0)), 0);
+            const avgRating = totalReviews > 0 ? (ratingsSum / totalReviews).toFixed(1) : '0.0';
+            const uniqueGrowers = new Set(allBudsData.map(bud => bud.grower_id)).size;
+            
+            document.getElementById('totalBuds').textContent = totalBuds;
+            document.getElementById('totalReviews').textContent = totalReviews;
+            document.getElementById('avgRating').textContent = avgRating;
+            document.getElementById('totalGrowers').textContent = uniqueGrowers;
+        }
+        
+        function setupFilters() {
+            document.getElementById('strainTypeFilter').addEventListener('change', applyFilters);
+            document.getElementById('gradeFilter').addEventListener('change', applyFilters);
+        }
+        
+        function applyFilters() {
+            const strainTypeFilter = document.getElementById('strainTypeFilter').value;
+            const gradeFilter = document.getElementById('gradeFilter').value;
+            
+            filteredData = allBudsData.filter(bud => {
+                if (strainTypeFilter && bud.strain_type !== strainTypeFilter) return false;
+                if (gradeFilter && bud.grade !== gradeFilter) return false;
+                return true;
+            });
+            
+            displayTable();
+        }
+        
+        function displayTable() {
+            const tbody = document.getElementById('tableBody');
+            
+            if (filteredData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="11" class="empty-state">ไม่พบข้อมูลที่ตรงกับการกรอง</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = filteredData.map(bud => `
+                <tr>
+                    <td>${bud.id}</td>
+                    <td class="strain-name">${bud.strain_name_en || 'ไม่ระบุ'}</td>
+                    <td>${bud.strain_name_th || 'ไม่ระบุ'}</td>
+                    <td>${bud.breeder || 'ไม่ระบุ'}</td>
+                    <td>
+                        <span class="strain-type ${getStrainTypeClass(bud.strain_type)}">
+                            ${bud.strain_type || 'ไม่ระบุ'}
+                        </span>
+                    </td>
+                    <td class="thc-cbd-display">
+                        <div class="thc">THC: ${bud.thc_percentage || 'N/A'}%</div>
+                        <div class="cbd">CBD: ${bud.cbd_percentage || 'N/A'}%</div>
+                    </td>
+                    <td>
+                        <span class="grade-badge ${getGradeClass(bud.grade)}">
+                            ${bud.grade || 'ไม่ระบุ'}
+                        </span>
+                    </td>
+                    <td class="rating-display">
+                        <div class="rating-stars">${'⭐'.repeat(Math.round(bud.avg_rating || 0))}</div>
+                        <div class="rating-number">${(bud.avg_rating || 0).toFixed(1)}</div>
+                    </td>
+                    <td class="review-count">${bud.review_count || 0} รีวิว</td>
+                    <td class="grower-info">
+                        <div ${bud.grower_license_verified ? 'class="verified-grower"' : ''}>
+                            ${bud.grower_name || 'ไม่ระบุ'}
+                            ${bud.grower_license_verified ? ' ✅' : ''}
+                        </div>
+                    </td>
+                    <td>${formatDate(bud.created_at)}</td>
+                </tr>
+            `).join('');
+        }
+        
+        function getStrainTypeClass(type) {
+            switch(type) {
+                case 'Indica': return 'type-indica';
+                case 'Sativa': return 'type-sativa';
+                case 'Hybrid': return 'type-hybrid';
+                default: return '';
+            }
+        }
+        
+        function getGradeClass(grade) {
+            switch(grade) {
+                case 'A+': return 'grade-a-plus';
+                case 'A': return 'grade-a';
+                case 'B+': return 'grade-b-plus';
+                case 'B': return 'grade-b';
+                case 'C': return 'grade-c';
+                default: return '';
+            }
+        }
+        
+        function formatDate(dateString) {
+            if (!dateString) return 'ไม่ระบุ';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('th-TH', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        }
+        
+        function exportToCSV() {
+            const headers = ['ID', 'ชื่อดอก (EN)', 'ชื่อดอก (TH)', 'ผู้พัฒนา', 'ประเภท', 'THC%', 'CBD%', 'เกรด', 'คะแนนเฉลี่ย', 'จำนวนรีวิว', 'ผู้ปลูก', 'มีใบอนุญาต', 'วันที่เพิ่ม'];
+            
+            const csvContent = [
+                headers.join(','),
+                ...filteredData.map(bud => [
+                    bud.id,
+                    `"${bud.strain_name_en || ''}"`,
+                    `"${bud.strain_name_th || ''}"`,
+                    `"${bud.breeder || ''}"`,
+                    `"${bud.strain_type || ''}"`,
+                    bud.thc_percentage || '',
+                    bud.cbd_percentage || '',
+                    `"${bud.grade || ''}"`,
+                    (bud.avg_rating || 0).toFixed(1),
+                    bud.review_count || 0,
+                    `"${bud.grower_name || ''}"`,
+                    bud.grower_license_verified ? 'ใช่' : 'ไม่',
+                    formatDate(bud.created_at)
+                ].join(','))
+            ].join('\n');
+            
+            const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `cannabis_report_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>

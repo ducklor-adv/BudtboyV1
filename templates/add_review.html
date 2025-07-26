@@ -930,22 +930,6 @@
                         </button>
                     </div>
                 </div>
-            `;ils-text">
-                            <strong>ชื่อไทย:</strong> ${bud.strain_name_th || 'ไม่ระบุ'}<br>
-                            <strong>ผู้พัฒนา:</strong> ${bud.breeder || 'ไม่ระบุ'}<br>
-                            <strong>ประเภท:</strong> ${bud.strain_type || 'ไม่ระบุ'}<br>
-                            <strong>THC:</strong> ${bud.thc_percentage || 'ไม่ระบุ'}% | 
-                            <strong>CBD:</strong> ${bud.cbd_percentage || 'ไม่ระบุ'}%
-                        </div>
-                        <div class="grower-info">
-                            <div class="grower-name">👨‍🌾 เจ้าของดอก: ${bud.grower_name || 'ไม่ระบุ'}</div>
-                            ${bud.grower_license_verified ? '<div style="color: #28a745; font-size: 12px;">✅ มีใบอนุญาตปลูก</div>' : ''}
-                        </div>
-                        <button type="button" class="confirm-btn" onclick="confirmBud(${bud.id})">
-                            ✅ ยืนยันเพื่อเขียนรีวิว
-                        </button>
-                    </div>
-                </div>
             `;
         }
 

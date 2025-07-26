@@ -10,13 +10,13 @@ import hashlib
 
 app = Flask(__name__)
 
-# Email configuration - using environment variables with fallback for testing
+# Email configuration
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME', 'budtboy.app@gmail.com')
-app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD', 'demo_password')
-app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_USERNAME', 'budtboy.app@gmail.com')
+app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
+app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_USERNAME', 'noreply@cannabisapp.com')
 app.config['MAIL_USE_SSL'] = False
 
 # File upload configuration
@@ -96,22 +96,10 @@ def generate_verification_token():
 
 def send_verification_email(email, username, token):
     try:
-        # For demo/testing - simulate email sending if no real email config
-        if app.config['MAIL_PASSWORD'] == 'demo_password':
-            verification_url = url_for('verify_email', token=token, _external=True)
-            print(f"""
-            🔶 จำลองการส่งอีเมล (Demo Mode) 🔶
-            ถึง: {email}
-            หัวข้อ: ยืนยันการลงทะเบียน - Cannabis App
-            
-            สวัสดี {username}!
-            ขอบคุณที่ลงทะเบียนกับ Cannabis App
-            
-            ลิงก์ยืนยัน: {verification_url}
-            
-            📌 สำหรับการทดสอบ: คุณสามารถคัดลอกลิงก์ข้างต้นไปวางในเบราว์เซอร์เพื่อยืนยันได้เลย
-            """)
-            return True
+        # Check if email configuration is available
+        if not app.config['MAIL_USERNAME'] or not app.config['MAIL_PASSWORD']:
+            print("Email configuration not found - skipping email send")
+            return False
             
         verification_url = url_for('verify_email', token=token, _external=True)
         msg = Message(

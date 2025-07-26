@@ -108,6 +108,10 @@ def create_tables():
                     grower_license_verified BOOLEAN DEFAULT FALSE,
                     fertilizer_type VARCHAR(20) CHECK (fertilizer_type IN ('Organic', 'Chemical', 'Mixed')),
                     flowering_type VARCHAR(20) CHECK (flowering_type IN ('Photoperiod', 'Autoflower')),
+                    image_1_url VARCHAR(500),
+                    image_2_url VARCHAR(500),
+                    image_3_url VARCHAR(500),
+                    image_4_url VARCHAR(500),
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     created_by INTEGER REFERENCES users(id)
@@ -545,10 +549,14 @@ def get_buds():
                     'grower_license_verified': bud[18],
                     'fertilizer_type': bud[19],
                     'flowering_type': bud[20],
-                    'created_at': bud[21].strftime('%Y-%m-%d %H:%M:%S') if bud[21] else None,
-                    'updated_at': bud[22].strftime('%Y-%m-%d %H:%M:%S') if bud[22] else None,
-                    'created_by': bud[23],
-                    'grower_name': bud[24]
+                    'image_1_url': bud[21],
+                    'image_2_url': bud[22],
+                    'image_3_url': bud[23],
+                    'image_4_url': bud[24],
+                    'created_at': bud[25].strftime('%Y-%m-%d %H:%M:%S') if bud[25] else None,
+                    'updated_at': bud[26].strftime('%Y-%m-%d %H:%M:%S') if bud[26] else None,
+                    'created_by': bud[27],
+                    'grower_name': bud[28]
                 })
             
             return jsonify(buds_list)
@@ -711,6 +719,79 @@ def update_bud(bud_id):
     else:
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
+@app.route('/api/buds/<int:bud_id>/upload-images', methods=['POST'])
+def upload_bud_images(bud_id):
+    """Upload images for a specific bud"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'ไม่ได้เข้าสู่ระบบ'}), 401
+    
+    user_id = session['user_id']
+    
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            
+            # Check if user has permission to upload images (owner of the bud)
+            cur.execute("""
+                SELECT created_by FROM buds_data WHERE id = %s
+            """, (bud_id,))
+            result = cur.fetchone()
+            
+            if not result:
+                return jsonify({'error': 'ไม่พบข้อมูล Bud'}), 404
+            
+            if result[0] != user_id:
+                return jsonify({'error': 'ไม่มีสิทธิ์อัพโหลดรูปภาพสำหรับ Bud นี้'}), 403
+            
+            # Handle image uploads
+            image_urls = {}
+            for i in range(1, 5):  # image_1 to image_4
+                file_key = f'image_{i}'
+                if file_key in request.files:
+                    file = request.files[file_key]
+                    if file and file.filename != '' and allowed_file(file.filename):
+                        filename = secure_filename(file.filename)
+                        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_')
+                        filename = f"{timestamp}bud_{bud_id}_{file_key}_{filename}"
+                        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                        file.save(file_path)
+                        image_urls[f'image_{i}_url'] = file_path
+            
+            # Update database with image URLs
+            if image_urls:
+                update_fields = []
+                update_values = []
+                for field, url in image_urls.items():
+                    update_fields.append(f"{field} = %s")
+                    update_values.append(url)
+                
+                update_values.append(bud_id)
+                update_query = f"""
+                    UPDATE buds_data SET {', '.join(update_fields)}, updated_at = CURRENT_TIMESTAMP
+                    WHERE id = %s
+                """
+                
+                cur.execute(update_query, update_values)
+                conn.commit()
+                
+                return jsonify({
+                    'success': True,
+                    'message': f'อัพโหลดรูปภาพสำเร็จ ({len(image_urls)} รูป)',
+                    'uploaded_images': list(image_urls.keys())
+                })
+            else:
+                return jsonify({'error': 'ไม่พบไฟล์รูปภาพที่ถูกต้อง'}), 400
+                
+        except Exception as e:
+            conn.rollback()
+            return jsonify({'error': str(e)}), 500
+        finally:
+            cur.close()
+            conn.close()
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
 @app.route('/api/buds/<int:bud_id>', methods=['DELETE'])
 def delete_bud(bud_id):
     """Delete bud data"""
@@ -752,6 +833,12 @@ def delete_bud(bud_id):
             conn.close()
     else:
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    """Serve uploaded files"""
+    from flask import send_from_directory
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 @app.route('/users')
 def list_users():

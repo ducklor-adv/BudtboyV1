@@ -117,6 +117,17 @@
             box-sizing: border-box;
         }
         
+        input[type="file"] {
+            padding: 8px;
+            background: #f8f9fa;
+            border: 2px dashed #e9ecef;
+        }
+        
+        input[type="file"]:hover {
+            border-color: #4CAF50;
+            background: #f0f8f0;
+        }
+        
         input:focus, select:focus, textarea:focus {
             outline: none;
             border-color: #4CAF50;
@@ -351,6 +362,39 @@
                     </div>
                 </div>
 
+                <!-- Image Upload Section -->
+                <div class="form-section">
+                    <div class="section-title">
+                        📸 รูปภาพดอก
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group half-width">
+                            <label for="image_1">รูปภาพที่ 1</label>
+                            <input type="file" id="image_1" name="image_1" accept=".png,.jpg,.jpeg">
+                            <div class="help-text">รองรับไฟล์: PNG, JPG, JPEG</div>
+                        </div>
+                        <div class="form-group half-width">
+                            <label for="image_2">รูปภาพที่ 2</label>
+                            <input type="file" id="image_2" name="image_2" accept=".png,.jpg,.jpeg">
+                            <div class="help-text">รองรับไฟล์: PNG, JPG, JPEG</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group half-width">
+                            <label for="image_3">รูปภาพที่ 3</label>
+                            <input type="file" id="image_3" name="image_3" accept=".png,.jpg,.jpeg">
+                            <div class="help-text">รองรับไฟล์: PNG, JPG, JPEG</div>
+                        </div>
+                        <div class="form-group half-width">
+                            <label for="image_4">รูปภาพที่ 4</label>
+                            <input type="file" id="image_4" name="image_4" accept=".png,.jpg,.jpeg">
+                            <div class="help-text">รองรับไฟล์: PNG, JPG, JPEG</div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Growing Information -->
                 <div class="form-section">
                     <div class="section-title">
@@ -433,10 +477,13 @@
             
             const formData = new FormData(this);
             const data = {};
+            const imageFiles = new FormData();
             
-            // Convert FormData to regular object
+            // Separate text data and image files
             for (let [key, value] of formData.entries()) {
-                if (value.trim() !== '') {
+                if (key.startsWith('image_') && value instanceof File && value.size > 0) {
+                    imageFiles.append(key, value);
+                } else if (typeof value === 'string' && value.trim() !== '') {
                     // Convert numeric fields
                     if (key === 'thc_percentage' || key === 'cbd_percentage') {
                         data[key] = parseFloat(value);
@@ -447,7 +494,8 @@
             }
             
             try {
-                const response = await fetch('/api/buds', {
+                // First, create the bud record
+                const budResponse = await fetch('/api/buds', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -455,10 +503,30 @@
                     body: JSON.stringify(data)
                 });
                 
-                const result = await response.json();
+                const budResult = await budResponse.json();
                 
-                if (response.ok) {
-                    showAlert('✅ บันทึกข้อมูลดอกสำเร็จ!', 'success');
+                if (budResponse.ok) {
+                    const budId = budResult.bud_id;
+                    
+                    // If there are images, upload them
+                    if (imageFiles.has('image_1') || imageFiles.has('image_2') || 
+                        imageFiles.has('image_3') || imageFiles.has('image_4')) {
+                        
+                        const imageResponse = await fetch(`/api/buds/${budId}/upload-images`, {
+                            method: 'POST',
+                            body: imageFiles
+                        });
+                        
+                        const imageResult = await imageResponse.json();
+                        
+                        if (imageResponse.ok) {
+                            showAlert('✅ บันทึกข้อมูลดอกและรูปภาพสำเร็จ!', 'success');
+                        } else {
+                            showAlert('✅ บันทึกข้อมูลดอกสำเร็จ แต่อัพโหลดรูปภาพไม่สำเร็จ: ' + imageResult.error, 'success');
+                        }
+                    } else {
+                        showAlert('✅ บันทึกข้อมูลดอกสำเร็จ!', 'success');
+                    }
                     
                     // Reset form
                     this.reset();
@@ -468,7 +536,7 @@
                         window.location.href = '/profile';
                     }, 2000);
                 } else {
-                    showAlert('❌ เกิดข้อผิดพลาด: ' + result.error, 'error');
+                    showAlert('❌ เกิดข้อผิดพลาด: ' + budResult.error, 'error');
                 }
             } catch (error) {
                 console.error('Error submitting form:', error);

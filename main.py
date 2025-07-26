@@ -1,5 +1,5 @@
 
-from flask import Flask, render_template, request, jsonify, url_for
+from flask import Flask, render_template, request, jsonify, url_for, session, redirect
 import psycopg2
 import os
 from datetime import datetime, timedelta
@@ -9,6 +9,7 @@ import secrets
 import hashlib
 
 app = Flask(__name__)
+app.secret_key = os.environ.get('SECRET_KEY', 'budtboy-secret-key-2024')
 
 # Email configuration - using environment variables with fallback for testing
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
@@ -138,7 +139,127 @@ def send_verification_email(email, username, token):
 
 @app.route('/')
 def index():
+    # Check if user is logged in, if not redirect to auth page
+    if 'user_id' not in session:
+        return redirect('/auth')
     return render_template('index.html')
+
+@app.route('/auth')
+def auth_page():
+    return render_template('auth.html')
+
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    email = data.get('email')
+    password = data.get('password')
+    
+    if not email or not password:
+        return jsonify({'success': False, 'error': 'กรุณากรอกอีเมลและรหัสผ่าน'}), 400
+    
+    password_hash = hashlib.sha256(password.encode()).hexdigest()
+    
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("""
+                SELECT id, username, email, is_verified
+                FROM users 
+                WHERE email = %s AND password_hash = %s
+            """, (email, password_hash))
+            
+            user = cur.fetchone()
+            if user:
+                user_id, username, email, is_verified = user
+                
+                if not is_verified:
+                    return jsonify({
+                        'success': False, 
+                        'error': 'กรุณายืนยันอีเมลก่อนเข้าสู่ระบบ'
+                    }), 400
+                
+                # Create session
+                session['user_id'] = user_id
+                session['username'] = username
+                session['email'] = email
+                
+                return jsonify({
+                    'success': True,
+                    'message': f'เข้าสู่ระบบสำเร็จ ยินดีต้อนรับ {username}!'
+                })
+            else:
+                return jsonify({
+                    'success': False,
+                    'error': 'อีเมลหรือรหัสผ่านไม่ถูกต้อง'
+                }), 400
+                
+        except Exception as e:
+            return jsonify({'success': False, 'error': str(e)}), 500
+        finally:
+            cur.close()
+            conn.close()
+    else:
+        return jsonify({'success': False, 'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+@app.route('/quick_signup', methods=['POST'])
+def quick_signup():
+    data = request.get_json()
+    username = data.get('username')
+    email = data.get('email')
+    password = data.get('password')
+    
+    if not username or not email or not password:
+        return jsonify({'success': False, 'error': 'กรุณากรอกข้อมูลให้ครบถ้วน'}), 400
+    
+    password_hash = hashlib.sha256(password.encode()).hexdigest()
+    
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            
+            # Check if user exists
+            cur.execute("SELECT id FROM users WHERE username = %s OR email = %s", (username, email))
+            if cur.fetchone():
+                return jsonify({
+                    'success': False,
+                    'error': 'ชื่อผู้ใช้หรืออีเมลนี้ถูกใช้แล้ว'
+                }), 400
+            
+            # Create user (quick signup - auto verified)
+            cur.execute("""
+                INSERT INTO users (username, email, password_hash, is_consumer, is_verified)
+                VALUES (%s, %s, %s, %s, %s)
+                RETURNING id
+            """, (username, email, password_hash, True, True))
+            
+            user_id = cur.fetchone()[0]
+            conn.commit()
+            
+            # Auto login
+            session['user_id'] = user_id
+            session['username'] = username
+            session['email'] = email
+            
+            return jsonify({
+                'success': True,
+                'message': f'สมัครสมาชิกสำเร็จ! ยินดีต้อนรับ {username}'
+            })
+            
+        except Exception as e:
+            conn.rollback()
+            return jsonify({'success': False, 'error': str(e)}), 500
+        finally:
+            cur.close()
+            conn.close()
+    else:
+        return jsonify({'success': False, 'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect('/auth')
 
 @app.route('/verify_email/<token>')
 def verify_email(token):

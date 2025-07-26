@@ -793,6 +793,12 @@ def create_tables():
                 );
             """)
 
+            # Add selected_effects column if it doesn't exist (for existing databases)
+            cur.execute("""
+                ALTER TABLE reviews 
+                ADD COLUMN IF NOT EXISTS selected_effects TEXT[] DEFAULT '{}';
+            """)
+
             # Create index for better performance
             cur.execute("""
                 CREATE INDEX IF NOT EXISTS idx_strain_names_th ON strain_names(name_th);

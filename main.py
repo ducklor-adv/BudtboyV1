@@ -2266,7 +2266,50 @@ def get_all_buds_report():
         if cur:
             cur.close()
         if conn:
-            conn.close()</old_str>
+            conn.close()
+
+@app.route('/api/buds/for-review')
+def get_buds_for_review():
+    """Get all buds available for review"""
+    if not is_authenticated():
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("""
+                SELECT id, strain_name_en, strain_name_th, breeder, strain_type,
+                       thc_percentage, cbd_percentage, created_at
+                FROM buds_data 
+                ORDER BY created_at DESC
+            """)
+
+            buds = []
+            for row in cur.fetchall():
+                buds.append({
+                    'id': row[0],
+                    'strain_name_en': row[1],
+                    'strain_name_th': row[2],
+                    'breeder': row[3],
+                    'strain_type': row[4],
+                    'thc_percentage': float(row[5]) if row[5] else None,
+                    'cbd_percentage': float(row[6]) if row[6] else None,
+                    'created_at': row[7].strftime('%Y-%m-%d') if row[7] else None
+                })
+
+            cur.close()
+            conn.close()
+            return jsonify({'buds': buds})
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+        finally:
+            if cur:
+                cur.close()
+            if conn:
+                conn.close()
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500</old_str>
 
 @app.route('/api/buds/for-review')
 def get_buds_for_review():

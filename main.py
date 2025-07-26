@@ -2148,8 +2148,8 @@ def upload_images():
     try:
         uploaded_urls = []
         
-        # Process up to 12 images
-        for i in range(12):
+        # Process up to 4 images
+        for i in range(4):
             file_key = f'image_{i}'
             if file_key in request.files:
                 file = request.files[file_key]

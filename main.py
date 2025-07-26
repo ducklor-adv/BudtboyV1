@@ -775,6 +775,18 @@ def create_tables():
                 );
             """)
 
+            # Add image columns if they don't exist (for existing databases)
+            try:
+                cur.execute("""
+                    ALTER TABLE buds_data 
+                    ADD COLUMN IF NOT EXISTS image_1_url VARCHAR(500),
+                    ADD COLUMN IF NOT EXISTS image_2_url VARCHAR(500),
+                    ADD COLUMN IF NOT EXISTS image_3_url VARCHAR(500),
+                    ADD COLUMN IF NOT EXISTS image_4_url VARCHAR(500);
+                """)
+            except Exception as e:
+                print(f"Note: Image columns may already exist: {e}")
+
             # Create reviews table
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS reviews (

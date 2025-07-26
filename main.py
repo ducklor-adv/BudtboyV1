@@ -910,6 +910,63 @@ def delete_bud(bud_id):
     else:
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
+@app.route('/api/strains', methods=['POST'])
+def add_strain():
+    """Add new strain name to database"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'ไม่ได้เข้าสู่ระบบ'}), 401
+    
+    data = request.get_json()
+    name_en = data.get('name_en', '').strip()
+    name_th = data.get('name_th', '').strip()
+    strain_type = data.get('strain_type', '').strip()
+    is_popular = data.get('is_popular', False)
+    
+    if not name_en:
+        return jsonify({'error': 'กรุณากรอกชื่อภาษาอังกฤษ'}), 400
+    
+    if strain_type not in ['Indica', 'Sativa', 'Hybrid']:
+        return jsonify({'error': 'ประเภทสายพันธุ์ไม่ถูกต้อง'}), 400
+    
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            
+            # Check if strain already exists
+            cur.execute("""
+                SELECT id FROM strain_names 
+                WHERE name_en ILIKE %s OR (name_th IS NOT NULL AND name_th ILIKE %s)
+            """, (name_en, name_th if name_th else None))
+            
+            if cur.fetchone():
+                return jsonify({'error': 'สายพันธุ์นี้มีในระบบแล้ว'}), 400
+            
+            # Insert new strain
+            cur.execute("""
+                INSERT INTO strain_names (name_en, name_th, strain_type, is_popular)
+                VALUES (%s, %s, %s, %s)
+                RETURNING id
+            """, (name_en, name_th if name_th else None, strain_type, is_popular))
+            
+            strain_id = cur.fetchone()[0]
+            conn.commit()
+            
+            return jsonify({
+                'success': True,
+                'message': f'เพิ่มสายพันธุ์ "{name_en}" สำเร็จ',
+                'strain_id': strain_id
+            }), 201
+            
+        except Exception as e:
+            conn.rollback()
+            return jsonify({'error': str(e)}), 500
+        finally:
+            cur.close()
+            conn.close()
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
 @app.route('/api/strains/search', methods=['GET'])
 def search_strains():
     """Search strain names with autocomplete suggestions"""

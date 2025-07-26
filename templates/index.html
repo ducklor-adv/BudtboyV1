@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -137,7 +136,7 @@
 
     <div class="container">
         <h2>ลงทะเบียนผู้ใช้ใหม่</h2>
-        
+
         <!-- User Type Selection at the top -->
         <div class="user-type-section">
             <label><strong>ประเภทผู้ใช้ (สามารถเลือกได้มากกว่า 1 ข้อ):</strong></label>
@@ -155,7 +154,7 @@
                     <label for="is_budtender">บัดเทนเดอร์ (Budtender)</label>
                 </div>
             </div>
-            
+
             <!-- Grower license upload section -->
             <div class="file-upload-section" id="licenseUploadSection">
                 <label for="grow_license_file"><strong>อัปโหลดใบอนุญาตปลูก:</strong></label>
@@ -163,65 +162,43 @@
                 <div class="note">รองรับไฟล์: PDF, PNG, JPG, JPEG (ขนาดไม่เกิน 16MB)</div>
             </div>
         </div>
-        
+
         <form id="userForm" enctype="multipart/form-data">
             <div class="form-group">
                 <label for="username">ชื่อผู้ใช้:</label>
                 <input type="text" id="username" name="username" required>
             </div>
-            
+
             <div class="form-group">
                 <label for="email">อีเมล:</label>
                 <input type="email" id="email" name="email" required>
                 <div class="note">จะส่งลิงก์ยืนยันการลงทะเบียนไปยังอีเมลนี้</div>
             </div>
-            
+
             <div class="form-group">
                 <label for="password">รหัสผ่าน:</label>
                 <input type="password" id="password" name="password" required minlength="6">
                 <div class="note">รหัสผ่านต้องมีความยาวอย่างน้อย 6 ตัวอักษร</div>
             </div>
-            
+
             <div class="form-group">
                 <label for="birth_year">ปีเกิด:</label>
                 <input type="number" id="birth_year" name="birth_year" min="1900" max="2024">
                 <div class="note">ใช้สำหรับตรวจสอบอายุ (ไม่บังคับ)</div>
             </div>
-            
+
             <div class="form-group">
                 <label for="profile_image">รูปโปรไฟล์:</label>
                 <input type="file" id="profile_image" name="profile_image" accept=".png,.jpg,.jpeg">
                 <div class="note">รองรับไฟล์: PNG, JPG, JPEG (ขนาดไม่เกิน 16MB)</div>
             </div>
-            
+
             <button type="submit" class="register-button">🎯 ยืนยันการลงทะเบียน</button>
         </form>
-        
+
         <div id="message"></div>
     </div>
 
-    <div class="container">
-        <h2>รายชื่อผู้ใช้ในระบบ</h2>
-        <button onclick="loadUsers()">โหลดข้อมูลผู้ใช้</button>
-        
-        <table class="users-table" id="usersTable" style="display: none;">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>ชื่อผู้ใช้</th>
-                    <th>อีเมล</th>
-                    <th>ผู้ปลูก</th>
-                    <th>บัดเทนเดอร์</th>
-                    <th>ผู้บริโภค</th>
-                    <th>ปีเกิด</th>
-                    <th>ยืนยันแล้ว</th>
-                    <th>สร้างเมื่อ</th>
-                </tr>
-            </thead>
-            <tbody id="usersTableBody">
-            </tbody>
-        </table>
-    </div>
 
     <script>
         // Show/hide license upload section based on grower checkbox
@@ -238,15 +215,15 @@
         // Form submission
         document.getElementById('userForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
+
             const formData = new FormData();
-            
+
             // Add form fields
             formData.append('username', document.getElementById('username').value);
             formData.append('email', document.getElementById('email').value);
             formData.append('password', document.getElementById('password').value);
             formData.append('birth_year', document.getElementById('birth_year').value);
-            
+
             // Add checkboxes
             if (document.getElementById('is_grower').checked) {
                 formData.append('is_grower', 'on');
@@ -257,28 +234,28 @@
             if (document.getElementById('is_consumer').checked) {
                 formData.append('is_consumer', 'on');
             }
-            
+
             // Add file if grower is selected
             const growerFile = document.getElementById('grow_license_file').files[0];
             if (growerFile && document.getElementById('is_grower').checked) {
                 formData.append('grow_license_file', growerFile);
             }
-            
+
             // Add profile image if provided
             const profileImage = document.getElementById('profile_image').files[0];
             if (profileImage) {
                 formData.append('profile_image', profileImage);
             }
-            
+
             try {
                 const response = await fetch('/register_user', {
                     method: 'POST',
                     body: formData
                 });
-                
+
                 const result = await response.json();
                 const messageDiv = document.getElementById('message');
-                
+
                 if (response.ok && result.success) {
                     messageDiv.innerHTML = `<div class="message success">✅ ${result.message}</div>`;
                     document.getElementById('userForm').reset();
@@ -292,41 +269,7 @@
             }
         });
 
-        // Load users function
-        async function loadUsers() {
-            try {
-                const response = await fetch('/users');
-                const users = await response.json();
-                
-                if (response.ok) {
-                    const tableBody = document.getElementById('usersTableBody');
-                    const table = document.getElementById('usersTable');
-                    
-                    tableBody.innerHTML = '';
-                    
-                    users.forEach(user => {
-                        const row = tableBody.insertRow();
-                        row.innerHTML = `
-                            <td>${user.id}</td>
-                            <td>${user.username}</td>
-                            <td>${user.email}</td>
-                            <td>${user.is_grower ? '✅' : '❌'}</td>
-                            <td>${user.is_budtender ? '✅' : '❌'}</td>
-                            <td>${user.is_consumer ? '✅' : '❌'}</td>
-                            <td>${user.birth_year || 'ไม่ระบุ'}</td>
-                            <td>${user.is_verified ? '✅ ยืนยันแล้ว' : '⏳ รอยืนยัน'}</td>
-                            <td>${user.created_at || 'ไม่ระบุ'}</td>
-                        `;
-                    });
-                    
-                    table.style.display = 'table';
-                } else {
-                    alert('เกิดข้อผิดพลาดในการโหลดข้อมูล: ' + users.error);
-                }
-            } catch (error) {
-                alert('เกิดข้อผิดพลาดในการโหลดข้อมูล: ' + error.message);
-            }
-        }
+
     </script>
 </body>
 </html>

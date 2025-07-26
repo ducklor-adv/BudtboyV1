@@ -2139,6 +2139,37 @@ def add_review_page():
         return redirect('/auth')
     return render_template('add_review.html')
 
+@app.route('/api/upload-images', methods=['POST'])
+def upload_images():
+    """Upload multiple images for reviews"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'ไม่ได้เข้าสู่ระบบ'}), 401
+
+    try:
+        uploaded_urls = []
+        
+        # Process up to 12 images
+        for i in range(12):
+            file_key = f'image_{i}'
+            if file_key in request.files:
+                file = request.files[file_key]
+                if file and file.filename != '' and allowed_file(file.filename):
+                    filename = secure_filename(file.filename)
+                    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_')
+                    filename = f"{timestamp}review_{session['user_id']}_{filename}"
+                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                    file.save(file_path)
+                    uploaded_urls.append(f'/uploads/{filename}')
+
+        return jsonify({
+            'success': True,
+            'message': f'อัปโหลดรูปภาพสำเร็จ ({len(uploaded_urls)} รูป)',
+            'image_urls': uploaded_urls
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/users')
 def list_users():
     conn = get_db_connection()

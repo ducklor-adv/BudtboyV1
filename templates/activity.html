@@ -103,8 +103,18 @@
         }
 
         .add-btn:hover {
-            background: #45a049;
             transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 152, 0, 0.3);
+        }
+
+        .view-reviews-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+        }
+
+        .rating-info {
+            display: flex;
+            align-items: center;
         }
 
         .item-list {
@@ -295,8 +305,8 @@
             if (buds.length === 0) {
                 budsList.innerHTML = `
                     <div class="empty-state">
-                        <div class="empty-icon">🌸</div>
-                        <p>ยังไม่มีข้อมูลดอกในระบบ</p>
+                        <div class="empty-icon">🌿</div>
+                        <p>ยังไม่มีดอกในระบบ</p>
                         <p style="font-size: 14px; color: #999;">คลิกปุ่ม "เพิ่มดอกที่คุณมี" เพื่อเริ่มต้น</p>
                     </div>
                 `;
@@ -306,16 +316,26 @@
             budsList.innerHTML = buds.map(bud => `
                 <div class="item-card">
                     <div class="item-header">
-                        <div class="item-name">${bud.strain_name_en || 'ไม่ระบุชื่อ'}</div>
+                        <div class="item-name">${bud.strain_name_en || 'ไม่ระบุชื่อ'} ${bud.strain_name_th ? `(${bud.strain_name_th})` : ''}</div>
                         <div class="item-date">${formatDate(bud.created_at)}</div>
                     </div>
                     <div class="item-details">
-                        <strong>Bud ID:</strong> ${bud.id || 'ไม่ระบุ'}<br>
-                        <strong>ชื่อไทย:</strong> ${bud.strain_name_th || 'ไม่ระบุ'}<br>
-                        <strong>ผู้พัฒนา:</strong> ${bud.breeder || 'ไม่ระบุ'}<br>
-                        <strong>THC:</strong> ${bud.thc_percentage || 'ไม่ระบุ'}% | 
-                        <strong>CBD:</strong> ${bud.cbd_percentage || 'ไม่ระบุ'}%
-                        <div class="strain-type">${getStrainType(bud.strain_type)}</div>
+                        <p><strong>Bud ID:</strong> ${bud.id}</p>
+                        <p><strong>ผู้พัฒนา:</strong> ${bud.breeder || 'ไม่ระบุ'}</p>
+                        <p><strong>ประเภท:</strong> ${bud.strain_type || 'ไม่ระบุ'}</p>
+                        <p><strong>THC:</strong> ${bud.thc_percentage || 'ไม่ระบุ'}% | <strong>CBD:</strong> ${bud.cbd_percentage || 'ไม่ระบุ'}%</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;">
+                            <div class="rating-info">
+                                <span style="color: #ffd700; font-size: 16px;">${'⭐'.repeat(Math.round(bud.avg_rating))}</span>
+                                <span style="color: #666; font-size: 14px; margin-left: 5px;">
+                                    ${bud.avg_rating > 0 ? `${bud.avg_rating.toFixed(1)} (${bud.review_count} รีวิว)` : 'ยังไม่มีรีวิว'}
+                                </span>
+                            </div>
+                            <button class="view-reviews-btn" onclick="window.location.href='/bud-reviews?bud_id=${bud.id}'" 
+                                    style="background: linear-gradient(135deg, #4CAF50, #45a049); color: white; border: none; padding: 8px 12px; border-radius: 15px; font-size: 12px; cursor: pointer; transition: all 0.3s ease;">
+                                📋 ดูรีวิวทั้งหมด
+                            </button>
+                        </div>
                     </div>
                 </div>
             `).join('');

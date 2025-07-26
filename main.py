@@ -976,11 +976,16 @@ def get_user_buds():
 
         user_id = session.get('user_id')
         cur.execute("""
-            SELECT id, strain_name_en, strain_name_th, breeder, thc_percentage, 
-                   cbd_percentage, strain_type, created_at
-            FROM buds_data
-            WHERE created_by = %s 
-            ORDER BY created_at DESC
+            SELECT b.id, b.strain_name_en, b.strain_name_th, b.breeder, b.thc_percentage, 
+                   b.cbd_percentage, b.strain_type, b.created_at,
+                   COALESCE(AVG(r.overall_rating), 0) as avg_rating,
+                   COUNT(r.id) as review_count
+            FROM buds_data b
+            LEFT JOIN reviews r ON b.id = r.bud_reference_id
+            WHERE b.created_by = %s 
+            GROUP BY b.id, b.strain_name_en, b.strain_name_th, b.breeder, 
+                     b.thc_percentage, b.cbd_percentage, b.strain_type, b.created_at
+            ORDER BY b.created_at DESC
         """, (user_id,))
 
         buds = []
@@ -993,7 +998,9 @@ def get_user_buds():
                 'thc_percentage': row[4],
                 'cbd_percentage': row[5],
                 'strain_type': row[6],
-                'created_at': row[7].strftime('%Y-%m-%d %H:%M:%S') if row[7] else None
+                'created_at': row[7].strftime('%Y-%m-%d %H:%M:%S') if row[7] else None,
+                'avg_rating': float(row[8]) if row[8] else 0,
+                'review_count': row[9]
             })
 
         cur.close()
@@ -2297,6 +2304,13 @@ def add_review_page():
     if 'user_id' not in session:
         return redirect('/auth')
     return render_template('add_review.html')
+
+@app.route('/bud-reviews')
+def bud_reviews_page():
+    # Check if user is logged in
+    if 'user_id' not in session:
+        return redirect('/auth')
+    return render_template('bud_reviews.html')
 
 @app.route('/api/upload-images', methods=['POST'])
 def upload_images():

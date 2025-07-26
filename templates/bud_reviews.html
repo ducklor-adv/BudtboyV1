@@ -1,0 +1,392 @@
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cannabis App - รีวิวทั้งหมด</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e8f5e8 0%, #f0f8ff 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #ff9800, #ff6f00);
+            padding: 20px 30px;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .header-title {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .bud-info {
+            padding: 30px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .bud-name {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .bud-details {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .rating-summary {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .avg-rating {
+            font-size: 32px;
+            font-weight: 600;
+            color: #ff9800;
+        }
+        
+        .rating-details {
+            flex: 1;
+        }
+        
+        .stars {
+            color: #ffd700;
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        
+        .review-count {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .reviews-container {
+            padding: 20px 30px;
+        }
+        
+        .review-item {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #ff9800;
+        }
+        
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .reviewer-name {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .review-date {
+            color: #666;
+            font-size: 12px;
+        }
+        
+        .review-rating {
+            color: #ffd700;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        
+        .review-summary {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .review-content {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        
+        .review-effects {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        
+        .effect-tag {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+        
+        .review-images {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .review-image {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .review-image:hover {
+            transform: scale(1.05);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+        
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .error {
+            text-align: center;
+            padding: 40px;
+            color: #f44336;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .bud-info, .reviews-container {
+                padding: 20px;
+            }
+            
+            .rating-summary {
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+            
+            .review-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="/activity" class="back-btn">← กลับ</a>
+            <div class="header-title">
+                <h1>📋 รีวิวทั้งหมด</h1>
+            </div>
+            <div style="width: 60px;"></div>
+        </div>
+        
+        <div class="bud-info" id="budInfo">
+            <div class="loading">กำลังโหลดข้อมูล...</div>
+        </div>
+        
+        <div class="reviews-container" id="reviewsContainer">
+            <div class="loading">กำลังโหลดรีวิว...</div>
+        </div>
+    </div>
+
+    <script>
+        const budId = new URLSearchParams(window.location.search).get('bud_id');
+        
+        if (!budId) {
+            document.getElementById('budInfo').innerHTML = '<div class="error">ไม่พบข้อมูลดอกที่ต้องการ</div>';
+            document.getElementById('reviewsContainer').innerHTML = '';
+        } else {
+            loadBudInfo();
+            loadReviews();
+        }
+        
+        async function loadBudInfo() {
+            try {
+                const response = await fetch(`/api/buds/${budId}/info`);
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    displayBudInfo(result.bud);
+                } else {
+                    document.getElementById('budInfo').innerHTML = '<div class="error">ไม่พบข้อมูลดอก</div>';
+                }
+            } catch (error) {
+                document.getElementById('budInfo').innerHTML = '<div class="error">เกิดข้อผิดพลาดในการโหลดข้อมูล</div>';
+            }
+        }
+        
+        async function loadReviews() {
+            try {
+                const response = await fetch(`/api/reviews?bud_id=${budId}`);
+                const reviews = await response.json();
+                
+                if (response.ok) {
+                    displayReviews(reviews);
+                } else {
+                    document.getElementById('reviewsContainer').innerHTML = '<div class="error">เกิดข้อผิดพลาดในการโหลดรีวิว</div>';
+                }
+            } catch (error) {
+                document.getElementById('reviewsContainer').innerHTML = '<div class="error">เกิดข้อผิดพลาดในการโหลดรีวิว</div>';
+            }
+        }
+        
+        function displayBudInfo(bud) {
+            const avgRating = calculateAverageRating();
+            
+            document.getElementById('budInfo').innerHTML = `
+                <div class="bud-name">${bud.strain_name_en || 'ไม่ระบุชื่อ'}</div>
+                <div class="bud-details">
+                    <strong>ชื่อไทย:</strong> ${bud.strain_name_th || 'ไม่ระบุ'}<br>
+                    <strong>ผู้พัฒนา:</strong> ${bud.breeder || 'ไม่ระบุ'}<br>
+                    <strong>ประเภท:</strong> ${bud.strain_type || 'ไม่ระบุ'}<br>
+                    <strong>THC:</strong> ${bud.thc_percentage || 'ไม่ระบุ'}% | 
+                    <strong>CBD:</strong> ${bud.cbd_percentage || 'ไม่ระบุ'}%<br>
+                    <strong>เจ้าของดอก:</strong> ${bud.grower_name || 'ไม่ระบุ'}
+                </div>
+                <div class="rating-summary" id="ratingSummary">
+                    <div class="loading">กำลังคำนวณคะแนนเฉลี่ย...</div>
+                </div>
+            `;
+        }
+        
+        let allReviews = [];
+        
+        function displayReviews(reviews) {
+            allReviews = reviews;
+            updateRatingSummary();
+            
+            const container = document.getElementById('reviewsContainer');
+            
+            if (reviews.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📝</div>
+                        <h3>ยังไม่มีรีวิว</h3>
+                        <p>เป็นคนแรกที่รีวิวดอกนี้!</p>
+                        <a href="/add-review" style="color: #ff9800; text-decoration: none;">เขียนรีวิว →</a>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = reviews.map(review => `
+                <div class="review-item">
+                    <div class="review-header">
+                        <div class="reviewer-name">👤 ${review.reviewer_name}</div>
+                        <div class="review-date">${formatDate(review.created_at)}</div>
+                    </div>
+                    <div class="review-rating">${'⭐'.repeat(review.overall_rating)} (${review.overall_rating}/5)</div>
+                    <div class="review-summary">${review.short_summary}</div>
+                    ${review.full_review_content ? `<div class="review-content">${review.full_review_content}</div>` : ''}
+                    ${review.selected_effects && review.selected_effects.length > 0 ? `
+                        <div class="review-effects">
+                            ${review.selected_effects.map(effect => `<span class="effect-tag">${effect}</span>`).join('')}
+                        </div>
+                    ` : ''}
+                    ${review.review_images && review.review_images.length > 0 ? `
+                        <div class="review-images">
+                            ${review.review_images.map(img => `<img src="${img}" alt="รีวิวภาพ" class="review-image" onclick="window.open('${img}', '_blank')">`).join('')}
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+        
+        function calculateAverageRating() {
+            if (allReviews.length === 0) return 0;
+            const sum = allReviews.reduce((acc, review) => acc + review.overall_rating, 0);
+            return (sum / allReviews.length).toFixed(1);
+        }
+        
+        function updateRatingSummary() {
+            const avgRating = calculateAverageRating();
+            const reviewCount = allReviews.length;
+            
+            document.getElementById('ratingSummary').innerHTML = `
+                <div class="avg-rating">${avgRating}</div>
+                <div class="rating-details">
+                    <div class="stars">${'⭐'.repeat(Math.round(avgRating))}</div>
+                    <div class="review-count">${reviewCount} รีวิว</div>
+                </div>
+            `;
+        }
+        
+        function formatDate(dateString) {
+            if (!dateString) return 'ไม่ระบุ';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('th-TH', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+    </script>
+</body>
+</html>

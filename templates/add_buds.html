@@ -1,0 +1,480 @@
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cannabis App - เพิ่มข้อมูลดอก</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+        
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+        
+        .form-content {
+            padding: 40px;
+        }
+        
+        .form-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border-left: 5px solid #4CAF50;
+        }
+        
+        .section-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #2c5530;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .form-group {
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        .form-group.full-width {
+            flex: 100%;
+        }
+        
+        .form-group.half-width {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #495057;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+            box-sizing: border-box;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .required {
+            color: #dc3545;
+        }
+        
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+        }
+        
+        .btn-primary {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .form-actions {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .help-text {
+            font-size: 14px;
+            color: #6c757d;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+            }
+            
+            .form-group {
+                min-width: auto;
+            }
+            
+            .container {
+                margin: 10px;
+            }
+            
+            .form-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="/profile" class="back-btn">← กลับ</a>
+            <h1>🌿 เพิ่มข้อมูลดอก</h1>
+            <div class="subtitle">กรอกข้อมูลรายละเอียดของดอกที่คุณมี</div>
+        </div>
+        
+        <div class="form-content">
+            <div id="alertContainer"></div>
+            
+            <form id="budsForm">
+                <!-- Basic Information -->
+                <div class="form-section">
+                    <div class="section-title">
+                        📋 ข้อมูลพื้นฐาน
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="strain_name_th">ชื่อสายพันธุ์ (ไทย) <span class="required">*</span></label>
+                            <input type="text" id="strain_name_th" name="strain_name_th" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="strain_name_en">ชื่อสายพันธุ์ (อังกฤษ) <span class="required">*</span></label>
+                            <input type="text" id="strain_name_en" name="strain_name_en" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="breeder">ผู้พัฒนาสายพันธุ์</label>
+                            <input type="text" id="breeder" name="breeder">
+                        </div>
+                        <div class="form-group">
+                            <label for="strain_type">ประเภทสายพันธุ์ <span class="required">*</span></label>
+                            <select id="strain_type" name="strain_type" required>
+                                <option value="">เลือกประเภท</option>
+                                <option value="Indica">Indica</option>
+                                <option value="Sativa">Sativa</option>
+                                <option value="Hybrid">Hybrid</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chemical Properties -->
+                <div class="form-section">
+                    <div class="section-title">
+                        🧪 ข้อมูลทางเคมี
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group half-width">
+                            <label for="thc_percentage">THC (%)</label>
+                            <input type="number" id="thc_percentage" name="thc_percentage" step="0.01" min="0" max="100">
+                            <div class="help-text">ระดับ THC เป็นเปอร์เซ็นต์</div>
+                        </div>
+                        <div class="form-group half-width">
+                            <label for="cbd_percentage">CBD (%)</label>
+                            <input type="number" id="cbd_percentage" name="cbd_percentage" step="0.01" min="0" max="100">
+                            <div class="help-text">ระดับ CBD เป็นเปอร์เซ็นต์</div>
+                        </div>
+                        <div class="form-group half-width">
+                            <label for="grade">เกรด</label>
+                            <select id="grade" name="grade">
+                                <option value="">เลือกเกรด</option>
+                                <option value="A+">A+</option>
+                                <option value="A">A</option>
+                                <option value="B+">B+</option>
+                                <option value="B">B</option>
+                                <option value="C">C</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sensory Properties -->
+                <div class="form-section">
+                    <div class="section-title">
+                        👃 คุณสมบัติทางประสาทสัมผัส
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label for="aroma_flavor">กลิ่นและรส (คีย์เวิร์ดสั้น)</label>
+                            <textarea id="aroma_flavor" name="aroma_flavor" placeholder="เช่น หวาน ซิตรัส ดิน ไม้..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="top_terpenes_1">Terpene อันดับ 1</label>
+                            <input type="text" id="top_terpenes_1" name="top_terpenes_1">
+                        </div>
+                        <div class="form-group">
+                            <label for="top_terpenes_2">Terpene อันดับ 2</label>
+                            <input type="text" id="top_terpenes_2" name="top_terpenes_2">
+                        </div>
+                        <div class="form-group">
+                            <label for="top_terpenes_3">Terpene อันดับ 3</label>
+                            <input type="text" id="top_terpenes_3" name="top_terpenes_3">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Effects & Usage -->
+                <div class="form-section">
+                    <div class="section-title">
+                        ✨ ผลกระทบและการใช้งาน
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="effect">ผลกระทบ</label>
+                            <select id="effect" name="effect">
+                                <option value="">เลือกผลกระทบ</option>
+                                <option value="ผ่อนคลาย">ผ่อนคลาย</option>
+                                <option value="สนุกสนาน">สนุกสนาน</option>
+                                <option value="สงบ">สงบ</option>
+                                <option value="เพิ่มจินตนาการ">เพิ่มจินตนาการ</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="recommended_time">เวลาที่แนะนำ</label>
+                            <select id="recommended_time" name="recommended_time">
+                                <option value="">เลือกเวลา</option>
+                                <option value="กลางวัน">กลางวัน</option>
+                                <option value="กลางคืน">กลางคืน</option>
+                                <option value="ตลอดวัน">ตลอดวัน</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Growing Information -->
+                <div class="form-section">
+                    <div class="section-title">
+                        🌱 ข้อมูลการปลูก
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="grow_method">วิธีการปลูก</label>
+                            <select id="grow_method" name="grow_method">
+                                <option value="">เลือกวิธีการปลูก</option>
+                                <option value="Indoor">Indoor</option>
+                                <option value="Outdoor">Outdoor</option>
+                                <option value="Greenhouse">Greenhouse</option>
+                                <option value="Hydroponic">Hydroponic</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="fertilizer_type">ประเภทปุ่ย</label>
+                            <select id="fertilizer_type" name="fertilizer_type">
+                                <option value="">เลือกประเภทปุ่ย</option>
+                                <option value="Organic">Organic</option>
+                                <option value="Chemical">Chemical</option>
+                                <option value="Mixed">Mixed</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="flowering_type">ประเภทการออกดอก</label>
+                            <select id="flowering_type" name="flowering_type">
+                                <option value="">เลือกประเภท</option>
+                                <option value="Photoperiod">Photoperiod</option>
+                                <option value="Autoflower">Autoflower</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="harvest_date">วันที่เก็บเกี่ยว</label>
+                            <input type="date" id="harvest_date" name="harvest_date">
+                        </div>
+                        <div class="form-group">
+                            <label for="batch_number">หมายเลข Batch</label>
+                            <input type="text" id="batch_number" name="batch_number">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        💾 บันทึกข้อมูล
+                    </button>
+                    <a href="/profile" class="btn btn-secondary">
+                        ❌ ยกเลิก
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function showAlert(message, type = 'success') {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertClass = type === 'success' ? 'alert-success' : 'alert-error';
+            
+            alertContainer.innerHTML = `
+                <div class="alert ${alertClass}">
+                    ${message}
+                </div>
+            `;
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                alertContainer.innerHTML = '';
+            }, 5000);
+        }
+
+        document.getElementById('budsForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = {};
+            
+            // Convert FormData to regular object
+            for (let [key, value] of formData.entries()) {
+                if (value.trim() !== '') {
+                    // Convert numeric fields
+                    if (key === 'thc_percentage' || key === 'cbd_percentage') {
+                        data[key] = parseFloat(value);
+                    } else {
+                        data[key] = value;
+                    }
+                }
+            }
+            
+            try {
+                const response = await fetch('/api/buds', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showAlert('✅ บันทึกข้อมูลดอกสำเร็จ!', 'success');
+                    
+                    // Reset form
+                    this.reset();
+                    
+                    // Redirect to profile after 2 seconds
+                    setTimeout(() => {
+                        window.location.href = '/profile';
+                    }, 2000);
+                } else {
+                    showAlert('❌ เกิดข้อผิดพลาด: ' + result.error, 'error');
+                }
+            } catch (error) {
+                console.error('Error submitting form:', error);
+                showAlert('❌ เกิดข้อผิดพลาดในการส่งข้อมูล', 'error');
+            }
+        });
+    </script>
+</body>
+</html>

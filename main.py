@@ -201,6 +201,13 @@ def register_page():
 def auth_page():
     return render_template('auth.html')
 
+@app.route('/add-buds')
+def add_buds_page():
+    # Check if user is logged in
+    if 'user_id' not in session:
+        return redirect('/auth')
+    return render_template('add_buds.html')
+
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()

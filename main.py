@@ -1,4 +1,3 @@
-
 from flask import Flask, render_template, request, jsonify, url_for, session, redirect
 import psycopg2
 import os
@@ -40,7 +39,7 @@ def get_db_connection():
         database_url = os.environ.get('DATABASE_URL')
         if not database_url:
             raise Exception("DATABASE_URL environment variable not set")
-        
+
         conn = psycopg2.connect(database_url)
         return conn
     except Exception as e:
@@ -53,7 +52,7 @@ def create_tables():
     if conn:
         try:
             cur = conn.cursor()
-            
+
             # Create users table
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS users (
@@ -71,7 +70,7 @@ def create_tables():
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
             """)
-            
+
             # Create email verification table
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS email_verifications (
@@ -83,7 +82,7 @@ def create_tables():
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
             """)
-            
+
             # Create strain_names table for autocomplete (removed strain_type)
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS strain_names (
@@ -94,7 +93,7 @@ def create_tables():
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
             """)
-            
+
             # Create breeders table for autocomplete
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS breeders (
@@ -104,11 +103,11 @@ def create_tables():
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
             """)
-            
+
             # Insert all 456 strain names if table is empty
             cur.execute("SELECT COUNT(*) FROM strain_names")
             count = cur.fetchone()[0]
-            
+
             if count == 0:
                 # Complete strain list from attached file (all 456 strains)
                 all_strains = [
@@ -124,7 +123,7 @@ def create_tables():
                     (None, 'Granddaddy Purple', True),
                     (None, 'Pineapple Express', True),
                     (None, 'Godfather OG', True),
-                    
+
                     # All 456 strains from the file
                     (None, 'A-Dub', False),
                     (None, 'A-Train', False),
@@ -571,7 +570,7 @@ def create_tables():
                     (None, '814 Fireworks', False),
                     (None, '818 OG', False),
                     (None, '88G', False),
-                    
+
                     # Thai local strains (with Thai translations)
                     ('ไทยสติ๊ก', 'Thai Stick', True),
                     ('ช้างไทย', 'Thai Elephant', False),
@@ -579,16 +578,16 @@ def create_tables():
                     ('สายพันธุ์เหนือ', 'Northern Thai', False),
                     ('สายพันธุ์อีสาน', 'Isaan Strain', False),
                 ]
-                
+
                 cur.executemany("""
                     INSERT INTO strain_names (name_th, name_en, is_popular)
                     VALUES (%s, %s, %s)
                 """, all_strains)
-            
+
             # Insert breeder names if table is empty
             cur.execute("SELECT COUNT(*) FROM breeders")
             breeder_count = cur.fetchone()[0]
-            
+
             if breeder_count == 0:
                 # All breeders from the file
                 all_breeders = [
@@ -733,12 +732,12 @@ def create_tables():
                     ('Zamnesia', False),
                     ('Zmoothiez', False),
                 ]
-                
+
                 cur.executemany("""
                     INSERT INTO breeders (name, is_popular)
                     VALUES (%s, %s)
                 """, all_breeders)
-            
+
             # Create buds_data table
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS buds_data (
@@ -775,7 +774,7 @@ def create_tables():
                     created_by INTEGER REFERENCES users(id)
                 );
             """)
-            
+
             # Create index for better performance
             cur.execute("""
                 CREATE INDEX IF NOT EXISTS idx_strain_names_th ON strain_names(name_th);
@@ -788,7 +787,7 @@ def create_tables():
                 CREATE INDEX IF NOT EXISTS idx_buds_strain_type ON buds_data(strain_type);
                 CREATE INDEX IF NOT EXISTS idx_buds_grower_id ON buds_data(grower_id);
             """)
-            
+
             conn.commit()
             print("Tables created successfully")
         except Exception as e:
@@ -809,16 +808,16 @@ def send_verification_email(email, username, token):
             🔶 จำลองการส่งอีเมล (Demo Mode) 🔶
             ถึง: {email}
             หัวข้อ: ยืนยันการลงทะเบียน - Cannabis App
-            
+
             สวัสดี {username}!
             ขอบคุณที่ลงทะเบียนกับ Cannabis App
-            
+
             ลิงก์ยืนยัน: {verification_url}
-            
+
             📌 สำหรับการทดสอบ: คุณสามารถคัดลอกลิงก์ข้างต้นไปวางในเบราว์เซอร์เพื่อยืนยันได้เลย
             """)
             return True
-            
+
         verification_url = url_for('verify_email', token=token, _external=True)
         msg = Message(
             subject='ยืนยันการลงทะเบียน - Cannabis App',
@@ -849,12 +848,79 @@ def index():
         return redirect('/auth')
     return redirect('/profile')
 
+def is_authenticated():
+    return 'user_id' in session
+
 @app.route('/profile')
 def profile():
-    # Check if user is logged in, if not redirect to auth page
-    if 'user_id' not in session:
+    if not is_authenticated():
         return redirect('/auth')
     return render_template('profile.html')
+
+@app.route('/activity')
+def activity():
+    if not is_authenticated():
+        return redirect('/auth')
+    return render_template('activity.html')
+
+@app.route('/api/user_buds')
+def get_user_buds():
+    if not is_authenticated():
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        user_id = session.get('user_id')
+        cur.execute("""
+            SELECT strain_name_en, strain_name_th, breeder, thc_percentage, 
+                   cbd_percentage, strain_type, created_at
+            FROM buds_data
+            WHERE created_by = %s 
+            ORDER BY created_at DESC
+        """, (user_id,))
+
+        buds = []
+        for row in cur.fetchall():
+            buds.append({
+                'strain_name_en': row[0],
+                'strain_name_th': row[1],
+                'breeder': row[2],
+                'thc_percentage': row[3],
+                'cbd_percentage': row[4],
+                'strain_type': row[5],
+                'created_at': row[6].strftime('%Y-%m-%d %H:%M:%S') if row[6] else None
+            })
+
+        cur.close()
+        conn.close()
+
+        return jsonify({'buds': buds})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/user_reviews')
+def get_user_reviews():
+    if not is_authenticated():
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        user_id = session.get('user_id')
+        # สำหรับตอนนี้ return empty array เพราะยังไม่มีตาราง reviews
+        # cur.execute("SELECT strain_name, rating, review_text, created_at FROM reviews WHERE user_id = %s ORDER BY created_at DESC", (user_id,))
+
+        reviews = []  # ชั่วคราวให้เป็น array ว่าง
+
+        cur.close()
+        conn.close()
+
+        return jsonify({'reviews': reviews})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/register')
 def register_page():
@@ -879,12 +945,12 @@ def login():
     data = request.get_json()
     email = data.get('email')
     password = data.get('password')
-    
+
     if not email or not password:
         return jsonify({'success': False, 'error': 'กรุณากรอกอีเมลและรหัสผ่าน'}), 400
-    
+
     password_hash = hashlib.sha256(password.encode()).hexdigest()
-    
+
     conn = get_db_connection()
     if conn:
         try:
@@ -894,16 +960,16 @@ def login():
                 FROM users 
                 WHERE email = %s AND password_hash = %s
             """, (email, password_hash))
-            
+
             user = cur.fetchone()
             if user:
                 user_id, username, email, is_verified = user
-                
+
                 # Create session (no email verification required)
                 session['user_id'] = user_id
                 session['username'] = username
                 session['email'] = email
-                
+
                 return jsonify({
                     'success': True,
                     'message': f'เข้าสู่ระบบสำเร็จ ยินดีต้อนรับ {username}!',
@@ -914,7 +980,7 @@ def login():
                     'success': False,
                     'error': 'อีเมลหรือรหัสผ่านไม่ถูกต้อง'
                 }), 400
-                
+
         except Exception as e:
             return jsonify({'success': False, 'error': str(e)}), 500
         finally:
@@ -929,17 +995,17 @@ def quick_signup():
     username = data.get('username')
     email = data.get('email')
     password = data.get('password')
-    
+
     if not username or not email or not password:
         return jsonify({'success': False, 'error': 'กรุณากรอกข้อมูลให้ครบถ้วน'}), 400
-    
+
     password_hash = hashlib.sha256(password.encode()).hexdigest()
-    
+
     conn = get_db_connection()
     if conn:
         try:
             cur = conn.cursor()
-            
+
             # Check if user exists
             cur.execute("SELECT id FROM users WHERE username = %s OR email = %s", (username, email))
             if cur.fetchone():
@@ -947,28 +1013,28 @@ def quick_signup():
                     'success': False,
                     'error': 'ชื่อผู้ใช้หรืออีเมลนี้ถูกใช้แล้ว'
                 }), 400
-            
+
             # Create user (quick signup - auto verified)
             cur.execute("""
                 INSERT INTO users (username, email, password_hash, is_consumer, is_verified)
                 VALUES (%s, %s, %s, %s, %s)
                 RETURNING id
             """, (username, email, password_hash, True, True))
-            
+
             user_id = cur.fetchone()[0]
             conn.commit()
-            
+
             # Auto login
             session['user_id'] = user_id
             session['username'] = username
             session['email'] = email
-            
+
             return jsonify({
                 'success': True,
                 'message': f'สมัครสมาชิกสำเร็จ! ยินดีต้อนรับ {username}',
                 'redirect': '/profile'
             })
-            
+
         except Exception as e:
             conn.rollback()
             return jsonify({'success': False, 'error': str(e)}), 500
@@ -989,7 +1055,7 @@ def verify_email(token):
     if conn:
         try:
             cur = conn.cursor()
-            
+
             # Check if token is valid and not expired
             cur.execute("""
                 SELECT ev.user_id, u.username, u.email 
@@ -997,16 +1063,16 @@ def verify_email(token):
                 JOIN users u ON ev.user_id = u.id
                 WHERE ev.token = %s AND ev.expires_at > NOW() AND ev.is_used = FALSE
             """, (token,))
-            
+
             result = cur.fetchone()
             if result:
                 user_id, username, email = result
-                
+
                 # Mark token as used and user as verified
                 cur.execute("UPDATE email_verifications SET is_used = TRUE WHERE token = %s", (token,))
                 cur.execute("UPDATE users SET is_verified = TRUE WHERE id = %s", (user_id,))
                 conn.commit()
-                
+
                 return f"""
                 <html>
                 <head><meta charset="UTF-8"></head>
@@ -1045,7 +1111,7 @@ def verify_email(token):
 def get_profile():
     if 'user_id' not in session:
         return jsonify({'error': 'ไม่ได้เข้าสู่ระบบ'}), 401
-    
+
     user_id = session['user_id']
     conn = get_db_connection()
     if conn:
@@ -1057,7 +1123,7 @@ def get_profile():
                 FROM users WHERE id = %s
             """, (user_id,))
             user = cur.fetchone()
-            
+
             if user:
                 user_data = {
                     'id': user[0],
@@ -1075,7 +1141,7 @@ def get_profile():
                 return jsonify(user_data)
             else:
                 return jsonify({'error': 'ไม่พบข้อมูลผู้ใช้'}), 404
-                
+
         except Exception as e:
             return jsonify({'error': str(e)}), 500
         finally:
@@ -1088,37 +1154,37 @@ def get_profile():
 def update_profile():
     if 'user_id' not in session:
         return jsonify({'error': 'ไม่ได้เข้าสู่ระบบ'}), 401
-    
+
     user_id = session['user_id']
     data = request.get_json()
-    
+
     username = data.get('username')
     email = data.get('email')
     birth_year = data.get('birth_year')
     is_consumer = data.get('is_consumer', False)
     is_grower = data.get('is_grower', False)
     is_budtender = data.get('is_budtender', False)
-    
+
     if not username or not email:
         return jsonify({'error': 'กรุณากรอกชื่อผู้ใช้และอีเมล'}), 400
-    
+
     conn = get_db_connection()
     if conn:
         try:
             cur = conn.cursor()
-            
+
             # Check if username or email already exists (excluding current user)
             cur.execute("""
                 SELECT id FROM users 
                 WHERE (username = %s OR email = %s) AND id != %s
             """, (username, email, user_id))
             existing_user = cur.fetchone()
-            
+
             if existing_user:
                 return jsonify({
                     'error': 'ชื่อผู้ใช้หรืออีเมลนี้ถูกใช้โดยผู้ใช้อื่นแล้ว'
                 }), 400
-            
+
             # Update user profile
             cur.execute("""
                 UPDATE users 
@@ -1130,18 +1196,18 @@ def update_profile():
                 int(birth_year) if birth_year else None,
                 is_consumer, is_grower, is_budtender, user_id
             ))
-            
+
             conn.commit()
-            
+
             # Update session data
             session['username'] = username
             session['email'] = email
-            
+
             return jsonify({
                 'success': True,
                 'message': 'อัพเดทโปรไฟล์สำเร็จ'
             })
-            
+
         except Exception as e:
             conn.rollback()
             return jsonify({'error': str(e)}), 500
@@ -1157,12 +1223,12 @@ def get_buds():
     strain_type = request.args.get('strain_type')
     effect = request.args.get('effect')
     grower_id = request.args.get('grower_id')
-    
+
     conn = get_db_connection()
     if conn:
         try:
             cur = conn.cursor()
-            
+
             # Build query with filters
             query = """
                 SELECT b.*, u.username as grower_name 
@@ -1171,7 +1237,7 @@ def get_buds():
                 WHERE 1=1
             """
             params = []
-            
+
             if strain_type:
                 query += " AND b.strain_type = %s"
                 params.append(strain_type)
@@ -1181,12 +1247,12 @@ def get_buds():
             if grower_id:
                 query += " AND b.grower_id = %s"
                 params.append(grower_id)
-                
+
             query += " ORDER BY b.created_at DESC"
-            
+
             cur.execute(query, params)
             buds = cur.fetchall()
-            
+
             buds_list = []
             for bud in buds:
                 buds_list.append({
@@ -1223,7 +1289,7 @@ def get_buds():
                     'created_by': bud[30],
                     'grower_name': bud[31]
                 })
-            
+
             return jsonify(buds_list)
         except Exception as e:
             return jsonify({'error': str(e)}), 500
@@ -1238,21 +1304,21 @@ def add_bud():
     """Add new bud data"""
     if 'user_id' not in session:
         return jsonify({'error': 'ไม่ได้เข้าสู่ระบบ'}), 401
-    
+
     data = request.get_json()
     user_id = session['user_id']
-    
+
     # Required fields validation
     required_fields = ['strain_name_th', 'strain_name_en', 'strain_type']
     for field in required_fields:
         if not data.get(field):
             return jsonify({'error': f'กรุณากรอก {field}'}), 400
-    
+
     conn = get_db_connection()
     if conn:
         try:
             cur = conn.cursor()
-            
+
             cur.execute("""
                 INSERT INTO buds_data (
                     strain_name_th, strain_name_en, breeder, strain_type,
@@ -1293,16 +1359,16 @@ def add_bud():
                 data.get('flowering_type'),
                 user_id
             ))
-            
+
             bud_id = cur.fetchone()[0]
             conn.commit()
-            
+
             return jsonify({
                 'success': True,
                 'message': 'เพิ่มข้อมูล Bud สำเร็จ',
                 'bud_id': bud_id
             }), 201
-            
+
         except Exception as e:
             conn.rollback()
             return jsonify({'error': str(e)}), 500
@@ -1317,27 +1383,27 @@ def update_bud(bud_id):
     """Update existing bud data"""
     if 'user_id' not in session:
         return jsonify({'error': 'ไม่ได้เข้าสู่ระบบ'}), 401
-    
+
     data = request.get_json()
     user_id = session['user_id']
-    
+
     conn = get_db_connection()
     if conn:
         try:
             cur = conn.cursor()
-            
+
             # Check if user has permission to update (owner or admin)
             cur.execute("""
                 SELECT created_by FROM buds_data WHERE id = %s
             """, (bud_id,))
             result = cur.fetchone()
-            
+
             if not result:
                 return jsonify({'error': 'ไม่พบข้อมูล Bud'}), 404
-            
+
             if result[0] != user_id:
                 return jsonify({'error': 'ไม่มีสิทธิ์แก้ไขข้อมูลนี้'}), 403
-            
+
             cur.execute("""
                 UPDATE buds_data SET
                     strain_name_th = %s, strain_name_en = %s, breeder = %s,
@@ -1377,14 +1443,14 @@ def update_bud(bud_id):
                 data.get('flowering_type'),
                 bud_id
             ))
-            
+
             conn.commit()
-            
+
             return jsonify({
                 'success': True,
                 'message': 'อัพเดทข้อมูล Bud สำเร็จ'
             })
-            
+
         except Exception as e:
             conn.rollback()
             return jsonify({'error': str(e)}), 500
@@ -1399,26 +1465,26 @@ def upload_bud_images(bud_id):
     """Upload images for a specific bud"""
     if 'user_id' not in session:
         return jsonify({'error': 'ไม่ได้เข้าสู่ระบบ'}), 401
-    
+
     user_id = session['user_id']
-    
+
     conn = get_db_connection()
     if conn:
         try:
             cur = conn.cursor()
-            
+
             # Check if user has permission to upload images (owner of the bud)
             cur.execute("""
                 SELECT created_by FROM buds_data WHERE id = %s
             """, (bud_id,))
             result = cur.fetchone()
-            
+
             if not result:
                 return jsonify({'error': 'ไม่พบข้อมูล Bud'}), 404
-            
+
             if result[0] != user_id:
                 return jsonify({'error': 'ไม่มีสิทธิ์อัพโหลดรูปภาพสำหรับ Bud นี้'}), 403
-            
+
             # Handle image uploads
             image_urls = {}
             for i in range(1, 5):  # image_1 to image_4
@@ -1432,7 +1498,7 @@ def upload_bud_images(bud_id):
                         file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                         file.save(file_path)
                         image_urls[f'image_{i}_url'] = file_path
-            
+
             # Update database with image URLs
             if image_urls:
                 update_fields = []
@@ -1440,16 +1506,16 @@ def upload_bud_images(bud_id):
                 for field, url in image_urls.items():
                     update_fields.append(f"{field} = %s")
                     update_values.append(url)
-                
+
                 update_values.append(bud_id)
                 update_query = f"""
                     UPDATE buds_data SET {', '.join(update_fields)}, updated_at = CURRENT_TIMESTAMP
                     WHERE id = %s
                 """
-                
+
                 cur.execute(update_query, update_values)
                 conn.commit()
-                
+
                 return jsonify({
                     'success': True,
                     'message': f'อัพโหลดรูปภาพสำเร็จ ({len(image_urls)} รูป)',
@@ -1457,7 +1523,7 @@ def upload_bud_images(bud_id):
                 })
             else:
                 return jsonify({'error': 'ไม่พบไฟล์รูปภาพที่ถูกต้อง'}), 400
-                
+
         except Exception as e:
             conn.rollback()
             return jsonify({'error': str(e)}), 500
@@ -1472,34 +1538,34 @@ def delete_bud(bud_id):
     """Delete bud data"""
     if 'user_id' not in session:
         return jsonify({'error': 'ไม่ได้เข้าสู่ระบบ'}), 401
-    
+
     user_id = session['user_id']
-    
+
     conn = get_db_connection()
     if conn:
         try:
             cur = conn.cursor()
-            
+
             # Check if user has permission to delete
             cur.execute("""
                 SELECT created_by FROM buds_data WHERE id = %s
             """, (bud_id,))
             result = cur.fetchone()
-            
+
             if not result:
                 return jsonify({'error': 'ไม่พบข้อมูล Bud'}), 404
-            
+
             if result[0] != user_id:
                 return jsonify({'error': 'ไม่มีสิทธิ์ลบข้อมูลนี้'}), 403
-            
+
             cur.execute("DELETE FROM buds_data WHERE id = %s", (bud_id,))
             conn.commit()
-            
+
             return jsonify({
                 'success': True,
                 'message': 'ลบข้อมูล Bud สำเร็จ'
             })
-            
+
         except Exception as e:
             conn.rollback()
             return jsonify({'error': str(e)}), 500
@@ -1514,45 +1580,46 @@ def add_strain():
     """Add new strain name to database"""
     if 'user_id' not in session:
         return jsonify({'error': 'ไม่ได้เข้าสู่ระบบ'}), 401
-    
+
     data = request.get_json()
     name_en = data.get('name_en', '').strip()
     name_th = data.get('name_th', '').strip()
     is_popular = data.get('is_popular', False)
-    
+
     if not name_en:
+```python
         return jsonify({'error': 'กรุณากรอกชื่อภาษาอังกฤษ'}), 400
-    
+
     conn = get_db_connection()
     if conn:
         try:
             cur = conn.cursor()
-            
+
             # Check if strain already exists
             cur.execute("""
                 SELECT id FROM strain_names 
                 WHERE name_en ILIKE %s OR (name_th IS NOT NULL AND name_th ILIKE %s)
             """, (name_en, name_th if name_th else None))
-            
+
             if cur.fetchone():
                 return jsonify({'error': 'สายพันธุ์นี้มีในระบบแล้ว'}), 400
-            
+
             # Insert new strain
             cur.execute("""
                 INSERT INTO strain_names (name_en, name_th, is_popular)
                 VALUES (%s, %s, %s)
                 RETURNING id
             """, (name_en, name_th if name_th else None, is_popular))
-            
+
             strain_id = cur.fetchone()[0]
             conn.commit()
-            
+
             return jsonify({
                 'success': True,
                 'message': f'เพิ่มสายพันธุ์ "{name_en}" สำเร็จ',
                 'strain_id': strain_id
             }), 201
-            
+
         except Exception as e:
             conn.rollback()
             return jsonify({'error': str(e)}), 500
@@ -1567,14 +1634,14 @@ def search_breeders():
     """Search breeder names with autocomplete suggestions"""
     query = request.args.get('q', '').strip()
     limit = int(request.args.get('limit', 15))
-    
+
     conn = get_db_connection()
     if conn:
         try:
             cur = conn.cursor()
-            
+
             suggestions = []
-            
+
             if query:
                 # Search with query - case-insensitive partial matching
                 cur.execute("""
@@ -1586,7 +1653,7 @@ def search_breeders():
                              name
                     LIMIT %s
                 """, (f'%{query}%', f'{query}%', limit))
-                
+
                 for row in cur.fetchall():
                     suggestions.append({
                         'name': row[0],
@@ -1600,15 +1667,15 @@ def search_breeders():
                     ORDER BY is_popular DESC, name
                     LIMIT %s
                 """, (limit,))
-                
+
                 for row in cur.fetchall():
                     suggestions.append({
                         'name': row[0],
                         'is_popular': row[1]
                     })
-            
+
             return jsonify(suggestions)
-            
+
         except Exception as e:
             print(f"Error in search_breeders: {e}")
             return jsonify({'error': str(e)}), 500
@@ -1624,14 +1691,14 @@ def search_strains():
     query = request.args.get('q', '').strip()
     lang = request.args.get('lang', 'both')  # 'th', 'en', or 'both'
     limit = int(request.args.get('limit', 10))
-    
+
     conn = get_db_connection()
     if conn:
         try:
             cur = conn.cursor()
-            
+
             suggestions = []
-            
+
             if query:
                 # Search with query
                 if lang in ['en', 'both']:
@@ -1646,7 +1713,7 @@ def search_strains():
                                  name_en
                         LIMIT %s
                     """, (f'%{query}%', f'{query}%', limit))
-                    
+
                     for row in cur.fetchall():
                         if row[0]:
                             suggestions.append({
@@ -1654,7 +1721,7 @@ def search_strains():
                                 'language': 'en',
                                 'is_popular': row[1]
                             })
-                
+
                 if lang in ['th', 'both']:
                     # Search Thai names with ILIKE for case-insensitive partial matching
                     cur.execute("""
@@ -1667,7 +1734,7 @@ def search_strains():
                                  name_th
                         LIMIT %s
                     """, (f'%{query}%', f'{query}%', limit))
-                    
+
                     for row in cur.fetchall():
                         if row[0]:
                             suggestions.append({
@@ -1685,7 +1752,7 @@ def search_strains():
                         ORDER BY name_en
                         LIMIT %s
                     """, (limit,))
-                    
+
                     for row in cur.fetchall():
                         if row[0]:
                             suggestions.append({
@@ -1693,7 +1760,7 @@ def search_strains():
                                 'language': 'en',
                                 'is_popular': row[1]
                             })
-                
+
                 if lang in ['th', 'both']:
                     cur.execute("""
                         SELECT name_th, is_popular
@@ -1702,7 +1769,7 @@ def search_strains():
                         ORDER BY name_th
                         LIMIT %s
                     """, (limit,))
-                    
+
                     for row in cur.fetchall():
                         if row[0]:
                             suggestions.append({
@@ -1710,21 +1777,21 @@ def search_strains():
                                 'language': 'th',
                                 'is_popular': row[1]
                             })
-            
+
             # Remove duplicates and sort by popularity then alphabetically
             unique_suggestions = []
             seen_names = set()
-            
+
             for suggestion in suggestions:
                 if suggestion['name'] not in seen_names:
                     unique_suggestions.append(suggestion)
                     seen_names.add(suggestion['name'])
-            
+
             # Sort: popular first, then alphabetically
             unique_suggestions.sort(key=lambda x: (not x['is_popular'], x['name']))
-            
+
             return jsonify(unique_suggestions[:limit])
-            
+
         except Exception as e:
             print(f"Error in search_strains: {e}")
             return jsonify({'error': str(e)}), 500
@@ -1752,7 +1819,7 @@ def list_users():
                 FROM users ORDER BY created_at DESC
             """)
             users = cur.fetchall()
-            
+
             users_list = []
             for user in users:
                 users_list.append({
@@ -1768,7 +1835,7 @@ def list_users():
                     'grow_license_file_url': user[9],
                     'profile_image_url': user[10]
                 })
-            
+
             return jsonify(users_list)
         except Exception as e:
             return jsonify({'error': str(e)}), 500
@@ -1792,7 +1859,7 @@ def register_user():
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(file_path)
             license_file_url = file_path
-    
+
     # Handle profile image upload
     profile_image_url = None
     if 'profile_image' in request.files:
@@ -1805,7 +1872,7 @@ def register_user():
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(file_path)
             profile_image_url = file_path
-    
+
     # Get form data
     username = request.form.get('username')
     email = request.form.get('email')
@@ -1814,25 +1881,25 @@ def register_user():
     is_grower = 'is_grower' in request.form
     is_budtender = 'is_budtender' in request.form
     is_consumer = 'is_consumer' in request.form
-    
+
     # Simple password hashing (use proper hashing in production)
     password_hash = hashlib.sha256(password.encode()).hexdigest()
-    
+
     conn = get_db_connection()
     if conn:
         try:
             cur = conn.cursor()
-            
+
             # Check if username or email already exists
             cur.execute("SELECT id FROM users WHERE username = %s OR email = %s", (username, email))
             existing_user = cur.fetchone()
-            
+
             if existing_user:
                 return jsonify({
                     'success': False, 
                     'error': 'ชื่อผู้ใช้หรืออีเมลนี้ถูกใช้ไปแล้ว'
                 }), 400
-            
+
             # Insert user
             cur.execute("""
                 INSERT INTO users (username, email, password_hash, is_grower, grow_license_file_url, 
@@ -1846,20 +1913,20 @@ def register_user():
                 profile_image_url,
                 False  # Not verified initially
             ))
-            
+
             user_id = cur.fetchone()[0]
-            
+
             # Generate verification token
             token = generate_verification_token()
             expires_at = datetime.now() + timedelta(hours=24)
-            
+
             cur.execute("""
                 INSERT INTO email_verifications (user_id, token, expires_at)
                 VALUES (%s, %s, %s)
             """, (user_id, token, expires_at))
-            
+
             conn.commit()
-            
+
             # Send verification email
             if send_verification_email(email, username, token):
                 return jsonify({
@@ -1873,7 +1940,7 @@ def register_user():
                     'message': 'ลงทะเบียนสำเร็จ แต่ไม่สามารถส่งอีเมลยืนยันได้',
                     'user_id': user_id
                 }), 201
-                
+
         except Exception as e:
             conn.rollback()
             return jsonify({'success': False, 'error': str(e)}), 500

@@ -29,20 +29,28 @@
         
         .card-header {
             background: linear-gradient(135deg, #4CAF50, #45a049);
-            padding: 30px 25px 80px 25px;
+            padding: 20px 25px 80px 25px;
             text-align: center;
             position: relative;
+        }
+        
+        .cannabis-icon {
+            font-size: 24px;
+            margin-bottom: 10px;
         }
         
         .welcome-text {
             color: white;
             margin: 0;
-            font-size: 16px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+        
+        .username-display {
+            font-size: 20px;
+            font-weight: 700;
+            margin-top: 5px;
         }
         
         .cannabis-icon {
@@ -266,10 +274,11 @@
             <button class="logout-btn" onclick="location.href='/logout'">
                 🚪 ออกจากระบบ
             </button>
-            <h1 class="welcome-text">
-                <span class="cannabis-icon">🌿</span>
-                ยินดีต้อนรับ<br>คุณ <span id="displayUsername">Budt.Boy</span>!
-            </h1>
+            <div class="cannabis-icon">🌿</div>
+            <div class="welcome-text">
+                ยินดีต้อนรับ<br>คุณ Budt.Boy !
+            </div>
+            <div class="username-display" id="displayUsername">Budt.Boy</div>
             <div class="profile-avatar" id="profileAvatar">
                 👤
             </div>
@@ -363,8 +372,8 @@
             <button class="btn btn-edit" onclick="toggleEditMode()" id="editBtn">
                 ✏️ แก้ไขโปรไฟล์
             </button>
-            <a href="/add-buds" class="btn btn-download">
-                ⬇️ เพิ่มดอกที่คุณมี
+            <a href="/activity" class="btn btn-download">
+                ⬇️ ข้อมูลกิจกรรม
             </a>
         </div>
     </div>

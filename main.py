@@ -173,13 +173,7 @@ def login():
             if user:
                 user_id, username, email, is_verified = user
                 
-                if not is_verified:
-                    return jsonify({
-                        'success': False, 
-                        'error': 'กรุณายืนยันอีเมลก่อนเข้าสู่ระบบ'
-                    }), 400
-                
-                # Create session
+                # Create session (no email verification required)
                 session['user_id'] = user_id
                 session['username'] = username
                 session['email'] = email

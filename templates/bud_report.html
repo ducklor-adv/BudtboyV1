@@ -1,0 +1,490 @@
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cannabis App - รายงานดอกแบบละเอียด</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e8f5e8 0%, #f0f8ff 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            padding: 20px 30px;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .bud-header {
+            padding: 30px;
+            text-align: center;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .bud-name {
+            font-size: 28px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .bud-name-thai {
+            font-size: 20px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .bud-id {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 14px;
+            font-weight: 600;
+            display: inline-block;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .info-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            border-left: 4px solid #2196F3;
+        }
+        
+        .info-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .strain-type {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .type-indica { background: #e8eaf6; color: #3f51b5; }
+        .type-sativa { background: #e8f5e9; color: #4caf50; }
+        .type-hybrid { background: #fff3e0; color: #ff9800; }
+        
+        .thc-cbd {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .thc { color: #ff6b6b; }
+        .cbd { color: #4ecdc4; }
+        
+        .rating-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .rating-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .rating-display {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .stars {
+            font-size: 24px;
+            color: #ffd700;
+        }
+        
+        .rating-number {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .review-count {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .effects-section {
+            margin-bottom: 30px;
+        }
+        
+        .effects-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .effects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .effect-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #28a745;
+        }
+        
+        .effect-card.negative {
+            border-left-color: #dc3545;
+        }
+        
+        .effect-type {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        
+        .effect-text {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.4;
+        }
+        
+        .grower-section {
+            background: #e8f5e9;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .grower-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .grower-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .verified-badge {
+            background: #28a745;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            padding: 20px 0;
+        }
+        
+        .action-btn {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .action-btn:hover {
+            background: #1976D2;
+            transform: translateY(-2px);
+        }
+        
+        .action-btn.secondary {
+            background: #28a745;
+        }
+        
+        .action-btn.secondary:hover {
+            background: #218838;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: #666;
+        }
+        
+        .error {
+            text-align: center;
+            padding: 60px;
+            color: #dc3545;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .actions {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="/activity" class="back-btn">← กลับ</a>
+            <div class="header-title">
+                <h1>📊 รายงานดอกแบบละเอียด</h1>
+            </div>
+            <div style="width: 60px;"></div>
+        </div>
+        
+        <div id="loadingMessage" class="loading">กำลังโหลดข้อมูล...</div>
+        <div id="errorMessage" class="error" style="display: none;"></div>
+        
+        <div id="budContent" style="display: none;">
+            <div class="bud-header">
+                <div class="bud-name" id="budName">-</div>
+                <div class="bud-name-thai" id="budNameThai">-</div>
+                <div class="bud-id" id="budId">Bud ID: -</div>
+            </div>
+            
+            <div class="content">
+                <div class="info-grid">
+                    <div class="info-card">
+                        <div class="info-label">ผู้พัฒนา</div>
+                        <div class="info-value" id="breeder">-</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-label">ประเภท</div>
+                        <div class="info-value">
+                            <span class="strain-type" id="strainType">-</span>
+                        </div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-label">THC / CBD</div>
+                        <div class="info-value thc-cbd">
+                            <span class="thc" id="thc">THC: -%</span>
+                            <span class="cbd" id="cbd">CBD: -%</span>
+                        </div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-label">เกรด</div>
+                        <div class="info-value" id="grade">-</div>
+                    </div>
+                </div>
+                
+                <div class="rating-section">
+                    <div class="rating-title">📊 คะแนนรีวิว</div>
+                    <div class="rating-display">
+                        <div class="stars" id="ratingStars">-</div>
+                        <div class="rating-number" id="ratingNumber">0.0</div>
+                        <div class="review-count" id="reviewCount">(0 รีวิว)</div>
+                    </div>
+                </div>
+                
+                <div class="effects-section">
+                    <div class="effects-title">🎯 ผลกระทบ</div>
+                    <div class="effects-grid" id="effectsGrid">
+                        <!-- Effects will be populated here -->
+                    </div>
+                </div>
+                
+                <div class="grower-section">
+                    <div class="effects-title">👨‍🌾 ข้อมูลผู้ปลูก</div>
+                    <div class="grower-info">
+                        <div class="grower-name" id="growerName">-</div>
+                        <div class="verified-badge" id="verifiedBadge" style="display: none;">✅ ยืนยันแล้ว</div>
+                    </div>
+                </div>
+                
+                <div class="actions">
+                    <a href="/add-review" class="action-btn">⭐ เขียนรีวิว</a>
+                    <a href="#" class="action-btn secondary" id="viewReviewsBtn">📖 ดูรีวิวทั้งหมด</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const budId = urlParams.get('id');
+        
+        if (!budId) {
+            document.getElementById('loadingMessage').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'block';
+            document.getElementById('errorMessage').textContent = 'ไม่พบ ID ของดอก';
+        } else {
+            loadBudReport();
+        }
+        
+        async function loadBudReport() {
+            try {
+                // Load bud info
+                const budResponse = await fetch(`/api/buds/${budId}/info`);
+                
+                if (!budResponse.ok) {
+                    throw new Error('ไม่พบข้อมูลดอก');
+                }
+                
+                const budData = await budResponse.json();
+                const bud = budData.bud;
+                
+                // Load reviews for rating calculation
+                const reviewsResponse = await fetch(`/api/reviews?bud_id=${budId}`);
+                const reviews = reviewsResponse.ok ? await reviewsResponse.json() : [];
+                
+                displayBudReport(bud, reviews);
+                
+                document.getElementById('loadingMessage').style.display = 'none';
+                document.getElementById('budContent').style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error loading bud report:', error);
+                document.getElementById('loadingMessage').style.display = 'none';
+                document.getElementById('errorMessage').style.display = 'block';
+                document.getElementById('errorMessage').textContent = error.message || 'เกิดข้อผิดพลาดในการโหลดข้อมูล';
+            }
+        }
+        
+        function displayBudReport(bud, reviews) {
+            // Basic info
+            document.getElementById('budName').textContent = bud.strain_name_en || 'ไม่ระบุชื่อ';
+            document.getElementById('budNameThai').textContent = bud.strain_name_th || '';
+            document.getElementById('budId').textContent = `Bud ID: ${bud.id}`;
+            document.getElementById('breeder').textContent = bud.breeder || 'ไม่ระบุ';
+            document.getElementById('grade').textContent = bud.grade || 'ไม่ระบุ';
+            
+            // Strain type with styling
+            const strainTypeElement = document.getElementById('strainType');
+            strainTypeElement.textContent = bud.strain_type || 'ไม่ระบุ';
+            if (bud.strain_type) {
+                strainTypeElement.className = `strain-type type-${bud.strain_type.toLowerCase()}`;
+            }
+            
+            // THC/CBD
+            document.getElementById('thc').textContent = `THC: ${bud.thc_percentage || 'N/A'}%`;
+            document.getElementById('cbd').textContent = `CBD: ${bud.cbd_percentage || 'N/A'}%`;
+            
+            // Rating calculation
+            const avgRating = reviews.length > 0 
+                ? (reviews.reduce((sum, review) => sum + review.overall_rating, 0) / reviews.length)
+                : 0;
+            
+            document.getElementById('ratingStars').textContent = '⭐'.repeat(Math.round(avgRating));
+            document.getElementById('ratingNumber').textContent = avgRating.toFixed(1);
+            document.getElementById('reviewCount').textContent = `(${reviews.length} รีวิว)`;
+            
+            // Effects (if available)
+            displayEffects(bud);
+            
+            // Grower info
+            document.getElementById('growerName').textContent = bud.grower_name || 'ไม่ระบุ';
+            if (bud.grower_license_verified) {
+                document.getElementById('verifiedBadge').style.display = 'inline-block';
+            }
+            
+            // Set up view reviews button
+            document.getElementById('viewReviewsBtn').href = `/bud-reviews?bud_id=${bud.id}`;
+        }
+        
+        function displayEffects(bud) {
+            const effectsGrid = document.getElementById('effectsGrid');
+            effectsGrid.innerHTML = '';
+            
+            const effects = [
+                { type: 'ผลทางจิต (บวก)', text: bud.mental_effects_positive, positive: true },
+                { type: 'ผลทางจิต (ลบ)', text: bud.mental_effects_negative, positive: false },
+                { type: 'ผลทางกาย (บวก)', text: bud.physical_effects_positive, positive: true },
+                { type: 'ผลทางกาย (ลบ)', text: bud.physical_effects_negative, positive: false }
+            ];
+            
+            effects.forEach(effect => {
+                if (effect.text && effect.text.trim()) {
+                    const effectCard = document.createElement('div');
+                    effectCard.className = `effect-card ${effect.positive ? '' : 'negative'}`;
+                    effectCard.innerHTML = `
+                        <div class="effect-type">${effect.type}</div>
+                        <div class="effect-text">${effect.text}</div>
+                    `;
+                    effectsGrid.appendChild(effectCard);
+                }
+            });
+            
+            if (effectsGrid.children.length === 0) {
+                effectsGrid.innerHTML = '<div class="effect-card"><div class="effect-text">ไม่มีข้อมูลผลกระทบ</div></div>';
+            }
+        }
+    </script>
+</body>
+</html>

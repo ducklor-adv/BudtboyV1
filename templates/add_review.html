@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -13,7 +12,7 @@
             padding: 20px;
             min-height: 100vh;
         }
-        
+
         .container {
             max-width: 600px;
             margin: 0 auto;
@@ -22,7 +21,7 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             overflow: hidden;
         }
-        
+
         .header {
             background: linear-gradient(135deg, #ff9800, #ff6f00);
             padding: 20px 30px;
@@ -31,7 +30,7 @@
             align-items: center;
             justify-content: space-between;
         }
-        
+
         .back-btn {
             background: rgba(255,255,255,0.2);
             color: white;
@@ -43,30 +42,30 @@
             font-size: 14px;
             transition: all 0.3s ease;
         }
-        
+
         .back-btn:hover {
             background: rgba(255,255,255,0.3);
         }
-        
+
         .header-title {
             text-align: center;
             flex: 1;
         }
-        
+
         .header h1 {
             margin: 0;
             font-size: 24px;
             font-weight: 600;
         }
-        
+
         .form-container {
             padding: 30px;
         }
-        
+
         .form-group {
             margin-bottom: 25px;
         }
-        
+
         .form-label {
             display: block;
             margin-bottom: 8px;
@@ -74,7 +73,7 @@
             color: #333;
             font-size: 14px;
         }
-        
+
         .form-input, .form-select, .form-textarea {
             width: 100%;
             padding: 12px 15px;
@@ -84,53 +83,53 @@
             transition: all 0.3s ease;
             box-sizing: border-box;
         }
-        
+
         .form-input:focus, .form-select:focus, .form-textarea:focus {
             outline: none;
             border-color: #ff9800;
             box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.1);
         }
-        
+
         .form-textarea {
             resize: vertical;
             min-height: 100px;
         }
-        
+
         .rating-group {
             display: flex;
             gap: 15px;
             flex-wrap: wrap;
         }
-        
+
         .rating-item {
             flex: 1;
             min-width: 120px;
         }
-        
+
         .star-rating {
             display: flex;
             gap: 3px;
             margin-top: 5px;
         }
-        
+
         .star {
             font-size: 20px;
             color: #ddd;
             cursor: pointer;
             transition: color 0.2s ease;
         }
-        
+
         .star.active, .star:hover {
             color: #ffd700;
         }
-        
+
         .aroma-flavors {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
             gap: 10px;
             margin-top: 10px;
         }
-        
+
         .aroma-item {
             display: flex;
             align-items: center;
@@ -142,21 +141,21 @@
             cursor: pointer;
             transition: all 0.3s ease;
         }
-        
+
         .aroma-item:hover {
             background: #e9ecef;
         }
-        
+
         .aroma-item.selected {
             background: #fff3cd;
             border: 2px solid #ff9800;
         }
-        
+
         .aroma-item input[type="checkbox"] {
             margin: 0;
             width: auto;
         }
-        
+
         .submit-btn {
             width: 100%;
             background: linear-gradient(135deg, #ff9800, #ff6f00);
@@ -170,18 +169,18 @@
             transition: all 0.3s ease;
             margin-top: 20px;
         }
-        
+
         .submit-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(255, 152, 0, 0.3);
         }
-        
+
         .submit-btn:disabled {
             background: #ccc;
             cursor: not-allowed;
             transform: none;
         }
-        
+
         .error-message {
             background: #ffebee;
             color: #c62828;
@@ -190,7 +189,7 @@
             margin-bottom: 20px;
             font-size: 14px;
         }
-        
+
         .success-message {
             background: #e8f5e9;
             color: #2e7d32;
@@ -199,13 +198,13 @@
             margin-bottom: 20px;
             font-size: 14px;
         }
-        
+
         .loading {
             display: inline-flex;
             align-items: center;
             gap: 8px;
         }
-        
+
         .spinner {
             width: 16px;
             height: 16px;
@@ -214,7 +213,7 @@
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
-        
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -488,15 +487,15 @@
                 margin: 10px;
                 border-radius: 15px;
             }
-            
+
             .form-container {
                 padding: 20px;
             }
-            
+
             .rating-group {
                 flex-direction: column;
             }
-            
+
             .aroma-flavors {
                 grid-template-columns: 1fr 1fr;
             }
@@ -542,11 +541,11 @@
             </div>
             <div style="width: 60px;"></div>
         </div>
-        
+
         <div class="form-container">
             <div id="errorMessage" class="error-message" style="display: none;"></div>
             <div id="successMessage" class="success-message" style="display: none;"></div>
-            
+
             <form id="reviewForm">
                 <!-- เลือกดอกที่จะรีวิว -->
                 <div class="form-group">
@@ -558,7 +557,7 @@
                     <div id="budInfo" class="bud-info" style="display: none;"></div>
                     <input type="hidden" id="budSelect" required>
                 </div>
-                
+
                 <!-- คะแนนรวม -->
                 <div class="form-group">
                     <label class="form-label">⭐ คะแนนรวม</label>
@@ -571,14 +570,14 @@
                     </div>
                     <input type="hidden" id="overallRating" required>
                 </div>
-                
+
                 <!-- สรุปสั้น ๆ -->
                 <div class="form-group">
                     <label class="form-label">📝 สรุปสั้น ๆ (เช่น "กลิ่นส้มชัด สดชื่น")</label>
                     <input type="text" id="shortSummary" class="form-input" maxlength="200" 
                            placeholder="อธิบายสั้น ๆ เกี่ยวกับดอกนี้" required>
                 </div>
-                
+
                 <!-- กลิ่นและรส -->
                 <div class="form-group">
                     <label class="form-label">👃 กลิ่นและรส (เลือกได้หลายตัว)</label>
@@ -625,7 +624,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- คะแนนกลิ่น -->
                 <div class="form-group">
                     <label class="form-label">📊 คะแนนกลิ่น</label>
@@ -646,7 +645,7 @@
                 <!-- ผลกระทบที่รู้สึก -->
                 <div class="form-group">
                     <label class="form-label">🧠 ผลกระทบที่รู้สึก (เลือกได้หลายตัว)</label>
-                    
+
                     <!-- ผลกระทบต่อจิตใจ (เชิงบวก) -->
                     <div class="effects-category">
                         <h4 class="effects-category-title">🌟 ผลกระทบต่อจิตใจ (เชิงบวก)</h4>
@@ -835,12 +834,11 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- รีวิวเต็ม -->
                 <div class="form-group">
                     <label class="form-label">📖 เนื้อหารีวิวเต็ม</label>
-                    <textarea id="fullReview" class="form-textarea" 
-                              placeholder="เล่าประสบการณ์การใช้งานของคุณ เช่น ผลกระทบ อาการข้างเคียง เหมาะสำหรับเวลาไหน ฯลฯ"></textarea>
+                    <textarea id="fullReview" class="form-textarea"                              placeholder="เล่าประสบการณ์การใช้งานของคุณ เช่น ผลกระทบ อาการข้างเคียง เหมาะสำหรับเวลาไหน ฯลฯ"></textarea>
                 </div>
 
                 <!-- อัปโหลดรูปภาพ -->
@@ -856,7 +854,7 @@
                         <div id="imagePreview" class="image-preview-grid"></div>
                     </div>
                 </div>
-                
+
                 <button type="submit" class="submit-btn" id="submitBtn">
                     ⭐ เพิ่มรีวิว
                 </button>
@@ -877,7 +875,7 @@
         async function checkBudInfo(budId) {
             const budInfo = document.getElementById('budInfo');
             const checkBtn = document.getElementById('checkBudBtn');
-            
+
             if (!budId || budId.trim() === '') {
                 budInfo.style.display = 'none';
                 return;
@@ -911,7 +909,9 @@
         function displayBudInfo(bud, budInfo) {
             budInfo.innerHTML = `
                 <div class="bud-details">
-                    <div class="bud-image" style="background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 24px;">🌿</div>
+                    <div class="bud-image" style="width: 80px; height: 80px; border-radius: 10px; object-fit: cover; border: 2px solid #ddd; display: flex; align-items: center; justify-content: center; font-size: 24px;">🌿
+                    <a href="/bud_report/${bud.id}" target="_blank" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); color: white; opacity: 0; transition: opacity 0.3s;">Bud Report</a>
+                    </div>
                     <div class="bud-text-info">
                         <div class="bud-name">${bud.strain_name_en || 'ไม่ระบุชื่อ'}</div>
                         <div class="bud-details-text">
@@ -951,7 +951,7 @@
         function confirmBud(budId) {
             verifiedBudId = budId;
             document.getElementById('budSelect').value = budId;
-            
+
             // Update bud info to show confirmed state
             const budInfo = document.getElementById('budInfo');
             const confirmBtn = budInfo.querySelector('.confirm-btn');
@@ -960,7 +960,7 @@
                 confirmBtn.disabled = true;
                 confirmBtn.style.background = '#28a745';
             }
-            
+
             toggleReviewForm(true);
             showSuccess('ยืนยันข้อมูลดอกเรียบร้อย สามารถเขียนรีวิวได้แล้ว!');
         }
@@ -968,7 +968,7 @@
         function toggleReviewForm(enable) {
             const formElements = document.querySelectorAll('#reviewForm input, #reviewForm textarea, #reviewForm button, .star, .aroma-item, .effect-item');
             const submitBtn = document.getElementById('submitBtn');
-            
+
             formElements.forEach(element => {
                 if (element === submitBtn) {
                     element.disabled = !enable;
@@ -1019,11 +1019,11 @@
                 const ratingGroup = e.target.closest('.star-rating');
                 const ratingType = ratingGroup.getAttribute('data-rating');
                 const value = parseInt(e.target.getAttribute('data-value'));
-                
+
                 // Update rating value
                 ratings[ratingType] = value;
                 document.getElementById(ratingType + 'Rating').value = value;
-                
+
                 // Update visual stars
                 const stars = ratingGroup.querySelectorAll('.star');
                 stars.forEach((star, index) => {
@@ -1063,26 +1063,26 @@
         // Form submission
         document.getElementById('reviewForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
+
             const submitBtn = document.getElementById('submitBtn');
             const errorDiv = document.getElementById('errorMessage');
             const successDiv = document.getElementById('successMessage');
-            
+
             // Hide previous messages
             errorDiv.style.display = 'none';
             successDiv.style.display = 'none';
-            
+
             // Validate form
             if (!verifiedBudId) {
                 showError('กรุณาใส่ Bud ID และยืนยันข้อมูลก่อนเขียนรีวิว');
                 return;
             }
-            
+
             if (!ratings.overall) {
                 showError('กรุณาให้คะแนนรวม');
                 return;
             }
-            
+
             if (!document.getElementById('shortSummary').value.trim()) {
                 showError('กรุณาเขียนสรุปสั้น ๆ');
                 return;
@@ -1094,11 +1094,11 @@
                 showError('กรุณาเลือกผลกระทบที่รู้สึกอย่างน้อย 1 ตัว');
                 return;
             }
-            
+
             // Disable submit button and show loading
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<div class="loading"><div class="spinner"></div> กำลังบันทึก...</div>';
-            
+
             try {
                 // Upload images first
                 const imageUrls = await uploadImages();
@@ -1110,7 +1110,7 @@
                 // Collect selected effects
                 const effectCheckboxes = document.querySelectorAll('.effect-item input[type="checkbox"]:checked');
                 const selectedEffects = Array.from(effectCheckboxes).map(cb => cb.value);
-                
+
                 const reviewData = {
                     bud_reference_id: verifiedBudId,
                     overall_rating: ratings.overall,
@@ -1121,7 +1121,7 @@
                     full_review_content: document.getElementById('fullReview').value.trim() || null,
                     review_images: imageUrls
                 };
-                
+
                 const response = await fetch('/api/reviews', {
                     method: 'POST',
                     headers: {
@@ -1129,9 +1129,9 @@
                     },
                     body: JSON.stringify(reviewData)
                 });
-                
+
                 const result = await response.json();
-                
+
                 if (response.ok) {
                     showSuccess('เพิ่มรีวิวสำเร็จ! กำลังกลับไปหน้ากิจกรรม...');
                     setTimeout(() => {
@@ -1169,7 +1169,7 @@
 
         document.getElementById('imageInput').addEventListener('change', function(e) {
             const files = Array.from(e.target.files);
-            
+
             // Check if adding these files would exceed the limit
             if (selectedImages.length + files.length > maxImages) {
                 showError(`สามารถอัปโหลดได้สูงสุด ${maxImages} รูปภาพเท่านั้น`);
@@ -1199,7 +1199,7 @@
         function updateImagePreview() {
             const previewGrid = document.getElementById('imagePreview');
             const uploadArea = document.querySelector('.upload-area');
-            
+
             if (selectedImages.length === 0) {
                 previewGrid.innerHTML = '';
                 uploadArea.style.display = 'block';

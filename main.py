@@ -2409,6 +2409,13 @@ def report_page():
         return redirect('/auth')
     return render_template('report.html')
 
+@app.route('/bud-report')
+def bud_report_page():
+    # Check if user is logged in
+    if 'user_id' not in session:
+        return redirect('/auth')
+    return render_template('bud_report.html')
+
 @app.route('/api/upload-images', methods=['POST'])
 def upload_images():
     """Upload multiple images for reviews"""

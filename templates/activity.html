@@ -227,6 +227,35 @@
             border-radius: 12px;
             display: inline-block;
         }
+        .bud-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .report-btn, .edit-btn, .delete-btn {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+            display: inline-block;
+        }
+
+        .report-btn {
+            background: #2196F3;
+            color: white;
+        }
+
+        .report-btn:hover {
+            background: #1976D2;
+            transform: translateY(-1px);
+        }
     </style>
 </head>
 <body>
@@ -336,6 +365,11 @@
                                 📋 ดูรีวิวทั้งหมด
                             </button>
                         </div>
+                    </div>
+                    <div class="bud-actions">
+                        <a href="/bud-report?id=${bud.id}" class="report-btn">📊 Bud Report</a>
+                        <button class="edit-btn" onclick="editBud(${bud.id})">✏️ แก้ไข</button>
+                        <button class="delete-btn" onclick="deleteBud(${bud.id})">🗑️ ลบ</button>
                     </div>
                 </div>
             `).join('');

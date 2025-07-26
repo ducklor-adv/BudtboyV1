@@ -84,6 +84,45 @@ def create_tables():
                 );
             """)
             
+            # Create buds_data table
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS buds_data (
+                    id SERIAL PRIMARY KEY,
+                    strain_name_th VARCHAR(255) NOT NULL,
+                    strain_name_en VARCHAR(255) NOT NULL,
+                    breeder VARCHAR(255),
+                    strain_type VARCHAR(50) CHECK (strain_type IN ('Indica', 'Sativa', 'Hybrid')),
+                    thc_percentage DECIMAL(5,2) CHECK (thc_percentage >= 0 AND thc_percentage <= 100),
+                    cbd_percentage DECIMAL(5,2) CHECK (cbd_percentage >= 0 AND cbd_percentage <= 100),
+                    grade VARCHAR(10) CHECK (grade IN ('A+', 'A', 'B+', 'B', 'C')),
+                    aroma_flavor TEXT,
+                    top_terpenes_1 VARCHAR(100),
+                    top_terpenes_2 VARCHAR(100),
+                    top_terpenes_3 VARCHAR(100),
+                    effect VARCHAR(50) CHECK (effect IN ('ผ่อนคลาย', 'สนุกสนาน', 'สงบ', 'เพิ่มจินตนาการ')),
+                    recommended_time VARCHAR(20) CHECK (recommended_time IN ('กลางวัน', 'กลางคืน', 'ตลอดวัน')),
+                    grow_method VARCHAR(30) CHECK (grow_method IN ('Indoor', 'Outdoor', 'Greenhouse', 'Hydroponic')),
+                    harvest_date DATE,
+                    batch_number VARCHAR(100),
+                    grower_id INTEGER REFERENCES users(id),
+                    grower_license_verified BOOLEAN DEFAULT FALSE,
+                    fertilizer_type VARCHAR(20) CHECK (fertilizer_type IN ('Organic', 'Chemical', 'Mixed')),
+                    flowering_type VARCHAR(20) CHECK (flowering_type IN ('Photoperiod', 'Autoflower')),
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    created_by INTEGER REFERENCES users(id)
+                );
+            """)
+            
+            # Create index for better performance
+            cur.execute("""
+                CREATE INDEX IF NOT EXISTS idx_buds_strain_name_th ON buds_data(strain_name_th);
+                CREATE INDEX IF NOT EXISTS idx_buds_strain_name_en ON buds_data(strain_name_en);
+                CREATE INDEX IF NOT EXISTS idx_buds_strain_type ON buds_data(strain_type);
+                CREATE INDEX IF NOT EXISTS idx_buds_grower_id ON buds_data(grower_id);
+                CREATE INDEX IF NOT EXISTS idx_buds_effect ON buds_data(effect);
+            """)
+            
             conn.commit()
             print("Tables created successfully")
         except Exception as e:
@@ -428,6 +467,274 @@ def update_profile():
             return jsonify({
                 'success': True,
                 'message': 'อัพเดทโปรไฟล์สำเร็จ'
+            })
+            
+        except Exception as e:
+            conn.rollback()
+            return jsonify({'error': str(e)}), 500
+        finally:
+            cur.close()
+            conn.close()
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+@app.route('/api/buds', methods=['GET'])
+def get_buds():
+    """Get all buds data with optional filtering"""
+    strain_type = request.args.get('strain_type')
+    effect = request.args.get('effect')
+    grower_id = request.args.get('grower_id')
+    
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            
+            # Build query with filters
+            query = """
+                SELECT b.*, u.username as grower_name 
+                FROM buds_data b
+                LEFT JOIN users u ON b.grower_id = u.id
+                WHERE 1=1
+            """
+            params = []
+            
+            if strain_type:
+                query += " AND b.strain_type = %s"
+                params.append(strain_type)
+            if effect:
+                query += " AND b.effect = %s"
+                params.append(effect)
+            if grower_id:
+                query += " AND b.grower_id = %s"
+                params.append(grower_id)
+                
+            query += " ORDER BY b.created_at DESC"
+            
+            cur.execute(query, params)
+            buds = cur.fetchall()
+            
+            buds_list = []
+            for bud in buds:
+                buds_list.append({
+                    'id': bud[0],
+                    'strain_name_th': bud[1],
+                    'strain_name_en': bud[2],
+                    'breeder': bud[3],
+                    'strain_type': bud[4],
+                    'thc_percentage': float(bud[5]) if bud[5] else None,
+                    'cbd_percentage': float(bud[6]) if bud[6] else None,
+                    'grade': bud[7],
+                    'aroma_flavor': bud[8],
+                    'top_terpenes_1': bud[9],
+                    'top_terpenes_2': bud[10],
+                    'top_terpenes_3': bud[11],
+                    'effect': bud[12],
+                    'recommended_time': bud[13],
+                    'grow_method': bud[14],
+                    'harvest_date': bud[15].strftime('%Y-%m-%d') if bud[15] else None,
+                    'batch_number': bud[16],
+                    'grower_id': bud[17],
+                    'grower_license_verified': bud[18],
+                    'fertilizer_type': bud[19],
+                    'flowering_type': bud[20],
+                    'created_at': bud[21].strftime('%Y-%m-%d %H:%M:%S') if bud[21] else None,
+                    'updated_at': bud[22].strftime('%Y-%m-%d %H:%M:%S') if bud[22] else None,
+                    'created_by': bud[23],
+                    'grower_name': bud[24]
+                })
+            
+            return jsonify(buds_list)
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+        finally:
+            cur.close()
+            conn.close()
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+@app.route('/api/buds', methods=['POST'])
+def add_bud():
+    """Add new bud data"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'ไม่ได้เข้าสู่ระบบ'}), 401
+    
+    data = request.get_json()
+    user_id = session['user_id']
+    
+    # Required fields validation
+    required_fields = ['strain_name_th', 'strain_name_en', 'strain_type']
+    for field in required_fields:
+        if not data.get(field):
+            return jsonify({'error': f'กรุณากรอก {field}'}), 400
+    
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            
+            cur.execute("""
+                INSERT INTO buds_data (
+                    strain_name_th, strain_name_en, breeder, strain_type,
+                    thc_percentage, cbd_percentage, grade, aroma_flavor,
+                    top_terpenes_1, top_terpenes_2, top_terpenes_3,
+                    effect, recommended_time, grow_method, harvest_date,
+                    batch_number, grower_id, grower_license_verified,
+                    fertilizer_type, flowering_type, created_by
+                ) VALUES (
+                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+                ) RETURNING id
+            """, (
+                data.get('strain_name_th'),
+                data.get('strain_name_en'),
+                data.get('breeder'),
+                data.get('strain_type'),
+                data.get('thc_percentage'),
+                data.get('cbd_percentage'),
+                data.get('grade'),
+                data.get('aroma_flavor'),
+                data.get('top_terpenes_1'),
+                data.get('top_terpenes_2'),
+                data.get('top_terpenes_3'),
+                data.get('effect'),
+                data.get('recommended_time'),
+                data.get('grow_method'),
+                data.get('harvest_date'),
+                data.get('batch_number'),
+                data.get('grower_id'),
+                data.get('grower_license_verified', False),
+                data.get('fertilizer_type'),
+                data.get('flowering_type'),
+                user_id
+            ))
+            
+            bud_id = cur.fetchone()[0]
+            conn.commit()
+            
+            return jsonify({
+                'success': True,
+                'message': 'เพิ่มข้อมูล Bud สำเร็จ',
+                'bud_id': bud_id
+            }), 201
+            
+        except Exception as e:
+            conn.rollback()
+            return jsonify({'error': str(e)}), 500
+        finally:
+            cur.close()
+            conn.close()
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+@app.route('/api/buds/<int:bud_id>', methods=['PUT'])
+def update_bud(bud_id):
+    """Update existing bud data"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'ไม่ได้เข้าสู่ระบบ'}), 401
+    
+    data = request.get_json()
+    user_id = session['user_id']
+    
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            
+            # Check if user has permission to update (owner or admin)
+            cur.execute("""
+                SELECT created_by FROM buds_data WHERE id = %s
+            """, (bud_id,))
+            result = cur.fetchone()
+            
+            if not result:
+                return jsonify({'error': 'ไม่พบข้อมูล Bud'}), 404
+            
+            if result[0] != user_id:
+                return jsonify({'error': 'ไม่มีสิทธิ์แก้ไขข้อมูลนี้'}), 403
+            
+            cur.execute("""
+                UPDATE buds_data SET
+                    strain_name_th = %s, strain_name_en = %s, breeder = %s,
+                    strain_type = %s, thc_percentage = %s, cbd_percentage = %s,
+                    grade = %s, aroma_flavor = %s, top_terpenes_1 = %s,
+                    top_terpenes_2 = %s, top_terpenes_3 = %s, effect = %s,
+                    recommended_time = %s, grow_method = %s, harvest_date = %s,
+                    batch_number = %s, grower_id = %s, grower_license_verified = %s,
+                    fertilizer_type = %s, flowering_type = %s,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id = %s
+            """, (
+                data.get('strain_name_th'),
+                data.get('strain_name_en'),
+                data.get('breeder'),
+                data.get('strain_type'),
+                data.get('thc_percentage'),
+                data.get('cbd_percentage'),
+                data.get('grade'),
+                data.get('aroma_flavor'),
+                data.get('top_terpenes_1'),
+                data.get('top_terpenes_2'),
+                data.get('top_terpenes_3'),
+                data.get('effect'),
+                data.get('recommended_time'),
+                data.get('grow_method'),
+                data.get('harvest_date'),
+                data.get('batch_number'),
+                data.get('grower_id'),
+                data.get('grower_license_verified', False),
+                data.get('fertilizer_type'),
+                data.get('flowering_type'),
+                bud_id
+            ))
+            
+            conn.commit()
+            
+            return jsonify({
+                'success': True,
+                'message': 'อัพเดทข้อมูล Bud สำเร็จ'
+            })
+            
+        except Exception as e:
+            conn.rollback()
+            return jsonify({'error': str(e)}), 500
+        finally:
+            cur.close()
+            conn.close()
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+@app.route('/api/buds/<int:bud_id>', methods=['DELETE'])
+def delete_bud(bud_id):
+    """Delete bud data"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'ไม่ได้เข้าสู่ระบบ'}), 401
+    
+    user_id = session['user_id']
+    
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            
+            # Check if user has permission to delete
+            cur.execute("""
+                SELECT created_by FROM buds_data WHERE id = %s
+            """, (bud_id,))
+            result = cur.fetchone()
+            
+            if not result:
+                return jsonify({'error': 'ไม่พบข้อมูล Bud'}), 404
+            
+            if result[0] != user_id:
+                return jsonify({'error': 'ไม่มีสิทธิ์ลบข้อมูลนี้'}), 403
+            
+            cur.execute("DELETE FROM buds_data WHERE id = %s", (bud_id,))
+            conn.commit()
+            
+            return jsonify({
+                'success': True,
+                'message': 'ลบข้อมูล Bud สำเร็จ'
             })
             
         except Exception as e:

@@ -2230,7 +2230,6 @@ def get_bud_info(bud_id):
                        b.grade, b.aroma_flavor, b.recommended_time, b.grow_method,
                        b.harvest_date, b.batch_number, b.grower_license_verified,
                        b.fertilizer_type, b.flowering_type, 
-                       b.image_1_url, b.image_2_url, b.image_3_url, b.image_4_url,
                        b.created_at, b.grower_id,
                        u.username as grower_name, u.is_grower
                 FROM buds_data b
@@ -2262,14 +2261,10 @@ def get_bud_info(bud_id):
                 'grower_license_verified': result[13],
                 'fertilizer_type': result[14],
                 'flowering_type': result[15],
-                'image_1_url': result[16],
-                'image_2_url': result[17],
-                'image_3_url': result[18],
-                'image_4_url': result[19],
-                'created_at': result[20].strftime('%Y-%m-%d %H:%M:%S') if result[20] else None,
-                'grower_id': result[21],
-                'grower_name': result[22],
-                'is_grower': result[23]
+                'created_at': result[16].strftime('%Y-%m-%d %H:%M:%S') if result[16] else None,
+                'grower_id': result[17],
+                'grower_name': result[18],
+                'is_grower': result[19]
             }
 
             cur.close()

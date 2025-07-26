@@ -909,14 +909,28 @@
         }
 
         function displayBudInfo(bud, budInfo) {
-            const imageUrl = bud.image_1_url ? `/uploads/${bud.image_1_url.split('/').pop()}` : '';
-            
             budInfo.innerHTML = `
                 <div class="bud-details">
-                    ${imageUrl ? `<img src="${imageUrl}" alt="Bud Image" class="bud-image" onerror="this.style.display='none'">` : '<div class="bud-image" style="background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 24px;">🌿</div>'}
+                    <div class="bud-image" style="background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 24px;">🌿</div>
                     <div class="bud-text-info">
                         <div class="bud-name">${bud.strain_name_en || 'ไม่ระบุชื่อ'}</div>
                         <div class="bud-details-text">
+                            <strong>ชื่อไทย:</strong> ${bud.strain_name_th || 'ไม่ระบุ'}<br>
+                            <strong>ผู้พัฒนา:</strong> ${bud.breeder || 'ไม่ระบุ'}<br>
+                            <strong>ประเภท:</strong> ${bud.strain_type || 'ไม่ระบุ'}<br>
+                            <strong>THC:</strong> ${bud.thc_percentage || 'ไม่ระบุ'}% | 
+                            <strong>CBD:</strong> ${bud.cbd_percentage || 'ไม่ระบุ'}%
+                        </div>
+                        <div class="grower-info">
+                            <div class="grower-name">👨‍🌾 เจ้าของดอก: ${bud.grower_name || 'ไม่ระบุ'}</div>
+                            ${bud.grower_license_verified ? '<div style="color: #28a745; font-size: 12px;">✅ มีใบอนุญาตปลูก</div>' : ''}
+                        </div>
+                        <button type="button" class="confirm-btn" onclick="confirmBud(${bud.id})">
+                            ✅ ยืนยันเพื่อเขียนรีวิว
+                        </button>
+                    </div>
+                </div>
+            `;ils-text">
                             <strong>ชื่อไทย:</strong> ${bud.strain_name_th || 'ไม่ระบุ'}<br>
                             <strong>ผู้พัฒนา:</strong> ${bud.breeder || 'ไม่ระบุ'}<br>
                             <strong>ประเภท:</strong> ${bud.strain_type || 'ไม่ระบุ'}<br>

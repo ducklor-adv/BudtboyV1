@@ -424,6 +424,33 @@
             word-break: break-word;
         }
         
+        .bud-images {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-top: 12px;
+            padding: 0 10px;
+        }
+        
+        .bud-image {
+            width: 100%;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+            background: #f8f9fa;
+        }
+        
+        .no-image {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8f9fa;
+            color: #666;
+            font-size: 10px;
+            text-align: center;
+        }
+        
         @media (max-width: 768px) {
             .container {
                 margin: 5px;
@@ -505,6 +532,16 @@
                 align-items: flex-start;
                 gap: 5px;
             }
+            
+            .bud-images {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 6px;
+                padding: 0 8px;
+            }
+            
+            .bud-image {
+                height: 60px;
+            }
         }
     </style>
 </head>
@@ -526,6 +563,11 @@
                 <div class="bud-name" id="budName">-</div>
                 <div class="bud-name-thai" id="budNameThai">-</div>
                 <div class="bud-id" id="budId">Bud ID: -</div>
+                
+                <!-- รูปดอก 4 รูป -->
+                <div class="bud-images" id="budImages">
+                    <!-- Bud images will be populated here -->
+                </div>
             </div>
             
             <div class="content">
@@ -610,6 +652,9 @@
             document.getElementById('budNameThai').textContent = bud.strain_name_th || '';
             document.getElementById('budId').textContent = `Bud ID: ${bud.id}`;
             
+            // Display bud images
+            displayBudImages(bud);
+            
             // Display all info as list
             displayAllBudInfo(bud);
             
@@ -627,6 +672,24 @@
             
             // Set up view reviews button
             document.getElementById('viewReviewsBtn').href = `/bud-reviews?bud_id=${bud.id}`;
+        }
+        
+        function displayBudImages(bud) {
+            const budImages = document.getElementById('budImages');
+            const images = [
+                bud.image_1_url,
+                bud.image_2_url,
+                bud.image_3_url,
+                bud.image_4_url
+            ];
+            
+            budImages.innerHTML = images.map((imageUrl, index) => {
+                if (imageUrl && imageUrl.trim()) {
+                    return `<img src="${imageUrl}" alt="รูปดอก ${index + 1}" class="bud-image">`;
+                } else {
+                    return `<div class="bud-image no-image">ไม่มีรูป<br>${index + 1}</div>`;
+                }
+            }).join('');
         }
         
         function displayBasicInfo(bud) {
@@ -789,9 +852,10 @@
         function displayAllBudInfo(bud) {
             const allBudInfo = document.getElementById('allBudInfo');
             
-            // รวมข้อมูลทั้งหมด
+            // รวมข้อมูลทั้งหมด - ย้าย ผู้ปลูก ขึ้นไปข้างบนและแก้ ผู้พัฒนา
             const allInfo = [
-                { label: 'ผู้พัฒนา', value: bud.breeder },
+                { label: 'ผู้ปลูก', value: bud.grower_name },
+                { label: 'ผู้พัฒนาสายพันธ์', value: bud.breeder },
                 { label: 'ประเภท', value: bud.strain_type },
                 { label: 'THC', value: bud.thc_percentage ? `${bud.thc_percentage}%` : null },
                 { label: 'CBD', value: bud.cbd_percentage ? `${bud.cbd_percentage}%` : null },
@@ -810,7 +874,6 @@
                 { label: 'ผลทางจิต (ลบ)', value: bud.mental_effects_negative },
                 { label: 'ผลทางกาย (บวก)', value: bud.physical_effects_positive },
                 { label: 'ผลทางกาย (ลบ)', value: bud.physical_effects_negative },
-                { label: 'ผู้ปลูก', value: bud.grower_name },
                 { label: 'วันที่เพิ่มข้อมูล', value: formatDate(bud.created_at) }
             ];
             

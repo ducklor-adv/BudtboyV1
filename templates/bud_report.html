@@ -1312,11 +1312,10 @@
                                                 </div>
                                                 <div class="reviewer-name-display">${review.reviewer_name || 'ผู้ใช้ไม่ระบุชื่อ'}</div>
                                                 <div style="margin-left: 8px; font-size: 12px; color: #FF9800; font-weight: 600;">
-                                                    คะแนนรวม: ${'⭐'.repeat(review.overall_rating)} (${review.overall_rating}/5)
+                                                    คะแนนรวม: ${'⭐'.repeat(review.overall_rating)} (${review.overall_rating}/5)${review.aroma_rating ? ` | คะแนนกลิ่น: ${'⭐'.repeat(review.aroma_rating)} (${review.aroma_rating}/5)` : ''}
                                                 </div>
                                             </div>
                                         </div>
-                                        ${review.aroma_rating ? `<div class="aroma-rating-text">คะแนนกลิ่น : ${'⭐'.repeat(review.aroma_rating)} (${review.aroma_rating}/5)</div>` : ''}
                                     </div>
                                 </div>
 

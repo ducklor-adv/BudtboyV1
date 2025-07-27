@@ -218,6 +218,237 @@
             transform: translateY(-2px);
         }
 
+        .btn-chat {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-chat:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+            transform: translateY(-2px);
+        }
+
+        /* Chat Modal Styles */
+        .chat-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .chat-container {
+            position: relative;
+            background: white;
+            margin: 2% auto;
+            padding: 0;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 20px 20px 0 0;
+            position: relative;
+        }
+
+        .chat-close {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .chat-close:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.1);
+        }
+
+        .chat-title {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .chat-subtitle {
+            margin: 5px 0 0 0;
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .message.bot .message-avatar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .message.user .message-avatar {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+        }
+
+        .message-content {
+            background: white;
+            padding: 12px 16px;
+            border-radius: 18px;
+            max-width: 70%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            word-wrap: break-word;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+        }
+
+        .message-time {
+            font-size: 10px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .chat-input-container {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #eee;
+        }
+
+        .chat-input-wrapper {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .chat-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .chat-send-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .chat-send-btn:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+            transform: translateY(-2px);
+        }
+
+        .chat-send-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 10px 16px;
+            background: white;
+            border-radius: 18px;
+            max-width: 70%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ccc;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes typing {
+            0%, 80%, 100% {
+                opacity: 0.3;
+                transform: scale(0.8);
+            }
+            40% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
         .logout-btn {
             position: absolute;
             top: 15px;
@@ -437,12 +668,39 @@
         </div>
 
         <div class="action-buttons" id="actionButtons" style="display: none;">
+            <button class="btn btn-chat" onclick="openChatWithBudtBoy()" id="chatBtn">
+                💬 Chat with Budt.Boy
+            </button>
             <button class="btn btn-edit" onclick="toggleEditMode()" id="editBtn">
                 ✏️ แก้ไขโปรไฟล์
             </button>
             <a href="/activity" class="btn btn-download">
                 ⬇️ ข้อมูลกิจกรรม
             </a>
+        </div>
+    </div>
+
+    <!-- Chat Modal -->
+    <div id="chatModal" class="chat-modal">
+        <div class="chat-container">
+            <div class="chat-header">
+                <button class="chat-close" onclick="closeChatModal()">&times;</button>
+                <div class="chat-title">🤖 Budt.Boy AI Assistant</div>
+                <div class="chat-subtitle">ผู้ช่วยอัจฉริยะด้านกัญชา</div>
+            </div>
+            
+            <div class="chat-messages" id="chatMessages">
+                <!-- Messages will be populated here -->
+            </div>
+            
+            <div class="chat-input-container">
+                <div class="chat-input-wrapper">
+                    <input type="text" id="chatInput" class="chat-input" placeholder="พิมพ์ข้อความของคุณ..." onkeypress="handleChatKeyPress(event)">
+                    <button id="chatSendBtn" class="chat-send-btn" onclick="sendMessage()">
+                        <span>ส่ง</span> 📤
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -853,6 +1111,166 @@
 
         // แทนที่ฟังก์ชัน saveProfile เดิม
         window.saveProfile = saveProfileImproved;
+
+        // Chat functionality
+        let chatHistory = [];
+
+        function openChatWithBudtBoy() {
+            const modal = document.getElementById('chatModal');
+            modal.style.display = 'block';
+            
+            // Initialize chat if empty
+            if (chatHistory.length === 0) {
+                addBotMessage("สวัสดีครับ! ผม Budt.Boy ผู้ช่วยอัจฉริยะด้านกัญชา 🌿\n\nผมพร้อมช่วยตอบคำถามเกี่ยวกับ:\n• สายพันธุ์กัญชา\n• วิธีการปลูก\n• ผลกระทบและคุณสมบัติ\n• คำแนะนำทั่วไป\n\nมีอะไรอยากถามไหมครับ?");
+            }
+            
+            // Focus on input
+            document.getElementById('chatInput').focus();
+        }
+
+        function closeChatModal() {
+            const modal = document.getElementById('chatModal');
+            modal.style.display = 'none';
+        }
+
+        function handleChatKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Add user message
+            addUserMessage(message);
+            
+            // Clear input
+            input.value = '';
+            
+            // Show typing indicator
+            showTypingIndicator();
+            
+            // Simulate AI response (in real implementation, this would call an AI API)
+            setTimeout(() => {
+                hideTypingIndicator();
+                const response = generateBotResponse(message);
+                addBotMessage(response);
+            }, 1000 + Math.random() * 2000);
+        }
+
+        function addUserMessage(message) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message user';
+            
+            const currentUser = currentUserData || { username: 'คุณ' };
+            const avatarLetter = currentUser.username ? currentUser.username.charAt(0).toUpperCase() : 'U';
+            
+            messageDiv.innerHTML = `
+                <div class="message-avatar">${avatarLetter}</div>
+                <div class="message-content">
+                    ${message}
+                    <div class="message-time">${new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}</div>
+                </div>
+            `;
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            chatHistory.push({ role: 'user', message, time: new Date() });
+        }
+
+        function addBotMessage(message) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message bot';
+            
+            messageDiv.innerHTML = `
+                <div class="message-avatar">🤖</div>
+                <div class="message-content">
+                    ${message.replace(/\n/g, '<br>')}
+                    <div class="message-time">${new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}</div>
+                </div>
+            `;
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            chatHistory.push({ role: 'bot', message, time: new Date() });
+        }
+
+        function showTypingIndicator() {
+            const messagesContainer = document.getElementById('chatMessages');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message bot';
+            typingDiv.id = 'typingIndicator';
+            
+            typingDiv.innerHTML = `
+                <div class="message-avatar">🤖</div>
+                <div class="typing-indicator" style="display: block;">
+                    <div class="typing-dots">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+            `;
+            
+            messagesContainer.appendChild(typingDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function hideTypingIndicator() {
+            const typingIndicator = document.getElementById('typingIndicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+        }
+
+        function generateBotResponse(userMessage) {
+            const message = userMessage.toLowerCase();
+            
+            // Simple keyword-based responses (in real implementation, this would use AI)
+            if (message.includes('สวัสดี') || message.includes('หวัดดี') || message.includes('ดี')) {
+                return "สวัสดีครับ! ยินดีที่ได้รู้จัก มีอะไรเกี่ยวกับกัญชาที่อยากถามไหมครับ? 😊";
+            }
+            
+            if (message.includes('สายพันธุ์') || message.includes('strain')) {
+                return "เรามีข้อมูลสายพันธุ์กัญชามากมายครับ! \n\nสายพันธุ์ยอดนิยม:\n• Blue Dream - Hybrid (Sativa โดด)\n• OG Kush - Indica โดด\n• White Widow - Hybrid สมดุล\n• Girl Scout Cookies - Hybrid (Indica โดด)\n\nอยากรู้เพิ่มเติมเกี่ยวกับสายพันธุ์ไหนเป็นพิเศษไหมครับ?";
+            }
+            
+            if (message.includes('ปลูก') || message.includes('grow')) {
+                return "การปลูกกัญชานั้นต้องคำนึงถึงหลายปัจจัยครับ:\n\n🌱 ปัจจัยสำคัญ:\n• แสงแดด/แสงไฟ LED\n• ความชื้น 40-60%\n• อุณหภูมิ 20-26°C\n• ปุ่ยและสารอาหาร\n• การระบายอากาศ\n\nต้องการคำแนะนำเฉพาะด้านไหนไหมครับ?";
+            }
+            
+            if (message.includes('ผลกระทบ') || message.includes('effect')) {
+                return "ผลกระทบของกัญชาแบ่งได้เป็น:\n\n😊 ผลกระทบเชิงบวก:\n• ผ่อนคลาย\n• สร้างสรรค์\n• บรรเทาปวด\n• ช่วยให้หลับ\n\n⚠️ ผลข้างเคียง:\n• ปากแห้ง\n• ตาแดง\n• วิตกกังวล (ในบางคน)\n• ความจำระยะสั้น\n\nควรใช้อย่างรับผิดชอบครับ!";
+            }
+            
+            if (message.includes('ขอบคุณ') || message.includes('thank')) {
+                return "ด้วยความยินดีครับ! หากมีคำถามอื่นๆ เกี่ยวกับกัญชา สามารถถามได้เสมอนะครับ 🌿✨";
+            }
+            
+            if (message.includes('thc') || message.includes('cbd')) {
+                return "THC และ CBD เป็นสารสำคัญในกัญชาครับ:\n\n🔥 THC (Tetrahydrocannabinol):\n• ทำให้เมา/เหิม\n• บรรเทาปวด\n• กระตุ้นความอยาก\n\n🌿 CBD (Cannabidiol):\n• ไม่ทำให้เมา\n• ต้านอักเสบ\n• ลดวิตกกังวล\n• ช่วยผ่อนคลาย\n\nอัตราส่วนที่แตกต่างกันจะให้ผลที่แตกต่างกันครับ!";
+            }
+            
+            // Default response
+            return "ขออภัยครับ ผมยังไม่เข้าใจคำถามนี้ดี ลองถามเกี่ยวกับ:\n• สายพันธุ์กัญชา\n• การปลูก\n• ผลกระทบ\n• THC/CBD\n\nหรือถามในรูปแบบอื่นได้ครับ 😊";
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('chatModal');
+            if (event.target === modal) {
+                closeChatModal();
+            }
+        }
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {

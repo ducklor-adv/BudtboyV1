@@ -754,41 +754,108 @@
                     <div class="empty-state">
                         <div class="empty-icon">⭐</div>
                         <p>ยังไม่มีรีวิวในระบบ</p>
-                        <p style="font-size: 14px; color: #999;">คลิกปุ่ม "เพิ่มรีวิว" เพื่อแชร์ประสบการณ์ของคุณ</p>
+                        <p style="font-size: 14px; color: #999;">คลิกปุ่ม "เพิ่มรีวิู" เพื่อแชร์ประสบการณ์ของคุณ</p>
                     </div>
                 `;
                 return;
             }
 
             const reviewsHtml = reviews.map(review => {
-                const stars = Array(5).fill(0).map((_, i) => 
+                const overallStars = Array(5).fill(0).map((_, i) => 
                     i < review.overall_rating ? '⭐' : '☆'
                 ).join('');
 
+                const aromaStars = review.aroma_rating ? 
+                    Array(5).fill(0).map((_, i) => 
+                        i < review.aroma_rating ? '⭐' : '☆'
+                    ).join('') : null;
+
                 const effectsText = review.selected_effects && review.selected_effects.length > 0 
-                    ? review.selected_effects.slice(0, 3).join(', ') + (review.selected_effects.length > 3 ? '...' : '')
+                    ? review.selected_effects.slice(0, 5).join(', ') + (review.selected_effects.length > 5 ? '...' : '')
                     : 'ไม่ระบุ';
+
+                const aromaText = review.aroma_flavors && review.aroma_flavors.length > 0 
+                    ? review.aroma_flavors.join(', ')
+                    : 'ไม่ระบุ';
+
+                const contentPreview = review.full_review_content && review.full_review_content.length > 100 
+                    ? review.full_review_content.substring(0, 100) + '...'
+                    : review.full_review_content || '';
+
+                const hasImages = review.review_images && review.review_images.length > 0;
+                const imageCount = hasImages ? review.review_images.length : 0;
+
+                const createdDate = formatDate(review.created_at);
+                const updatedDate = review.updated_at && review.updated_at !== review.created_at 
+                    ? formatDate(review.updated_at) 
+                    : null;
 
                 return `
                     <div class="item-card">
                         <div class="item-header">
                             <div class="item-title">
-                                ${review.strain_name_th} (${review.strain_name_en})
+                                ${review.strain_name_th || 'ไม่ระบุชื่อไทย'} (${review.strain_name_en || 'ไม่ระบุชื่ออังกฤษ'})
                             </div>
-                            <div class="item-date">${formatDate(review.created_at)}</div>
+                            <div class="item-date">${createdDate}</div>
                         </div>
+                        
                         <div class="review-content">
                             <div class="review-main-info">
-                                <div class="item-rating">
-                                    <span class="stars">${stars}</span>
-                                    <span class="rating-text">${review.overall_rating}/5</span>
+                                <!-- คะแนนรวมและกลิ่น -->
+                                <div class="review-ratings">
+                                    <div class="overall-rating">
+                                        <strong>คะแนนรวม:</strong> ${overallStars} (${review.overall_rating}/5)
+                                    </div>
+                                    ${aromaStars ? `
+                                        <div class="aroma-rating">
+                                            <strong>คะแนนกลิ่น:</strong> ${aromaStars} (${review.aroma_rating}/5)
+                                        </div>
+                                    ` : ''}
                                 </div>
-                                <div class="item-summary">${review.short_summary}</div>
-                                <div class="item-effects">
-                                    <strong>เอฟเฟกต์:</strong> ${effectsText}
+
+                                <!-- สรุปสั้น -->
+                                <div class="review-summary">
+                                    <strong>สรุป:</strong> ${review.short_summary}
                                 </div>
-                                ${review.breeder ? `<div class="item-breeder">📦 ${review.breeder}</div>` : ''}
+
+                                <!-- เนื้อหาเต็ม -->
+                                ${contentPreview ? `
+                                    <div class="review-full-content">
+                                        <strong>รีวิวเต็ม:</strong>
+                                        <div class="content-preview">${contentPreview}</div>
+                                    </div>
+                                ` : ''}
+
+                                <!-- รายละเอียดอื่นๆ -->
+                                <div class="review-details">
+                                    <div class="review-effects">
+                                        <strong>🎯 เอฟเฟกต์:</strong> ${effectsText}
+                                    </div>
+                                    <div class="review-aromas">
+                                        <strong>🌸 กลิ่นและรส:</strong> ${aromaText}
+                                    </div>
+                                    ${review.breeder ? `
+                                        <div class="review-breeder">
+                                            <strong>📦 ผู้พัฒนา:</strong> ${review.breeder}
+                                        </div>
+                                    ` : ''}
+                                </div>
+
+                                <!-- ข้อมูลรูปภาพ -->
+                                ${hasImages ? `
+                                    <div class="review-images-info">
+                                        📷 มีรูปภาพประกอบ ${imageCount} รูป
+                                    </div>
+                                ` : ''}
+
+                                <!-- วันที่แก้ไข -->
+                                ${updatedDate ? `
+                                    <div class="review-updated">
+                                        <strong>แก้ไขล่าสุด:</strong> ${updatedDate}
+                                    </div>
+                                ` : ''}
                             </div>
+                            
                             <div class="review-actions">
                                 <button class="action-btn primary" onclick="editReview(${review.id})">✏️ แก้ไข</button>
                                 <button class="action-btn danger" onclick="deleteReview(${review.id})">🗑️ ลบ</button>

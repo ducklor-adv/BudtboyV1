@@ -837,7 +837,7 @@
                 const reviewStars = '⭐'.repeat(review.overall_rating);
                 const effectTags = review.selected_effects && review.selected_effects.length > 0 
                     ? review.selected_effects.slice(0, 6).map(effect => `<span class="effect-tag">${effect}</span>`).join('')
-                    : '<span class="effect-tag">ไม่มีข้อมูล</span>';
+                    : '<span class="effect-tag">ไม่มีข้อมูl</span>';
 
                 const aromaRating = review.aroma_rating 
                     ? `<div style="font-size: 10px; margin-top: 4px;"><strong>กลิ่น:</strong> ${'⭐'.repeat(review.aroma_rating)}</div>`
@@ -849,15 +849,12 @@
                        </div>`
                     : '';
 
-                // Default profile image if none provided
-                const profileImage = review.reviewer_profile_image || '/uploads/20250727_055943_review_1_budtboy1_V2.png';
-
                 return `
                     <div class="review-card">
                         <div class="review-header">
                             <div class="reviewer-info">
                                 <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 3px;">
-                                    <img src="${profileImage}" alt="Profile" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1px solid #ddd;">
+                                    <img src="/attached_assets/budt_boy_logo.png" alt="Profile" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1px solid #ddd;">
                                     <div class="reviewer-name">${review.reviewer_name || 'ผู้ใช้งาน'}</div>
                                 </div>
                                 <div class="review-date">${formatDate(review.created_at)}</div>
@@ -932,6 +929,7 @@
         }
 
         function formatDate(dateString) {
+            ```python
             if (!dateString) return 'ไม่ระบุ';
             const date = new Date(dateString);
             return date.toLocaleDateString('th-TH', {

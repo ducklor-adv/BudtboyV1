@@ -865,42 +865,88 @@
                 `;
             }).join('');
 
-            // Modified reviewsList.innerHTML to include the new image grid
-            reviewsList.innerHTML = `
+            // สร้าง HTML สำหรับคอลัมน์ 1: รูปโปรไฟล์ผู้รีวิว
+            const column1Html = `
+                <div class="item-card">
+                    <div class="item-header">
+                        <div class="item-name">ข้อมูลผู้รีวิว</div>
+                    </div>
+                    <div class="review-content">
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 15px; padding: 20px;">
+                            <div style="width: 80px; height: 80px; border-radius: 50%; background: #4CAF50; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; font-weight: bold;">
+                                👤
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-weight: bold; font-size: 16px; margin-bottom: 5px;">budtboy</div>
+                                <div style="color: #666; font-size: 12px;">ผู้รีวิว</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // สร้าง HTML สำหรับคอลัมน์ 2: รูปภาพจากรีวิว
+            const column2Html = `
                 <div class="item-card">
                     <div class="item-header">
                         <div class="item-name">รูปภาพจากรีวิว</div>
                     </div>
                     <div class="review-content">
-                        <div style="width: 100%; height: 200px; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 8px; border: 3px solid #dc3545; border-radius: 15px; padding: 8px; background: #f8f9fa;">
+                        <div style="width: 100%; height: 200px; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 4px; border: 2px solid #4CAF50; border-radius: 12px; padding: 6px; background: #f8f9fa; overflow: hidden;">
                             ${reviews.length > 0 && reviews[0].review_images && reviews[0].review_images.length > 0 ? 
                                 reviews[0].review_images.slice(0, 4).map((image, idx) => 
-                                    `<img src="${image}" alt="รูปรีวิว ${idx + 1}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; border: 1px solid #ddd;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">` 
+                                    `<div style="width: 100%; height: 100%; overflow: hidden; border-radius: 6px;">
+                                        <img src="${image}" alt="รูปรีวิว ${idx + 1}" style="width: 100%; height: 100%; object-fit: cover; cursor: pointer; transition: all 0.3s ease;">
+                                    </div>` 
                                 ).join('') + 
                                 (reviews[0].review_images.length < 4 ? 
                                     Array(4 - reviews[0].review_images.length).fill().map((_, idx) => 
-                                        `<div style="width: 100%; height: 100%; background: #e0e0e0; display: flex; align-items: center; justify-content: center; color: #666; font-size: 10px; text-align: center; border-radius: 8px; border: 1px solid #ddd;">ไม่มีรูป ${reviews[0].review_images.length + idx + 1}</div>`
+                                        `<div style="width: 100%; height: 100%; background: #e9ecef; display: flex; align-items: center; justify-content: center; color: #6c757d; font-size: 10px; text-align: center; border-radius: 6px;">ไม่มีรูป</div>`
                                     ).join('')
                                 : '') :
                                 Array(4).fill().map((_, idx) => 
-                                    `<div style="width: 100%; height: 100%; background: #e0e0e0; display: flex; align-items: center; justify-content: center; color: #666; font-size: 10px; text-align: center; border-radius: 8px; border: 1px solid #ddd;">ไม่มีรูป ${idx + 1}</div>`
+                                    `<div style="width: 100%; height: 100%; background: #e9ecef; display: flex; align-items: center; justify-content: center; color: #6c757d; font-size: 10px; text-align: center; border-radius: 6px;">ไม่มีรูป</div>`
                                 ).join('')
                             }
                         </div>
                     </div>
                 </div>
+            `;
 
+            // สร้าง HTML สำหรับคอลัมน์ 3: วิดีโอรีวิว
+            const column3Html = `
                 <div class="item-card">
                     <div class="item-header">
-                        <div class="item-name">รีวิวคอลัมน์ 3</div>
+                        <div class="item-name">วิดีโอรีวิว</div>
                     </div>
                     <div class="review-content">
-                        <div style="text-align: center; font-size: 48px; font-weight: bold; color: #2196F3; padding: 40px;">
-                            3
+                        <div style="display: flex; flex-direction: column; gap: 10px; padding: 15px;">
+                            ${reviews.length > 0 && reviews[0].video_review_url ? `
+                                <div style="width: 100%; height: 150px; border-radius: 8px; overflow: hidden; background: #000;">
+                                    <video controls style="width: 100%; height: 100%; object-fit: cover;">
+                                        <source src="${reviews[0].video_review_url}" type="video/mp4">
+                                        เบราว์เซอร์ไม่รองรับการเล่นวิดีโอ
+                                    </video>
+                                </div>
+                                <a href="${reviews[0].video_review_url}" target="_blank" style="background: #ff4757; color: white; padding: 8px 12px; border-radius: 6px; text-decoration: none; text-align: center; font-size: 12px; font-weight: bold;">
+                                    🎥 เปิดวิดีโอ
+                                </a>
+                            ` : `
+                                <div style="width: 100%; height: 150px; background: #e9ecef; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #6c757d;">
+                                    <div style="font-size: 32px; margin-bottom: 10px;">🎥</div>
+                                    <div style="font-size: 12px;">ไม่มีวิดีโอรีวิว</div>
+                                </div>
+                                <div style="background: #6c757d; color: white; padding: 8px 12px; border-radius: 6px; text-align: center; font-size: 12px; opacity: 0.5;">
+                                    ไม่มีลิงค์วิดีโอ
+                                </div>
+                            `}
                         </div>
                     </div>
                 </div>
-            `+ reviewsHtml;
+            `;
+
+            // รวม HTML ทั้งหมด
+            reviewsList.innerHTML = column1Html + column2Html + column3Html + reviewsHtml;
         }
 
         // Function to navigate to edit review page

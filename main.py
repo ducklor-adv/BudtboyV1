@@ -88,7 +88,7 @@ def get_db_connection():
     try:
         if connection_pool is None:
             init_connection_pool()
-
+        
         if connection_pool:
             conn = connection_pool.getconn()
             if conn:
@@ -96,7 +96,7 @@ def get_db_connection():
                 with conn.cursor() as test_cur:
                     test_cur.execute("SELECT 1")
                 return conn
-
+        
         # Fallback to direct connection
         database_url = os.environ.get('DATABASE_URL')
         if not database_url:
@@ -871,15 +871,9 @@ def create_tables():
                     short_summary VARCHAR(200),
                     full_review_content TEXT,
                     review_images TEXT[] DEFAULT '{}',
-                    video_review_url VARCHAR(500),
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
-            """)
-            # Add video_review_url column if it doesn't exist
-            cur.execute("""
-                ALTER TABLE reviews
-                ADD COLUMN IF NOT EXISTS video_review_url VARCHAR(500);
             """)
 
             # Add selected_effects column if it doesn't exist (for existing databases)
@@ -1121,15 +1115,15 @@ def get_user_reviews():
 
         user_id = session.get('user_id')
         cur.execute("""
-                SELECT r.id, r.overall_rating, r.short_summary, r.full_review_content, 
-                       r.aroma_rating, r.selected_effects, r.aroma_flavors, r.review_images,
-                       r.created_at, r.updated_at, r.video_review_url,
-                       b.strain_name_en, b.strain_name_th, b.breeder
-                FROM reviews r
-                JOIN buds_data b ON r.bud_reference_id = b.id
-                WHERE r.reviewer_id = %s 
-                ORDER BY r.created_at DESC
-            """, (user_id,))
+            SELECT r.id, r.overall_rating, r.short_summary, r.full_review_content, 
+                   r.aroma_rating, r.selected_effects, r.aroma_flavors, r.review_images,
+                   r.created_at, r.updated_at,
+                   b.strain_name_en, b.strain_name_th, b.breeder
+            FROM reviews r
+            JOIN buds_data b ON r.bud_reference_id = b.id
+            WHERE r.reviewer_id = %s 
+            ORDER BY r.created_at DESC
+        """, (user_id,))
 
         reviews = []
         for row in cur.fetchall():
@@ -1144,10 +1138,9 @@ def get_user_reviews():
                 'review_images': row[7] if row[7] else [],
                 'created_at': row[8].strftime('%Y-%m-%d %H:%M:%S') if row[8] else None,
                 'updated_at': row[9].strftime('%Y-%m-%d %H:%M:%S') if row[9] else None,
-                'video_review_url': row[10],
-                'strain_name_en': row[11],
-                'strain_name_th': row[12],
-                'breeder': row[13]
+                'strain_name_en': row[10],
+                'strain_name_th': row[11],
+                'breeder': row[12]
             })
 
         cur.close()
@@ -1349,7 +1342,7 @@ def get_profile():
 
     user_id = session['user_id']
     cache_key = f"profile_{user_id}"
-
+    
     # Check cache first
     cached_data = get_cache(cache_key)
     if cached_data:
@@ -1390,10 +1383,10 @@ def get_profile():
                     'grow_license_file_url': user[9],
                     'profile_image_url': profile_image_url
                 }
-
+                
                 # Cache the result
                 set_cache(cache_key, user_data)
-
+                
                 return jsonify(user_data)
             else:
                 return jsonify({'error': 'ไม่พบข้อมูลผู้ใช้'}), 404
@@ -1544,7 +1537,7 @@ def get_buds():
                     'image_3_url': bud[26],
                     'image_4_url': bud[27],
                     'created_at': bud[28].strftime('%Y-%m-%d %H:%M:%S') if bud[28] else None,
-                    'updated_at': bud[29].strftime('%Y-%m-%d %H:%M:%S') if bud[29] else None,```python
+                    'updated_at': bud[29].strftime('%Y-%m-%d %H:%M:%S') if bud[29] else None,
                     'created_by': bud[30],
                     'grower_name': bud[31]
                 })
@@ -2081,7 +2074,7 @@ def get_reviews():
             query = """
                 SELECT r.id, r.overall_rating, r.short_summary, r.full_review_content,
                        r.aroma_rating, r.selected_effects, r.aroma_flavors, r.review_images,
-                       r.created_at, r.updated_at, r.video_review_url,
+                       r.created_at, r.updated_at,
                        b.strain_name_en, b.strain_name_th, b.breeder,
                        u.username as reviewer_name, u.profile_image_url as reviewer_profile_image
                 FROM reviews r
@@ -2110,13 +2103,13 @@ def get_reviews():
             for review in reviews:
                 # Format profile image URL correctly
                 reviewer_profile_image = None
-                if review[15]:  # reviewer_profile_image
-                    if review[15].startswith('/uploads/'):
-                        reviewer_profile_image = review[15]
-                    elif review[15].startswith('uploads/'):
-                        reviewer_profile_image = f'/{review[15]}'
+                if review[14]:  # reviewer_profile_image
+                    if review[14].startswith('/uploads/'):
+                        reviewer_profile_image = review[14]
+                    elif review[14].startswith('uploads/'):
+                        reviewer_profile_image = f'/{review[14]}'
                     else:
-                        reviewer_profile_image = f'/uploads/{review[15].split("/")[-1]}'
+                        reviewer_profile_image = f'/uploads/{review[14].split("/")[-1]}'
 
                 reviews_list.append({
                     'id': review[0],
@@ -2129,11 +2122,10 @@ def get_reviews():
                     'review_images': review[7] if review[7] else [],
                     'created_at': review[8].strftime('%Y-%m-%d %H:%M:%S') if review[8] else None,
                     'updated_at': review[9].strftime('%Y-%m-%d %H:%M:%S') if review[9] else None,
-                    'video_review_url': review[10],
-                    'strain_name_en': review[11],
-                    'strain_name_th': review[12],
-                    'breeder': review[13],
-                    'reviewer_name': review[14],
+                    'strain_name_en': review[10],
+                    'strain_name_th': review[11],
+                    'breeder': review[12],
+                    'reviewer_name': review[13],
                     'reviewer_profile_image': reviewer_profile_image
                 })
 
@@ -2184,9 +2176,9 @@ def add_review():
                 INSERT INTO reviews (
                     bud_reference_id, reviewer_id, overall_rating, aroma_flavors,
                     aroma_rating, selected_effects, short_summary, full_review_content,
-                    review_images, video_review_url
+                    review_images
                 ) VALUES (
-                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+                    %s, %s, %s, %s, %s, %s, %s, %s, %s
                 ) RETURNING id
             """, (
                 data.get('bud_reference_id'),
@@ -2197,8 +2189,7 @@ def add_review():
                 data.get('selected_effects', []),
                 data.get('short_summary'),
                 data.get('full_review_content'),
-                data.get('review_images', []),
-                data.get('video_review_url')
+                data.get('review_images', [])
             ))
 
             review_id = cur.fetchone()[0]
@@ -2236,7 +2227,7 @@ def get_review(review_id):
             cur.execute("""
                 SELECT r.id, r.overall_rating, r.short_summary, r.full_review_content,
                        r.aroma_rating, r.selected_effects, r.aroma_flavors, r.review_images,
-                       r.created_at, r.updated_at, r.video_review_url, r.bud_reference_id,
+                       r.created_at, r.updated_at, r.bud_reference_id,
                        b.strain_name_en, b.strain_name_th, b.breeder
                 FROM reviews r
                 JOIN buds_data b ON r.bud_reference_id = b.id
@@ -2258,11 +2249,10 @@ def get_review(review_id):
                 'review_images': result[7] if result[7] else [],
                 'created_at': result[8].strftime('%Y-%m-%d %H:%M:%S') if result[8] else None,
                 'updated_at': result[9].strftime('%Y-%m-%d %H:%M:%S') if result[9] else None,
-                'video_review_url': result[10],
-                'bud_reference_id': result[11],
-                'strain_name_en': result[12],
-                'strain_name_th': result[13],
-                'breeder': result[14]
+                'bud_reference_id': result[10],
+                'strain_name_en': result[11],
+                'strain_name_th': result[12],
+                'breeder': result[13]
             }
 
             cur.close()
@@ -2307,7 +2297,7 @@ def update_review(review_id):
                 UPDATE reviews SET
                     overall_rating = %s, aroma_flavors = %s, aroma_rating = %s,
                     selected_effects = %s, short_summary = %s, full_review_content = %s,
-                    review_images = %s, video_review_url = %s, updated_at = CURRENT_TIMESTAMP
+                    review_images = %s, updated_at = CURRENT_TIMESTAMP
                 WHERE id = %s
             """, (
                 data.get('overall_rating'),
@@ -2317,7 +2307,6 @@ def update_review(review_id):
                 data.get('short_summary'),
                 data.get('full_review_content'),
                 data.get('review_images', []),
-                data.get('video_review_url'),
                 review_id
             ))
 
@@ -2736,12 +2725,12 @@ def upload_profile_image():
         return jsonify({'error': 'ไม่ได้เข้าสู่ระบบ'}), 401
 
     user_id = session['user_id']
-
+    
     if 'profile_image' not in request.files:
         return jsonify({'error': 'ไม่พบไฟล์รูปภาพ'}), 400
 
     file = request.files['profile_image']
-
+    
     if file.filename == '':
         return jsonify({'error': 'ไม่ได้เลือกไฟล์'}), 400
 
@@ -2752,25 +2741,25 @@ def upload_profile_image():
             filename = f"{timestamp}profile_{user_id}_{filename}"
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(file_path)
-
+            
             # Update database with new profile image URL
             conn = get_db_connection()
             if conn:
                 cur = conn.cursor()
                 profile_image_url = f'/uploads/{filename}'
-
+                
                 cur.execute("""
                     UPDATE users SET profile_image_url = %s WHERE id = %s
                 """, (profile_image_url, user_id))
-
+                
                 conn.commit()
-
+                
                 # Clear cache for this user
                 clear_cache_pattern(f"profile_{user_id}")
-
+                
                 cur.close()
                 return_db_connection(conn)
-
+                
                 return jsonify({
                     'success': True,
                     'message': 'อัปโหลดรูปโปรไฟล์สำเร็จ',
@@ -2778,7 +2767,7 @@ def upload_profile_image():
                 })
             else:
                 return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
-
+                
         except Exception as e:
             return jsonify({'error': str(e)}), 500
     else:
@@ -2930,7 +2919,7 @@ def register_user():
 if __name__ == '__main__':
     # Initialize connection pool
     init_connection_pool()
-
+    
     # Create tables on startup
     create_tables()
     app.run(host='0.0.0.0', port=5000, debug=True)

@@ -871,6 +871,7 @@ def create_tables():
                     short_summary VARCHAR(200),
                     full_review_content TEXT,
                     review_images TEXT[] DEFAULT '{}',
+                    video_review_url VARCHAR(500),
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
@@ -880,6 +881,12 @@ def create_tables():
             cur.execute("""
                 ALTER TABLE reviews 
                 ADD COLUMN IF NOT EXISTS selected_effects TEXT[] DEFAULT '{}';
+            """)
+            
+            # Add video_review_url column if it doesn't exist (for existing databases)
+            cur.execute("""
+                ALTER TABLE reviews 
+                ADD COLUMN IF NOT EXISTS video_review_url VARCHAR(500);
             """)
 
             # Create index for better performance

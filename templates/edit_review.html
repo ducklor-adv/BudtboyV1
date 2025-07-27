@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -522,6 +521,11 @@
                     <input type="hidden" id="overallRating" required>
                 </div>
 
+                <div class="form-group">
+                    <label for="video-review-url">ลิงค์วิดีโอรีวิว</label>
+                    <input type="url" id="video-review-url" class="form-input" placeholder="https://youtube.com/watch?v=... หรือ https://youtu.be/...">
+                </div>
+
                 <!-- สรุปสั้น ๆ -->
                 <div class="form-group">
                     <label class="form-label">📝 สรุปสั้น ๆ (เช่น "กลิ่นส้มชัด สดชื่น")</label>
@@ -856,7 +860,7 @@
         function populateForm() {
             // แสดงข้อมูลดอก
             displayBudInfo();
-            
+
             // Set ratings
             ratings.overall = reviewData.overall_rating || 0;
             ratings.aroma = reviewData.aroma_rating || 0;
@@ -868,6 +872,7 @@
             // Set text fields
             document.getElementById('shortSummary').value = reviewData.short_summary || '';
             document.getElementById('fullReview').value = reviewData.full_review_content || '';
+            document.getElementById('video-review-url').value = reviewData.video_review_url || '';
 
             // Set selected aroma flavors
             const aromaFlavors = reviewData.aroma_flavors || [];
@@ -1123,7 +1128,8 @@
                         selected_effects: selectedEffectsArray,
                         short_summary: document.getElementById('shortSummary').value.trim(),
                         full_review_content: document.getElementById('fullReview').value.trim() || null,
-                        review_images: imageUrls
+                        review_images: imageUrls,
+                        video_review_url: document.getElementById('video-review-url').value.trim() || null
                     };
 
                     const response = await fetch(`/api/reviews/${reviewId}`, {

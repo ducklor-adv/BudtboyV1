@@ -785,22 +785,23 @@
         .review-images-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 4px;
-            max-width: 200px;
+            gap: 3px;
+            max-width: 120px;
         }
 
         .review-image-thumb {
             width: 100%;
-            height: 40px;
+            height: 25px;
             object-fit: cover;
-            border-radius: 4px;
+            border-radius: 3px;
             border: 1px solid #ddd;
             cursor: pointer;
             transition: transform 0.2s ease;
         }
 
         .review-image-thumb:hover {
-            transform: scale(1.1);
+            transform: scale(1.05);
+            border-color: #FF9800;
         }
 
         .more-images {
@@ -809,10 +810,49 @@
             justify-content: center;
             background: #f0f0f0;
             border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 10px;
+            border-radius: 3px;
+            font-size: 8px;
             color: #666;
-            height: 40px;
+            height: 25px;
+        }
+
+        /* Image Modal Styles */
+        .image-modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.9);
+            padding-top: 50px;
+        }
+
+        .modal-content {
+            margin: auto;
+            display: block;
+            max-width: 90%;
+            max-height: 80%;
+            border-radius: 10px;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .modal-close:hover,
+        .modal-close:focus {
+            color: #bbb;
+            text-decoration: none;
         }
 
         .video-section {
@@ -886,6 +926,12 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Modal สำหรับดูรูปขยาย -->
+    <div id="imageModal" class="image-modal">
+        <span class="modal-close" onclick="closeImageModal()">&times;</span>
+        <img id="modalImage" class="modal-content">
     </div>
 
     <script>
@@ -1202,9 +1248,25 @@
             }
         }
 
-        // ฟังก์ชันสำหรับดูรูปภาพแบบเต็ม
+        // ฟังก์ชันสำหรับดูรูปภาพแบบเต็มใน popup
         function viewImage(imageUrl) {
-            window.open(imageUrl, '_blank');
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            modal.style.display = 'block';
+            modalImg.src = imageUrl;
+        }
+
+        // ฟังก์ชันปิด modal
+        function closeImageModal() {
+            document.getElementById('imageModal').style.display = 'none';
+        }
+
+        // ปิด modal เมื่อคลิกข้างนอก
+        window.onclick = function(event) {
+            const modal = document.getElementById('imageModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
         }
 
         // ฟังก์ชันสำหรับขยายเนื้อหารีวิว

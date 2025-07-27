@@ -763,7 +763,6 @@ def create_tables():
                     ('Paradise Seeds', True),
                     ('Philosopher Seeds', False),
                     ('Positronics Seeds', False),
-```python
                     ('Premium Cultivars', False),
                     ('Purple City Genetics', False),
                     ('Pyramid Seeds', False),

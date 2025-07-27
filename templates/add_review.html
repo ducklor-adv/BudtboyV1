@@ -1157,7 +1157,8 @@
                     selected_effects: selectedEffects,
                     short_summary: document.getElementById('shortSummary').value.trim(),
                     full_review_content: document.getElementById('fullReview').value.trim() || null,
-                    review_images: imageUrls
+                    review_images: imageUrls,
+                    video_review_url: document.getElementById('video-review-url').value.trim() || null
                 };
 
                 const response = await fetch('/api/reviews', {
@@ -1303,6 +1304,22 @@
         window.addEventListener('load', function() {
             toggleReviewForm(false); // Disable form initially
         });
+
+        // Add video URL validation
+        document.getElementById('video-review-url').addEventListener('input', function() {
+            const url = this.value.trim();
+            if (url && !isValidVideoUrl(url)) {
+                this.setCustomValidity('กรุณาใส่ลิงค์วิดีโอที่ถูกต้อง (YouTube หรือ Facebook)');
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+
+        function isValidVideoUrl(url) {
+            const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)/;
+            const facebookRegex = /^(https?:\/\/)?(www\.)?facebook\.com/;
+            return youtubeRegex.test(url) || facebookRegex.test(url);
+        }
     </script>
 </body>
 </html>

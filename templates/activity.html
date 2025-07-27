@@ -752,7 +752,7 @@
             }
         }
 
-        function displayReviews(reviews) {
+        async function displayReviews(reviews) {
             const reviewsList = document.getElementById('reviewsList');
 
             if (reviews.length === 0) {
@@ -766,51 +766,131 @@
                 return;
             }
 
-            // แสดง 3 คอลัมน์ - คอลัมน์ที่ 1 แสดงข้อมูลผู้รีวิว
-            const reviewsHtml = `
+            // โหลดข้อมูลโปรไฟล์ผู้ใช้
+            let userProfile = null;
+            try {
+                const response = await fetch('/api/profile');
+                if (response.ok) {
+                    userProfile = await response.json();
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
+            }
+
+            // คอลัมน์ที่ 1: แสดงข้อมูลผู้รีวิว (user profile)
+            const userProfileHtml = `
                 <div class="item-card">
                     <div class="item-header">
                         <div class="item-name">ข้อมูลผู้รีวิว</div>
                     </div>
                     <div class="review-content">
                         <div style="display: flex; align-items: center; gap: 15px; padding: 20px;">
-                            <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #4CAF50, #45a049); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 18px; flex-shrink: 0;">
-                                🌿
+                            <div style="width: 60px; height: 60px; border-radius: 50%; overflow: hidden; background: linear-gradient(135deg, #4CAF50, #45a049); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 18px; flex-shrink: 0;">
+                                ${userProfile && userProfile.profile_image ? 
+                                    `<img src="${userProfile.profile_image}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">` : 
+                                    '🌿'
+                                }
                             </div>
                             <div style="flex: 1;">
                                 <div style="font-weight: 600; color: #333; font-size: 16px; margin-bottom: 5px;">
-                                    Budt Boy
+                                    ${userProfile ? userProfile.username : 'ผู้ใช้'}
+                                </div>
+                                <div style="color: #666; font-size: 12px; margin-bottom: 5px;">
+                                    รีวิวทั้งหมด: ${reviews.length} รายการ
                                 </div>
                                 <div style="color: #666; font-size: 12px;">
-                                    26 กรกฎาคม 2568 เวลา 15:42
+                                    เข้าร่วมเมื่อ: ${userProfile && userProfile.created_at ? formatDate(userProfile.created_at) : 'ไม่ระบุ'}
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="item-card">
-                    <div class="item-header">
-                        <div class="item-name">รีวิวคอลัมน์ 2</div>
-                    </div>
-                    <div class="review-content">
-                        <div style="text-align: center; font-size: 48px; font-weight: bold; color: #FF9800; padding: 40px;">
-                            2
-                        </div>
-                    </div>
-                </div>
-                <div class="item-card">
-                    <div class="item-header">
-                        <div class="item-name">รีวิวคอลัมน์ 3</div>
-                    </div>
-                    <div class="review-content">
-                        <div style="text-align: center; font-size: 48px; font-weight: bold; color: #2196F3; padding: 40px;">
-                            3
                         </div>
                     </div>
                 </div>
             `;
 
-            reviewsList.innerHTML = reviewsHtml;
+            // แสดงรีวิวทั้งหมดในคอลัมน์ที่เหลือ
+            const reviewCards = reviews.slice(0, 10).map(review => createReviewCard(review)).join('');
+
+            reviewsList.innerHTML = userProfileHtml + reviewCards;
+        }
+
+        function createReviewCard(review) {
+            const reviewDate = new Date(review.created_at).toLocaleDateString('th-TH', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+            });
+
+            const effectTags = (review.selected_effects || []).slice(0, 4).map(effect => 
+                `<span class="effect-tag">${effect}</span>`
+            ).join('');
+
+            const reviewImages = review.review_images || [];
+            const imageCount = reviewImages.filter(img => img && img.trim()).length;
+
+            return `
+                <div class="item-card">
+                    <div class="item-header">
+                        <div class="item-name">${review.strain_name_en || 'ไม่ระบุชื่อ'}</div>
+                        <div class="item-date">${reviewDate}</div>
+                    </div>
+                    <div class="review-content">
+                        <div class="review-main-info">
+                            <div class="review-ratings">
+                                <div class="overall-rating">
+                                    <span class="rating-stars">${'⭐'.repeat(review.overall_rating)}</span>
+                                    <span style="font-size: 12px; color: #666;"> (${review.overall_rating}/5)</span>
+                                </div>
+                            </div>
+
+                            ${review.short_summary ? `
+                                <div class="review-summary" style="font-weight: 600; color: #333; margin: 8px 0;">
+                                    "${review.short_summary}"
+                                </div>
+                            ` : ''}
+
+                            ${review.full_review_content ? `
+                                <div class="review-full-content">
+                                    <div class="content-preview" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                                        ${review.full_review_content}
+                                    </div>
+                                </div>
+                            ` : ''}
+
+                            <div class="review-details">
+                                <div class="review-breeder" style="color: #666; font-size: 11px;">
+                                    <strong>ผู้พัฒนา:</strong> ${review.breeder || 'ไม่ระบุ'}
+                                </div>
+                                
+                                ${effectTags ? `
+                                    <div class="review-effects" style="margin: 6px 0;">
+                                        <div style="font-size: 10px; color: #666; margin-bottom: 4px;">เอฟเฟค:</div>
+                                        <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+                                            ${effectTags}
+                                        </div>
+                                    </div>
+                                ` : ''}
+
+                                ${imageCount > 0 ? `
+                                    <div class="review-images-info" style="color: #007bff; font-size: 10px; margin: 6px 0;">
+                                        📷 มีรูปภาพ ${imageCount} รูป
+                                    </div>
+                                ` : ''}
+                            </div>
+
+                            ${review.updated_at !== review.created_at ? `
+                                <div class="review-updated" style="color: #999; font-size: 10px;">
+                                    แก้ไขล่าสุด: ${formatDate(review.updated_at)}
+                                </div>
+                            ` : ''}
+                        </div>
+
+                        <div class="review-actions">
+                            <button class="action-btn primary" onclick="editReview(${review.id})">✏️ แก้ไข</button>
+                            <button class="action-btn danger" onclick="deleteReview(${review.id})">🗑️ ลบ</button>
+                        </div>
+                    </div>
+                </div>
+            `;
         }
 
         // Function to navigate to edit review page

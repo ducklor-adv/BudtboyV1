@@ -90,22 +90,36 @@
             gap: 10px;
         }
 
-        .bud-image-section {
+        .bud-images-grid {
             width: 300px;
             height: 200px;
-            background: #e0e0e0;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 8px;
+            border: 3px solid #ffd700;
             border-radius: 15px;
-            overflow: hidden;
+            padding: 8px;
+            background: #f8f9fa;
             flex-shrink: 0;
         }
 
-        .main-bud-image {
+        .bud-grid-image {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid #ddd;
         }
 
-        .main-bud-image-placeholder {
+        .bud-grid-image:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .bud-grid-placeholder {
             width: 100%;
             height: 100%;
             background: #e0e0e0;
@@ -113,8 +127,10 @@
             align-items: center;
             justify-content: center;
             color: #666;
-            font-size: 16px;
+            font-size: 10px;
             text-align: center;
+            border-radius: 8px;
+            border: 1px solid #ddd;
         }
 
         .grower-profile-section {
@@ -420,11 +436,17 @@
                 max-width: 200px;
             }
 
-            .bud-image-section {
+            .bud-images-grid {
                 width: 100%;
-                height: 120px;
-                max-width: 250px;
+                height: 160px;
+                max-width: 280px;
                 margin: 0 auto;
+                gap: 4px;
+                padding: 6px;
+            }
+
+            .bud-grid-placeholder {
+                font-size: 8px;
             }
 
             .action-buttons {
@@ -524,35 +546,32 @@
 
         async function loadBudInfo() {
             try {
-                // โหลดข้อมูลดอกรวมถึงรูปภาพ
-                const response = await fetch(`/api/buds/${budId}/info`);
-                const result = await response.json();
+                // โหลดข้อมูลดอกจาก API buds ให้ครบทั้งรูปภาพ
+                const budDataResponse = await fetch(`/api/buds`);
+                if (budDataResponse.ok) {
+                    const allBuds = await budDataResponse.json();
+                    const fullBudData = allBuds.find(b => b.id === parseInt(budId));
+                    
+                    if (fullBudData) {
+                        // ใช้ข้อมูลจาก buds API ที่มีรูปภาพครบ
+                        displayBudInfo(fullBudData);
+                    } else {
+                        // ถ้าไม่เจอใน buds API ให้ลองใช้ info API
+                        const response = await fetch(`/api/buds/${budId}/info`);
+                        const result = await response.json();
 
-                if (response.ok && result.success) {
-                    // เพิ่มข้อมูลรูปภาพถ้าไม่มี
-                    const bud = result.bud;
-
-                    // ถ้าไม่มีข้อมูลรูปใน API response ให้โหลดจาก buds data
-                    if (!bud.image_1_url) {
-                        const budDataResponse = await fetch(`/api/buds`);
-                        if (budDataResponse.ok) {
-                            const allBuds = await budDataResponse.json();
-                            const fullBudData = allBuds.find(b => b.id === parseInt(budId));
-                            if (fullBudData) {
-                                bud.image_1_url = fullBudData.image_1_url;
-                                bud.image_2_url = fullBudData.image_2_url;
-                                bud.image_3_url = fullBudData.image_3_url;
-                                bud.image_4_url = fullBudData.image_4_url;
-                            }
+                        if (response.ok && result.success) {
+                            displayBudInfo(result.bud);
+                        } else {
+                            document.getElementById('budInfo').innerHTML = '<div class="error">ไม่พบข้อมูลดอก</div>';
                         }
                     }
-
-                    displayBudInfo(bud);
                 } else {
-                    document.getElementById('budInfo').innerHTML = '<div class="error">ไม่พบข้อมูลดอก</div>';
+                    document.getElementById('budInfo').innerHTML = '<div class="error">เกิดข้อผิดพลาดในการโหลดข้อมูล</div>';
                 }
             } catch (error) {
                 document.getElementById('budInfo').innerHTML = '<div class="error">เกิดข้อผิดพลาดในการโหลดข้อมูล</div>';
+                console.error('Error loading bud info:', error);
             }
         }
 
@@ -575,6 +594,16 @@
         function displayBudInfo(bud) {
             const avgRating = calculateAverageRating();
 
+            // สร้างรูปดอกทั้ง 4 รูป
+            const budImages = [bud.image_1_url, bud.image_2_url, bud.image_3_url, bud.image_4_url];
+            const budImagesHtml = budImages.map((imageUrl, index) => {
+                if (imageUrl && imageUrl.trim()) {
+                    return `<img src="${imageUrl}" alt="รูปดอก ${index + 1}" class="bud-grid-image" onclick="openImageModal('${imageUrl}')">`;
+                } else {
+                    return `<div class="bud-grid-placeholder">ไม่มีรูป ${index + 1}</div>`;
+                }
+            }).join('');
+
             document.getElementById('budInfo').innerHTML = `
                 <div class="bud-content-layout">
                     <div class="bud-main-section">
@@ -588,11 +617,9 @@
                         </div>
                     </div>
 
-                    <div class="bud-image-section">
-                        ${bud.image_1_url && bud.image_1_url.trim() ? 
-                            `<img src="${bud.image_1_url}" alt="รูปดอก ${bud.strain_name_en}" class="main-bud-image">` :
-                            `<div class="main-bud-image-placeholder">ไม่มีรูปภาพ</div>`
-                        }
+                    <!-- กรอบรูปดอก 4 รูป -->
+                    <div class="bud-images-grid">
+                        ${budImagesHtml}
                     </div>
 
                     <div class="grower-profile-section">

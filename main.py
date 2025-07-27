@@ -1125,15 +1125,27 @@ def get_user_reviews():
             SELECT r.id, r.overall_rating, r.short_summary, r.full_review_content, 
                    r.aroma_rating, r.selected_effects, r.aroma_flavors, r.review_images,
                    r.created_at, r.updated_at,
-                   b.strain_name_en, b.strain_name_th, b.breeder
+                   b.strain_name_en, b.strain_name_th, b.breeder,
+                   u.username as reviewer_name, u.profile_image_url as reviewer_profile_image
             FROM reviews r
             JOIN buds_data b ON r.bud_reference_id = b.id
+            JOIN users u ON r.reviewer_id = u.id
             WHERE r.reviewer_id = %s 
             ORDER BY r.created_at DESC
         """, (user_id,))
 
         reviews = []
         for row in cur.fetchall():
+            # Format profile image URL correctly
+            reviewer_profile_image = None
+            if row[14]:  # reviewer_profile_image
+                if row[14].startswith('/uploads/'):
+                    reviewer_profile_image = row[14]
+                elif row[14].startswith('uploads/'):
+                    reviewer_profile_image = f'/{row[14]}'
+                else:
+                    reviewer_profile_image = f'/uploads/{row[14].split("/")[-1]}'
+
             reviews.append({
                 'id': row[0],
                 'overall_rating': row[1],
@@ -1147,7 +1159,9 @@ def get_user_reviews():
                 'updated_at': row[9].strftime('%Y-%m-%d %H:%M:%S') if row[9] else None,
                 'strain_name_en': row[10],
                 'strain_name_th': row[11],
-                'breeder': row[12]
+                'breeder': row[12],
+                'reviewer_name': row[13],
+                'reviewer_profile_image': reviewer_profile_image
             })
 
         cur.close()

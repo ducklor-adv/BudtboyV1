@@ -714,9 +714,38 @@
                 return;
             }
 
+            // สร้างรายการสายพันธุ์ที่ user เคยรีวิว (ไม่ซ้ำ)
+            const reviewedStrains = [...new Set(reviews.map(review => ({
+                strain_name_th: review.strain_name_th,
+                strain_name_en: review.strain_name_en,
+                breeder: review.breeder,
+                review_count: reviews.filter(r => r.strain_name_en === review.strain_name_en).length
+            })))];
+
             container.innerHTML = `
-                <div class="section-title">💬 รีวิวทั้งหมด (${reviews.length})</div>
-                ${reviews.map(review => createReviewCard(review)).join('')}
+                <div class="section-title">🌿 สายพันธุ์ที่เคยรีวิว (${reviewedStrains.length} สายพันธุ์)</div>
+                ${reviewedStrains.map(strain => createStrainCard(strain)).join('')}
+            `;
+        }
+
+        function createStrainCard(strain) {
+            return `
+                <div class="review-card">
+                    <div class="review-header">
+                        <div class="reviewer-avatar">🌿</div>
+                        <div class="reviewer-info">
+                            <div class="reviewer-name">${strain.strain_name_en || 'ไม่ระบุชื่อ'}</div>
+                            <div class="review-date">${strain.strain_name_th || ''}</div>
+                        </div>
+                        <div class="review-rating">
+                            <div class="rating-number">${strain.review_count} รีวิว</div>
+                        </div>
+                    </div>
+
+                    <div class="review-summary">
+                        <strong>ผู้พัฒนา:</strong> ${strain.breeder || 'ไม่ระบุ'}
+                    </div>
+                </div>
             `;
         }
 

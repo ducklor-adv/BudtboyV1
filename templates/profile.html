@@ -72,6 +72,44 @@
             font-size: 40px;
             color: white;
             overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .profile-avatar:hover {
+            transform: translateX(-50%) scale(1.05);
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .avatar-upload-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            color: white;
+            font-size: 16px;
+        }
+
+        .profile-avatar:hover .avatar-upload-overlay {
+            opacity: 1;
+        }
+
+        .avatar-upload-input {
+            display: none;
         }
 
         .card-content {
@@ -278,9 +316,14 @@
                 ยินดีต้อนรับ<br>คุณ Budt.Boy !
             </div>
             <div class="username-display" id="displayUsername">Budt.Boy</div>
-            <div class="profile-avatar" id="profileAvatar">
-                👤
+            <div class="profile-avatar" id="profileAvatar" onclick="document.getElementById('avatarInput').click()">
+                <img id="avatarImage" style="display: none;" alt="Profile">
+                <span id="avatarPlaceholder">👤</span>
+                <div class="avatar-upload-overlay">
+                    📷 เปลี่ยน
+                </div>
             </div>
+            <input type="file" id="avatarInput" class="avatar-upload-input" accept="image/*" onchange="uploadProfileImage(this)">
         </div>
 
         <div class="card-content">
@@ -451,10 +494,24 @@
             document.getElementById('is_grower_edit').checked = user.is_grower || false;
             document.getElementById('is_budtender_edit').checked = user.is_budtender || false;
 
-            // Update avatar with first letter of username
-            const avatar = document.getElementById('profileAvatar');
-            if (user.username) {
-                avatar.textContent = user.username.charAt(0).toUpperCase();
+            // Update avatar
+            const avatarImage = document.getElementById('avatarImage');
+            const avatarPlaceholder = document.getElementById('avatarPlaceholder');
+            
+            if (user.profile_image_url) {
+                // แสดงรูปโปรไฟล์
+                avatarImage.src = user.profile_image_url;
+                avatarImage.style.display = 'block';
+                avatarPlaceholder.style.display = 'none';
+            } else {
+                // แสดง placeholder ด้วยตัวอักษรแรกของชื่อผู้ใช้
+                avatarImage.style.display = 'none';
+                avatarPlaceholder.style.display = 'flex';
+                if (user.username) {
+                    avatarPlaceholder.textContent = user.username.charAt(0).toUpperCase();
+                } else {
+                    avatarPlaceholder.textContent = '👤';
+                }
             }
         }
 
@@ -537,6 +594,56 @@
                 console.error('Error saving profile:', error);
                 alert('❌ เกิดข้อผิดพลาดในการบันทึกข้อมูล');
             }
+        }
+
+        // Upload profile image function
+        async function uploadProfileImage(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            // ตรวจสอบประเภทไฟล์
+            if (!file.type.startsWith('image/')) {
+                alert('กรุณาเลือกไฟล์รูปภาพเท่านั้น');
+                return;
+            }
+
+            // ตรวจสอบขนาดไฟล์ (จำกัดที่ 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('ขนาดไฟล์ต้องไม่เกิน 5MB');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('profile_image', file);
+
+            try {
+                const response = await fetch('/api/upload_profile_image', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    // อัปเดทรูปภาพในหน้าเว็บทันที
+                    const avatarImage = document.getElementById('avatarImage');
+                    const avatarPlaceholder = document.getElementById('avatarPlaceholder');
+                    
+                    avatarImage.src = result.profile_image_url;
+                    avatarImage.style.display = 'block';
+                    avatarPlaceholder.style.display = 'none';
+                    
+                    alert('✅ อัปโหลดรูปโปรไฟล์สำเร็จ!');
+                } else {
+                    alert('❌ เกิดข้อผิดพลาด: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error uploading profile image:', error);
+                alert('❌ เกิดข้อผิดพลาดในการอัปโหลดรูปภาพ');
+            }
+
+            // Clear input
+            input.value = '';
         }
 
         // Load profile when page loads

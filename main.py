@@ -1282,6 +1282,16 @@ def get_profile():
             user = cur.fetchone()
 
             if user:
+                # Format profile image URL correctly
+                profile_image_url = None
+                if user[10]:
+                    if user[10].startswith('/uploads/'):
+                        profile_image_url = user[10]
+                    elif user[10].startswith('uploads/'):
+                        profile_image_url = f'/{user[10]}'
+                    else:
+                        profile_image_url = f'/uploads/{user[10].split("/")[-1]}'
+
                 user_data = {
                     'id': user[0],
                     'username': user[1],
@@ -1293,7 +1303,7 @@ def get_profile():
                     'created_at': user[7].strftime('%Y-%m-%d %H:%M:%S') if user[7] else None,
                     'is_verified': user[8],
                     'grow_license_file_url': user[9],
-                    'profile_image_url': user[10]
+                    'profile_image_url': profile_image_url
                 }
                 return jsonify(user_data)
             else:
@@ -2529,6 +2539,57 @@ def upload_images():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@app.route('/api/upload_profile_image', methods=['POST'])
+def upload_profile_image():
+    """Upload profile image"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'ไม่ได้เข้าสู่ระบบ'}), 401
+
+    user_id = session['user_id']
+    
+    if 'profile_image' not in request.files:
+        return jsonify({'error': 'ไม่พบไฟล์รูปภาพ'}), 400
+
+    file = request.files['profile_image']
+    
+    if file.filename == '':
+        return jsonify({'error': 'ไม่ได้เลือกไฟล์'}), 400
+
+    if file and allowed_file(file.filename):
+        try:
+            filename = secure_filename(file.filename)
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_')
+            filename = f"{timestamp}profile_{user_id}_{filename}"
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(file_path)
+            
+            # Update database with new profile image URL
+            conn = get_db_connection()
+            if conn:
+                cur = conn.cursor()
+                profile_image_url = f'/uploads/{filename}'
+                
+                cur.execute("""
+                    UPDATE users SET profile_image_url = %s WHERE id = %s
+                """, (profile_image_url, user_id))
+                
+                conn.commit()
+                cur.close()
+                conn.close()
+                
+                return jsonify({
+                    'success': True,
+                    'message': 'อัปโหลดรูปโปรไฟล์สำเร็จ',
+                    'profile_image_url': profile_image_url
+                })
+            else:
+                return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+                
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+    else:
+        return jsonify({'error': 'ประเภทไฟล์ไม่ถูกต้อง กรุณาเลือกไฟล์ภาพ'}), 400
 
 @app.route('/users')
 def list_users():

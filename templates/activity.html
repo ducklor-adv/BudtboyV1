@@ -584,10 +584,23 @@
                     displayBuds(data.buds || []);
                 } else {
                     console.error('Failed to load buds');
+                    showErrorMessage('ไม่สามารถโหลดข้อมูลดอกได้');
                 }
             } catch (error) {
-                console.error('Failed to load user buds:', error);
-                budsList.innerHTML = '<div class="no-data">⚠️ ไม่สามารถโหลดข้อมูลดอกได้ กรุณาลองใหม่อีกครั้ง</div>';
+                console.error('Error loading buds:', error);
+                showErrorMessage('เกิดข้อผิดพลาดในการโหลดข้อมูล');
+            }
+        }
+
+        function showErrorMessage(message) {
+            const budsList = document.getElementById('budsList');
+            if (budsList) {
+                budsList.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #dc3545;">
+                        <div style="font-size: 48px; margin-bottom: 15px;">❌</div>
+                        <p>${message}</p>
+                    </div>
+                `;
             }
         }
 

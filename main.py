@@ -1134,6 +1134,8 @@ def get_user_reviews():
             WHERE r.reviewer_id = %s 
             ORDER BY r.created_at DESC
         """, (user_id,))
+        
+        print(f"Debug: Query executed for user_id {user_id}")
 
         reviews = []
         for row in cur.fetchall():
@@ -1147,7 +1149,7 @@ def get_user_reviews():
                 else:
                     reviewer_profile_image = f'/uploads/{row[15].split("/")[-1]}'
 
-            reviews.append({
+            review_data = {
                 'id': row[0],
                 'overall_rating': row[1],
                 'short_summary': row[2],
@@ -1165,7 +1167,12 @@ def get_user_reviews():
                 'reviewer_name': row[14],
                 'reviewer_profile_image': reviewer_profile_image,
                 'bud_reference_id': row[16]  # Add bud reference ID from reviews table
-            })
+            }
+            
+            # Debug log for video_review_url
+            print(f"Debug: Review ID {row[0]} video_review_url: {row[10]}")
+            
+            reviews.append(review_data)
 
         cur.close()
         conn.close()

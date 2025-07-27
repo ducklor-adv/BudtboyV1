@@ -1086,6 +1086,11 @@
             const reviewsList = document.getElementById('reviewsList');
             reviewsData = reviews; // เก็บข้อมูลไว้ใช้กับฟังก์ชันอื่น
 
+            // Debug: ตรวจสอบ video_review_url
+            reviews.forEach((review, index) => {
+                console.log(`Review ${index + 1} video_review_url:`, review.video_review_url);
+            });
+
             if (reviews.length === 0) {
                 reviewsList.innerHTML = `
                     <div class="empty-state">
@@ -1198,10 +1203,10 @@
                                 ${reviewImages}
 
                                 <!-- Video Review Link -->
-                                ${review.video_review_url && review.video_review_url.trim() ? `
+                                ${review.video_review_url && review.video_review_url !== null && review.video_review_url.trim() !== '' ? `
                                 <div class="video-section">
                                     <a href="#" onclick="openVideoModal('${review.video_review_url}'); return false;" class="video-link">
-                                        🎥 link รีวิว
+                                        🎥 ดูวิดีโอรีวิว
                                     </a>
                                 </div>` : ''}
                                 

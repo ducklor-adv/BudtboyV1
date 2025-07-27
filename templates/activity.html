@@ -623,8 +623,6 @@
                                 }
                             </div>
 
-                            <a href="/bud-report?id=${bud.id}" class="full-report-btn">📊 Full Report</a>
-
                             <div class="bud-info">
                                 <div class="bud-detail"><strong>Bud ID:</strong> ${bud.id}</div>
                                 <div class="bud-detail"><strong>ผู้พัฒนา:</strong> ${bud.breeder || 'ไม่ระบุ'}</div>
@@ -640,6 +638,9 @@
                         </div>
 
                         <div class="bud-actions">
+                            <a href="/bud-report?id=${bud.id}" class="action-btn primary" style="text-decoration: none;">
+                                📊 Full Report
+                            </a>
                             <button class="action-btn primary" onclick="window.location.href='/bud-reviews?bud_id=${bud.id}'">
                                 📋 ดูรีวิว
                             </button>

@@ -1,0 +1,500 @@
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cannabis App - แก้ไขรีวิว</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e8f5e8 0%, #f0f8ff 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #ff9800, #ff6f00);
+            padding: 20px 30px;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .form-container {
+            padding: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 16px;
+        }
+        
+        .form-input, .form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+        
+        .form-input:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #ff9800;
+            box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.1);
+        }
+        
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .rating-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .rating-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+        
+        .rating-label {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .stars-input {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .star {
+            font-size: 24px;
+            cursor: pointer;
+            color: #ddd;
+            transition: color 0.2s ease;
+        }
+        
+        .star.active {
+            color: #ffd700;
+        }
+        
+        .star:hover {
+            color: #ffd700;
+        }
+        
+        .effects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .effect-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .effect-item:hover {
+            background: #e9ecef;
+        }
+        
+        .effect-item.selected {
+            background: #e3f2fd;
+            border: 2px solid #2196f3;
+        }
+        
+        .effect-checkbox {
+            margin: 0;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #ff9800, #ff6f00);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 152, 0, 0.3);
+        }
+        
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #f44336;
+        }
+        
+        .success-message {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #4caf50;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .form-container {
+                padding: 20px;
+            }
+            
+            .effects-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="/activity" class="back-btn">← กลับ</a>
+            <h1>✏️ แก้ไขรีวิว</h1>
+            <div style="width: 60px;"></div>
+        </div>
+
+        <div class="form-container">
+            <div id="errorMessage" class="error-message" style="display: none;"></div>
+            <div id="successMessage" class="success-message" style="display: none;"></div>
+            <div id="loadingMessage" class="loading">กำลังโหลดข้อมูลรีวิว...</div>
+
+            <form id="editReviewForm" style="display: none;">
+                <!-- คะแนนรวม -->
+                <div class="form-group">
+                    <label class="form-label">⭐ คะแนนรวม *</label>
+                    <div class="rating-item">
+                        <span class="rating-label">ความพึงพอใจโดยรวม</span>
+                        <div class="stars-input" data-rating="overall">
+                            <span class="star" data-value="1">⭐</span>
+                            <span class="star" data-value="2">⭐</span>
+                            <span class="star" data-value="3">⭐</span>
+                            <span class="star" data-value="4">⭐</span>
+                            <span class="star" data-value="5">⭐</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- คะแนนกลิ่น -->
+                <div class="form-group">
+                    <label class="form-label">👃 คะแนนกลิ่น (ไม่บังคับ)</label>
+                    <div class="rating-item">
+                        <span class="rating-label">กลิ่นและรสชาติ</span>
+                        <div class="stars-input" data-rating="aroma">
+                            <span class="star" data-value="1">⭐</span>
+                            <span class="star" data-value="2">⭐</span>
+                            <span class="star" data-value="3">⭐</span>
+                            <span class="star" data-value="4">⭐</span>
+                            <span class="star" data-value="5">⭐</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- สรุปสั้น -->
+                <div class="form-group">
+                    <label class="form-label" for="shortSummary">📝 สรุปสั้น ๆ *</label>
+                    <input type="text" id="shortSummary" class="form-input" placeholder="เช่น หวานซ่า ชิลสบาย เหมาะกับช่วงเย็น" required>
+                </div>
+
+                <!-- รีวิวเต็ม -->
+                <div class="form-group">
+                    <label class="form-label" for="fullReview">📄 รีวิวเต็ม (ไม่บังคับ)</label>
+                    <textarea id="fullReview" class="form-textarea" placeholder="อธิบายประสบการณ์การใช้งานโดยละเอียด เช่น รสชาติ กลิ่น ความรู้สึกหลังใช้ ผลข้างเคียง"></textarea>
+                </div>
+
+                <!-- ผลกระทบที่เลือก -->
+                <div class="form-group">
+                    <label class="form-label">🌟 ผลกระทบที่พบ (เลือกได้หลายอย่าง)</label>
+                    <div class="effects-grid" id="effectsGrid">
+                        <!-- Effects will be loaded here -->
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    💾 บันทึกการแก้ไข
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const reviewId = new URLSearchParams(window.location.search).get('id');
+        let ratings = { overall: 0, aroma: 0 };
+        let reviewData = null;
+
+        const effects = [
+            'ผ่อนคลาย', 'ง่วงนอน', 'มีความสุข', 'กระตือรือร้น', 'สร้างสรรค์',
+            'ชิลล์', 'มีโฟกัส', 'หิวข้าว', 'ปวดหัวลดลง', 'คลื่นไส้ลดลง',
+            'อารมณ์ดี', 'ตื่นตัว', 'สงบ', 'ตาแห้ง', 'ปากแห้ง'
+        ];
+
+        if (!reviewId) {
+            showError('ไม่พบข้อมูลรีวิวที่ต้องการแก้ไข');
+        } else {
+            loadReviewData();
+        }
+
+        async function loadReviewData() {
+            try {
+                const response = await fetch(`/api/reviews/${reviewId}`);
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    reviewData = result.review;
+                    populateForm();
+                    document.getElementById('loadingMessage').style.display = 'none';
+                    document.getElementById('editReviewForm').style.display = 'block';
+                } else {
+                    showError('ไม่พบข้อมูลรีวิว');
+                }
+            } catch (error) {
+                showError('เกิดข้อผิดพลาดในการโหลดข้อมูล');
+            }
+        }
+
+        function populateForm() {
+            // Set ratings
+            ratings.overall = reviewData.overall_rating || 0;
+            ratings.aroma = reviewData.aroma_rating || 0;
+            updateStarDisplay('overall', ratings.overall);
+            updateStarDisplay('aroma', ratings.aroma);
+
+            // Set text fields
+            document.getElementById('shortSummary').value = reviewData.short_summary || '';
+            document.getElementById('fullReview').value = reviewData.full_review_content || '';
+
+            // Create effects grid
+            createEffectsGrid();
+
+            // Set selected effects
+            const selectedEffects = reviewData.selected_effects || [];
+            selectedEffects.forEach(effect => {
+                const checkbox = document.querySelector(`input[value="${effect}"]`);
+                if (checkbox) {
+                    checkbox.checked = true;
+                    checkbox.closest('.effect-item').classList.add('selected');
+                }
+            });
+        }
+
+        function createEffectsGrid() {
+            const grid = document.getElementById('effectsGrid');
+            grid.innerHTML = effects.map(effect => `
+                <div class="effect-item">
+                    <input type="checkbox" class="effect-checkbox" value="${effect}" id="effect_${effect}">
+                    <label for="effect_${effect}">${effect}</label>
+                </div>
+            `).join('');
+        }
+
+        // Star rating functionality
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('star')) {
+                const starsContainer = e.target.parentElement;
+                const ratingType = starsContainer.getAttribute('data-rating');
+                const value = parseInt(e.target.getAttribute('data-value'));
+                
+                ratings[ratingType] = value;
+                updateStarDisplay(ratingType, value);
+            }
+        });
+
+        function updateStarDisplay(ratingType, value) {
+            const container = document.querySelector(`[data-rating="${ratingType}"]`);
+            const stars = container.querySelectorAll('.star');
+            
+            stars.forEach((star, index) => {
+                if (index < value) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+        }
+
+        // Effect selection
+        document.addEventListener('change', function(e) {
+            if (e.target.type === 'checkbox' && e.target.closest('.effect-item')) {
+                const item = e.target.closest('.effect-item');
+                if (e.target.checked) {
+                    item.classList.add('selected');
+                } else {
+                    item.classList.remove('selected');
+                }
+            }
+        });
+
+        // Form submission
+        document.getElementById('editReviewForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const submitBtn = document.getElementById('submitBtn');
+            const errorDiv = document.getElementById('errorMessage');
+            const successDiv = document.getElementById('successMessage');
+
+            // Hide previous messages
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+
+            // Validate form
+            if (!ratings.overall) {
+                showError('กรุณาให้คะแนนรวม');
+                return;
+            }
+
+            if (!document.getElementById('shortSummary').value.trim()) {
+                showError('กรุณาเขียนสรุปสั้น ๆ');
+                return;
+            }
+
+            // Get selected effects
+            const selectedEffects = Array.from(document.querySelectorAll('.effect-checkbox:checked'))
+                .map(cb => cb.value);
+
+            // Prepare data
+            const updateData = {
+                overall_rating: ratings.overall,
+                aroma_rating: ratings.aroma || null,
+                short_summary: document.getElementById('shortSummary').value.trim(),
+                full_review_content: document.getElementById('fullReview').value.trim() || null,
+                selected_effects: selectedEffects
+            };
+
+            try {
+                submitBtn.disabled = true;
+                submitBtn.textContent = '🔄 กำลังบันทึก...';
+
+                const response = await fetch(`/api/reviews/${reviewId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updateData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    showSuccess('แก้ไขรีวิวสำเร็จ! กำลังกลับไปหน้ากิจกรรม...');
+                    setTimeout(() => {
+                        window.location.href = '/activity';
+                    }, 2000);
+                } else {
+                    showError(result.error || 'เกิดข้อผิดพลาดในการแก้ไขรีวิว');
+                }
+            } catch (error) {
+                showError('เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '💾 บันทึกการแก้ไข';
+            }
+        });
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            const successDiv = document.getElementById('successMessage');
+            const loadingDiv = document.getElementById('loadingMessage');
+            
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            successDiv.style.display = 'none';
+            loadingDiv.style.display = 'none';
+            
+            errorDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function showSuccess(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            const successDiv = document.getElementById('successMessage');
+            
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            errorDiv.style.display = 'none';
+            
+            successDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

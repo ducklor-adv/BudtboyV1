@@ -992,7 +992,7 @@ def get_user_buds():
         conn = get_db_connection()
         if not conn:
             return jsonify({'error': 'Database connection failed'}), 500
-            
+
         cur = conn.cursor()
 
         user_id = session.get('user_id')
@@ -2407,10 +2407,17 @@ def get_bud_info(bud_id):
 
 @app.route('/add-review')
 def add_review_page():
-    # Check if user is logged in
+    """Add review page"""
     if 'user_id' not in session:
         return redirect('/auth')
     return render_template('add_review.html')
+
+@app.route('/edit-review')
+def edit_review_page():
+    """Edit review page"""
+    if 'user_id' not in session:
+        return redirect('/auth')
+    return render_template('edit_review.html')
 
 @app.route('/bud-reviews')
 def bud_reviews_page():

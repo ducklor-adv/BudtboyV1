@@ -604,6 +604,14 @@
                                 <small style="color: #888;">กลิ่น: ${review.aroma_flavors.join(', ')}</small>
                             </div>
                         ` : ''}
+                        <div style="margin-top: 15px; display: flex; gap: 10px;">
+                            <button class="edit-review-btn" onclick="editReview(${review.id})" style="background: #007bff; color: white; border: none; padding: 8px 15px; border-radius: 15px; cursor: pointer; font-size: 12px; font-weight: 600;">
+                                ✏️ แก้ไข
+                            </button>
+                            <button class="delete-review-btn" onclick="deleteReview(${review.id})" style="background: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 15px; cursor: pointer; font-size: 12px; font-weight: 600;">
+                                🗑️ ลบ
+                            </button>
+                        </div>
                     </div>
                 </div>
             `).join('');
@@ -647,6 +655,35 @@
                     if (data.success) {
                         alert('ลบดอกสำเร็จ');
                         loadBuds(); // Reload the list
+                    } else {
+                        alert('เกิดข้อผิดพลาด: ' + (data.error || 'ไม่สามารถลบได้'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('เกิดข้อผิดพลาดในการลบ');
+                });
+            }
+        }
+
+        function editReview(reviewId) {
+            // Redirect to edit review page
+            window.location.href = `/edit-review?id=${reviewId}`;
+        }
+
+        function deleteReview(reviewId) {
+            if (confirm('คุณแน่ใจหรือไม่ที่จะลบรีวิวนี้? การกระทำนี้ไม่สามารถย้อนกลับได้')) {
+                fetch(`/api/reviews/${reviewId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('ลบรีวิวสำเร็จ');
+                        loadReviews(); // Reload the list
                     } else {
                         alert('เกิดข้อผิดพลาด: ' + (data.error || 'ไม่สามารถลบได้'));
                     }

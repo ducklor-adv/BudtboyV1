@@ -1006,11 +1006,33 @@
                     displayBuds(data.buds || []);
                 } else {
                     console.error('Failed to load buds');
-                    showErrorMessage('ไม่สามารถโหลดข้อมูลดอกได้');
+                    const budsList = document.getElementById('budsList');
+                    if (budsList) {
+                        budsList.innerHTML = `
+                            <div class="empty-state">
+                                <div class="empty-icon">❌</div>
+                                <p>ไม่สามารถโหลดข้อมูลดอกได้</p>
+                                <button onclick="loadBuds()" style="margin-top: 10px; padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                                    🔄 ลองใหม่
+                                </button>
+                            </div>
+                        `;
+                    }
                 }
             } catch (error) {
                 console.error('Error loading buds:', error);
-                showErrorMessage('เกิดข้อผิดพลาดในการโหลดข้อมูล');
+                const budsList = document.getElementById('budsList');
+                if (budsList) {
+                    budsList.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">❌</div>
+                            <p>เกิดข้อผิดพลาดในการโหลดข้อมูล</p>
+                            <button onclick="loadBuds()" style="margin-top: 10px; padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                                🔄 ลองใหม่
+                            </button>
+                        </div>
+                    `;
+                }
             }
         }
 
@@ -1095,10 +1117,33 @@
                     displayReviews(data.reviews || []);
                 } else {
                     console.error('Failed to load reviews');
+                    const reviewsList = document.getElementById('reviewsList');
+                    if (reviewsList) {
+                        reviewsList.innerHTML = `
+                            <div class="empty-state">
+                                <div class="empty-icon">❌</div>
+                                <p>ไม่สามารถโหลดข้อมูลรีวิวได้</p>
+                                <button onclick="loadReviews()" style="margin-top: 10px; padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                                    🔄 ลองใหม่
+                                </button>
+                            </div>
+                        `;
+                    }
                 }
             } catch (error) {
                 console.error('Failed to load reviews:', error);
-                reviewsList.innerHTML = '<div class="no-data">⚠️ ไม่สามารถโหลดข้อมูลรีวิวได้ กรุณาลองใหม่อีกครั้ง</div>';
+                const reviewsList = document.getElementById('reviewsList');
+                if (reviewsList) {
+                    reviewsList.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">❌</div>
+                            <p>เกิดข้อผิดพลาดในการโหลดข้อมูลรีวิว</p>
+                            <button onclick="loadReviews()" style="margin-top: 10px; padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                                🔄 ลองใหม่
+                            </button>
+                        </div>
+                    `;
+                }
             }
         }
 
@@ -1354,6 +1399,13 @@
             modal.style.display = 'block';
         }
 
+        // ฟังก์ชันสำหรับเล่นวิดีโอรีวิว
+        function playVideoReview(videoUrl) {
+            if (videoUrl && videoUrl.trim()) {
+                openVideoModal(videoUrl);
+            }
+        }
+
         // ฟังก์ชันปิด video modal
         function closeVideoModal() {
             const modal = document.getElementById('videoModal');
@@ -1395,9 +1447,25 @@
         let reviewsData = [];
 
         // Load data when page loads
-        window.addEventListener('load', () => {
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded, starting to load data...');
             loadBuds();
             loadReviews();
+        });
+
+        // Fallback for window load
+        window.addEventListener('load', function() {
+            console.log('Window loaded, checking if data is already loaded...');
+            const budsList = document.getElementById('budsList');
+            const reviewsList = document.getElementById('reviewsList');
+            
+            // Only load if not already loaded
+            if (budsList && budsList.innerHTML.includes('ยังไม่มีข้อมูลดอกในระบบ')) {
+                loadBuds();
+            }
+            if (reviewsList && reviewsList.innerHTML.includes('ยังไม่มีรีวิวในระบบ')) {
+                loadReviews();
+            }
         });
     </script>
 </body>

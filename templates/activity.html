@@ -381,7 +381,7 @@
         }
 
         .item-list.reviews-list {
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(3, 1fr); /* Modified to display in 3 columns */
             gap: 15px;
         }
 
@@ -391,7 +391,7 @@
             }
 
             .item-list.reviews-list {
-                grid-template-columns: repeat(3, 1fr);
+                grid-template-columns: repeat(2, 1fr); /* Adjust for medium screens */
             }
         }
 
@@ -401,13 +401,7 @@
             }
 
             .item-list.reviews-list {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 600px) {
-            .item-list.reviews-list {
-                grid-template-columns: 1fr;
+                grid-template-columns: 1fr; /* Adjust for small screens */
             }
         }
 
@@ -752,7 +746,7 @@
             }
         }
 
-        async function displayReviews(reviews) {
+        function displayReviews(reviews) {
             const reviewsList = document.getElementById('reviewsList');
 
             if (reviews.length === 0) {
@@ -760,137 +754,153 @@
                     <div class="empty-state">
                         <div class="empty-icon">⭐</div>
                         <p>ยังไม่มีรีวิวในระบบ</p>
-                        <p style="font-size: 14px; color: #999;">คลิกปุ่ม "เพิ่มรีวิว" เพื่อแชร์ประสบการณ์ของคุณ</p>
+                        <p style="font-size: 14px; color: #999;">คลิกปุ่ม "เพิ่มรีวิู" เพื่อแชร์ประสบการณ์ของคุณ</p>
                     </div>
                 `;
                 return;
             }
 
-            // โหลดข้อมูลโปรไฟล์ผู้ใช้
-            let userProfile = null;
-            try {
-                const response = await fetch('/api/profile');
-                if (response.ok) {
-                    userProfile = await response.json();
-                }
-            } catch (error) {
-                console.error('Error loading profile:', error);
-            }
+            const reviewsHtml = reviews.map(review => {
+                const overallStars = Array(5).fill(0).map((_, i) => 
+                    i < review.overall_rating ? '⭐' : '☆'
+                ).join('');
 
-            // คอลัมน์ที่ 1: แสดงข้อมูลผู้รีวิว (user profile)
-            const userProfileHtml = `
-                <div class="item-card">
-                    <div class="item-header">
-                        <div class="item-name">ข้อมูลผู้รีวิว</div>
-                    </div>
-                    <div class="review-content">
-                        <div style="display: flex; align-items: center; gap: 15px; padding: 20px;">
-                            <div style="width: 60px; height: 60px; border-radius: 50%; overflow: hidden; background: linear-gradient(135deg, #4CAF50, #45a049); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 18px; flex-shrink: 0;">
-                                ${userProfile && userProfile.profile_image ? 
-                                    `<img src="${userProfile.profile_image}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">` : 
-                                    '🌿'
-                                }
+                const aromaStars = review.aroma_rating ? 
+                    Array(5).fill(0).map((_, i) => 
+                        i < review.aroma_rating ? '⭐' : '☆'
+                    ).join('') : null;
+
+                const effectsText = review.selected_effects && review.selected_effects.length > 0 
+                    ? review.selected_effects.slice(0, 5).join(', ') + (review.selected_effects.length > 5 ? '...' : '')
+                    : 'ไม่ระบุ';
+
+                const aromaText = review.aroma_flavors && review.aroma_flavors.length > 0 
+                    ? review.aroma_flavors.join(', ')
+                    : 'ไม่ระบุ';
+
+                const contentPreview = review.full_review_content && review.full_review_content.length > 100 
+                    ? review.full_review_content.substring(0, 100) + '...'
+                    : review.full_review_content || '';
+
+                const hasImages = review.review_images && review.review_images.length > 0;
+                const imageCount = hasImages ? review.review_images.length : 0;
+
+                const createdDate = formatDate(review.created_at);
+                const updatedDate = review.updated_at && review.updated_at !== review.created_at 
+                    ? formatDate(review.updated_at) 
+                    : null;
+
+                return `
+                    <div class="item-card">
+                        <div class="item-header">
+                            <div class="item-title">
+                                ${review.strain_name_th || 'ไม่ระบุชื่อไทย'} (${review.strain_name_en || 'ไม่ระบุชื่ออังกฤษ'})
                             </div>
-                            <div style="flex: 1;">
-                                <div style="font-weight: 600; color: #333; font-size: 16px; margin-bottom: 5px;">
-                                    ${userProfile ? userProfile.username : 'ผู้ใช้'}
-                                </div>
-                                <div style="color: #666; font-size: 12px; margin-bottom: 5px;">
-                                    รีวิวทั้งหมด: ${reviews.length} รายการ
-                                </div>
-                                <div style="color: #666; font-size: 12px;">
-                                    เข้าร่วมเมื่อ: ${userProfile && userProfile.created_at ? formatDate(userProfile.created_at) : 'ไม่ระบุ'}
-                                </div>
-                            </div>
+                            <div class="item-date">${createdDate}</div>
                         </div>
-                    </div>
-                </div>
-            `;
 
-            // แสดงรีวิวทั้งหมดในคอลัมน์ที่เหลือ
-            const reviewCards = reviews.slice(0, 10).map(review => createReviewCard(review)).join('');
-
-            reviewsList.innerHTML = userProfileHtml + reviewCards;
-        }
-
-        function createReviewCard(review) {
-            const reviewDate = new Date(review.created_at).toLocaleDateString('th-TH', {
-                day: 'numeric',
-                month: 'short',
-                year: 'numeric'
-            });
-
-            const effectTags = (review.selected_effects || []).slice(0, 4).map(effect => 
-                `<span class="effect-tag">${effect}</span>`
-            ).join('');
-
-            const reviewImages = review.review_images || [];
-            const imageCount = reviewImages.filter(img => img && img.trim()).length;
-
-            return `
-                <div class="item-card">
-                    <div class="item-header">
-                        <div class="item-name">${review.strain_name_en || 'ไม่ระบุชื่อ'}</div>
-                        <div class="item-date">${reviewDate}</div>
-                    </div>
-                    <div class="review-content">
-                        <div class="review-main-info">
-                            <div class="review-ratings">
-                                <div class="overall-rating">
-                                    <span class="rating-stars">${'⭐'.repeat(review.overall_rating)}</span>
-                                    <span style="font-size: 12px; color: #666;"> (${review.overall_rating}/5)</span>
-                                </div>
-                            </div>
-
-                            ${review.short_summary ? `
-                                <div class="review-summary" style="font-weight: 600; color: #333; margin: 8px 0;">
-                                    "${review.short_summary}"
-                                </div>
-                            ` : ''}
-
-                            ${review.full_review_content ? `
-                                <div class="review-full-content">
-                                    <div class="content-preview" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
-                                        ${review.full_review_content}
+                        <div class="review-content">
+                            <div class="review-main-info">
+                                <!-- คะแนนรวมและกลิ่น -->
+                                <div class="review-ratings">
+                                    <div class="overall-rating">
+                                        <strong>คะแนนรวม:</strong> ${overallStars} (${review.overall_rating}/5)
                                     </div>
-                                </div>
-                            ` : ''}
-
-                            <div class="review-details">
-                                <div class="review-breeder" style="color: #666; font-size: 11px;">
-                                    <strong>ผู้พัฒนา:</strong> ${review.breeder || 'ไม่ระบุ'}
-                                </div>
-                                
-                                ${effectTags ? `
-                                    <div class="review-effects" style="margin: 6px 0;">
-                                        <div style="font-size: 10px; color: #666; margin-bottom: 4px;">เอฟเฟค:</div>
-                                        <div style="display: flex; flex-wrap: wrap; gap: 4px;">
-                                            ${effectTags}
+                                    ${aromaStars ? `
+                                        <div class="aroma-rating">
+                                            <strong>คะแนนกลิ่น:</strong> ${aromaStars} (${review.aroma_rating}/5)
                                         </div>
+                                    ` : ''}
+                                </div>
+
+                                <!-- สรุปสั้น -->
+                                <div class="review-summary">
+                                    <strong>สรุป:</strong> ${review.short_summary}
+                                </div>
+
+                                <!-- เนื้อหาเต็ม -->
+                                ${contentPreview ? `
+                                    <div class="review-full-content">
+                                        <strong>รีวิวเต็ม:</strong>
+                                        <div class="content-preview">${contentPreview}</div>
                                     </div>
                                 ` : ''}
 
-                                ${imageCount > 0 ? `
-                                    <div class="review-images-info" style="color: #007bff; font-size: 10px; margin: 6px 0;">
-                                        📷 มีรูปภาพ ${imageCount} รูป
+                                <!-- รายละเอียดอื่นๆ -->
+                                <div class="review-details">
+                                    <div class="review-effects">
+                                        <strong>🎯 เอฟเฟกต์:</strong> ${effectsText}
+                                    </div>
+                                    <div class="review-aromas">
+                                        <strong>🌸 กลิ่นและรส:</strong> ${aromaText}
+                                    </div>
+                                    ${review.breeder ? `
+                                        <div class="review-breeder">
+                                            <strong>📦 ผู้พัฒนา:</strong> ${review.breeder}
+                                        </div>
+                                    ` : ''}
+                                </div>
+
+                                <!-- ข้อมูลรูปภาพ -->
+                                ${hasImages ? `
+                                    <div class="review-images-info">
+                                        📷 มีรูปภาพประกอบ ${imageCount} รูป
+                                    </div>
+                                ` : ''}
+
+                                <!-- วันที่แก้ไข -->
+                                ${updatedDate ? `
+                                    <div class="review-updated">
+                                        <strong>แก้ไขล่าสุด:</strong> ${updatedDate}
                                     </div>
                                 ` : ''}
                             </div>
 
-                            ${review.updated_at !== review.created_at ? `
-                                <div class="review-updated" style="color: #999; font-size: 10px;">
-                                    แก้ไขล่าสุด: ${formatDate(review.updated_at)}
-                                </div>
-                            ` : ''}
+                            <div class="review-actions">
+                                <button class="action-btn primary" onclick="editReview(${review.id})">✏️ แก้ไข</button>
+                                <button class="action-btn danger" onclick="deleteReview(${review.id})">🗑️ ลบ</button>
+                            </div>
                         </div>
+                    </div>
+                `;
+            }).join('');
 
-                        <div class="review-actions">
-                            <button class="action-btn primary" onclick="editReview(${review.id})">✏️ แก้ไข</button>
-                            <button class="action-btn danger" onclick="deleteReview(${review.id})">🗑️ ลบ</button>
+            // Modified reviewsList.innerHTML to include the new image grid
+            reviewsList.innerHTML = `
+                <div class="item-card">
+                    <div class="item-header">
+                        <div class="item-name">รูปภาพจากรีวิว</div>
+                    </div>
+                    <div class="review-content">
+                        <div style="width: 100%; height: 200px; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 8px; border: 3px solid #dc3545; border-radius: 15px; padding: 8px; background: #f8f9fa;">
+                            ${reviews.length > 0 && reviews[0].review_images && reviews[0].review_images.length > 0 ? 
+                                reviews[0].review_images.slice(0, 4).map((image, idx) => 
+                                    `<img src="${image}" alt="รูปรีวิว ${idx + 1}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; border: 1px solid #ddd;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">` 
+                                ).join('') + 
+                                (reviews[0].review_images.length < 4 ? 
+                                    Array(4 - reviews[0].review_images.length).fill().map((_, idx) => 
+                                        `<div style="width: 100%; height: 100%; background: #e0e0e0; display: flex; align-items: center; justify-content: center; color: #666; font-size: 10px; text-align: center; border-radius: 8px; border: 1px solid #ddd;">ไม่มีรูป ${reviews[0].review_images.length + idx + 1}</div>`
+                                    ).join('')
+                                : '') :
+                                Array(4).fill().map((_, idx) => 
+                                    `<div style="width: 100%; height: 100%; background: #e0e0e0; display: flex; align-items: center; justify-content: center; color: #666; font-size: 10px; text-align: center; border-radius: 8px; border: 1px solid #ddd;">ไม่มีรูป ${idx + 1}</div>`
+                                ).join('')
+                            }
                         </div>
                     </div>
                 </div>
-            `;
+
+                <div class="item-card">
+                    <div class="item-header">
+                        <div class="item-name">รีวิวคอลัมน์ 3</div>
+                    </div>
+                    <div class="review-content">
+                        <div style="text-align: center; font-size: 48px; font-weight: bold; color: #2196F3; padding: 40px;">
+                            3
+                        </div>
+                    </div>
+                </div>
+            `+ reviewsHtml;
         }
 
         // Function to navigate to edit review page

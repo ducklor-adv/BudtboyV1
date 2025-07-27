@@ -361,6 +361,10 @@
             display: none;
         }
 
+        .flavor-categories.active {
+            display: block;
+        }
+
         .flavor-category {
             margin-bottom: 12px;
         }
@@ -487,6 +491,10 @@
             max-height: 250px;
             overflow-y: auto;
             display: none;
+        }
+
+        .effects-categories.active {
+            display: block;
         }
 
         .effect-category {
@@ -1410,13 +1418,14 @@
 
             // Toggle categories visibility when clicking on selected flavors area
             selectedFlavorsDiv.addEventListener('click', function() {
-                flavorCategoriesDiv.classList.toggle('active');
+                const isActive = flavorCategoriesDiv.style.display === 'block';
+                flavorCategoriesDiv.style.display = isActive ? 'none' : 'block';
             });
 
             // Close categories when clicking outside
             document.addEventListener('click', function(e) {
                 if (!e.target.closest('.aroma-selector')) {
-                    flavorCategoriesDiv.classList.remove('active');
+                    flavorCategoriesDiv.style.display = 'none';
                 }
             });
 
@@ -1539,10 +1548,11 @@
                 // Close other effect selectors
                 document.querySelectorAll('.effects-categories').forEach(cat => {
                     if (cat !== categoriesDiv) {
-                        cat.classList.remove('active');
+                        cat.style.display = 'none';
                     }
                 });
-                categoriesDiv.classList.toggle('active');
+                const isActive = categoriesDiv.style.display === 'block';
+                categoriesDiv.style.display = isActive ? 'none' : 'block';
             });
 
             // Handle effect button clicks
@@ -1625,7 +1635,7 @@
         document.addEventListener('click', function(e) {
             if (!e.target.closest('.effects-selector')) {
                 document.querySelectorAll('.effects-categories').forEach(cat => {
-                    cat.classList.remove('active');
+                    cat.style.display = 'none';
                 });
             }
         });

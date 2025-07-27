@@ -865,7 +865,42 @@
                 `;
             }).join('');
 
-            reviewsList.innerHTML = reviewsHtml;
+            // Modified reviewsList.innerHTML to include the new image grid
+            reviewsList.innerHTML = `
+                <div class="item-card">
+                    <div class="item-header">
+                        <div class="item-name">รูปภาพจากรีวิว</div>
+                    </div>
+                    <div class="review-content">
+                        <div style="width: 100%; height: 200px; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 8px; border: 3px solid #dc3545; border-radius: 15px; padding: 8px; background: #f8f9fa;">
+                            ${reviews.length > 0 && reviews[0].review_images && reviews[0].review_images.length > 0 ? 
+                                reviews[0].review_images.slice(0, 4).map((image, idx) => 
+                                    `<img src="${image}" alt="รูปรีวิว ${idx + 1}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; border: 1px solid #ddd;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">` 
+                                ).join('') + 
+                                (reviews[0].review_images.length < 4 ? 
+                                    Array(4 - reviews[0].review_images.length).fill().map((_, idx) => 
+                                        `<div style="width: 100%; height: 100%; background: #e0e0e0; display: flex; align-items: center; justify-content: center; color: #666; font-size: 10px; text-align: center; border-radius: 8px; border: 1px solid #ddd;">ไม่มีรูป ${reviews[0].review_images.length + idx + 1}</div>`
+                                    ).join('')
+                                : '') :
+                                Array(4).fill().map((_, idx) => 
+                                    `<div style="width: 100%; height: 100%; background: #e0e0e0; display: flex; align-items: center; justify-content: center; color: #666; font-size: 10px; text-align: center; border-radius: 8px; border: 1px solid #ddd;">ไม่มีรูป ${idx + 1}</div>`
+                                ).join('')
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div class="item-card">
+                    <div class="item-header">
+                        <div class="item-name">รีวิวคอลัมน์ 3</div>
+                    </div>
+                    <div class="review-content">
+                        <div style="text-align: center; font-size: 48px; font-weight: bold; color: #2196F3; padding: 40px;">
+                            3
+                        </div>
+                    </div>
+                </div>
+            `+ reviewsHtml;
         }
 
         // Function to navigate to edit review page

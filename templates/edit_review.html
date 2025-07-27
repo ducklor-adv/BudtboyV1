@@ -15,7 +15,7 @@
         }
 
         .container {
-            max-width: 800px;
+            max-width: 600px;
             margin: 0 auto;
             background: white;
             border-radius: 20px;
@@ -24,7 +24,7 @@
         }
 
         .header {
-            background: linear-gradient(135deg, #FF9800, #F57C00);
+            background: linear-gradient(135deg, #ff9800, #ff6f00);
             padding: 20px 30px;
             color: white;
             display: flex;
@@ -59,33 +59,15 @@
             font-weight: 600;
         }
 
-        .content {
+        .form-container {
             padding: 30px;
         }
 
-        .form-section {
-            margin-bottom: 25px;
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 20px;
-            border-left: 4px solid #FF9800;
-        }
-
-        .section-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 25px;
         }
 
-        .form-group label {
+        .form-label {
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
@@ -93,241 +75,105 @@
             font-size: 14px;
         }
 
-        .form-control {
+        .form-input, .form-select, .form-textarea {
             width: 100%;
             padding: 12px 15px;
             border: 2px solid #e9ecef;
-            border-radius: 10px;
+            border-radius: 12px;
             font-size: 14px;
             transition: all 0.3s ease;
             box-sizing: border-box;
         }
 
-        .form-control:focus {
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
             outline: none;
-            border-color: #FF9800;
+            border-color: #ff9800;
             box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.1);
         }
 
-        textarea.form-control {
-            min-height: 100px;
+        .form-textarea {
             resize: vertical;
-        }
-
-        .rating-section {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
+            min-height: 100px;
         }
 
         .rating-group {
             display: flex;
-            align-items: center;
-            gap: 10px;
+            gap: 15px;
+            flex-wrap: wrap;
         }
 
-        .rating-stars {
+        .rating-item {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .star-rating {
             display: flex;
             gap: 3px;
+            margin-top: 5px;
         }
 
         .star {
-            font-size: 24px;
+            font-size: 20px;
+            color: #ddd;
             cursor: pointer;
-            transition: all 0.2s ease;
-            user-select: none;
+            transition: color 0.2s ease;
         }
 
-        .star.filled {
+        .star.active, .star:hover {
             color: #ffd700;
         }
 
-        .star.empty {
-            color: #ddd;
-        }
-
-        .star:hover {
-            transform: scale(1.1);
-        }
-
-        .rating-text {
-            font-size: 14px;
-            color: #666;
-            font-weight: 500;
-        }
-
-        .effects-grid {
+        .aroma-flavors {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 8px;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
             margin-top: 10px;
         }
 
-        .effect-checkbox {
+        .aroma-item {
             display: flex;
             align-items: center;
             gap: 8px;
             padding: 8px 12px;
-            background: white;
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 13px;
-        }
-
-        .effect-checkbox:hover {
-            border-color: #FF9800;
-            background: #fff3e0;
-        }
-
-        .effect-checkbox.selected {
-            border-color: #FF9800;
-            background: #fff3e0;
-        }
-
-        .effect-checkbox input[type="checkbox"] {
-            margin: 0;
-        }
-
-        .aromas-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-            gap: 8px;
-            margin-top: 10px;
-        }
-
-        .aroma-checkbox {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 10px;
-            background: white;
-            border: 2px solid #e9ecef;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 12px;
-        }
-
-        .aroma-checkbox:hover {
-            border-color: #9C27B0;
-            background: #f3e5f5;
-        }
-
-        .aroma-checkbox.selected {
-            border-color: #9C27B0;
-            background: #f3e5f5;
-        }
-
-        .aroma-checkbox input[type="checkbox"] {
-            margin: 0;
-        }
-
-        .image-upload-section {
-            border: 2px dashed #ddd;
-            border-radius: 10px;
-            padding: 20px;
-            text-align: center;
-            background: #fafafa;
-            transition: all 0.3s ease;
-        }
-
-        .image-upload-section:hover {
-            border-color: #FF9800;
-            background: #fff3e0;
-        }
-
-        .upload-btn {
-            background: #FF9800;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            margin-top: 10px;
-        }
-
-        .upload-btn:hover {
-            background: #F57C00;
-        }
-
-        .images-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-top: 15px;
-            border: 3px solid #dc3545;
-            border-radius: 15px;
-            padding: 10px;
             background: #f8f9fa;
-        }
-
-        .image-slot {
-            position: relative;
-            width: 100%;
-            height: 120px;
-            border: 2px dashed #ddd;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #fafafa;
-            overflow: hidden;
-        }
-
-        .image-slot img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 8px;
-        }
-
-        .image-placeholder {
-            text-align: center;
-            color: #999;
-            font-size: 12px;
-        }
-
-        .remove-image-btn {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background: #ff4757;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
+            border-radius: 20px;
+            font-size: 13px;
             cursor: pointer;
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
+            transition: all 0.3s ease;
+        }
+
+        .aroma-item:hover {
+            background: #e9ecef;
+        }
+
+        .aroma-item.selected {
+            background: #fff3cd;
+            border: 2px solid #ff9800;
+        }
+
+        .aroma-item input[type="checkbox"] {
+            margin: 0;
+            width: auto;
         }
 
         .submit-btn {
-            background: linear-gradient(135deg, #4CAF50, #45a049);
+            width: 100%;
+            background: linear-gradient(135deg, #ff9800, #ff6f00);
             color: white;
             border: none;
-            padding: 15px 40px;
+            padding: 15px 20px;
             border-radius: 25px;
-            cursor: pointer;
             font-size: 16px;
             font-weight: 600;
-            width: 100%;
-            margin-top: 20px;
+            cursor: pointer;
             transition: all 0.3s ease;
+            margin-top: 20px;
         }
 
         .submit-btn:hover {
-            background: linear-gradient(135deg, #45a049, #3d8b40);
             transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 152, 0, 0.3);
         }
 
         .submit-btn:disabled {
@@ -336,62 +182,393 @@
             transform: none;
         }
 
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .success-message {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
         .loading {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #ffffff;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .effects-category {
+            margin-bottom: 25px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border: 1px solid #e9ecef;
+        }
+
+        .effects-category-title {
+            margin: 0 0 15px 0;
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .effects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 8px;
+        }
+
+        .effect-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 13px;
+        }
+
+        .effect-item:hover {
+            border-color: #ff9800;
+            background: #fff3cd;
+        }
+
+        .effect-item input[type="checkbox"] {
+            margin: 0;
+            width: 16px;
+            height: 16px;
+        }
+
+        .effect-item input[type="checkbox"]:checked + label {
+            font-weight: 600;
+        }
+
+        .effect-item input[type="checkbox"]:checked {
+            accent-color: #ff9800;
+        }
+
+        .effect-item.selected {
+            background: #fff3cd;
+            border-color: #ff9800;
+        }
+
+        .effect-item label {
+            cursor: pointer;
+            margin: 0;
+            flex: 1;
+            font-size: 13px;
+        }
+
+        .image-upload-container {
+            margin-top: 10px;
+        }
+
+        .upload-area {
+            border: 2px dashed #e9ecef;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            background: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-area:hover {
+            border-color: #ff9800;
+            background: #fff3cd;
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .upload-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .upload-hint {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .image-preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .image-preview-item {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .image-preview-item img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .image-remove-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(255, 0, 0, 0.8);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .image-remove-btn:hover {
+            background: rgba(255, 0, 0, 1);
+        }
+
+        .image-count {
+            margin-top: 10px;
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+        }
+
+        .check-btn {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .check-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+        }
+
+        .check-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .bud-info {
+            margin-top: 15px;
+            padding: 20px;
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .bud-info.verified {
+            background: #d4edda;
+            border-color: #c3e6cb;
+        }
+
+        .bud-info.error {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+        }
+
+        .bud-details {
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+        }
+
+        .bud-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 2px solid #ddd;
+        }
+
+        .bud-text-info {
+            flex: 1;
+        }
+
+        .bud-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .bud-details-text {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .grower-info {
+            margin-top: 15px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+        }
+
+        .grower-name {
+            font-weight: 600;
+            color: #28a745;
+        }
+
+        .confirm-btn {
+            margin-top: 15px;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .confirm-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+
+            .form-container {
+                padding: 20px;
+            }
+
+            .rating-group {
+                flex-direction: column;
+            }
+
+            .aroma-flavors {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .effects-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .effect-item {
+                font-size: 12px;
+                padding: 6px 10px;
+            }
+
+            .image-preview-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+                gap: 10px;
+            }
+
+            .image-preview-item img {
+                height: 100px;
+            }
+
+            .upload-area {
+                padding: 20px;
+            }
+
+            .upload-icon {
+                font-size: 36px;
+            }
+
+            .upload-text {
+                font-size: 14px;
+            }
+        }
+
+        .effects-categories {
+            display: none;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 5px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .effects-categories.active {
+            display: block;
+        }
+
+        .flavor-categories {
+            display: none;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 5px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .flavor-categories.active {
+            display: block;
+        }
+
+        .loading-container {
             text-align: center;
             padding: 60px;
             color: #666;
             font-size: 16px;
-        }
-
-        .error {
-            background: #ffebee;
-            border: 1px solid #f44336;
-            color: #d32f2f;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-
-        .success {
-            background: #e8f5e9;
-            border: 1px solid #4caf50;
-            color: #2e7d32;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-
-        @media (max-width: 768px) {
-            body {
-                padding: 10px;
-            }
-
-            .container {
-                margin: 0;
-                border-radius: 15px;
-            }
-
-            .content {
-                padding: 20px;
-            }
-
-            .effects-grid {
-                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            }
-
-            .aromas-grid {
-                grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-            }
-
-            .images-grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 8px;
-                padding: 8px;
-            }
-
-            .image-slot {
-                height: 100px;
-            }
         }
     </style>
 </head>
@@ -405,163 +582,318 @@
             <div style="width: 60px;"></div>
         </div>
 
-        <div class="content">
-            <div id="loading" class="loading">กำลังโหลดข้อมูลรีวิว...</div>
-            <div id="errorMessage" class="error" style="display: none;"></div>
-            <div id="successMessage" class="success" style="display: none;"></div>
+        <div class="form-container">
+            <div id="errorMessage" class="error-message" style="display: none;"></div>
+            <div id="successMessage" class="success-message" style="display: none;"></div>
+            <div id="loadingContainer" class="loading-container">กำลังโหลดข้อมูลรีวิว...</div>
 
-            <form id="editReviewForm" style="display: none;">
+            <form id="reviewForm" style="display: none;">
                 <!-- ข้อมูลดอกที่รีวิว -->
-                <div class="form-section">
-                    <div class="section-title">
-                        🌿 ข้อมูลดอกที่รีวิว
-                    </div>
-                    <div id="budInfo" class="form-group">
-                        <!-- จะแสดงข้อมูลดอกที่รีวิว -->
-                    </div>
+                <div class="form-group">
+                    <label class="form-label">🌸 ดอกที่รีวิว</label>
+                    <div id="budInfo" class="bud-info verified" style="display: none;"></div>
+                    <input type="hidden" id="budSelect" required>
                 </div>
 
-                <!-- คะแนนรีวิว -->
-                <div class="form-section">
-                    <div class="section-title">
-                        ⭐ คะแนนรีวิว
+                <!-- คะแนนรวม -->
+                <div class="form-group">
+                    <label class="form-label">⭐ คะแนนรวม</label>
+                    <div class="star-rating" data-rating="overall">
+                        <span class="star" data-value="1">★</span>
+                        <span class="star" data-value="2">★</span>
+                        <span class="star" data-value="3">★</span>
+                        <span class="star" data-value="4">★</span>
+                        <span class="star" data-value="5">★</span>
                     </div>
-
-                    <div class="form-group">
-                        <label>คะแนนรวม (1-5 ดาว) *</label>
-                        <div class="rating-section">
-                            <div class="rating-group">
-                                <span style="font-size: 14px; color: #666;">รวม:</span>
-                                <div class="rating-stars" id="overallRating">
-                                    <span class="star" data-rating="1">⭐</span>
-                                    <span class="star" data-rating="2">⭐</span>
-                                    <span class="star" data-rating="3">⭐</span>
-                                    <span class="star" data-rating="4">⭐</span>
-                                    <span class="star" data-rating="5">⭐</span>
-                                </div>
-                                <span class="rating-text" id="overallRatingText">ยังไม่ได้เลือก</span>
-                            </div>
-                        </div>
-                        <input type="hidden" id="overallRatingValue" name="overall_rating" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label>คะแนนกลิ่นและรส (1-5 ดาว)</label>
-                        <div class="rating-section">
-                            <div class="rating-group">
-                                <span style="font-size: 14px; color: #666;">กลิ่น:</span>
-                                <div class="rating-stars" id="aromaRating">
-                                    <span class="star" data-rating="1">👃</span>
-                                    <span class="star" data-rating="2">👃</span>
-                                    <span class="star" data-rating="3">👃</span>
-                                    <span class="star" data-rating="4">👃</span>
-                                    <span class="star" data-rating="5">👃</span>
-                                </div>
-                                <span class="rating-text" id="aromaRatingText">ไม่บังคับ</span>
-                            </div>
-                        </div>
-                        <input type="hidden" id="aromaRatingValue" name="aroma_rating">
-                    </div>
+                    <input type="hidden" id="overallRating" required>
                 </div>
 
-                <!-- สรุปสั้น -->
-                <div class="form-section">
-                    <div class="section-title">
-                        📝 สรุปรีวิว
-                    </div>
-
-                    <div class="form-group">
-                        <label for="shortSummary">สรุปสั้นๆ (สูงสุด 200 ตัวอักษร) *</label>
-                        <textarea 
-                            id="shortSummary" 
-                            name="short_summary" 
-                            class="form-control" 
-                            placeholder="เช่น หอม แรง ได้ผลดี..."
-                            maxlength="200"
-                            required
-                        ></textarea>
-                    </div>
+                <div class="form-group">
+                    <label for="video-review-url">ลิงค์วิดีโอรีวิว</label>
+                    <input type="url" id="video-review-url" class="form-input" placeholder="https://youtube.com/watch?v=... หรือ https://youtu.be/...">
                 </div>
 
-                <!-- ผลกระทบ -->
-                <div class="form-section">
-                    <div class="section-title">
-                        🧠 ผลกระทบที่รู้สึก
-                    </div>
-
-                    <div class="form-group">
-                        <label>เลือกผลกระทบที่รู้สึก (เลือกได้หลายตัว)</label>
-                        <div class="effects-grid" id="effectsGrid">
-                            <!-- Effects จะถูกโหลดที่นี่ -->
-                        </div>
-                    </div>
+                <!-- สรุปสั้น ๆ -->
+                <div class="form-group">
+                    <label class="form-label">📝 สรุปสั้น ๆ (เช่น "กลิ่นส้มชัด สดชื่น")</label>
+                    <input type="text" id="shortSummary" class="form-input" maxlength="200" 
+                           placeholder="อธิบายสั้น ๆ เกี่ยวกับดอกนี้" required>
                 </div>
 
                 <!-- กลิ่นและรส -->
-                <div class="form-section">
-                    <div class="section-title">
-                        👃 กลิ่นและรสชาติ
+                <div class="form-group">
+                    <label class="form-label">👃 กลิ่นและรส (เลือกได้หลายตัว)</label>
+                    <div class="aroma-flavors" id="aromaFlavors">
+                        <div class="aroma-item">
+                            <input type="checkbox" value="citrus" id="aroma_citrus">
+                            <label for="aroma_citrus">🍊 ซิตรัส</label>
+                        </div>
+                        <div class="aroma-item">
+                            <input type="checkbox" value="sweet" id="aroma_sweet">
+                            <label for="aroma_sweet">🍯 หวาน</label>
+                        </div>
+                        <div class="aroma-item">
+                            <input type="checkbox" value="earthy" id="aroma_earthy">
+                            <label for="aroma_earthy">🌍 ดิน</label>
+                        </div>
+                        <div class="aroma-item">
+                            <input type="checkbox" value="pine" id="aroma_pine">
+                            <label for="aroma_pine">🌲 สน</label>
+                        </div>
+                        <div class="aroma-item">
+                            <input type="checkbox" value="floral" id="aroma_floral">
+                            <label for="aroma_floral">🌸 ดอกไม้</label>
+                        </div>
+                        <div class="aroma-item">
+                            <input type="checkbox" value="spicy" id="aroma_spicy">
+                            <label for="aroma_spicy">🌶️ เผ็ด</label>
+                        </div>
+                        <div class="aroma-item">
+                            <input type="checkbox" value="berry" id="aroma_berry">
+                            <label for="aroma_berry">🫐 เบอร์รี่</label>
+                        </div>
+                        <div class="aroma-item">
+                            <input type="checkbox" value="mint" id="aroma_mint">
+                            <label for="aroma_mint">🌿 มินต์</label>
+                        </div>
+                        <div class="aroma-item">
+                            <input type="checkbox" value="diesel" id="aroma_diesel">
+                            <label for="aroma_diesel">⛽ ดีเซล</label>
+                        </div>
+                        <div class="aroma-item">
+                            <input type="checkbox" value="cheese" id="aroma_cheese">
+                            <label for="aroma_cheese">🧀 ชีส</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- คะแนนกลิ่น -->
+                <div class="form-group">
+                    <label class="form-label">📊 คะแนนกลิ่น</label>
+                    <div class="rating-group">
+                        <div class="rating-item">
+                            <div class="star-rating" data-rating="aroma">
+                                <span class="star" data-value="1">★</span>
+                                <span class="star" data-value="2">★</span>
+                                <span class="star" data-value="3">★</span>
+                                <span class="star" data-value="4">★</span>
+                                <span class="star" data-value="5">★</span>
+                            </div>
+                            <input type="hidden" id="aromaRating">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ผลกระทบที่รู้สึก -->
+                <div class="form-group">
+                    <label class="form-label">🧠 ผลกระทบที่รู้สึก (เลือกได้หลายตัว)</label>
+
+                    <!-- ผลกระทบต่อจิตใจ (เชิงบวก) -->
+                    <div class="effects-category">
+                        <h4 class="effects-category-title">🌟 ผลกระทบต่อจิตใจ (เชิงบวก)</h4>
+                        <div class="effects-grid" id="mentalPositiveEffects">
+                            <div class="effect-item">
+                                <input type="checkbox" value="สุขใจ" id="mental_pos_happy">
+                                <label for="mental_pos_happy">😊 สุขใจ</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="ผ่อนคลาย" id="mental_pos_relaxed">
+                                <label for="mental_pos_relaxed">😌 ผ่อนคลาย</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="สร้างสรรค์" id="mental_pos_creative">
+                                <label for="mental_pos_creative">🎨 สร้างสรรค์</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="ร่าเริง" id="mental_pos_cheerful">
+                                <label for="mental_pos_cheerful">🎉 ร่าเริง</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="เบิกบาน" id="mental_pos_euphoric">
+                                <label for="mental_pos_euphoric">✨ เบิกบาน</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="โฟกัส" id="mental_pos_focused">
+                                <label for="mental_pos_focused">🎯 โฟกัส</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="ตื่นตัว" id="mental_pos_alert">
+                                <label for="mental_pos_alert">⚡ ตื่นตัว</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="คิดลึก" id="mental_pos_thoughtful">
+                                <label for="mental_pos_thoughtful">🤔 คิดลึก</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="หลับง่าย" id="mental_pos_sleepy">
+                                <label for="mental_pos_sleepy">😴 หลับง่าย</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="เพลิดเพลิน" id="mental_pos_enjoyable">
+                                <label for="mental_pos_enjoyable">🎈 เพลิดเพลิน</label>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label>เลือกกลิ่นและรสที่รู้สึก (เลือกได้หลายตัว)</label>
-                        <div class="aromas-grid" id="aromasGrid">
-                            <!-- Aromas จะถูกโหลดที่นี่ -->
+                    <!-- ผลกระทบต่อจิตใจ (เชิงลบ) -->
+                    <div class="effects-category">
+                        <h4 class="effects-category-title">⚠️ ผลกระทบต่อจิตใจ (เชิงลบ)</h4>
+                        <div class="effects-grid" id="mentalNegativeEffects">
+                            <div class="effect-item">
+                                <input type="checkbox" value="วิตก" id="mental_neg_anxious">
+                                <label for="mental_neg_anxious">😰 วิตก</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="พารานอยด์" id="mental_neg_paranoid">
+                                <label for="mental_neg_paranoid">👁️ พารานอยด์</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="แพนิค" id="mental_neg_panic">
+                                <label for="mental_neg_panic">😱 แพนิค</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="สับสน" id="mental_neg_confused">
+                                <label for="mental_neg_confused">🤯 สับสน</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="ความจำสั้น" id="mental_neg_memory">
+                                <label for="mental_neg_memory">🧠 ความจำสั้น</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="สมาธิหาย" id="mental_neg_unfocused">
+                                <label for="mental_neg_unfocused">💭 สมาธิหาย</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="หลอน" id="mental_neg_hallucination">
+                                <label for="mental_neg_hallucination">👻 หลอน</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="ง่วงหนัก" id="mental_neg_drowsy">
+                                <label for="mental_neg_drowsy">🥱 ง่วงหนัก</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="ซึมเศร้า" id="mental_neg_depressed">
+                                <label for="mental_neg_depressed">😔 ซึมเศร้า</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="หงุดหงิด" id="mental_neg_irritated">
+                                <label for="mental_neg_irritated">😤 หงุดหงิด</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ผลกระทบทางร่างกาย (เชิงบวก) -->
+                    <div class="effects-category">
+                        <h4 class="effects-category-title">💪 ผลกระทบทางร่างกาย (เชิงบวก)</h4>
+                        <div class="effects-grid" id="physicalPositiveEffects">
+                            <div class="effect-item">
+                                <input type="checkbox" value="บรรเทาปวด" id="physical_pos_pain_relief">
+                                <label for="physical_pos_pain_relief">🩹 บรรเทาปวด</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="คลายกล้าม" id="physical_pos_muscle_relax">
+                                <label for="physical_pos_muscle_relax">💆 คลายกล้าม</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="ต้านอักเสบ" id="physical_pos_anti_inflammatory">
+                                <label for="physical_pos_anti_inflammatory">🛡️ ต้านอักเสบ</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="หลับง่าย" id="physical_pos_sleep">
+                                <label for="physical_pos_sleep">🛌 หลับง่าย</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="คลายเกร็ง" id="physical_pos_tension_relief">
+                                <label for="physical_pos_tension_relief">🤲 คลายเกร็ง</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="ต้านคลื่นไส้" id="physical_pos_anti_nausea">
+                                <label for="physical_pos_anti_nausea">🤢 ต้านคลื่นไส้</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="กระตุ้นกิน" id="physical_pos_appetite">
+                                <label for="physical_pos_appetite">🍽️ กระตุ้นกิน</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="ผ่อนคลาย" id="physical_pos_relaxation">
+                                <label for="physical_pos_relaxation">🧘 ผ่อนคลาย</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="สดชื่น" id="physical_pos_refreshed">
+                                <label for="physical_pos_refreshed">🌿 สดชื่น</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="สุขภาพลำไส้" id="physical_pos_digestive">
+                                <label for="physical_pos_digestive">🦠 สุขภาพลำไส้</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ผลกระทบทางร่างกาย (เชิงลบ) -->
+                    <div class="effects-category">
+                        <h4 class="effects-category-title">⛔ ผลกระทบทางร่างกาย (เชิงลบ)</h4>
+                        <div class="effects-grid" id="physicalNegativeEffects">
+                            <div class="effect-item">
+                                <input type="checkbox" value="ปากแห้ง" id="physical_neg_dry_mouth">
+                                <label for="physical_neg_dry_mouth">👄 ปากแห้ง</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="ตาแดง" id="physical_neg_red_eyes">
+                                <label for="physical_neg_red_eyes">👁️ ตาแดง</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="ตาแห้ง" id="physical_neg_dry_eyes">
+                                <label for="physical_neg_dry_eyes">👀 ตาแห้ง</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="เวียนหัว" id="physical_neg_dizzy">
+                                <label for="physical_neg_dizzy">💫 เวียนหัว</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="ใจเต้นเร็ว" id="physical_neg_heart_rate">
+                                <label for="physical_neg_heart_rate">💓 ใจเต้นเร็ว</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="ความดันตก"id="physical_neg_blood_pressure">
+                                <label for="physical_neg_blood_pressure">📉 ความดันตก</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="มือสั่น" id="physical_neg_tremor">
+                                <label for="physical_neg_tremor">🤝 มือสั่น</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="เหงื่อออก" id="physical_neg_sweating">
+                                <label for="physical_neg_sweating">💦 เหงื่อออก</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="คลื่นไส้" id="physical_neg_nausea">
+                                <label for="physical_neg_nausea">🤮 คลื่นไส้</label>
+                            </div>
+                            <div class="effect-item">
+                                <input type="checkbox" value="ไอ/เจ็บคอ" id="physical_neg_cough">
+                                <label for="physical_neg_cough">🤧 ไอ/เจ็บคอ</label>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- รีวิวเต็ม -->
-                <div class="form-section">
-                    <div class="section-title">
-                        📄 รีวิวเต็ม
-                    </div>
-
-                    <div class="form-group">
-                        <label for="fullReview">รีวิวแบบเต็ม (ไม่บังคับ)</label>
-                        <textarea 
-                            id="fullReview" 
-                            name="full_review_content" 
-                            class="form-control" 
-                            placeholder="เขียนรีวิวแบบละเอียด..."
-                            rows="4"
-                        ></textarea>
-                    </div>
+                <div class="form-group">
+                    <label class="form-label">📖 เนื้อหารีวิวเต็ม</label>
+                    <textarea id="fullReview" class="form-textarea" placeholder="เล่าประสบการณ์การใช้งานของคุณ เช่น ผลกระทบ อาการข้างเคียง เหมาะสำหรับเวลาไหน ฯลฯ"></textarea>
                 </div>
 
-                <!-- รูปภาพ -->
-                <div class="form-section">
-                    <div class="section-title">
-                        📸 รูปภาพรีวิว
-                    </div>
-
-                    <div class="form-group">
-                        <label>รูปภาพรีวิว (ไม่บังคับ, สูงสุด 4 รูป)</label>
-                        <div class="image-upload-section">
-                            <div>📷 เลือกรูปภาพสำหรับรีวิว</div>
-                            <div style="font-size: 12px; color: #666; margin: 5px 0;">
-                                คลิกเพื่อเลือกรูป หรือลากไฟล์มาวาง
-                            </div>
-                            <input type="file" id="reviewImages" multiple accept="image/*" style="display: none;">
-                            <button type="button" class="upload-btn" onclick="document.getElementById('reviewImages').click()">
-                                เลือกรูป
-                            </button>
+                <!-- อัปโหลดรูปภาพ -->
+                <div class="form-group">
+                    <label class="form-label">📷 รูปภาพประกอบ (สูงสุด 4 รูป)</label>
+                    <div class="image-upload-container">
+                        <input type="file" id="imageInput" accept="image/*" multiple class="file-input" style="display: none;">
+                        <div class="upload-area" onclick="document.getElementById('imageInput').click()">
+                            <div class="upload-icon">📷</div>
+                            <div class="upload-text">คลิกเพื่อเลือกรูปภาพ</div>
+                            <div class="upload-hint">รองรับ JPG, PNG, GIF สูงสุด 4 รูป</div>
                         </div>
-
-                        <div class="images-grid" id="imagesGrid">
-                            <div class="image-slot" id="imageSlot1">
-                                <div class="image-placeholder">รูปที่ 1<br>ไม่มีรูป</div>
-                            </div>
-                            <div class="image-slot" id="imageSlot2">
-                                <div class="image-placeholder">รูปที่ 2<br>ไม่มีรูป</div>
-                            </div>
-                            <div class="image-slot" id="imageSlot3">
-                                <div class="image-placeholder">รูปที่ 3<br>ไม่มีรูป</div>
-                            </div>
-                            <div class="image-slot" id="imageSlot4">
-                                <div class="image-placeholder">รูปที่ 4<br>ไม่มีรูป</div>
-                            </div>
-                        </div>
+                        <div id="imagePreview" class="image-preview-grid"></div>
                     </div>
                 </div>
 
@@ -573,30 +905,15 @@
     </div>
 
     <script>
-        // Global variables
+        let ratings = {
+            overall: 0,
+            aroma: 0
+        };
+
         let reviewData = null;
         let currentImages = [];
-        let selectedFiles = [];
-        let overallRating = 0;
-        let aromaRating = 0;
-
-        // Effects และ Aromas lists
-        const effectsList = [
-            'ผ่อนคลาย', 'สุขใจ', 'หลับง่าย', 'สร้างสรรค์', 'โฟกัส', 'ตื่นตัว',
-            'หิวข้าว', 'คิดลึก', 'หัวเราะ', 'พูดเก่ง', 'ร่าเริง', 'ปลอดภัย',
-            'ปวดศีรษะ', 'วิตก', 'หวาดระแวง', 'ความจำสั้น', 'เซื่องซึม', 'ง่วง',
-            'คลายกล้าม', 'บรรเทาปวด', 'ต้านอักเสบ', 'คลายเกร็ง', 'สดชื่น', 'กระปรี้กระเปร่า',
-            'ปากแห้ง', 'ตาแดง', 'ตาแห้ง', 'ใจเต้นเร็ว', 'หน้ามืด', 'มือสั่น'
-        ];
-
-        const aromasList = [
-            'citrus', 'lemon', 'orange', 'grapefruit', 'lime',
-            'berry', 'strawberry', 'blueberry', 'grape', 'cherry',
-            'sweet', 'honey', 'vanilla', 'caramel', 'chocolate',
-            'earthy', 'woody', 'pine', 'herbal', 'grass',
-            'spicy', 'pepper', 'cinnamon', 'mint', 'lavender',
-            'diesel', 'cheese', 'skunky', 'pungent', 'floral'
-        ];
+        let selectedImages = [];
+        const maxImages = 4;
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', async function() {
@@ -626,13 +943,11 @@
                 console.log('API Response:', reviewData);
 
                 // ซ่อน loading และแสดงฟอร์ม
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('editReviewForm').style.display = 'block';
+                document.getElementById('loadingContainer').style.display = 'none';
+                document.getElementById('reviewForm').style.display = 'block';
 
                 // เติมข้อมูลในฟอร์ม
                 populateForm();
-                initializeEffectsAndAromas();
-                initializeEventListeners();
 
             } catch (error) {
                 console.error('Error loading review:', error);
@@ -644,187 +959,226 @@
             if (!reviewData) return;
 
             // แสดงข้อมูลดอก
-            document.getElementById('budInfo').innerHTML = `
-                <div style="background: white; padding: 15px; border-radius: 10px; border: 2px solid #e9ecef;">
-                    <h4 style="margin: 0 0 10px 0; color: #333;">${reviewData.strain_name_th} (${reviewData.strain_name_en})</h4>
-                    <p style="margin: 0; color: #666; font-size: 14px;">ผู้พัฒนา: ${reviewData.breeder || 'ไม่ระบุ'}</p>
-                </div>
-            `;
+            displayBudInfo();
 
             // ตั้งค่าคะแนน
-            setOverallRating(reviewData.overall_rating);
+            setRating('overall', reviewData.overall_rating);
             if (reviewData.aroma_rating) {
-                setAromaRating(reviewData.aroma_rating);
+                setRating('aroma', reviewData.aroma_rating);
             }
 
             // ตั้งค่าข้อความ
             document.getElementById('shortSummary').value = reviewData.short_summary || '';
             document.getElementById('fullReview').value = reviewData.full_review_content || '';
+            document.getElementById('video-review-url').value = reviewData.video_review_url || '';
+
+            // ตั้งค่า aroma flavors
+            if (reviewData.aroma_flavors) {
+                reviewData.aroma_flavors.forEach(aroma => {
+                    const checkbox = document.getElementById(`aroma_${aroma}`);
+                    if (checkbox) {
+                        checkbox.checked = true;
+                        checkbox.closest('.aroma-item').classList.add('selected');
+                    }
+                });
+            }
+
+            // ตั้งค่า effects
+            if (reviewData.selected_effects) {
+                reviewData.selected_effects.forEach(effect => {
+                    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+                    checkboxes.forEach(checkbox => {
+                        if (checkbox.value === effect) {
+                            checkbox.checked = true;
+                            checkbox.closest('.effect-item').classList.add('selected');
+                        }
+                    });
+                });
+            }
 
             // ตั้งค่ารูปภาพเดิม
             if (reviewData.review_images && reviewData.review_images.length > 0) {
                 currentImages = [...reviewData.review_images];
                 displayCurrentImages();
             }
+
+            // Initialize event listeners
+            initializeEventListeners();
         }
 
-        function initializeEffectsAndAromas() {
-            // สร้าง effects checkboxes
-            const effectsGrid = document.getElementById('effectsGrid');
-            effectsGrid.innerHTML = effectsList.map(effect => {
-                const isSelected = reviewData.selected_effects && reviewData.selected_effects.includes(effect);
-                return `
-                    <label class="effect-checkbox ${isSelected ? 'selected' : ''}">
-                        <input type="checkbox" name="selected_effects" value="${effect}" ${isSelected ? 'checked' : ''}>
-                        ${effect}
-                    </label>
-                `;
-            }).join('');
-
-            // สร้าง aromas checkboxes
-            const aromasGrid = document.getElementById('aromasGrid');
-            aromasGrid.innerHTML = aromasList.map(aroma => {
-                const isSelected = reviewData.aroma_flavors && reviewData.aroma_flavors.includes(aroma);
-                return `
-                    <label class="aroma-checkbox ${isSelected ? 'selected' : ''}">
-                        <input type="checkbox" name="aroma_flavors" value="${aroma}" ${isSelected ? 'checked' : ''}>
-                        ${aroma}
-                    </label>
-                `;
-            }).join('');
-
-            // Add event listeners for checkboxes
-            addCheckboxListeners();
+        function displayBudInfo() {
+            const budInfo = document.getElementById('budInfo');
+            budInfo.innerHTML = `
+                <div class="bud-details">
+                    <div class="bud-image" style="width: 80px; height: 80px; border-radius: 10px; object-fit: cover; border: 2px solid #ddd; display: flex; align-items: center; justify-content: center; font-size: 24px; position: relative;">🌿
+                    <a href="/bud_report/${reviewData.bud_reference_id}" target="_blank" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); color: white; opacity: 0; transition: opacity 0.3s; text-decoration: none; font-size: 12px;">Report</a>
+                    </div>
+                    <div class="bud-text-info">
+                        <div class="bud-name">${reviewData.strain_name_en || 'ไม่ระบุชื่อ'}</div>
+                        <div class="bud-details-text">
+                            <strong>ชื่อไทย:</strong> ${reviewData.strain_name_th || 'ไม่ระบุ'}<br>
+                            <strong>ผู้พัฒนา:</strong> ${reviewData.breeder || 'ไม่ระบุ'}<br>
+                            <strong>Bud ID:</strong> ${reviewData.bud_reference_id}
+                        </div>
+                    </div>
+                </div>
+            `;
+            budInfo.style.display = 'block';
+            document.getElementById('budSelect').value = reviewData.bud_reference_id;
         }
 
         function initializeEventListeners() {
             // Rating listeners
-            document.querySelectorAll('#overallRating .star').forEach(star => {
-                star.addEventListener('click', function() {
-                    const rating = parseInt(this.dataset.rating);
-                    setOverallRating(rating);
+            document.querySelectorAll('.star-rating').forEach(ratingGroup => {
+                const stars = ratingGroup.querySelectorAll('.star');
+                const ratingType = ratingGroup.getAttribute('data-rating');
+
+                stars.forEach(star => {
+                    star.addEventListener('click', function() {
+                        const value = parseInt(this.getAttribute('data-value'));
+                        setRating(ratingType, value);
+                    });
                 });
             });
 
-            document.querySelectorAll('#aromaRating .star').forEach(star => {
-                star.addEventListener('click', function() {
-                    const rating = parseInt(this.dataset.rating);
-                    setAromaRating(rating);
-                });
+            // Aroma flavor selection
+            document.getElementById('aromaFlavors').addEventListener('change', function(e) {
+                if (e.target.type === 'checkbox') {
+                    const item = e.target.closest('.aroma-item');
+                    if (e.target.checked) {
+                        item.classList.add('selected');
+                    } else {
+                        item.classList.remove('selected');
+                    }
+                }
+            });
+
+            // Effects selection
+            document.addEventListener('change', function(e) {
+                if (e.target.type === 'checkbox' && e.target.closest('.effect-item')) {
+                    const item = e.target.closest('.effect-item');
+                    if (e.target.checked) {
+                        item.classList.add('selected');
+                    } else {
+                        item.classList.remove('selected');
+                    }
+                }
             });
 
             // Image upload listener
-            document.getElementById('reviewImages').addEventListener('change', handleImageUpload);
+            document.getElementById('imageInput').addEventListener('change', handleImageUpload);
 
             // Form submit listener
-            document.getElementById('editReviewForm').addEventListener('submit', handleFormSubmit);
-        }
+            document.getElementById('reviewForm').addEventListener('submit', handleFormSubmit);
 
-        function addCheckboxListeners() {
-            // Effects checkboxes
-            document.querySelectorAll('.effect-checkbox input').forEach(checkbox => {
-                checkbox.addEventListener('change', function() {
-                    this.parentElement.classList.toggle('selected', this.checked);
-                });
-            });
-
-            // Aromas checkboxes
-            document.querySelectorAll('.aroma-checkbox input').forEach(checkbox => {
-                checkbox.addEventListener('change', function() {
-                    this.parentElement.classList.toggle('selected', this.checked);
-                });
+            // Video URL validation
+            document.getElementById('video-review-url').addEventListener('input', function() {
+                const url = this.value.trim();
+                if (url && !isValidVideoUrl(url)) {
+                    this.setCustomValidity('กรุณาใส่ลิงค์วิดีโอที่ถูกต้อง (YouTube หรือ Facebook)');
+                } else {
+                    this.setCustomValidity('');
+                }
             });
         }
 
-        function setOverallRating(rating) {
-            overallRating = rating;
-            document.getElementById('overallRatingValue').value = rating;
+        function setRating(type, value) {
+            ratings[type] = value;
+            document.getElementById(type + 'Rating').value = value;
 
-            document.querySelectorAll('#overallRating .star').forEach((star, index) => {
-                star.classList.toggle('filled', index < rating);
-                star.classList.toggle('empty', index >= rating);
+            const ratingGroup = document.querySelector(`.star-rating[data-rating="${type}"]`);
+            const stars = ratingGroup.querySelectorAll('.star');
+            
+            stars.forEach((star, index) => {
+                if (index < value) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
             });
-
-            const ratingTexts = ['', 'แย่มาก', 'แย่', 'ปกติ', 'ดี', 'ดีมาก'];
-            document.getElementById('overallRatingText').textContent = ratingTexts[rating] || 'ยังไม่ได้เลือก';
-        }
-
-        function setAromaRating(rating) {
-            aromaRating = rating;
-            document.getElementById('aromaRatingValue').value = rating;
-
-            document.querySelectorAll('#aromaRating .star').forEach((star, index) => {
-                star.classList.toggle('filled', index < rating);
-                star.classList.toggle('empty', index >= rating);
-            });
-
-            const ratingTexts = ['ไม่บังคับ', 'แย่มาก', 'แย่', 'ปกติ', 'ดี', 'ดีมาก'];
-            document.getElementById('aromaRatingText').textContent = rating > 0 ? ratingTexts[rating] : 'ไม่บังคับ';
         }
 
         function displayCurrentImages() {
-            for (let i = 0; i < 4; i++) {
-                const slot = document.getElementById(`imageSlot${i + 1}`);
-                if (currentImages[i]) {
-                    slot.innerHTML = `
-                        <img src="${currentImages[i]}" alt="Review image ${i + 1}">
-                        <button type="button" class="remove-image-btn" onclick="removeCurrentImage(${i})">×</button>
-                    `;
-                }
-            }
+            const allImages = [...currentImages, ...selectedImages.map(img => img.dataUrl)];
+            updateImagePreview(allImages);
         }
 
-        function handleImageUpload(event) {
-            const files = Array.from(event.target.files);
-            const totalImages = currentImages.length + selectedFiles.length + files.length;
-            
-            if (totalImages > 4) {
-                showError('สามารถอัปโหลดได้สูงสุด 4 รูป');
+        function handleImageUpload(e) {
+            const files = Array.from(e.target.files);
+
+            // Check if adding these files would exceed the limit
+            if (currentImages.length + selectedImages.length + files.length > maxImages) {
+                showError(`สามารถอัปโหลดได้สูงสุด ${maxImages} รูปภาพเท่านั้น`);
                 return;
             }
 
             files.forEach(file => {
                 if (file.type.startsWith('image/')) {
-                    selectedFiles.push(file);
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const imageData = {
+                            file: file,
+                            dataUrl: e.target.result,
+                            id: Date.now() + Math.random()
+                        };
+                        selectedImages.push(imageData);
+                        displayCurrentImages();
+                    };
+                    reader.readAsDataURL(file);
                 }
             });
 
-            displayAllImages();
+            // Clear the input
+            e.target.value = '';
         }
 
-        function displayAllImages() {
-            let allImages = [...currentImages];
+        function updateImagePreview(allImages = null) {
+            const previewGrid = document.getElementById('imagePreview');
+            const uploadArea = document.querySelector('.upload-area');
             
-            // Add selected files
-            selectedFiles.forEach(file => {
-                allImages.push(URL.createObjectURL(file));
-            });
-
-            for (let i = 0; i < 4; i++) {
-                const slot = document.getElementById(`imageSlot${i + 1}`);
-                if (allImages[i]) {
-                    const isCurrentImage = i < currentImages.length;
-                    slot.innerHTML = `
-                        <img src="${allImages[i]}" alt="Review image ${i + 1}">
-                        <button type="button" class="remove-image-btn" onclick="${isCurrentImage ? `removeCurrentImage(${i})` : `removeSelectedFile(${i - currentImages.length})`}">×</button>
-                    `;
-                } else {
-                    slot.innerHTML = `
-                        <div class="image-placeholder">รูปที่ ${i + 1}<br>ไม่มีรูป</div>
-                    `;
-                }
+            if (!allImages) {
+                allImages = [...currentImages, ...selectedImages.map(img => img.dataUrl)];
             }
+
+            if (allImages.length === 0) {
+                previewGrid.innerHTML = '';
+                uploadArea.style.display = 'block';
+                return;
+            }
+
+            // Hide upload area if at max capacity
+            if (allImages.length >= maxImages) {
+                uploadArea.style.display = 'none';
+            } else {
+                uploadArea.style.display = 'block';
+            }
+
+            previewGrid.innerHTML = allImages.map((img, index) => {
+                const isCurrentImage = index < currentImages.length;
+                return `
+                    <div class="image-preview-item">
+                        <img src="${img}" alt="Preview">
+                        <button type="button" class="image-remove-btn" onclick="${isCurrentImage ? `removeCurrentImage(${index})` : `removeSelectedImage(${index - currentImages.length})`}">×</button>
+                    </div>
+                `;
+            }).join('') + `
+                <div class="image-count">${allImages.length}/${maxImages} รูป</div>
+            `;
         }
 
         function removeCurrentImage(index) {
             currentImages.splice(index, 1);
-            displayAllImages();
+            displayCurrentImages();
         }
 
-        function removeSelectedFile(index) {
-            selectedFiles.splice(index, 1);
-            displayAllImages();
+        function removeSelectedImage(index) {
+            selectedImages.splice(index, 1);
+            displayCurrentImages();
         }
+
+        // Make remove functions globally accessible
+        window.removeCurrentImage = removeCurrentImage;
+        window.removeSelectedImage = removeSelectedImage;
 
         async function handleFormSubmit(event) {
             event.preventDefault();
@@ -832,36 +1186,49 @@
             try {
                 const submitBtn = document.getElementById('submitBtn');
                 submitBtn.disabled = true;
-                submitBtn.textContent = 'กำลังบันทึก...';
+                submitBtn.innerHTML = '<div class="loading"><div class="spinner"></div> กำลังบันทึก...</div>';
+
+                // Validate form
+                if (!ratings.overall) {
+                    showError('กรุณาให้คะแนนรวม');
+                    return;
+                }
+
+                if (!document.getElementById('shortSummary').value.trim()) {
+                    showError('กรุณาเขียนสรุปสั้น ๆ');
+                    return;
+                }
+
+                // Check if at least one effect is selected
+                const selectedEffects = document.querySelectorAll('.effect-item input[type="checkbox"]:checked');
+                if (selectedEffects.length === 0) {
+                    showError('กรุณาเลือกผลกระทบที่รู้สึกอย่างน้อย 1 ตัว');
+                    return;
+                }
 
                 // Upload new images if any
                 let newImageUrls = [];
-                if (selectedFiles.length > 0) {
-                    const imageFormData = new FormData();
-                    selectedFiles.forEach((file, index) => {
-                        imageFormData.append(`image_${index}`, file);
-                    });
-
-                    const imageResponse = await fetch('/api/upload-images', {
-                        method: 'POST',
-                        body: imageFormData
-                    });
-
-                    if (imageResponse.ok) {
-                        const imageResult = await imageResponse.json();
-                        newImageUrls = imageResult.image_urls;
-                    }
+                if (selectedImages.length > 0) {
+                    newImageUrls = await uploadImages();
                 }
 
-                // Prepare review update data
+                // Collect selected aroma flavors
+                const aromaCheckboxes = document.querySelectorAll('#aromaFlavors input[type="checkbox"]:checked');
+                const aromaFlavors = Array.from(aromaCheckboxes).map(cb => cb.value);
+
+                // Collect selected effects
+                const effectCheckboxes = document.querySelectorAll('.effect-item input[type="checkbox"]:checked');
+                const selectedEffectsArray = Array.from(effectCheckboxes).map(cb => cb.value);
+
                 const reviewUpdate = {
-                    overall_rating: overallRating,
-                    aroma_rating: aromaRating || null,
-                    short_summary: document.getElementById('shortSummary').value,
-                    full_review_content: document.getElementById('fullReview').value,
-                    selected_effects: Array.from(document.querySelectorAll('input[name="selected_effects"]:checked')).map(cb => cb.value),
-                    aroma_flavors: Array.from(document.querySelectorAll('input[name="aroma_flavors"]:checked')).map(cb => cb.value),
-                    review_images: [...currentImages, ...newImageUrls]
+                    overall_rating: ratings.overall,
+                    aroma_rating: ratings.aroma || null,
+                    short_summary: document.getElementById('shortSummary').value.trim(),
+                    full_review_content: document.getElementById('fullReview').value.trim() || null,
+                    selected_effects: selectedEffectsArray,
+                    aroma_flavors: aromaFlavors,
+                    review_images: [...currentImages, ...newImageUrls],
+                    video_review_url: document.getElementById('video-review-url').value.trim() || null
                 };
 
                 // Update review
@@ -892,8 +1259,44 @@
             } finally {
                 const submitBtn = document.getElementById('submitBtn');
                 submitBtn.disabled = false;
-                submitBtn.textContent = '💾 บันทึกการแก้ไข';
+                submitBtn.innerHTML = '💾 บันทึกการแก้ไข';
             }
+        }
+
+        // Upload images to server
+        async function uploadImages() {
+            if (selectedImages.length === 0) {
+                return [];
+            }
+
+            const formData = new FormData();
+            selectedImages.forEach((img, index) => {
+                formData.append(`image_${index}`, img.file);
+            });
+
+            try {
+                const response = await fetch('/api/upload-images', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    return result.image_urls || [];
+                } else {
+                    console.error('Failed to upload images');
+                    return [];
+                }
+            } catch (error) {
+                console.error('Error uploading images:', error);
+                return [];
+            }
+        }
+
+        function isValidVideoUrl(url) {
+            const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)/;
+            const facebookRegex = /^(https?:\/\/)?(www\.)?facebook\.com/;
+            return youtubeRegex.test(url) || facebookRegex.test(url);
         }
 
         function showError(message) {
@@ -901,8 +1304,7 @@
             errorDiv.textContent = message;
             errorDiv.style.display = 'block';
             document.getElementById('successMessage').style.display = 'none';
-            document.getElementById('loading').style.display = 'none';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
         function showSuccess(message) {
@@ -910,7 +1312,7 @@
             successDiv.textContent = message;
             successDiv.style.display = 'block';
             document.getElementById('errorMessage').style.display = 'none';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            successDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
     </script>
 </body>

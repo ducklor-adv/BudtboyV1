@@ -857,7 +857,10 @@
                     <div class="review-card">
                         <div class="review-header">
                             <div class="reviewer-info">
-                                <div class="reviewer-name">${review.reviewer_name || 'ผู้ใช้งาน'}</div>
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 3px;">
+                                    <img src="${profileImage}" alt="Profile" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1px solid #ddd;">
+                                    <div class="reviewer-name">${review.reviewer_name || 'ผู้ใช้งาน'}</div>
+                                </div>
                                 <div class="review-date">${formatDate(review.created_at)}</div>
                             </div>
                             <div class="review-rating">

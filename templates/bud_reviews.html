@@ -463,6 +463,27 @@
                 grid-template-columns: repeat(2, 1fr);
             }
         }
+
+        /* เพิ่ม CSS สำหรับ Modal */
+        .image-modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            padding-top: 50px;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.8);
+        }
+
+        .modal-content {
+            margin: auto;
+            display: block;
+            max-width: 80%;
+            max-height: 80%;
+        }
     </style>
 </head>
 <body>
@@ -482,6 +503,11 @@
         <div class="reviews-container" id="reviewsContainer">
             <div class="loading">กำลังโหลดรีวิว...</div>
         </div>
+    </div>
+
+    <!-- Modal สำหรับดูรูปขยาย -->
+    <div id="imageModal" class="image-modal" onclick="closeImageModal()">
+        <img id="modalImage" class="modal-content">
     </div>
 
     <script>
@@ -505,7 +531,7 @@
                 if (response.ok && result.success) {
                     // เพิ่มข้อมูลรูปภาพถ้าไม่มี
                     const bud = result.bud;
-                    
+
                     // ถ้าไม่มีข้อมูลรูปใน API response ให้โหลดจาก buds data
                     if (!bud.image_1_url) {
                         const budDataResponse = await fetch(`/api/buds`);
@@ -520,7 +546,7 @@
                             }
                         }
                     }
-                    
+
                     displayBudInfo(bud);
                 } else {
                     document.getElementById('budInfo').innerHTML = '<div class="error">ไม่พบข้อมูลดอก</div>';
@@ -561,14 +587,14 @@
                             <strong>เจ้าของดอก:</strong> ${bud.grower_name || 'ไม่ระบุ'}
                         </div>
                     </div>
-                    
+
                     <div class="bud-image-section">
                         ${bud.image_1_url && bud.image_1_url.trim() ? 
                             `<img src="${bud.image_1_url}" alt="รูปดอก ${bud.strain_name_en}" class="main-bud-image">` :
                             `<div class="main-bud-image-placeholder">ไม่มีรูปภาพ</div>`
                         }
                     </div>
-                    
+
                     <div class="grower-profile-section">
                         ${bud.grower_profile_image && bud.grower_profile_image.trim() ? 
                             `<img src="${bud.grower_profile_image}" alt="รูปผู้ปลูก ${bud.grower_name}" class="grower-profile-image">` :
@@ -576,7 +602,7 @@
                         }
                     </div>
                 </div>
-                
+
                 <div class="rating-summary">
                     <div class="avg-rating">${avgRating.toFixed(1)}</div>
                     <div class="rating-details">
@@ -584,14 +610,14 @@
                         <div class="review-count">${allReviews.length} รีวิว</div>
                     </div>
                 </div>
-                
+
                 <div class="action-buttons">
                     <a href="/bud-report?id=${bud.id}" class="action-btn">Full Report</a>
                 </div>
             `;
         }
 
-        
+
 
         function displayReviews(reviews) {
             const container = document.getElementById('reviewsContainer');
@@ -668,6 +694,18 @@
             if (allReviews.length === 0) return 0;
             const sum = allReviews.reduce((total, review) => total + review.overall_rating, 0);
             return sum / allReviews.length;
+        }
+
+        // Image modal functions
+        function openImageModal(imageSrc) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            modal.style.display = 'block';
+            modalImg.src = imageSrc;
+        }
+
+        function closeImageModal() {
+            document.getElementById('imageModal').style.display = 'none';
         }
     </script>
 </body>

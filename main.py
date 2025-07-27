@@ -1,11 +1,14 @@
 from flask import Flask, render_template, request, jsonify, url_for, session, redirect
 import psycopg2
+from psycopg2 import pool
 import os
 from datetime import datetime, timedelta
 from werkzeug.utils import secure_filename
 from flask_mail import Mail, Message
 import secrets
 import hashlib
+import threading
+import time
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'budtboy-secret-key-2024')
@@ -30,12 +33,71 @@ mail = Mail(app)
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
     os.makedirs(app.config['UPLOAD_FOLDER'])
 
+# Connection pool
+connection_pool = None
+pool_lock = threading.Lock()
+
+# Simple cache system
+cache = {}
+cache_lock = threading.Lock()
+CACHE_TTL = 300  # 5 minutes
+
+def init_connection_pool():
+    global connection_pool
+    if connection_pool is None:
+        with pool_lock:
+            if connection_pool is None:
+                try:
+                    database_url = os.environ.get('DATABASE_URL')
+                    if database_url:
+                        connection_pool = psycopg2.pool.ThreadedConnectionPool(
+                            1, 20,  # min and max connections
+                            database_url
+                        )
+                        print("Connection pool initialized successfully")
+                    else:
+                        print("DATABASE_URL not found")
+                except Exception as e:
+                    print(f"Error initializing connection pool: {e}")
+
+def get_cache(key):
+    with cache_lock:
+        if key in cache:
+            data, timestamp = cache[key]
+            if time.time() - timestamp < CACHE_TTL:
+                return data
+            else:
+                del cache[key]
+    return None
+
+def set_cache(key, data):
+    with cache_lock:
+        cache[key] = (data, time.time())
+
+def clear_cache_pattern(pattern):
+    with cache_lock:
+        keys_to_delete = [key for key in cache.keys() if pattern in key]
+        for key in keys_to_delete:
+            del cache[key]
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # Database connection function
 def get_db_connection():
     try:
+        if connection_pool is None:
+            init_connection_pool()
+        
+        if connection_pool:
+            conn = connection_pool.getconn()
+            if conn:
+                # Test connection
+                with conn.cursor() as test_cur:
+                    test_cur.execute("SELECT 1")
+                return conn
+        
+        # Fallback to direct connection
         database_url = os.environ.get('DATABASE_URL')
         if not database_url:
             raise Exception("DATABASE_URL environment variable not set")
@@ -45,6 +107,15 @@ def get_db_connection():
     except Exception as e:
         print(f"Database connection error: {e}")
         return None
+
+def return_db_connection(conn):
+    try:
+        if connection_pool and conn:
+            connection_pool.putconn(conn)
+        elif conn:
+            conn.close()
+    except Exception as e:
+        print(f"Error returning connection: {e}")
 
 # Create tables if they don't exist
 def create_tables():
@@ -1270,6 +1341,13 @@ def get_profile():
         return jsonify({'error': 'ไม่ได้เข้าสู่ระบบ'}), 401
 
     user_id = session['user_id']
+    cache_key = f"profile_{user_id}"
+    
+    # Check cache first
+    cached_data = get_cache(cache_key)
+    if cached_data:
+        return jsonify(cached_data)
+
     conn = get_db_connection()
     if conn:
         try:
@@ -1305,6 +1383,10 @@ def get_profile():
                     'grow_license_file_url': user[9],
                     'profile_image_url': profile_image_url
                 }
+                
+                # Cache the result
+                set_cache(cache_key, user_data)
+                
                 return jsonify(user_data)
             else:
                 return jsonify({'error': 'ไม่พบข้อมูลผู้ใช้'}), 404
@@ -1313,7 +1395,7 @@ def get_profile():
             return jsonify({'error': str(e)}), 500
         finally:
             cur.close()
-            conn.close()
+            return_db_connection(conn)
     else:
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
@@ -1365,6 +1447,9 @@ def update_profile():
             ))
 
             conn.commit()
+
+            # Clear cache for this user
+            clear_cache_pattern(f"profile_{user_id}")
 
             # Update session data
             session['username'] = username
@@ -2668,8 +2753,12 @@ def upload_profile_image():
                 """, (profile_image_url, user_id))
                 
                 conn.commit()
+                
+                # Clear cache for this user
+                clear_cache_pattern(f"profile_{user_id}")
+                
                 cur.close()
-                conn.close()
+                return_db_connection(conn)
                 
                 return jsonify({
                     'success': True,
@@ -2828,6 +2917,9 @@ def register_user():
         return jsonify({'success': False, 'error': 'Database connection failed'}), 500
 
 if __name__ == '__main__':
+    # Initialize connection pool
+    init_connection_pool()
+    
     # Create tables on startup
     create_tables()
     app.run(host='0.0.0.0', port=5000, debug=True)

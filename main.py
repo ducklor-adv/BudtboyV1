@@ -2329,7 +2329,7 @@ def update_review(review_id):
                 UPDATE reviews SET
                     overall_rating = %s, aroma_flavors = %s, aroma_rating = %s,
                     selected_effects = %s, short_summary = %s, full_review_content = %s,
-                    review_images = %s, updated_at = CURRENT_TIMESTAMP
+                    review_images = %s, video_review_url = %s, updated_at = CURRENT_TIMESTAMP
                 WHERE id = %s
             """, (
                 data.get('overall_rating'),
@@ -2339,6 +2339,7 @@ def update_review(review_id):
                 data.get('short_summary'),
                 data.get('full_review_content'),
                 data.get('review_images', []),
+                data.get('video_review_url'),
                 review_id
             ))
 

@@ -602,8 +602,8 @@
         }
 
         .reviewer-info-section {
-            margin-bottom: 12px;
-            padding: 8px;
+            margin-bottom: 8px;
+            padding: 6px;
             background: #f8f9fa;
             border-radius: 8px;
             border-left: 3px solid #4CAF50;
@@ -613,7 +613,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
 
         .reviewer-by-text {
@@ -666,8 +666,8 @@
         }
 
         .review-ratings-section {
-            margin: 10px 0;
-            padding: 8px;
+            margin: 6px 0;
+            padding: 6px;
             background: #f8f9fa;
             border-radius: 6px;
         }
@@ -675,8 +675,8 @@
         .rating-row {
             display: flex;
             align-items: center;
-            gap: 8px;
-            margin-bottom: 5px;
+            gap: 6px;
+            margin-bottom: 3px;
         }
 
         .rating-label {
@@ -704,14 +704,14 @@
         }
 
         .tags-section {
-            margin: 8px 0;
+            margin: 4px 0;
         }
 
         .tags-row {
             display: flex;
             align-items: flex-start;
-            gap: 6px;
-            margin-bottom: 5px;
+            gap: 4px;
+            margin-bottom: 3px;
         }
 
         .tags-label {
@@ -755,8 +755,8 @@
         }
 
         .review-full-content {
-            margin: 8px 0;
-            padding: 8px;
+            margin: 4px 0;
+            padding: 6px;
             background: #ffffff;
             border-radius: 6px;
             border: 1px solid #e0e0e0;
@@ -779,7 +779,7 @@
         }
 
         .review-images-section {
-            margin: 8px 0;
+            margin: 4px 0;
         }
 
         .review-images-grid {
@@ -1153,10 +1153,10 @@
                                                 ${reviewerAvatar}
                                             </div>
                                             <div class="reviewer-name-display">${review.reviewer_name || 'ผู้ใช้ไม่ระบุชื่อ'}</div>
-                                            <div style="margin-left: 15px; font-size: 12px; color: #FF9800; font-weight: 600;">
+                                            <div style="margin-left: 8px; font-size: 12px; color: #FF9800; font-weight: 600;">
                                                 คะแนนรวม: ${'⭐'.repeat(review.overall_rating)} (${review.overall_rating}/5)
                                             </div>
-                                            ${review.video_review_url ? `<div style="margin-left: 15px;">
+                                            ${review.video_review_url && review.video_review_url.trim() ? `<div style="margin-left: 8px;">
                                                 <a href="#" onclick="openVideoModal('${review.video_review_url}'); return false;" style="font-size: 12px; color: #FF0000; font-weight: 600; text-decoration: none;">
                                                     🎥 ดูวิดีโอรีวิว
                                                 </a>

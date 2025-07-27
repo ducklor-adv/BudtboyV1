@@ -457,22 +457,16 @@
                 `<span class="aroma-tag">${aroma}</span>`
             ).join('');
 
-            const reviewImages = (review.review_images || []).length > 0 ? `
-                <div class="review-images">
-                    ${review.review_images.map(image => 
-                        `<img src="${image}" alt="Review Image" class="review-image" onclick="window.open('${image}', '_blank')">`
-                    ).join('')}
-                </div>
-            ` : '';
-
-            // Create reviewer avatar - show first letter if no profile image
-            const reviewerInitial = review.reviewer_name ? review.reviewer_name.charAt(0).toUpperCase() : '👤';
+            // Create reviewer avatar - show profile image if available, otherwise show first letter
+            const reviewerAvatar = review.reviewer_profile_image ? 
+                `<img src="${review.reviewer_profile_image}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">` :
+                (review.reviewer_name ? review.reviewer_name.charAt(0).toUpperCase() : '👤');
 
             return `
                 <div class="review-card">
                     <div class="review-header">
                         <div class="reviewer-avatar">
-                            ${reviewerInitial}
+                            ${reviewerAvatar}
                         </div>
                         <div class="reviewer-info">
                             <div class="reviewer-name">${review.reviewer_name || 'ผู้ใช้ไม่ระบุชื่อ'}</div>
@@ -494,8 +488,6 @@
                             ${aromaTags}
                         </div>
                     ` : ''}
-
-                    ${reviewImages}
                 </div>
             `;
         }

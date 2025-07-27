@@ -865,9 +865,10 @@
             top: 0;
             width: 100%;
             height: 100%;
-            overflow: auto;
+            overflow: hidden;
             background-color: rgba(0,0,0,0.9);
             padding-top: 50px;
+            -webkit-overflow-scrolling: touch;
         }
 
         .video-container {
@@ -876,17 +877,47 @@
             max-width: 90%;
             max-height: 80%;
             text-align: center;
+            position: relative;
         }
 
         .video-container iframe {
             max-width: 100%;
             max-height: 80vh;
+            border: none;
+            border-radius: 8px;
+        }
+
+        /* CSS สำหรับป้องกันการ scroll เมื่อ modal เปิด */
+        body.modal-open {
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
         }
 
         @media (max-width: 768px) {
+            .video-modal {
+                padding-top: 20px;
+            }
+            
+            .video-container {
+                max-width: 95%;
+                max-height: 85%;
+                margin-top: 10vh;
+            }
+            
             .video-container iframe {
                 width: 90vw;
                 height: 50.6vw; /* 16:9 aspect ratio */
+                min-height: 200px;
+                max-height: 70vh;
+            }
+            
+            .modal-close {
+                top: 10px;
+                right: 20px;
+                font-size: 35px;
+                z-index: 10000;
             }
         }
 
@@ -1329,7 +1360,7 @@
                                 <div class="review-media-section">
                                     ${reviewImages}
                                     ${review.video_review_url ? `
-                                        <button class="video-review-btn" onclick="playVideoReview('${review.video_review_url}')">
+                                        <button class="video-review-btn" onclick="playVideoReview('${review.video_review_url}'); return false;" type="button">
                                             🎥 ดูรีวิว
                                         </button>
                                     ` : ''}
@@ -1447,6 +1478,10 @@
         function openVideoModal(videoUrl) {
             if (!videoUrl) return;
             
+            // ป้องกันการ reload หน้าในมือถือ
+            event.preventDefault();
+            event.stopPropagation();
+            
             const modal = document.getElementById('videoModal');
             const player = document.getElementById('youtubePlayer');
             
@@ -1457,12 +1492,12 @@
             try {
                 if (videoUrl.includes('youtube.com/watch?v=')) {
                     const videoId = videoUrl.split('v=')[1].split('&')[0];
-                    embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+                    embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0&modestbranding=1`;
                 } else if (videoUrl.includes('youtu.be/')) {
                     const videoId = videoUrl.split('youtu.be/')[1].split('?')[0];
-                    embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+                    embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0&modestbranding=1`;
                 } else if (videoUrl.includes('youtube.com/embed/')) {
-                    embedUrl = videoUrl + (videoUrl.includes('?') ? '&' : '?') + 'autoplay=1';
+                    embedUrl = videoUrl + (videoUrl.includes('?') ? '&' : '?') + 'autoplay=0&rel=0&modestbranding=1';
                 } else {
                     // ถ้าไม่ใช่ YouTube URL ให้เปิดในแท็บใหม่
                     window.open(videoUrl, '_blank');
@@ -1471,6 +1506,10 @@
 
                 player.src = embedUrl;
                 modal.style.display = 'block';
+                
+                // เพิ่ม class สำหรับ mobile
+                document.body.classList.add('modal-open');
+                
             } catch (error) {
                 console.error('Error opening video:', error);
                 window.open(videoUrl, '_blank');
@@ -1479,8 +1518,14 @@
 
         function playVideoReview(videoUrl) {
             if (videoUrl && videoUrl.trim()) {
+                // ป้องกันการ reload หน้า
+                if (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
                 openVideoModal(videoUrl);
             }
+            return false;
         }
 
         function closeVideoModal() {
@@ -1493,6 +1538,9 @@
             if (player) {
                 player.src = ''; // หยุดเล่นวิดีโอ
             }
+            
+            // ลบ class สำหรับ mobile
+            document.body.classList.remove('modal-open');
         }
 
         function expandContent(reviewId) {
@@ -1514,14 +1562,46 @@
             const imageModal = document.getElementById('imageModal');
             const videoModal = document.getElementById('videoModal');
 
-            if (event.target == imageModal) {
+            if (event.target === imageModal) {
                 closeImageModal();
             }
 
-            if (event.target == videoModal) {
+            if (event.target === videoModal) {
                 closeVideoModal();
             }
         }
+
+        // เพิ่ม event listener สำหรับ touch events ในมือถือ
+        document.addEventListener('touchstart', function(event) {
+            const videoModal = document.getElementById('videoModal');
+            const imageModal = document.getElementById('imageModal');
+            
+            if (event.target === videoModal) {
+                closeVideoModal();
+            }
+            
+            if (event.target === imageModal) {
+                closeImageModal();
+            }
+        });
+
+        // ป้องกันการ scroll เมื่อ modal เปิด
+        document.addEventListener('DOMContentLoaded', function() {
+            const videoModal = document.getElementById('videoModal');
+            const imageModal = document.getElementById('imageModal');
+            
+            if (videoModal) {
+                videoModal.addEventListener('touchmove', function(e) {
+                    e.preventDefault();
+                }, { passive: false });
+            }
+            
+            if (imageModal) {
+                imageModal.addEventListener('touchmove', function(e) {
+                    e.preventDefault();
+                }, { passive: false });
+            }
+        });
 
         // Initialize when DOM is ready
         document.addEventListener('DOMContentLoaded', function() {

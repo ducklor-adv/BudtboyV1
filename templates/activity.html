@@ -381,7 +381,7 @@
         }
 
         .item-list.reviews-list {
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(3, 1fr); /* Modified to display in 3 columns */
             gap: 15px;
         }
 
@@ -391,7 +391,7 @@
             }
 
             .item-list.reviews-list {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(2, 1fr); /* Adjust for medium screens */
             }
         }
 
@@ -401,7 +401,7 @@
             }
 
             .item-list.reviews-list {
-                grid-template-columns: 1fr;
+                grid-template-columns: 1fr; /* Adjust for small screens */
             }
         }
 
@@ -798,7 +798,7 @@
                             </div>
                             <div class="item-date">${createdDate}</div>
                         </div>
-                        
+
                         <div class="review-content">
                             <div class="review-main-info">
                                 <!-- คะแนนรวมและกลิ่น -->
@@ -855,7 +855,7 @@
                                     </div>
                                 ` : ''}
                             </div>
-                            
+
                             <div class="review-actions">
                                 <button class="action-btn primary" onclick="editReview(${review.id})">✏️ แก้ไข</button>
                                 <button class="action-btn danger" onclick="deleteReview(${review.id})">🗑️ ลบ</button>

@@ -1065,6 +1065,9 @@
                                                 ${reviewerAvatar}
                                             </div>
                                             <div class="reviewer-name-display">${review.reviewer_name || 'ผู้ใช้ไม่ระบุชื่อ'}</div>
+                                            <div style="margin-left: 15px; font-size: 12px; color: #FF9800; font-weight: 600;">
+                                                คะแนนรวม: ${'⭐'.repeat(review.overall_rating)} (${review.overall_rating}/5)
+                                            </div>
                                         </div>
                                         ${review.aroma_rating ? `<div class="aroma-rating-text">คะแนนกลิ่น : ${'⭐'.repeat(review.aroma_rating)} (${review.aroma_rating}/5)</div>` : ''}
                                         <div class="review-actions">
@@ -1074,12 +1077,8 @@
                                     </div>
                                 </div>
 
-                                <!-- คะแนนและสรุปรีวิว -->
+                                <!-- สรุปรีวิว -->
                                 <div class="review-ratings-section">
-                                    <div class="rating-row">
-                                        <span class="rating-label">คะแนนรวม:</span>
-                                        <span class="rating-stars">${overallStars} (${review.overall_rating}/5)</span>
-                                    </div>
                                     <div class="review-summary-text">${review.short_summary || 'ไม่มีสรุป'}</div>
                                 </div>
 

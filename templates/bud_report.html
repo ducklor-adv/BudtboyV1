@@ -330,6 +330,16 @@
             font-weight: 500;
         }
         
+        .effect-tag.positive {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .effect-tag.negative {
+            background: #ffebee;
+            color: #c62828;
+        }
+        
         .review-images {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
@@ -836,8 +846,25 @@
             
             reviewsContainer.innerHTML = reviews.map(review => {
                 const reviewStars = '⭐'.repeat(review.overall_rating);
+                
+                // กำหนดเอฟเฟกต์ทางบวกและทางลบ
+                const positiveEffects = [
+                    'สุขใจ', 'ผ่อนคลาย', 'สร้างสรรค์', 'ร่าเริง', 'เบิกบาน', 'โฟกัส', 'ตื่นตัว', 'คิดลึก',
+                    'คลายกล้าม', 'หลับง่าย', 'คลายเกร็ง', 'ต้านคลื่นไส้', 'กระตุ้นกิน'
+                ];
+                
+                const negativeEffects = [
+                    'วิตก', 'ความจำสั้น', 'ปากแห้ง', 'ใจเต้นเร็ว', 'สมาธิหาย', 'หลอน', 'ง่วงหนัก', 
+                    'ซึมเศร้า', 'หงุดหงิด', 'ตาแห้ง', 'เวียนหัว', 'หิวข้าว'
+                ];
+                
                 const effectTags = review.selected_effects && review.selected_effects.length > 0 
-                    ? review.selected_effects.slice(0, 6).map(effect => `<span class="effect-tag">${effect}</span>`).join('')
+                    ? review.selected_effects.slice(0, 6).map(effect => {
+                        const isPositive = positiveEffects.includes(effect);
+                        const isNegative = negativeEffects.includes(effect);
+                        const effectClass = isPositive ? 'positive' : (isNegative ? 'negative' : '');
+                        return `<span class="effect-tag ${effectClass}">${effect}</span>`;
+                    }).join('')
                     : '<span class="effect-tag">ไม่มีข้อมูล</span>';
                 
                 const aromaRating = review.aroma_rating 

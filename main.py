@@ -2104,6 +2104,65 @@ def add_review():
     else:
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
+@app.route('/api/reviews/<int:review_id>', methods=['GET'])
+def get_review(review_id):
+    """Get individual review data"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'ไม่ได้เข้าสู่ระบบ'}), 401
+
+    user_id = session['user_id']
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+
+            # Get review with bud info - only allow user to access their own reviews
+            cur.execute("""
+                SELECT r.id, r.overall_rating, r.short_summary, r.full_review_content,
+                       r.aroma_rating, r.selected_effects, r.aroma_flavors, r.review_images,
+                       r.created_at, r.updated_at, r.bud_reference_id,
+                       b.strain_name_en, b.strain_name_th, b.breeder
+                FROM reviews r
+                JOIN buds_data b ON r.bud_reference_id = b.id
+                WHERE r.id = %s AND r.reviewer_id = %s
+            """, (review_id, user_id))
+
+            result = cur.fetchone()
+            if not result:
+                return jsonify({'error': 'ไม่พบรีวิวหรือไม่มีสิทธิ์เข้าถึง'}), 404
+
+            review_data = {
+                'id': result[0],
+                'overall_rating': result[1],
+                'short_summary': result[2],
+                'full_review_content': result[3],
+                'aroma_rating': result[4],
+                'selected_effects': result[5] if result[5] else [],
+                'aroma_flavors': result[6] if result[6] else [],
+                'review_images': result[7] if result[7] else [],
+                'created_at': result[8].strftime('%Y-%m-%d %H:%M:%S') if result[8] else None,
+                'updated_at': result[9].strftime('%Y-%m-%d %H:%M:%S') if result[9] else None,
+                'bud_reference_id': result[10],
+                'strain_name_en': result[11],
+                'strain_name_th': result[12],
+                'breeder': result[13]
+            }
+
+            cur.close()
+            conn.close()
+            return jsonify(review_data)
+
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+        finally:
+            if cur:
+                cur.close()
+            if conn:
+                conn.close()
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
 @app.route('/api/reviews/<int:review_id>', methods=['PUT'])
 def update_review(review_id):
     """Update existing review"""

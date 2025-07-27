@@ -125,15 +125,29 @@
         .item-card {
             background: white;
             border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            border: 1px solid #e9ecef;
-            transition: all 0.3s ease;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid #4CAF50;
         }
 
-        .item-card:hover {
+        .clickable-review {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .clickable-review:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-left-color: #45a049;
+        }
+
+        .edit-hint {
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+            margin-top: 8px;
+            opacity: 0.7;
         }
 
         .item-header {
@@ -528,7 +542,7 @@
                                     `<div class="bud-image-placeholder">🌿</div>`
                                 }
                             </div>
-                            
+
                             <div class="bud-info">
                                 <div class="bud-detail"><strong>Bud ID:</strong> ${bud.id}</div>
                                 <div class="bud-detail"><strong>ผู้พัฒนา:</strong> ${bud.breeder || 'ไม่ระบุ'}</div>
@@ -542,7 +556,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="bud-actions">
                             <button class="action-btn primary" onclick="window.location.href='/bud-reviews?bud_id=${bud.id}'">
                                 📋 ดูรีวิว
@@ -585,36 +599,43 @@
                 return;
             }
 
-            reviewsList.innerHTML = reviews.map(review => `
-                <div class="item-card">
-                    <div class="item-header">
-                        <div class="item-name">${review.strain_name_en || 'ไม่ระบุชื่อดอก'} ${review.strain_name_th ? `(${review.strain_name_th})` : ''}</div>
-                        <div class="item-date">${formatDate(review.created_at)}</div>
-                    </div>
-                    <div class="item-details">
-                        <div class="rating-stars">
-                            ${'⭐'.repeat(review.overall_rating || 0)}
-                            ${review.aroma_rating ? ` | กลิ่น: ${'⭐'.repeat(review.aroma_rating)}` : ''}
-                            ${review.effects_rating ? ` | ผลกระทบ: ${'⭐'.repeat(review.effects_rating)}` : ''}
-                        </div>
-                        <p style="margin-top: 10px; margin-bottom: 0; font-weight: 600;">${review.short_summary || 'ไม่มีสรุป'}</p>
-                        ${review.full_review_content ? `<p style="margin-top: 8px; margin-bottom: 0; color: #666; font-size: 13px;">${review.full_review_content}</p>` : ''}
-                        ${review.aroma_flavors && review.aroma_flavors.length > 0 ? `
-                            <div style="margin-top: 8px;">
-                                <small style="color: #888;">กลิ่น: ${review.aroma_flavors.join(', ')}</small>
+            const reviewsHtml = reviews.map(review => {
+                const stars = Array(5).fill(0).map((_, i) => 
+                    i < review.overall_rating ? '⭐' : '☆'
+                ).join('');
+
+                const effectsText = review.selected_effects && review.selected_effects.length > 0 
+                    ? review.selected_effects.slice(0, 3).join(', ') + (review.selected_effects.length > 3 ? '...' : '')
+                    : 'ไม่ระบุ';
+
+                return `
+                    <div class="item-card clickable-review" data-review-id="${review.id}" onclick="editReview(${review.id})">
+                        <div class="item-header">
+                            <div class="item-title">
+                                ${review.strain_name_th} (${review.strain_name_en})
                             </div>
-                        ` : ''}
-                        <div style="margin-top: 15px; display: flex; gap: 10px;">
-                            <button class="edit-review-btn" onclick="editReview(${review.id})" style="background: #007bff; color: white; border: none; padding: 8px 15px; border-radius: 15px; cursor: pointer; font-size: 12px; font-weight: 600;">
-                                ✏️ แก้ไข
-                            </button>
-                            <button class="delete-review-btn" onclick="deleteReview(${review.id})" style="background: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 15px; cursor: pointer; font-size: 12px; font-weight: 600;">
-                                🗑️ ลบ
-                            </button>
+                            <div class="item-date">${formatDate(review.created_at)}</div>
                         </div>
+                        <div class="item-rating">
+                            <span class="stars">${stars}</span>
+                            <span class="rating-text">${review.overall_rating}/5</span>
+                        </div>
+                        <div class="item-summary">${review.short_summary}</div>
+                        <div class="item-effects">
+                            <strong>เอฟเฟกต์:</strong> ${effectsText}
+                        </div>
+                        ${review.breeder ? `<div class="item-breeder">📦 ${review.breeder}</div>` : ''}
+                        <div class="edit-hint">👆 คลิกเพื่อแก้ไขรีวิว</div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
+
+            reviewsList.innerHTML = reviewsHtml;
+        }
+
+        // Function to navigate to edit review page
+        function editReview(reviewId) {
+            window.location.href = `/edit-review?id=${reviewId}`;
         }
 
         function formatDate(dateString) {
@@ -664,11 +685,6 @@
                     alert('เกิดข้อผิดพลาดในการลบ');
                 });
             }
-        }
-
-        function editReview(reviewId) {
-            // Redirect to edit review page
-            window.location.href = `/edit-review?id=${reviewId}`;
         }
 
         function deleteReview(reviewId) {

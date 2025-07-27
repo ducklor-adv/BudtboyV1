@@ -1124,7 +1124,7 @@ def get_user_reviews():
         cur.execute("""
             SELECT r.id, r.overall_rating, r.short_summary, r.full_review_content, 
                    r.aroma_rating, r.selected_effects, r.aroma_flavors, r.review_images,
-                   r.created_at, r.updated_at,
+                   r.created_at, r.updated_at, r.video_review_url,
                    b.strain_name_en, b.strain_name_th, b.breeder,
                    u.username as reviewer_name, u.profile_image_url as reviewer_profile_image,
                    r.bud_reference_id
@@ -1139,13 +1139,13 @@ def get_user_reviews():
         for row in cur.fetchall():
             # Format profile image URL correctly
             reviewer_profile_image = None
-            if row[14]:  # reviewer_profile_image
-                if row[14].startswith('/uploads/'):
-                    reviewer_profile_image = row[14]
-                elif row[14].startswith('uploads/'):
-                    reviewer_profile_image = f'/{row[14]}'
+            if row[15]:  # reviewer_profile_image
+                if row[15].startswith('/uploads/'):
+                    reviewer_profile_image = row[15]
+                elif row[15].startswith('uploads/'):
+                    reviewer_profile_image = f'/{row[15]}'
                 else:
-                    reviewer_profile_image = f'/uploads/{row[14].split("/")[-1]}'
+                    reviewer_profile_image = f'/uploads/{row[15].split("/")[-1]}'
 
             reviews.append({
                 'id': row[0],
@@ -1158,12 +1158,13 @@ def get_user_reviews():
                 'review_images': row[7] if row[7] else [],
                 'created_at': row[8].strftime('%Y-%m-%d %H:%M:%S') if row[8] else None,
                 'updated_at': row[9].strftime('%Y-%m-%d %H:%M:%S') if row[9] else None,
-                'strain_name_en': row[10],
-                'strain_name_th': row[11],
-                'breeder': row[12],
-                'reviewer_name': row[13],
+                'video_review_url': row[10],
+                'strain_name_en': row[11],
+                'strain_name_th': row[12],
+                'breeder': row[13],
+                'reviewer_name': row[14],
                 'reviewer_profile_image': reviewer_profile_image,
-                'bud_reference_id': row[15]  # Add bud reference ID from reviews table
+                'bud_reference_id': row[16]  # Add bud reference ID from reviews table
             })
 
         cur.close()
@@ -2097,7 +2098,7 @@ def get_reviews():
             query = """
                 SELECT r.id, r.overall_rating, r.short_summary, r.full_review_content,
                        r.aroma_rating, r.selected_effects, r.aroma_flavors, r.review_images,
-                       r.created_at, r.updated_at,
+                       r.created_at, r.updated_at, r.video_review_url,
                        b.strain_name_en, b.strain_name_th, b.breeder,
                        u.username as reviewer_name, u.profile_image_url as reviewer_profile_image
                 FROM reviews r
@@ -2126,13 +2127,13 @@ def get_reviews():
             for review in reviews:
                 # Format profile image URL correctly
                 reviewer_profile_image = None
-                if review[14]:  # reviewer_profile_image
-                    if review[14].startswith('/uploads/'):
-                        reviewer_profile_image = review[14]
-                    elif review[14].startswith('uploads/'):
-                        reviewer_profile_image = f'/{review[14]}'
+                if review[15]:  # reviewer_profile_image
+                    if review[15].startswith('/uploads/'):
+                        reviewer_profile_image = review[15]
+                    elif review[15].startswith('uploads/'):
+                        reviewer_profile_image = f'/{review[15]}'
                     else:
-                        reviewer_profile_image = f'/uploads/{review[14].split("/")[-1]}'
+                        reviewer_profile_image = f'/uploads/{review[15].split("/")[-1]}'
 
                 reviews_list.append({
                     'id': review[0],
@@ -2145,10 +2146,11 @@ def get_reviews():
                     'review_images': review[7] if review[7] else [],
                     'created_at': review[8].strftime('%Y-%m-%d %H:%M:%S') if review[8] else None,
                     'updated_at': review[9].strftime('%Y-%m-%d %H:%M:%S') if review[9] else None,
-                    'strain_name_en': review[10],
-                    'strain_name_th': review[11],
-                    'breeder': review[12],
-                    'reviewer_name': review[13],
+                    'video_review_url': review[10],
+                    'strain_name_en': review[11],
+                    'strain_name_th': review[12],
+                    'breeder': review[13],
+                    'reviewer_name': review[14],
                     'reviewer_profile_image': reviewer_profile_image
                 })
 

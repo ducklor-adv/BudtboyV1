@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -911,7 +912,7 @@
         .review-media-section {
             display: flex;
             flex-wrap: wrap;
-            align-items: flex-start;
+            align-items: center;
             gap: 15px;
             margin-top: 15px;
         }
@@ -926,6 +927,60 @@
             font-weight: 500;
             border: none;
             cursor: pointer;
+        }
+
+        .video-review-btn:hover {
+            background: #d50000;
+        }
+
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4CAF50;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            text-align: center;
+            color: #dc3545;
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .success-message {
+            text-align: center;
+            color: #155724;
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .retry-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .retry-btn:hover {
+            background: #45a049;
         }
     </style>
 </head>
@@ -953,9 +1008,8 @@
 
                 <div class="item-list" id="budsList">
                     <div class="empty-state">
-                        <div class="empty-icon">🌸</div>
-                        <p>ยังไม่มีข้อมูลดอกในระบบ</p>
-                        <p style="font-size: 14px; color: #999;">คลิกปุ่ม "เพิ่มดอกที่คุณมี" เพื่อเริ่มต้น</p>
+                        <div class="loading-spinner"></div>
+                        <p>กำลังโหลดข้อมูลดอก...</p>
                     </div>
                 </div>
             </div>
@@ -973,9 +1027,8 @@
 
                 <div class="item-list reviews-list" id="reviewsList">
                     <div class="empty-state">
-                        <div class="empty-icon">⭐</div>
-                        <p>ยังไม่มีรีวิวในระบบ</p>
-                        <p style="font-size: 14px; color: #999;">คลิกปุ่ม "เพิ่มรีวิว" เพื่อแชร์ประสบการณ์ของคุณ</p>
+                        <div class="loading-spinner"></div>
+                        <p>กำลังโหลดข้อมูลรีวิว...</p>
                     </div>
                 </div>
             </div>
@@ -997,52 +1050,109 @@
     </div>
 
     <script>
+        // Global variables
+        let reviewsData = [];
+        let budsData = [];
+        let isLoadingBuds = false;
+        let isLoadingReviews = false;
+
         // Load user's buds data
         async function loadBuds() {
+            if (isLoadingBuds) return;
+            
+            isLoadingBuds = true;
+            const budsList = document.getElementById('budsList');
+            
             try {
+                budsList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="loading-spinner"></div>
+                        <p>กำลังโหลดข้อมูลดอก...</p>
+                    </div>
+                `;
+
                 const response = await fetch('/api/user_buds');
-                if (response.ok) {
-                    const data = await response.json();
-                    displayBuds(data.buds || []);
-                } else {
-                    console.error('Failed to load buds');
-                    const budsList = document.getElementById('budsList');
-                    if (budsList) {
-                        budsList.innerHTML = `
-                            <div class="empty-state">
-                                <div class="empty-icon">❌</div>
-                                <p>ไม่สามารถโหลดข้อมูลดอกได้</p>
-                                <button onclick="loadBuds()" style="margin-top: 10px; padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                                    🔄 ลองใหม่
-                                </button>
-                            </div>
-                        `;
-                    }
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                budsData = data.buds || [];
+                displayBuds(budsData);
+                
             } catch (error) {
                 console.error('Error loading buds:', error);
-                const budsList = document.getElementById('budsList');
-                if (budsList) {
-                    budsList.innerHTML = `
-                        <div class="empty-state">
-                            <div class="empty-icon">❌</div>
-                            <p>เกิดข้อผิดพลาดในการโหลดข้อมูล</p>
-                            <button onclick="loadBuds()" style="margin-top: 10px; padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                                🔄 ลองใหม่
-                            </button>
-                        </div>
-                    `;
-                }
+                showBudsError(error.message || 'ไม่สามารถโหลดข้อมูลดอกได้');
+            } finally {
+                isLoadingBuds = false;
             }
         }
 
-        function showErrorMessage(message) {
+        // Load user's reviews data
+        async function loadReviews() {
+            if (isLoadingReviews) return;
+            
+            isLoadingReviews = true;
+            const reviewsList = document.getElementById('reviewsList');
+            
+            try {
+                reviewsList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="loading-spinner"></div>
+                        <p>กำลังโหลดข้อมูลรีวิว...</p>
+                    </div>
+                `;
+
+                const response = await fetch('/api/user_reviews');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                reviewsData = data.reviews || [];
+                displayReviews(reviewsData);
+                
+            } catch (error) {
+                console.error('Error loading reviews:', error);
+                showReviewsError(error.message || 'ไม่สามารถโหลดข้อมูลรีวิวได้');
+            } finally {
+                isLoadingReviews = false;
+            }
+        }
+
+        function showBudsError(message) {
             const budsList = document.getElementById('budsList');
             if (budsList) {
                 budsList.innerHTML = `
-                    <div style="text-align: center; padding: 40px; color: #dc3545;">
+                    <div class="error-message">
                         <div style="font-size: 48px; margin-bottom: 15px;">❌</div>
                         <p>${message}</p>
+                        <button class="retry-btn" onclick="loadBuds()">🔄 ลองใหม่</button>
+                    </div>
+                `;
+            }
+        }
+
+        function showReviewsError(message) {
+            const reviewsList = document.getElementById('reviewsList');
+            if (reviewsList) {
+                reviewsList.innerHTML = `
+                    <div class="error-message">
+                        <div style="font-size: 48px; margin-bottom: 15px;">❌</div>
+                        <p>${message}</p>
+                        <button class="retry-btn" onclick="loadReviews()">🔄 ลองใหม่</button>
                     </div>
                 `;
             }
@@ -1108,53 +1218,8 @@
             `).join('');
         }
 
-        // Load user's reviews data
-        async function loadReviews() {
-            try {
-                const response = await fetch('/api/user_reviews');
-                if (response.ok) {
-                    const data = await response.json();
-                    displayReviews(data.reviews || []);
-                } else {
-                    console.error('Failed to load reviews');
-                    const reviewsList = document.getElementById('reviewsList');
-                    if (reviewsList) {
-                        reviewsList.innerHTML = `
-                            <div class="empty-state">
-                                <div class="empty-icon">❌</div>
-                                <p>ไม่สามารถโหลดข้อมูลรีวิวได้</p>
-                                <button onclick="loadReviews()" style="margin-top: 10px; padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                                    🔄 ลองใหม่
-                                </button>
-                            </div>
-                        `;
-                    }
-                }
-            } catch (error) {
-                console.error('Failed to load reviews:', error);
-                const reviewsList = document.getElementById('reviewsList');
-                if (reviewsList) {
-                    reviewsList.innerHTML = `
-                        <div class="empty-state">
-                            <div class="empty-icon">❌</div>
-                            <p>เกิดข้อผิดพลาดในการโหลดข้อมูลรีวิว</p>
-                            <button onclick="loadReviews()" style="margin-top: 10px; padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                                🔄 ลองใหม่
-                            </button>
-                        </div>
-                    `;
-                }
-            }
-        }
-
         function displayReviews(reviews) {
             const reviewsList = document.getElementById('reviewsList');
-            reviewsData = reviews; // เก็บข้อมูลไว้ใช้กับฟังก์ชันอื่น
-
-            // Debug: ตรวจสอบ video_review_url
-            reviews.forEach((review, index) => {
-                console.log(`Review ${index + 1} video_review_url:`, review.video_review_url);
-            });
 
             if (reviews.length === 0) {
                 reviewsList.innerHTML = `
@@ -1177,21 +1242,17 @@
                     `<img src="${review.reviewer_profile_image}" alt="Profile" class="reviewer-avatar-img">` :
                     (review.reviewer_name ? review.reviewer_name.charAt(0).toUpperCase() : '👤');
 
-                // สร้าง stars สำหรับคะแนน
-                const overallStars = '⭐'.repeat(review.overall_rating);
-                const aromaStars = review.aroma_rating ? '👃' + '⭐'.repeat(review.aroma_rating) : '';
-
                 // สร้าง effects tags
                 const effectsTags = review.selected_effects && review.selected_effects.length > 0 ? 
                     review.selected_effects.slice(0, 4).map(effect => 
                         `<span class="effect-tag">${effect}</span>`
-                    ).join('') + (review.selected_effects.length > 4 ? '<span class="more-tag">+${review.selected_effects.length - 4}</span>' : '') : '';
+                    ).join('') + (review.selected_effects.length > 4 ? `<span class="more-tag">+${review.selected_effects.length - 4}</span>` : '') : '';
 
                 // สร้าง aroma tags
                 const aromaTags = review.aroma_flavors && review.aroma_flavors.length > 0 ? 
                     review.aroma_flavors.slice(0, 3).map(aroma => 
                         `<span class="aroma-tag">${aroma}</span>`
-                    ).join('') + (review.aroma_flavors.length > 3 ? '<span class="more-tag">+${review.aroma_flavors.length - 3}</span>' : '') : '';
+                    ).join('') + (review.aroma_flavors.length > 3 ? `<span class="more-tag">+${review.aroma_flavors.length - 3}</span>` : '') : '';
 
                 // สร้าง review images
                 const reviewImages = review.review_images && review.review_images.length > 0 ? 
@@ -1205,7 +1266,7 @@
                     </div>` : '';
 
                 return `
-                    <div class="item-card">
+                    <div class="item-card" data-review-id="${review.id}">
                         <div class="review-content">
                             <div class="review-main-info">
                                 <div class="item-header">
@@ -1266,7 +1327,7 @@
 
                                 <!-- รูปภาพประกอบการรีวิว และปุ่มวิดีโอรีวิว -->
                                 <div class="review-media-section">
-                                    ${reviewImages ? reviewImages : ''}
+                                    ${reviewImages}
                                     ${review.video_review_url ? `
                                         <button class="video-review-btn" onclick="playVideoReview('${review.video_review_url}')">
                                             🎥 ดูรีวิว
@@ -1283,37 +1344,37 @@
             reviewsList.innerHTML = reviewsHtml;
         }
 
-        // Function to navigate to edit review page
-        function editReview(reviewId) {
-            window.location.href = `/edit-review?id=${reviewId}`;
-        }
-
+        // Utility functions
         function formatDate(dateString) {
             if (!dateString) return 'ไม่ระบุ';
-            const date = new Date(dateString);
-            return date.toLocaleDateString('th-TH', {
-                day: 'numeric',
-                month: 'short',
-                year: 'numeric'
-            });
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('th-TH', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric'
+                });
+            } catch (error) {
+                return 'ไม่ระบุ';
+            }
         }
 
-        function getStrainType(type) {
-            const types = {
-                'indica': '🟣 Indica',
-                'sativa': '🟢 Sativa',
-                'hybrid': '🟡 Hybrid',
-                'auto': '🔵 Auto'
-            };
-            return types[type] || '❓ ไม่ระบุ';
-        }
-
+        // Action functions
         function editBud(budId) {
-            // Redirect to edit page or show edit modal
-            window.location.href = `/edit-bud?id=${budId}`;
+            if (budId) {
+                window.location.href = `/edit-bud?id=${budId}`;
+            }
+        }
+
+        function editReview(reviewId) {
+            if (reviewId) {
+                window.location.href = `/edit-review?id=${reviewId}`;
+            }
         }
 
         function deleteBud(budId) {
+            if (!budId) return;
+            
             if (confirm('คุณแน่ใจหรือไม่ที่จะลบดอกนี้? การกระทำนี้ไม่สามารถย้อนกลับได้')) {
                 fetch(`/api/buds/${budId}`, {
                     method: 'DELETE',
@@ -1338,6 +1399,8 @@
         }
 
         function deleteReview(reviewId) {
+            if (!reviewId) return;
+            
             if (confirm('คุณแน่ใจหรือไม่ที่จะลบรีวิวนี้? การกระทำนี้ไม่สามารถย้อนกลับได้')) {
                 fetch(`/api/reviews/${reviewId}`, {
                     method: 'DELETE',
@@ -1361,74 +1424,77 @@
             }
         }
 
-        // ฟังก์ชันสำหรับดูรูปภาพแบบเต็มใน popup
+        // Modal functions
         function viewImage(imageUrl) {
+            if (!imageUrl) return;
+            
             const modal = document.getElementById('imageModal');
             const modalImg = document.getElementById('modalImage');
-            modal.style.display = 'block';
-            modalImg.src = imageUrl;
+            
+            if (modal && modalImg) {
+                modal.style.display = 'block';
+                modalImg.src = imageUrl;
+            }
         }
 
-        // ฟังก์ชันปิด modal
         function closeImageModal() {
-            document.getElementById('imageModal').style.display = 'none';
+            const modal = document.getElementById('imageModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
         }
 
-        // ฟังก์ชันสำหรับเปิดวิดีโอ YouTube ใน popup
         function openVideoModal(videoUrl) {
+            if (!videoUrl) return;
+            
             const modal = document.getElementById('videoModal');
             const player = document.getElementById('youtubePlayer');
+            
+            if (!modal || !player) return;
 
             // แปลง YouTube URL เป็น embed URL
             let embedUrl = '';
-            if (videoUrl.includes('youtube.com/watch?v=')) {
-                const videoId = videoUrl.split('v=')[1].split('&')[0];
-                embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
-            } else if (videoUrl.includes('youtu.be/')) {
-                const videoId = videoUrl.split('youtu.be/')[1].split('?')[0];
-                embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
-            } else if (videoUrl.includes('youtube.com/embed/')) {
-                embedUrl = videoUrl + (videoUrl.includes('?') ? '&' : '?') + 'autoplay=1';
-            } else {
-                // ถ้าไม่ใช่ YouTube URL ให้เปิดในแท็บใหม่
-                window.open(videoUrl, '_blank');
-                return;
-            }
+            try {
+                if (videoUrl.includes('youtube.com/watch?v=')) {
+                    const videoId = videoUrl.split('v=')[1].split('&')[0];
+                    embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+                } else if (videoUrl.includes('youtu.be/')) {
+                    const videoId = videoUrl.split('youtu.be/')[1].split('?')[0];
+                    embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+                } else if (videoUrl.includes('youtube.com/embed/')) {
+                    embedUrl = videoUrl + (videoUrl.includes('?') ? '&' : '?') + 'autoplay=1';
+                } else {
+                    // ถ้าไม่ใช่ YouTube URL ให้เปิดในแท็บใหม่
+                    window.open(videoUrl, '_blank');
+                    return;
+                }
 
-            player.src = embedUrl;
-            modal.style.display = 'block';
+                player.src = embedUrl;
+                modal.style.display = 'block';
+            } catch (error) {
+                console.error('Error opening video:', error);
+                window.open(videoUrl, '_blank');
+            }
         }
 
-        // ฟังก์ชันสำหรับเล่นวิดีโอรีวิว
         function playVideoReview(videoUrl) {
             if (videoUrl && videoUrl.trim()) {
                 openVideoModal(videoUrl);
             }
         }
 
-        // ฟังก์ชันปิด video modal
         function closeVideoModal() {
             const modal = document.getElementById('videoModal');
             const player = document.getElementById('youtubePlayer');
-            modal.style.display = 'none';
-            player.src = ''; // หยุดเล่นวิดีโอ
-        }
-
-        // ปิด modal เมื่อคลิกข้างนอก
-        window.onclick = function(event) {
-            const imageModal = document.getElementById('imageModal');
-            const videoModal = document.getElementById('videoModal');
-
-            if (event.target == imageModal) {
-                imageModal.style.display = 'none';
+            
+            if (modal) {
+                modal.style.display = 'none';
             }
-
-            if (event.target == videoModal) {
-                closeVideoModal();
+            if (player) {
+                player.src = ''; // หยุดเล่นวิดีโอ
             }
         }
 
-        // ฟังก์ชันสำหรับขยายเนื้อหารีวิว
         function expandContent(reviewId) {
             const contentDiv = document.querySelector(`[data-review-id="${reviewId}"] .content-preview`);
             const expandBtn = document.querySelector(`[data-review-id="${reviewId}"] .expand-btn`);
@@ -1443,30 +1509,53 @@
             }
         }
 
-        // เก็บข้อมูลรีวิวไว้ใช้กับฟังก์ชันอื่น
-        let reviewsData = [];
+        // Event listeners
+        window.onclick = function(event) {
+            const imageModal = document.getElementById('imageModal');
+            const videoModal = document.getElementById('videoModal');
 
-        // Load data when page loads
+            if (event.target == imageModal) {
+                closeImageModal();
+            }
+
+            if (event.target == videoModal) {
+                closeVideoModal();
+            }
+        }
+
+        // Initialize when DOM is ready
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Page loaded, starting to load data...');
-            loadBuds();
-            loadReviews();
-        });
-
-        // Fallback for window load
-        window.addEventListener('load', function() {
-            console.log('Window loaded, checking if data is already loaded...');
+            console.log('DOM loaded, initializing...');
+            
+            // ตรวจสอบว่า elements พร้อมใช้งาน
             const budsList = document.getElementById('budsList');
             const reviewsList = document.getElementById('reviewsList');
             
-            // Only load if not already loaded
-            if (budsList && budsList.innerHTML.includes('ยังไม่มีข้อมูลดอกในระบบ')) {
-                loadBuds();
-            }
-            if (reviewsList && reviewsList.innerHTML.includes('ยังไม่มีรีวิวในระบบ')) {
-                loadReviews();
+            if (budsList && reviewsList) {
+                setTimeout(() => {
+                    loadBuds();
+                    loadReviews();
+                }, 100);
+            } else {
+                console.error('Required elements not found');
             }
         });
+
+        // Fallback for older browsers
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                setTimeout(() => {
+                    loadBuds();
+                    loadReviews();
+                }, 200);
+            });
+        } else {
+            // DOM already loaded
+            setTimeout(() => {
+                loadBuds();
+                loadReviews();
+            }, 100);
+        }
     </script>
 </body>
 </html>

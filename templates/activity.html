@@ -746,28 +746,6 @@
             }
         }
 
-        const currentUserId = 1; // จะได้จาก session ในอนาคต
-        let allBuds = [];
-        let allReviews = [];
-        let currentUser = { username: 'Loading...' };
-
-        // ฟังก์ชันสำหรับแปลง YouTube URL เป็น embed URL
-        function getEmbedUrl(url) {
-            if (!url) return '';
-
-            // YouTube URLs
-            if (url.includes('youtube.com/watch?v=')) {
-                const videoId = url.split('v=')[1].split('&')[0];
-                return `https://www.youtube.com/embed/${videoId}`;
-            } else if (url.includes('youtu.be/')) {
-                const videoId = url.split('youtu.be/')[1].split('?')[0];
-                return `https://www.youtube.com/embed/${videoId}`;
-            }
-
-            // สำหรับ URL อื่นๆ ให้ return URL เดิม
-            return url;
-        }
-
         function displayReviews(reviews) {
             const reviewsList = document.getElementById('reviewsList');
 
@@ -887,87 +865,42 @@
                 `;
             }).join('');
 
+            // Modified reviewsList.innerHTML to include the new image grid
             reviewsList.innerHTML = `
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-                    <!-- คอลัมน์ที่ 1: ข้อมูลผู้รีวิว -->
-                    <div class="item-card">
-                        <div class="item-header">
-                            <div class="item-name">ข้อมูลผู้รีวิว</div>
-                        </div>
-                        <div class="review-content">
-                            ${reviews.length > 0 ? `
-                                <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
-                                    <div style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #a78bfa, #60a5fa); display: flex; align-items: center; justify-content: center; font-size: 24px; color: white; font-weight: 600;">
-                                        ${currentUser.username ? currentUser.username.charAt(0).toUpperCase() : '👤'}
-                                    </div>
-                                    <div style="text-align: center;">
-                                        <div style="font-weight: 600; font-size: 16px; color: #333;">${currentUser.username || 'ผู้ใช้ไม่ระบุชื่อ'}</div>
-                                        <div style="font-size: 12px; color: #666; margin-top: 5px;">รีวิวทั้งหมด ${reviews.length} รีวิว</div>
-                                    </div>
-                                </div>
-                            ` : `
-                                <div style="text-align: center; color: #666; padding: 20px;">
-                                    <div style="font-size: 32px; margin-bottom: 10px;">👤</div>
-                                    <div>ยังไม่มีรีวิว</div>
-                                </div>
-                            `}
-                        </div>
+                <div class="item-card">
+                    <div class="item-header">
+                        <div class="item-name">รูปภาพจากรีวิว</div>
                     </div>
-
-                    <!-- คอลัมน์ที่ 2: รูปภาพจากรีวิว -->
-                    <div class="item-card">
-                        <div class="item-header">
-                            <div class="item-name">รูปภาพจากรีวิว</div>
-                        </div>
-                        <div class="review-content">
-                            <div style="width: 100%; height: 200px; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 8px; border: 3px solid #dc3545; border-radius: 15px; padding: 8px; background: #f8f9fa;">
-                                ${reviews.length > 0 && reviews[0].review_images && reviews[0].review_images.length > 0 ? 
-                                    reviews[0].review_images.slice(0, 4).map((image, idx) => 
-                                        `<img src="${image}" alt="รูปรีวิว ${idx + 1}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; border: 1px solid #ddd;">`
-                                    ).join('') : 
-                                    Array(4).fill(0).map((_, idx) => 
-                                        `<div style="width: 100%; height: 100%; background: #e0e0e0; display: flex; align-items: center; justify-content: center; color: #666; font-size: 10px; text-align: center; border-radius: 8px; border: 1px solid #ddd;">ไม่มีรูป ${idx + 1}</div>`
+                    <div class="review-content">
+                        <div style="width: 100%; height: 200px; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 8px; border: 3px solid #dc3545; border-radius: 15px; padding: 8px; background: #f8f9fa;">
+                            ${reviews.length > 0 && reviews[0].review_images && reviews[0].review_images.length > 0 ? 
+                                reviews[0].review_images.slice(0, 4).map((image, idx) => 
+                                    `<img src="${image}" alt="รูปรีวิว ${idx + 1}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; border: 1px solid #ddd;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">` 
+                                ).join('') + 
+                                (reviews[0].review_images.length < 4 ? 
+                                    Array(4 - reviews[0].review_images.length).fill().map((_, idx) => 
+                                        `<div style="width: 100%; height: 100%; background: #e0e0e0; display: flex; align-items: center; justify-content: center; color: #666; font-size: 10px; text-align: center; border-radius: 8px; border: 1px solid #ddd;">ไม่มีรูป ${reviews[0].review_images.length + idx + 1}</div>`
                                     ).join('')
-                                }
-                            </div>
-                        ```text
-
-                        </div>
-                    </div>
-
-                    <!-- คอลัมน์ที่ 3: วิดีโอรีวิว -->
-                    <div class="item-card">
-                        <div class="item-header">
-                            <div class="item-name">วิดีโอรีวิว</div>
-                        </div>
-                        <div class="review-content">
-                            <div style="width: 100%; height: 200px; border: 3px solid #28a745; border-radius: 15px; padding: 8px; background: #f8f9fa; display: flex; flex-direction: column; gap: 10px;">
-                                ${reviews.length > 0 && reviews[0].video_review_url ? `
-                                    <div style="flex: 1; background: #000; border-radius: 8px; overflow: hidden; position: relative;">
-                                        <iframe 
-                                            src="${getEmbedUrl(reviews[0].video_review_url)}" 
-                                            style="width: 100%; height: 100%; border: none;"
-                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                            allowfullscreen>
-                                        </iframe>
-                                    </div>
-                                    <div style="text-align: center;">
-                                        <a href="${reviews[0].video_review_url}" target="_blank" style="color: #28a745; text-decoration: none; font-size: 12px; font-weight: 600;">
-                                            🎥 ดูวิดีโอเต็ม
-                                        </a>
-                                    </div>
-                                ` : `
-                                    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #666;">
-                                        <div style="font-size: 32px; margin-bottom: 10px;">🎥</div>
-                                        <div style="font-size: 12px; text-align: center;">ยังไม่มีวิดีโอรีวิว</div>
-                                    </div>
-                                `}
-                            </div>
+                                : '') :
+                                Array(4).fill().map((_, idx) => 
+                                    `<div style="width: 100%; height: 100%; background: #e0e0e0; display: flex; align-items: center; justify-content: center; color: #666; font-size: 10px; text-align: center; border-radius: 8px; border: 1px solid #ddd;">ไม่มีรูป ${idx + 1}</div>`
+                                ).join('')
+                            }
                         </div>
                     </div>
                 </div>
-                ${reviewsHtml}
-            `;
+
+                <div class="item-card">
+                    <div class="item-header">
+                        <div class="item-name">รีวิวคอลัมน์ 3</div>
+                    </div>
+                    <div class="review-content">
+                        <div style="text-align: center; font-size: 48px; font-weight: bold; color: #2196F3; padding: 40px;">
+                            3
+                        </div>
+                    </div>
+                </div>
+            `+ reviewsHtml;
         }
 
         // Function to navigate to edit review page
@@ -1048,35 +981,10 @@
             }
         }
 
-        async function loadProfile() {
-            try {
-                const response = await fetch('/api/profile');
-                if (response.ok) {
-                    const profile = await response.json();
-                    currentUser = profile; // เก็บข้อมูลผู้ใช้
-
-                    // อัพเดท DOM elements
-                    document.getElementById('username').textContent = profile.username;
-                    document.getElementById('email').textContent = profile.email;
-
-                    // อัพเดทรูปโปรไฟล์
-                    const profileImg = document.getElementById('profileImage');
-                    if (profile.profile_image_url) {
-                        profileImg.src = profile.profile_image_url;
-                        profileImg.style.display = 'block';
-                    }
-                } else {
-                    console.error('Failed to load profile');
-                }
-            } catch (error) {
-                console.error('Error loading profile:', error);
-            }
-        }
         // Load data when page loads
         window.addEventListener('load', () => {
             loadBuds();
             loadReviews();
-            loadProfile();
         });
     </script>
 </body>

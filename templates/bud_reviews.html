@@ -77,53 +77,37 @@
             margin-bottom: 20px;
         }
 
-        .bud-images-section {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
+        .bud-single-image {
             margin: 20px 0;
+            display: flex;
+            justify-content: center;
             padding: 20px;
             background: #f8f9fa;
             border-radius: 15px;
         }
 
-        .bud-image-container {
-            position: relative;
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .bud-image {
+        .main-bud-image {
+            max-width: 300px;
             width: 100%;
-            height: 120px;
+            height: 200px;
             object-fit: cover;
-            display: block;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: 3px solid #FF9800;
         }
 
-        .bud-image-placeholder {
-            width: 100%;
-            height: 120px;
+        .main-bud-image-placeholder {
+            width: 300px;
+            height: 200px;
             background: #e0e0e0;
             display: flex;
             align-items: center;
             justify-content: center;
             color: #666;
-            font-size: 12px;
+            font-size: 16px;
             text-align: center;
-        }
-
-        .bud-image-label {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0,0,0,0.7);
-            color: white;
-            padding: 5px;
-            font-size: 10px;
-            text-align: center;
+            border-radius: 15px;
+            border: 3px solid #ddd;
         }
 
         .action-buttons {
@@ -386,14 +370,15 @@
                 font-size: 24px;
             }
 
-            .bud-images-section {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 10px;
-                padding: 15px;
+            .main-bud-image {
+                max-width: 250px;
+                height: 150px;
             }
 
-            .bud-image, .bud-image-placeholder {
-                height: 100px;
+            .main-bud-image-placeholder {
+                width: 250px;
+                height: 150px;
+                font-size: 14px;
             }
 
             .action-buttons {
@@ -543,43 +528,28 @@
                 </div>
                 
                 <div class="action-buttons">
-                    <a href="/bud-report?id=${bud.id}" class="action-btn">📋 ไปม full Report</a>
+                    <a href="/bud-report?id=${bud.id}" class="action-btn">Full Report</a>
                 </div>
             `;
         }
 
         function createBudImagesSection(bud) {
-            const budImageData = [
-                { url: bud.image_1_url, label: 'รูปดอก รีวิว 1' },
-                { url: bud.image_2_url, label: 'รูปโปรไฟล์ใส่ปิดปุก' },
-                { url: bud.image_3_url, label: 'รูปดอก 3' },
-                { url: bud.image_4_url, label: 'รูปดอก 4' }
-            ];
-
-            const imageElements = budImageData.map((imageData, index) => {
-                if (imageData.url && imageData.url.trim()) {
-                    return `
-                        <div class="bud-image-container">
-                            <img src="${imageData.url}" alt="${imageData.label}" class="bud-image">
-                            <div class="bud-image-label">${imageData.label}</div>
+            // แสดงเฉพาะรูปดอกรูปที่ 1
+            if (bud.image_1_url && bud.image_1_url.trim()) {
+                return `
+                    <div class="bud-single-image">
+                        <img src="${bud.image_1_url}" alt="รูปดอก ${bud.strain_name_en}" class="main-bud-image">
+                    </div>
+                `;
+            } else {
+                return `
+                    <div class="bud-single-image">
+                        <div class="main-bud-image-placeholder">
+                            ไม่มีรูปภาพดอก
                         </div>
-                    `;
-                } else {
-                    return `
-                        <div class="bud-image-container">
-                            <div class="bud-image-placeholder">
-                                ไม่มีรูปภาพ<br>${imageData.label}
-                            </div>
-                        </div>
-                    `;
-                }
-            }).join('');
-
-            return `
-                <div class="bud-images-section">
-                    ${imageElements}
-                </div>
-            `;
+                    </div>
+                `;
+            }
         }
 
         function displayReviews(reviews) {

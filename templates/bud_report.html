@@ -385,6 +385,302 @@
             border-radius: 6px;
             border: 1px solid #e9ecef;
         }
+
+        .reviewer-info-section {
+            margin-bottom: 4px;
+            padding: 4px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 3px solid #4CAF50;
+        }
+
+        .reviewer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .reviewer-by-text {
+            font-size: 12px;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .aroma-rating-text {
+            font-size: 12px;
+            color: #7b1fa2;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .reviewer-display {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .reviewer-avatar-small {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #a78bfa, #60a5fa);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: white;
+            font-weight: 600;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .reviewer-avatar-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .reviewer-name-display {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .review-ratings-section {
+            margin: 6px 0;
+            padding: 6px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        .review-summary-text {
+            font-size: 13px;
+            color: #333;
+            font-style: italic;
+            margin-top: 5px;
+        }
+
+        .tags-section {
+            margin: 4px 0;
+        }
+
+        .tags-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 4px;
+            margin-bottom: 3px;
+        }
+
+        .tags-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #666;
+            min-width: 70px;
+        }
+
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .aroma-tag {
+            background: #f3e5f5;
+            color: #7b1fa2;
+            padding: 2px 6px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 500;
+        }
+
+        .more-tag {
+            background: #e0e0e0;
+            color: #666;
+            padding: 2px 6px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 500;
+        }
+
+        .expand-btn {
+            background: none;
+            border: none;
+            color: #1976d2;
+            font-size: 11px;
+            cursor: pointer;
+            text-decoration: underline;
+            margin-top: 5px;
+        }
+
+        .review-images-section {
+            margin: 4px 0;
+        }
+
+        .review-images-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 3px;
+            max-width: 120px;
+        }
+
+        .review-image-thumb {
+            width: 100%;
+            height: 25px;
+            object-fit: cover;
+            border-radius: 3px;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .review-image-thumb:hover {
+            transform: scale(1.05);
+            border-color: #FF9800;
+        }
+
+        .more-images {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            font-size: 8px;
+            color: #666;
+            height: 25px;
+        }
+
+        .review-media-section {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .video-review-btn {
+            padding: 4px 8px;
+            background: #ff1744;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+        }
+
+        .video-review-btn:hover {
+            background: #d50000;
+        }
+
+        /* Image Modal Styles */
+        .image-modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.9);
+            padding-top: 50px;
+        }
+
+        .modal-content {
+            margin: auto;
+            display: block;
+            max-width: 90%;
+            max-height: 80%;
+            border-radius: 10px;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .modal-close:hover,
+        .modal-close:focus {
+            color: #bbb;
+            text-decoration: none;
+        }
+
+        /* Video Modal Styles */
+        .video-modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: rgba(0,0,0,0.9);
+            padding-top: 50px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .video-container {
+            margin: auto;
+            display: block;
+            max-width: 90%;
+            max-height: 80%;
+            text-align: center;
+            position: relative;
+        }
+
+        .video-container iframe {
+            max-width: 100%;
+            max-height: 80vh;
+            border: none;
+            border-radius: 8px;
+        }
+
+        /* CSS สำหรับป้องกันการ scroll เมื่อ modal เปิด */
+        body.modal-open {
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .video-modal {
+                padding-top: 20px;
+            }
+            
+            .video-container {
+                max-width: 95%;
+                max-height: 85%;
+                margin-top: 10vh;
+            }
+            
+            .video-container iframe {
+                width: 90vw;
+                height: 50.6vw; /* 16:9 aspect ratio */
+                min-height: 200px;
+                max-height: 70vh;
+            }
+            
+            .modal-close {
+                top: 10px;
+                right: 20px;
+                font-size: 35px;
+                z-index: 10000;
+            }
+        }
         
         .actions {
             display: flex;
@@ -710,6 +1006,20 @@
         </div>
     </div>
 
+    <!-- Modal สำหรับดูรูปขยาย -->
+    <div id="imageModal" class="image-modal">
+        <span class="modal-close" onclick="closeImageModal()">&times;</span>
+        <img id="modalImage" class="modal-content">
+    </div>
+
+    <!-- Modal สำหรับดูวิดีโอ YouTube -->
+    <div id="videoModal" class="video-modal">
+        <span class="modal-close" onclick="closeVideoModal()">&times;</span>
+        <div class="video-container">
+            <iframe id="youtubePlayer" width="800" height="450" frameborder="0" allowfullscreen></iframe>
+        </div>
+    </div>
+
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const budId = urlParams.get('id');
@@ -778,6 +1088,52 @@
             // Set up view reviews button
             document.getElementById('viewReviewsBtn').href = `/bud-reviews?bud_id=${bud.id}`;
         }
+
+        // Event listeners
+        window.onclick = function(event) {
+            const imageModal = document.getElementById('imageModal');
+            const videoModal = document.getElementById('videoModal');
+
+            if (event.target === imageModal) {
+                closeImageModal();
+            }
+
+            if (event.target === videoModal) {
+                closeVideoModal();
+            }
+        }
+
+        // เพิ่ม event listener สำหรับ touch events ในมือถือ
+        document.addEventListener('touchstart', function(event) {
+            const videoModal = document.getElementById('videoModal');
+            const imageModal = document.getElementById('imageModal');
+            
+            if (event.target === videoModal) {
+                closeVideoModal();
+            }
+            
+            if (event.target === imageModal) {
+                closeImageModal();
+            }
+        });
+
+        // ป้องกันการ scroll เมื่อ modal เปิด
+        document.addEventListener('DOMContentLoaded', function() {
+            const videoModal = document.getElementById('videoModal');
+            const imageModal = document.getElementById('imageModal');
+            
+            if (videoModal) {
+                videoModal.addEventListener('touchmove', function(e) {
+                    e.preventDefault();
+                }, { passive: false });
+            }
+            
+            if (imageModal) {
+                imageModal.addEventListener('touchmove', function(e) {
+                    e.preventDefault();
+                }, { passive: false });
+            }
+        });
         
         function displayBudImages(bud) {
             const budImages = document.getElementById('budImages');
@@ -902,71 +1258,112 @@
                 return;
             }
             
-            reviewsContainer.innerHTML = reviews.map(review => {
-                const reviewStars = '⭐'.repeat(review.overall_rating);
-                
-                // กำหนดเอฟเฟกต์ทางบวกและทางลบ
-                const positiveEffects = [
-                    'สุขใจ', 'ผ่อนคลาย', 'สร้างสรรค์', 'ร่าเริง', 'เบิกบาน', 'โฟกัส', 'ตื่นตัว', 'คิดลึก',
-                    'คลายกล้าม', 'หลับง่าย', 'คลายเกร็ง', 'ต้านคลื่นไส้', 'กระตุ้นกิน'
-                ];
-                
-                const negativeEffects = [
-                    'วิตก', 'ความจำสั้น', 'ปากแห้ง', 'ใจเต้นเร็ว', 'สมาธิหาย', 'หลอน', 'ง่วงหนัก', 
-                    'ซึมเศร้า', 'หงุดหงิด', 'ตาแห้ง', 'เวียนหัว', 'หิวข้าว'
-                ];
-                
-                const effectTags = review.selected_effects && review.selected_effects.length > 0 
-                    ? review.selected_effects.slice(0, 6).map(effect => {
-                        const isPositive = positiveEffects.includes(effect);
-                        const isNegative = negativeEffects.includes(effect);
-                        const effectClass = isPositive ? 'positive' : (isNegative ? 'negative' : '');
-                        return `<span class="effect-tag ${effectClass}">${effect}</span>`;
-                    }).join('')
-                    : '<span class="effect-tag">ไม่มีข้อมูล</span>';
-                
-                const aromaRating = review.aroma_rating 
-                    ? `<div style="font-size: 10px; margin-top: 4px;"><strong>กลิ่น:</strong> ${'⭐'.repeat(review.aroma_rating)}</div>`
-                    : '';
-                
-                // Default profile image if none provided
-                const profileImage = review.reviewer_profile_image || '/uploads/20250727_055943_review_1_budtboy1_V2.png';
-                
+            const reviewsHtml = reviews.map(review => {
+                const createdDate = formatDate(review.created_at);
+                const updatedDate = review.updated_at && review.updated_at !== review.created_at ? 
+                    ` (แก้ไขล่าสุด: ${formatDate(review.updated_at)})` : '';
+
+                // สร้าง avatar สำหรับคนรีวิว
+                const reviewerAvatar = review.reviewer_profile_image ? 
+                    `<img src="${review.reviewer_profile_image}" alt="Profile" class="reviewer-avatar-img">` :
+                    (review.reviewer_name ? review.reviewer_name.charAt(0).toUpperCase() : '👤');
+
+                // สร้าง effects tags
+                const effectsTags = review.selected_effects && review.selected_effects.length > 0 ? 
+                    review.selected_effects.slice(0, 4).map(effect => 
+                        `<span class="effect-tag">${effect}</span>`
+                    ).join('') + (review.selected_effects.length > 4 ? `<span class="more-tag">+${review.selected_effects.length - 4}</span>` : '') : '';
+
+                // สร้าง aroma tags
+                const aromaTags = review.aroma_flavors && review.aroma_flavors.length > 0 ? 
+                    review.aroma_flavors.slice(0, 3).map(aroma => 
+                        `<span class="aroma-tag">${aroma}</span>`
+                    ).join('') + (review.aroma_flavors.length > 3 ? `<span class="more-tag">+${review.aroma_flavors.length - 3}</span>` : '') : '';
+
+                // สร้าง review images
+                const reviewImages = review.review_images && review.review_images.length > 0 ? 
+                    `<div class="review-images-section">
+                        <div class="review-images-grid">
+                            ${review.review_images.slice(0, 4).map((img, index) => 
+                                `<img src="${img}" alt="Review image ${index + 1}" class="review-image-thumb" onclick="viewImage('${img}')">`
+                            ).join('')}
+                            ${review.review_images.length > 4 ? `<div class="more-images">+${review.review_images.length - 4}</div>` : ''}
+                        </div>
+                    </div>` : '';
+
                 return `
-                    <div class="review-card">
-                        <div class="review-header">
-                            <div class="reviewer-info">
-                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 3px;">
-                                    <img src="${profileImage}" alt="Profile" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1px solid #ddd;">
-                                    <div class="reviewer-name">${review.reviewer_name || 'ผู้ใช้งาน'}</div>
+                    <div class="item-card" data-review-id="${review.id}">
+                        <div class="review-content">
+                            <div class="review-main-info">
+                                <div class="item-header">
+                                    <div class="item-name">
+                                        ${review.strain_name_th || 'ไม่ระบุชื่อไทย'} (${review.strain_name_en || 'ไม่ระบุชื่ออังกฤษ'}) - Bud ID: ${review.bud_reference_id}
+                                    </div>
+                                    <div class="item-date">${createdDate}${updatedDate}</div>
                                 </div>
-                                <div class="review-date">${formatDate(review.created_at)}</div>
-                            </div>
-                            <div class="review-rating">
-                                <div class="review-stars">${reviewStars}</div>
-                                <span style="font-size: 10px;">${review.overall_rating}/5</span>
+
+                                <div class="reviewer-info-section">
+                                    <div class="reviewer-header">
+                                        <div class="reviewer-by-text">Review by :</div>
+                                        <div class="reviewer-display">
+                                            <div class="reviewer-avatar-small">
+                                                ${reviewerAvatar}
+                                            </div>
+                                            <div class="reviewer-name-display">${review.reviewer_name || 'ผู้ใช้ไม่ระบุชื่อ'}</div>
+                                            <div style="margin-left: 8px; font-size: 12px; color: #FF9800; font-weight: 600;">
+                                                คะแนนรวม: ${'⭐'.repeat(review.overall_rating)} (${review.overall_rating}/5)
+                                            </div>
+                                        </div>
+                                        ${review.aroma_rating ? `<div class="aroma-rating-text">คะแนนกลิ่น : ${'⭐'.repeat(review.aroma_rating)} (${review.aroma_rating}/5)</div>` : ''}
+                                    </div>
+                                </div>
+
+                                <!-- สรุปรีวิว -->
+                                <div class="review-ratings-section">
+                                    <div class="review-summary-text">${review.short_summary || 'ไม่มีสรุป'}</div>
+                                </div>
+
+                                <!-- Effects และ Aromas -->
+                                ${effectsTags ? `<div class="tags-section">
+                                    <div class="tags-row">
+                                        <span class="tags-label">🧠 ผลกระทบ:</span>
+                                        <div class="tags-container">${effectsTags}</div>
+                                    </div>
+                                </div>` : ''}
+
+                                ${aromaTags ? `<div class="tags-section">
+                                    <div class="tags-row">
+                                        <span class="tags-label">👃 กลิ่น/รส:</span>
+                                        <div class="tags-container">${aromaTags}</div>
+                                    </div>
+                                </div>` : ''}
+
+                                <!-- เนื้อหารีวิวเต็ม (ย่อ) -->
+                                ${review.full_review_content ? `<div class="review-full-content">
+                                    <div class="content-preview">${review.full_review_content.length > 100 ? 
+                                        review.full_review_content.substring(0, 100) + '...' : 
+                                        review.full_review_content}</div>
+                                    ${review.full_review_content.length > 100 ? 
+                                        `<button class="expand-btn" onclick="expandContent(${review.id})">อ่านเพิ่มเติม</button>` : ''}
+                                </div>` : ''}
+
+                                <!-- รูปภาพประกอบการรีวิว และปุ่มวิดีโอรีวิว -->
+                                <div class="review-media-section">
+                                    ${reviewImages}
+                                    ${review.video_review_url ? `
+                                        <button class="video-review-btn" onclick="playVideoReview('${review.video_review_url}'); return false;" type="button">
+                                            🎥 ดูรีวิว
+                                        </button>
+                                    ` : ''}
+                                </div>
+
                             </div>
                         </div>
-                        
-                        <div class="review-summary">
-                            <strong>สรุป:</strong> ${review.short_summary || 'ไม่มีสรุป'}
-                        </div>
-                        
-                        ${review.full_review_content ? `
-                            <div class="review-content">
-                                ${review.full_review_content}
-                            </div>
-                        ` : ''}
-                        
-                        <div class="review-effects">
-                            <div style="font-size: 10px; font-weight: 600; margin-bottom: 4px;">เอฟเฟกต์:</div>
-                            <div class="effect-tags">${effectTags}</div>
-                        </div>
-                        
-                        ${aromaRating}
                     </div>
                 `;
             }).join('');
+
+            reviewsContainer.innerHTML = reviewsHtml;
         }
         
         function displayAllBudInfo(bud) {
@@ -1012,14 +1409,117 @@
 
         function formatDate(dateString) {
             if (!dateString) return 'ไม่ระบุ';
-            const date = new Date(dateString);
-            return date.toLocaleDateString('th-TH', {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('th-TH', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric'
+                });
+            } catch (error) {
+                return 'ไม่ระบุ';
+            }
+        }
+
+        function expandContent(reviewId) {
+            const contentDiv = document.querySelector(`[data-review-id="${reviewId}"] .content-preview`);
+            const expandBtn = document.querySelector(`[data-review-id="${reviewId}"] .expand-btn`);
+
+            // ค้นหารีวิวจากข้อมูล
+            const review = reviews.find(r => r.id === reviewId);
+            if (review && contentDiv) {
+                contentDiv.textContent = review.full_review_content;
+                if (expandBtn) {
+                    expandBtn.style.display = 'none';
+                }
+            }
+        }
+
+        function viewImage(imageUrl) {
+            if (!imageUrl) return;
+            
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            
+            if (modal && modalImg) {
+                modal.style.display = 'block';
+                modalImg.src = imageUrl;
+            }
+        }
+
+        function closeImageModal() {
+            const modal = document.getElementById('imageModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        function playVideoReview(videoUrl) {
+            if (videoUrl && videoUrl.trim()) {
+                // ป้องกันการ reload หน้า
+                if (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                openVideoModal(videoUrl);
+            }
+            return false;
+        }
+
+        function openVideoModal(videoUrl) {
+            if (!videoUrl) return;
+            
+            // ป้องกันการ reload หน้าในมือถือ
+            event.preventDefault();
+            event.stopPropagation();
+            
+            const modal = document.getElementById('videoModal');
+            const player = document.getElementById('youtubePlayer');
+            
+            if (!modal || !player) return;
+
+            // แปลง YouTube URL เป็น embed URL
+            let embedUrl = '';
+            try {
+                if (videoUrl.includes('youtube.com/watch?v=')) {
+                    const videoId = videoUrl.split('v=')[1].split('&')[0];
+                    embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0&modestbranding=1`;
+                } else if (videoUrl.includes('youtu.be/')) {
+                    const videoId = videoUrl.split('youtu.be/')[1].split('?')[0];
+                    embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0&modestbranding=1`;
+                } else if (videoUrl.includes('youtube.com/embed/')) {
+                    embedUrl = videoUrl + (videoUrl.includes('?') ? '&' : '?') + 'autoplay=0&rel=0&modestbranding=1';
+                } else {
+                    // ถ้าไม่ใช่ YouTube URL ให้เปิดในแท็บใหม่
+                    window.open(videoUrl, '_blank');
+                    return;
+                }
+
+                player.src = embedUrl;
+                modal.style.display = 'block';
+                
+                // เพิ่ม class สำหรับ mobile
+                document.body.classList.add('modal-open');
+                
+            } catch (error) {
+                console.error('Error opening video:', error);
+                window.open(videoUrl, '_blank');
+            }
+        }
+
+        function closeVideoModal() {
+            const modal = document.getElementById('videoModal');
+            const player = document.getElementById('youtubePlayer');
+            
+            if (modal) {
+                modal.style.display = 'none';
+            }
+            if (player) {
+                player.src = ''; // หยุดเล่นวิดีโอ
+            }
+            
+            // ลบ class สำหรับ mobile
+            document.body.classList.remove('modal-open');
         }
     </script>
 </body>

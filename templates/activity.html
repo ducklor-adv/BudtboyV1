@@ -766,15 +766,25 @@
                 return;
             }
 
-            // แสดง 3 คอลัมน์ ด้วยตัวเลข 1, 2, และ 3
+            // แสดง 3 คอลัมน์ - คอลัมน์ที่ 1 แสดงข้อมูลผู้รีวิว
             const reviewsHtml = `
                 <div class="item-card">
                     <div class="item-header">
-                        <div class="item-name">รีวิวคอลัมน์ 1</div>
+                        <div class="item-name">ข้อมูลผู้รีวิว</div>
                     </div>
                     <div class="review-content">
-                        <div style="text-align: center; font-size: 48px; font-weight: bold; color: #4CAF50; padding: 40px;">
-                            1
+                        <div style="display: flex; align-items: center; gap: 15px; padding: 20px;">
+                            <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #4CAF50, #45a049); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 18px; flex-shrink: 0;">
+                                🌿
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; color: #333; font-size: 16px; margin-bottom: 5px;">
+                                    Budt Boy
+                                </div>
+                                <div style="color: #666; font-size: 12px;">
+                                    26 กรกฎาคม 2568 เวลา 15:42
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -371,6 +371,50 @@
             border-color: #FF9800;
         }
 
+        /* CSS สำหรับกรอบรูปรีวิว 4 รูป */
+        .review-images-grid {
+            width: 100%;
+            height: 200px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 8px;
+            border: 3px solid #dc3545;
+            border-radius: 15px;
+            padding: 8px;
+            background: #f8f9fa;
+            margin: 15px 0;
+        }
+
+        .review-images-grid .review-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid #ddd;
+        }
+
+        .review-images-grid .review-image:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .review-image-placeholder {
+            width: 100%;
+            height: 100%;
+            background: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 10px;
+            text-align: center;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+
         .loading {
             text-align: center;
             padding: 60px;
@@ -483,6 +527,16 @@
 
             .review-images {
                 grid-template-columns: repeat(2, 1fr);
+            }
+
+            .review-images-grid {
+                height: 160px;
+                gap: 4px;
+                padding: 6px;
+            }
+
+            .review-image-placeholder {
+                font-size: 8px;
             }
         }
 
@@ -687,6 +741,16 @@
                 `<img src="${review.reviewer_profile_image}" alt="Profile">` :
                 (review.reviewer_name ? review.reviewer_name.charAt(0).toUpperCase() : '👤');
 
+            // สร้างรูปรีวิว 4 รูป
+            const reviewImages = review.review_images || [];
+            const reviewImagesHtml = [0, 1, 2, 3].map(index => {
+                if (reviewImages[index] && reviewImages[index].trim()) {
+                    return `<img src="${reviewImages[index]}" alt="รูปรีวิว ${index + 1}" class="review-image" onclick="openImageModal('${reviewImages[index]}')">`;
+                } else {
+                    return `<div class="review-image-placeholder">ไม่มีรูป ${index + 1}</div>`;
+                }
+            }).join('');
+
             return `
                 <div class="review-card">
                     <div class="review-header">
@@ -713,6 +777,11 @@
                             ${aromaTags}
                         </div>
                     ` : ''}
+
+                    <!-- กรอบรูปรีวิว 4 รูป -->
+                    <div class="review-images-grid">
+                        ${reviewImagesHtml}
+                    </div>
                 </div>
             `;
         }

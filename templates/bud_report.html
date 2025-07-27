@@ -844,12 +844,6 @@
                     ? `<div style="font-size: 10px; margin-top: 4px;"><strong>กลิ่น:</strong> ${'⭐'.repeat(review.aroma_rating)}</div>`
                     : '';
                 
-                const reviewImages = review.review_images && review.review_images.length > 0
-                    ? `<div class="review-images">
-                         ${review.review_images.slice(0, 4).map(img => `<img src="${img}" alt="รูป" class="review-image">`).join('')}
-                       </div>`
-                    : '';
-                
                 // Default profile image if none provided
                 const profileImage = review.reviewer_profile_image || '/uploads/20250727_055943_review_1_budtboy1_V2.png';
                 
@@ -885,7 +879,6 @@
                         </div>
                         
                         ${aromaRating}
-                        ${reviewImages}
                     </div>
                 `;
             }).join('');

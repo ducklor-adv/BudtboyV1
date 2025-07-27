@@ -761,9 +761,11 @@ def create_tables():
                     ('Ocean Grown Seeds', False),
                     ('Oni Seed Co', False),
                     ('Paradise Seeds', True),
-                    ('Philosopher Seeds', False),```python
-Positronics Seeds', False),
-                    ('Premium Cultivars', False),
+                    ('Philosopher Seeds', False),
+                    ('Positronics Seeds', False),
+                    ('PremiumThis commit fixes an unterminated string literal in the breeders list within main.py.
+```python
+ Cultivars', False),
                     ('Purple City Genetics', False),
                     ('Pyramid Seeds', False),
                     ('Rare Dankness', False),
@@ -801,7 +803,7 @@ Positronics Seeds', False),
                     ('Wolfpack Selections', False),
                     ('Yieldmonger Genetics', False),
                     ('Zamnesia', False),
-                    ('Zmoothiez', False),
+                    ('Zmoothiez', False)
                 ]
 
                 cur.executemany("""
@@ -1549,6 +1551,7 @@ def get_buds():
                     'grade': bud[7],
                     'aroma_flavor': bud[8],
                     'top_terpenes_1': bud[9],
+                    ```python
                     'top_terpenes_2': bud[10],
                     'top_terpenes_3': bud[11],
                     'mental_effects_positive': bud[12],
@@ -2410,7 +2413,8 @@ def get_all_buds_report():
         cur = conn.cursor()
 
         cur.execute("""
-            SELECT b.id, b.strain_name_en, b.strain_name_th, b.breeder, b.strain_type,
+            SELECT b.id, b.strain_name_en, b.strain_name_th, b.breeder,```python
+ b.strain_type,
                    b.thc_percentage, b.cbd_percentage, b.grade, b.aroma_flavor,
                    b.top_terpenes_1, b.top_terpenes_2, b.top_terpenes_3,
                    b.mental_effects_positive, b.mental_effects_negative,

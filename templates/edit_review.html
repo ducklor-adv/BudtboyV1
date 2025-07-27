@@ -309,27 +309,35 @@
             'อารมณ์ดี', 'ตื่นตัว', 'สงบ', 'ตาแห้ง', 'ปากแห้ง'
         ];
 
-        if (!reviewId) {
-            showError('ไม่พบข้อมูลรีวิวที่ต้องการแก้ไข');
+        console.log('Review ID from URL:', reviewId);
+
+        if (!reviewId || reviewId === 'null') {
+            showError('ไม่พบข้อมูลรีวิวที่ต้องการแก้ไข กรุณาตรวจสอบ URL');
         } else {
             loadReviewData();
         }
 
         async function loadReviewData() {
             try {
+                console.log('Loading review data for ID:', reviewId);
                 const response = await fetch(`/api/reviews/${reviewId}`);
                 const result = await response.json();
 
-                if (response.ok && result.success) {
-                    reviewData = result.review;
+                console.log('API Response:', result);
+
+                if (response.ok && result) {
+                    reviewData = result;
                     populateForm();
-                    document.getElementById('loadingMessage').style.display = 'none';
-                    document.getElementById('editReviewForm').style.display = 'block';
+                    const loadingMsg = document.getElementById('loadingMessage');
+                    const editForm = document.getElementById('editReviewForm');
+                    if (loadingMsg) loadingMsg.style.display = 'none';
+                    if (editForm) editForm.style.display = 'block';
                 } else {
-                    showError('ไม่พบข้อมูลรีวิว');
+                    showError(result.error || 'ไม่พบข้อมูลรีวิว');
                 }
             } catch (error) {
-                showError('เกิดข้อผิดพลาดในการโหลดข้อมูล');
+                console.error('Error loading review:', error);
+                showError('เกิดข้อผิดพลาดในการโหลดข้อมูล: ' + error.message);
             }
         }
 
@@ -395,7 +403,7 @@
 
         // Effect selection
         document.addEventListener('change', function(e) {
-            if (e.target.type === 'checkbox' && e.target.closest('.effect-item')) {
+            if (e.target && e.target.type === 'checkbox' && e.target.closest('.effect-item')) {
                 const item = e.target.closest('.effect-item');
                 if (e.target.checked) {
                     item.classList.add('selected');
@@ -406,7 +414,9 @@
         });
 
         // Form submission
-        document.getElementById('editReviewForm').addEventListener('submit', async function(e) {
+        const editForm = document.getElementById('editReviewForm');
+        if (editForm) {
+            editForm.addEventListener('submit', async function(e) {
             e.preventDefault();
 
             const submitBtn = document.getElementById('submitBtn');
@@ -469,7 +479,8 @@
                 submitBtn.disabled = false;
                 submitBtn.textContent = '💾 บันทึกการแก้ไข';
             }
-        });
+            });
+        }
 
         function showError(message) {
             const errorDiv = document.getElementById('errorMessage');

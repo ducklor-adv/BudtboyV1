@@ -1991,7 +1991,7 @@ def get_reviews():
                        r.aroma_rating, r.selected_effects, r.aroma_flavors, r.review_images,
                        r.created_at, r.updated_at,
                        b.strain_name_en, b.strain_name_th, b.breeder,
-                       u.username as reviewer_name
+                       u.username as reviewer_name, u.profile_image_url as reviewer_profile_image
                 FROM reviews r
                 JOIN buds_data b ON r.bud_reference_id = b.id
                 JOIN users u ON r.reviewer_id = u.id
@@ -2016,6 +2016,16 @@ def get_reviews():
 
             reviews_list = []
             for review in reviews:
+                # Format profile image URL correctly
+                reviewer_profile_image = None
+                if review[14]:  # reviewer_profile_image
+                    if review[14].startswith('/uploads/'):
+                        reviewer_profile_image = review[14]
+                    elif review[14].startswith('uploads/'):
+                        reviewer_profile_image = f'/{review[14]}'
+                    else:
+                        reviewer_profile_image = f'/uploads/{review[14].split("/")[-1]}'
+
                 reviews_list.append({
                     'id': review[0],
                     'overall_rating': review[1],
@@ -2030,7 +2040,8 @@ def get_reviews():
                     'strain_name_en': review[10],
                     'strain_name_th': review[11],
                     'breeder': review[12],
-                    'reviewer_name': review[13]
+                    'reviewer_name': review[13],
+                    'reviewer_profile_image': reviewer_profile_image
                 })
 
             return jsonify(reviews_list)

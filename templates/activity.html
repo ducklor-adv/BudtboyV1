@@ -149,9 +149,13 @@
 
         .review-actions {
             display: flex;
-            gap: 8px;
-            width: 100%;
-            justify-content: flex-end;
+            gap: 6px;
+        }
+
+        .reviewer-info-section .review-actions .action-btn {
+            font-size: 10px;
+            padding: 4px 8px;
+            min-width: auto;
         }
 
         .item-header {
@@ -605,11 +609,17 @@
             border-left: 3px solid #4CAF50;
         }
 
+        .reviewer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
         .reviewer-by-text {
             font-size: 12px;
             color: #666;
             font-weight: 600;
-            margin-bottom: 6px;
         }
 
         .reviewer-display {
@@ -834,13 +844,19 @@
                             <div class="review-main-info">
                                 <div class="item-header">
                                     <div class="item-name">
-                                        ${review.strain_name_th || 'ไม่ระบุชื่อไทย'} (${review.strain_name_en || 'ไม่ระบุชื่ออังกฤษ'})
+                                        ${review.strain_name_th || 'ไม่ระบุชื่อไทย'} (${review.strain_name_en || 'ไม่ระบุชื่ออังกฤษ'}) - Bud ID: ${review.bud_reference_id}
                                     </div>
                                     <div class="item-date">${createdDate}</div>
                                 </div>
 
                                 <div class="reviewer-info-section">
-                                    <div class="reviewer-by-text">Review by :</div>
+                                    <div class="reviewer-header">
+                                        <div class="reviewer-by-text">Review by :</div>
+                                        <div class="review-actions">
+                                            <button class="action-btn primary" onclick="editReview(${review.id})">✏️ แก้ไข</button>
+                                            <button class="action-btn danger" onclick="deleteReview(${review.id})">🗑️ ลบ</button>
+                                        </div>
+                                    </div>
                                     <div class="reviewer-display">
                                         <div class="reviewer-avatar-small">
                                             ${reviewerAvatar}
@@ -848,11 +864,6 @@
                                         <div class="reviewer-name-display">${review.reviewer_name || 'ผู้ใช้ไม่ระบุชื่อ'}</div>
                                     </div>
                                 </div>
-                            </div>
-                            
-                            <div class="review-actions">
-                                <button class="action-btn primary" onclick="editReview(${review.id})">✏️ แก้ไข</button>
-                                <button class="action-btn danger" onclick="deleteReview(${review.id})">🗑️ ลบ</button>
                             </div>
                         </div>
                     </div>

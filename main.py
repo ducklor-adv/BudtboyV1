@@ -1126,7 +1126,8 @@ def get_user_reviews():
                    r.aroma_rating, r.selected_effects, r.aroma_flavors, r.review_images,
                    r.created_at, r.updated_at,
                    b.strain_name_en, b.strain_name_th, b.breeder,
-                   u.username as reviewer_name, u.profile_image_url as reviewer_profile_image
+                   u.username as reviewer_name, u.profile_image_url as reviewer_profile_image,
+                   r.bud_reference_id
             FROM reviews r
             JOIN buds_data b ON r.bud_reference_id = b.id
             JOIN users u ON r.reviewer_id = u.id
@@ -1161,7 +1162,8 @@ def get_user_reviews():
                 'strain_name_th': row[11],
                 'breeder': row[12],
                 'reviewer_name': row[13],
-                'reviewer_profile_image': reviewer_profile_image
+                'reviewer_profile_image': reviewer_profile_image,
+                'bud_reference_id': row[15]  # Add bud reference ID from reviews table
             })
 
         cur.close()

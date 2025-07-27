@@ -1060,17 +1060,17 @@
                                 <div class="reviewer-info-section">
                                     <div class="reviewer-header">
                                         <div class="reviewer-by-text">Review by :</div>
+                                        <div class="reviewer-display">
+                                            <div class="reviewer-avatar-small">
+                                                ${reviewerAvatar}
+                                            </div>
+                                            <div class="reviewer-name-display">${review.reviewer_name || 'ผู้ใช้ไม่ระบุชื่อ'}</div>
+                                        </div>
                                         ${review.aroma_rating ? `<div class="aroma-rating-text">คะแนนกลิ่น : ${'⭐'.repeat(review.aroma_rating)} (${review.aroma_rating}/5)</div>` : ''}
                                         <div class="review-actions">
                                             <button class="action-btn primary" onclick="editReview(${review.id})">✏️ แก้ไข</button>
                                             <button class="action-btn danger" onclick="deleteReview(${review.id})">🗑️ ลบ</button>
                                         </div>
-                                    </div>
-                                    <div class="reviewer-display">
-                                        <div class="reviewer-avatar-small">
-                                            ${reviewerAvatar}
-                                        </div>
-                                        <div class="reviewer-name-display">${review.reviewer_name || 'ผู้ใช้ไม่ระบุชื่อ'}</div>
                                     </div>
                                 </div>
 

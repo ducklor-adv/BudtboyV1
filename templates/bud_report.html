@@ -948,8 +948,8 @@
                 <div class="header-content">
                     <img src="/uploads/20250727_055943_review_1_budtboy1_V2.png" alt="โลโก้" class="grower-logo">
                     <div class="header-text">
-                        <div class="header-main">รายงาน</div>
-                        <div class="header-sub">ดอกแบบละเอียด</div>
+                        <div class="header-main">Grow by</div>
+                        <div class="header-sub" id="growerName">-</div>
                     </div>
                 </div>
             </div>
@@ -1066,6 +1066,9 @@
             document.getElementById('budName').textContent = bud.strain_name_en || 'ไม่ระบุชื่อ';
             document.getElementById('budNameThai').textContent = bud.strain_name_th || '';
             document.getElementById('budId').textContent = `Bud ID: ${bud.id}`;
+            
+            // Update grower name in header
+            document.getElementById('growerName').textContent = bud.grower_name || 'ไม่ระบุผู้ปลูก';
             
             // Display bud images
             displayBudImages(bud);

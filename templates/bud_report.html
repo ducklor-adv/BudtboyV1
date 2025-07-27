@@ -386,6 +386,36 @@
             border-radius: 15px;
         }
         
+        .simple-info-list {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .simple-info-item {
+            display: flex;
+            margin-bottom: 12px;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        
+        .simple-info-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .simple-info-label {
+            font-weight: 600;
+            color: #333;
+            margin-right: 8px;
+            min-width: 120px;
+        }
+        
+        .simple-info-value {
+            color: #666;
+            flex: 1;
+        }
+        
         @media (max-width: 768px) {
             .container {
                 margin: 10px;
@@ -442,6 +472,22 @@
                     </div>
                 </div>
                 
+                <!-- Terpenes และผลกระทบ -->
+                <div class="section">
+                    <div class="section-title">🧪 Terpenes Profile</div>
+                    <div class="simple-info-list" id="terpenesInfo">
+                        <!-- Terpenes info will be populated here -->
+                    </div>
+                </div>
+                
+                <!-- ผลกระทบและการใช้งาน -->
+                <div class="section">
+                    <div class="section-title">🎯 ผลกระทบและการใช้งาน</div>
+                    <div class="simple-info-list" id="effectsInfo">
+                        <!-- Effects info will be populated here -->
+                    </div>
+                </div>
+
                 <!-- คะแนนรีวิว -->
                 <div class="section">
                     <div class="section-title">📊 คะแนนรีวิว</div>
@@ -553,6 +599,12 @@
             
             // Growing info grid
             displayGrowingInfo(bud);
+            
+            // Terpenes info (new position)
+            displayTerpenesInfo(bud);
+            
+            // Effects info (new position)
+            displayEffectsInfo(bud);
             
             // Rating calculation
             const avgRating = reviews.length > 0 
@@ -739,6 +791,50 @@
             }).join('');
         }
         
+        function displayTerpenesInfo(bud) {
+            const terpenesInfo = document.getElementById('terpenesInfo');
+            const terpenes = [
+                { label: 'Terpene อันดับ 1', value: bud.top_terpenes_1 },
+                { label: 'Terpene อันดับ 2', value: bud.top_terpenes_2 },
+                { label: 'Terpene อันดับ 3', value: bud.top_terpenes_3 }
+            ];
+            
+            terpenesInfo.innerHTML = terpenes.map(terpene => {
+                if (terpene.value && terpene.value.trim()) {
+                    return `
+                        <div class="simple-info-item">
+                            <div class="simple-info-label">${terpene.label}:</div>
+                            <div class="simple-info-value">${terpene.value}</div>
+                        </div>
+                    `;
+                }
+                return '';
+            }).join('') || '<div class="simple-info-item"><div class="simple-info-value">ไม่มีข้อมูล Terpenes</div></div>';
+        }
+        
+        function displayEffectsInfo(bud) {
+            const effectsInfo = document.getElementById('effectsInfo');
+            const effects = [
+                { label: 'ผลทางจิต (บวก)', value: bud.mental_effects_positive },
+                { label: 'ผลทางจิต (ลบ)', value: bud.mental_effects_negative },
+                { label: 'ผลทางกาย (บวก)', value: bud.physical_effects_positive },
+                { label: 'ผลทางกาย (ลบ)', value: bud.physical_effects_negative },
+                { label: 'เวลาที่แนะนำ', value: bud.recommended_time }
+            ];
+            
+            effectsInfo.innerHTML = effects.map(effect => {
+                if (effect.value && effect.value.trim()) {
+                    return `
+                        <div class="simple-info-item">
+                            <div class="simple-info-label">${effect.label}:</div>
+                            <div class="simple-info-value">${effect.value}</div>
+                        </div>
+                    `;
+                }
+                return '';
+            }).join('') || '<div class="simple-info-item"><div class="simple-info-value">ไม่มีข้อมูลผลกระทบ</div></div>';
+        }
+
         function formatDate(dateString) {
             if (!dateString) return 'ไม่ระบุ';
             const date = new Date(dateString);

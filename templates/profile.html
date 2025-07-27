@@ -49,7 +49,8 @@
         .username-display {
             font-size: 20px;
             font-weight: 700;
-            margin-top: 5px;
+            margin-top: 15px;
+            color: white;
         }
 
         .cannabis-icon {
@@ -313,9 +314,8 @@
             </button>
             <div class="cannabis-icon">🌿</div>
             <div class="welcome-text">
-                ยินดีต้อนรับ<br>คุณ Budt.Boy !
+                สวัสดีครับ
             </div>
-            <div class="username-display" id="displayUsername">Budt.Boy</div>
             <div class="profile-avatar" id="profileAvatar" onclick="document.getElementById('avatarInput').click()">
                 <img id="avatarImage" style="display: none;" alt="Profile">
                 <span id="avatarPlaceholder">👤</span>
@@ -323,6 +323,7 @@
                     📷 เปลี่ยน
                 </div>
             </div>
+            <div class="username-display" id="displayUsername">Budt.Boy</div>
             <input type="file" id="avatarInput" class="avatar-upload-input" accept="image/*" onchange="uploadProfileImage(this)">
         </div>
 

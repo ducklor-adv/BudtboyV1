@@ -137,21 +137,21 @@
 
         .review-content {
             display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
+            flex-direction: column;
             gap: 15px;
+            width: 100%;
         }
 
         .review-main-info {
             flex: 1;
+            width: 100%;
         }
 
         .review-actions {
             display: flex;
-            flex-direction: column;
             gap: 8px;
-            width: 100px;
-            flex-shrink: 0;
+            width: 100%;
+            justify-content: flex-end;
         }
 
         .item-header {
@@ -380,15 +380,28 @@
             gap: 12px;
         }
 
+        .item-list.reviews-list {
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
         @media (max-width: 1200px) {
             .item-list {
                 grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .item-list.reviews-list {
+                grid-template-columns: 1fr;
             }
         }
 
         @media (max-width: 900px) {
             .item-list {
                 grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .item-list.reviews-list {
+                grid-template-columns: 1fr;
             }
         }
 
@@ -476,18 +489,24 @@
         }
 
         .action-btn {
-            width: 100%;
-            padding: 4px 6px;
+            padding: 8px 16px;
             border: none;
             border-radius: 10px;
             cursor: pointer;
-            font-size: 8px;
+            font-size: 14px;
             font-weight: 600;
             transition: all 0.3s ease;
             text-decoration: none;
             text-align: center;
             display: inline-block;
             box-sizing: border-box;
+            min-width: 80px;
+        }
+
+        .bud-actions .action-btn {
+            width: 100%;
+            font-size: 8px;
+            padding: 4px 6px;
         }
 
         .action-btn.primary {
@@ -563,7 +582,7 @@
                     </a>
                 </div>
 
-                <div class="item-list" id="reviewsList">
+                <div class="item-list reviews-list" id="reviewsList">
                     <div class="empty-state">
                         <div class="empty-icon">⭐</div>
                         <p>ยังไม่มีรีวิวในระบบ</p>

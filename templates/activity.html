@@ -622,6 +622,15 @@
             font-weight: 600;
         }
 
+        .aroma-rating-text {
+            font-size: 12px;
+            color: #7b1fa2;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
         .reviewer-display {
             display: flex;
             align-items: center;
@@ -1051,6 +1060,7 @@
                                 <div class="reviewer-info-section">
                                     <div class="reviewer-header">
                                         <div class="reviewer-by-text">Review by :</div>
+                                        ${review.aroma_rating ? `<div class="aroma-rating-text">คะแนนกลิ่น : ${'⭐'.repeat(review.aroma_rating)} (${review.aroma_rating}/5)</div>` : ''}
                                         <div class="review-actions">
                                             <button class="action-btn primary" onclick="editReview(${review.id})">✏️ แก้ไข</button>
                                             <button class="action-btn danger" onclick="deleteReview(${review.id})">🗑️ ลบ</button>
@@ -1069,7 +1079,6 @@
                                     <div class="rating-row">
                                         <span class="rating-label">คะแนนรวม:</span>
                                         <span class="rating-stars">${overallStars} (${review.overall_rating}/5)</span>
-                                        ${aromaStars ? `<span class="aroma-rating">${aromaStars} (${review.aroma_rating}/5)</span>` : ''}
                                     </div>
                                     <div class="review-summary-text">${review.short_summary || 'ไม่มีสรุป'}</div>
                                 </div>

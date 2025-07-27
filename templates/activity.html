@@ -754,116 +754,25 @@
                     <div class="empty-state">
                         <div class="empty-icon">⭐</div>
                         <p>ยังไม่มีรีวิวในระบบ</p>
-                        <p style="font-size: 14px; color: #999;">คลิกปุ่ม "เพิ่มรีวิู" เพื่อแชร์ประสบการณ์ของคุณ</p>
+                        <p style="font-size: 14px; color: #999;">คลิกปุ่ม "เพิ่มรีวิว" เพื่อแชร์ประสบการณ์ของคุณ</p>
                     </div>
                 `;
                 return;
             }
 
             const reviewsHtml = reviews.map(review => {
-                const overallStars = Array(5).fill(0).map((_, i) => 
-                    i < review.overall_rating ? '⭐' : '☆'
-                ).join('');
-
-                const aromaStars = review.aroma_rating ? 
-                    Array(5).fill(0).map((_, i) => 
-                        i < review.aroma_rating ? '⭐' : '☆'
-                    ).join('') : null;
-
-                const effectsText = review.selected_effects && review.selected_effects.length > 0 
-                    ? review.selected_effects.slice(0, 5).join(', ') + (review.selected_effects.length > 5 ? '...' : '')
-                    : 'ไม่ระบุ';
-
-                const aromaText = review.aroma_flavors && review.aroma_flavors.length > 0 
-                    ? review.aroma_flavors.join(', ')
-                    : 'ไม่ระบุ';
-
-                const contentPreview = review.full_review_content && review.full_review_content.length > 100 
-                    ? review.full_review_content.substring(0, 100) + '...'
-                    : review.full_review_content || '';
-
-                const hasImages = review.review_images && review.review_images.length > 0;
-                const imageCount = hasImages ? review.review_images.length : 0;
-
                 const createdDate = formatDate(review.created_at);
-                const updatedDate = review.updated_at && review.updated_at !== review.created_at 
-                    ? formatDate(review.updated_at) 
-                    : null;
 
                 return `
                     <div class="item-card">
                         <div class="item-header">
-                            <div class="item-title">
+                            <div class="item-name">
                                 ${review.strain_name_th || 'ไม่ระบุชื่อไทย'} (${review.strain_name_en || 'ไม่ระบุชื่ออังกฤษ'})
                             </div>
                             <div class="item-date">${createdDate}</div>
                         </div>
 
                         <div class="review-content">
-                            <div class="review-main-info">
-                                <!-- ข้อมูลผู้รีวิวและผู้ปลูก -->
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 8px;">
-                                    <div style="text-align: center; flex: 1;">
-                                        <div style="font-size: 10px; color: #666; margin-bottom: 2px;">👤 ผู้รีวิว</div>
-                                        <div style="font-size: 12px; font-weight: bold; color: #4CAF50;">budtboy</div>
-                                    </div>
-                                    <div style="width: 1px; background: #ddd; margin: 0 10px;"></div>
-                                    <div style="text-align: center; flex: 1;">
-                                        <div style="font-size: 10px; color: #666; margin-bottom: 2px;">🌱 ผู้ปลูก</div>
-                                        <div style="font-size: 12px; font-weight: bold; color: #FF9800;">${review.breeder || 'ไม่ระบุ'}</div>
-                                    </div>
-                                </div>
-
-                                <!-- คะแนนรวมและกลิ่น -->
-                                <div class="review-ratings">
-                                    <div class="overall-rating">
-                                        <strong>คะแนนรวม:</strong> ${overallStars} (${review.overall_rating}/5)
-                                    </div>
-                                    ${aromaStars ? `
-                                        <div class="aroma-rating">
-                                            <strong>คะแนนกลิ่น:</strong> ${aromaStars} (${review.aroma_rating}/5)
-                                        </div>
-                                    ` : ''}
-                                </div>
-
-                                <!-- สรุปสั้น -->
-                                <div class="review-summary">
-                                    <strong>สรุป:</strong> ${review.short_summary}
-                                </div>
-
-                                <!-- เนื้อหาเต็ม -->
-                                ${contentPreview ? `
-                                    <div class="review-full-content">
-                                        <strong>รีวิวเต็ม:</strong>
-                                        <div class="content-preview">${contentPreview}</div>
-                                    </div>
-                                ` : ''}
-
-                                <!-- รายละเอียดอื่นๆ -->
-                                <div class="review-details">
-                                    <div class="review-effects">
-                                        <strong>🎯 เอฟเฟกต์:</strong> ${effectsText}
-                                    </div>
-                                    <div class="review-aromas">
-                                        <strong>🌸 กลิ่นและรส:</strong> ${aromaText}
-                                    </div>
-                                </div>
-
-                                <!-- ข้อมูลรูปภาพ -->
-                                ${hasImages ? `
-                                    <div class="review-images-info">
-                                        📷 มีรูปภาพประกอบ ${imageCount} รูป
-                                    </div>
-                                ` : ''}
-
-                                <!-- วันที่แก้ไข -->
-                                ${updatedDate ? `
-                                    <div class="review-updated">
-                                        <strong>แก้ไขล่าสุด:</strong> ${updatedDate}
-                                    </div>
-                                ` : ''}
-                            </div>
-
                             <div class="review-actions">
                                 <button class="action-btn primary" onclick="editReview(${review.id})">✏️ แก้ไข</button>
                                 <button class="action-btn danger" onclick="deleteReview(${review.id})">🗑️ ลบ</button>
@@ -873,115 +782,7 @@
                 `;
             }).join('');
 
-            // สร้าง HTML สำหรับคอลัมน์ 1: รูปโปรไฟล์ผู้รีวิว
-            const column1Html = `
-                <div class="item-card">
-                    <div class="item-header">
-                        <div class="item-name">ข้อมูลผู้รีวิว</div>
-                    </div>
-                    <div class="review-content">
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: 15px; padding: 20px;">
-                            <div style="width: 80px; height: 80px; border-radius: 50%; background: #4CAF50; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; font-weight: bold;">
-                                👤
-                            </div>
-                            <div style="text-align: center;">
-                                <div style="font-weight: bold; font-size: 16px; margin-bottom: 5px; color: #4CAF50;">budtboy</div>
-                                <div style="color: #666; font-size: 12px;">ผู้รีวิว</div>
-                                ${reviews.length > 0 ? `
-                                    <div style="margin-top: 10px; padding: 8px; background: #f8f9fa; border-radius: 8px; border-left: 3px solid #4CAF50;">
-                                        <div style="font-size: 11px; color: #666; margin-bottom: 3px;">รีวิวล่าสุด:</div>
-                                        <div style="font-size: 12px; font-weight: bold; color: #333;">${reviews[0].strain_name_th || 'ไม่ระบุชื่อไทย'}</div>
-                                        <div style="font-size: 10px; color: #666;">(${reviews[0].strain_name_en || 'ไม่ระบุชื่ออังกฤษ'})</div>
-                                    </div>
-                                ` : ''}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            // สร้าง HTML สำหรับคอลัมน์ 2: รูปภาพจากรีวิว
-            const column2Html = `
-                <div class="item-card">
-                    <div class="item-header">
-                        <div class="item-name">รูปภาพจากรีวิว</div>
-                    </div>
-                    <div class="review-content">
-                        <div style="width: 100%; height: 200px; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 4px; border: 2px solid #4CAF50; border-radius: 12px; padding: 6px; background: #f8f9fa; overflow: hidden;">
-                            ${reviews.length > 0 && reviews[0].review_images && reviews[0].review_images.length > 0 ? 
-                                reviews[0].review_images.slice(0, 4).map((image, idx) => 
-                                    `<div style="width: 100%; height: 100%; overflow: hidden; border-radius: 6px;">
-                                        <img src="${image}" alt="รูปรีวิว ${idx + 1}" style="width: 100%; height: 100%; object-fit: cover; cursor: pointer; transition: all 0.3s ease;">
-                                    </div>` 
-                                ).join('') + 
-                                (reviews[0].review_images.length < 4 ? 
-                                    Array(4 - reviews[0].review_images.length).fill().map((_, idx) => 
-                                        `<div style="width: 100%; height: 100%; background: #e9ecef; display: flex; align-items: center; justify-content: center; color: #6c757d; font-size: 10px; text-align: center; border-radius: 6px;">ไม่มีรูป</div>`
-                                    ).join('')
-                                : '') :
-                                Array(4).fill().map((_, idx) => 
-                                    `<div style="width: 100%; height: 100%; background: #e9ecef; display: flex; align-items: center; justify-content: center; color: #6c757d; font-size: 10px; text-align: center; border-radius: 6px;">ไม่มีรูป</div>`
-                                ).join('')
-                            }
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            // สร้าง HTML สำหรับคอลัมน์ 3: ข้อมูลผู้ปลูกและวิดีโอรีวิว
-            const column3Html = `
-                <div class="item-card">
-                    <div class="item-header">
-                        <div class="item-name">ข้อมูลผู้ปลูกสายพันธุ์</div>
-                    </div>
-                    <div class="review-content">
-                        <div style="display: flex; flex-direction: column; gap: 15px; padding: 15px;">
-                            <!-- ข้อมูลผู้ปลูก -->
-                            <div style="text-align: center; padding: 15px; background: #f8f9fa; border-radius: 12px; border: 2px solid #FF9800;">
-                                <div style="font-size: 32px; margin-bottom: 10px;">🌱</div>
-                                <div style="font-weight: bold; font-size: 16px; color: #FF9800; margin-bottom: 5px;">
-                                    ${reviews.length > 0 && reviews[0].breeder ? reviews[0].breeder : 'ไม่ระบุผู้ปลูก'}
-                                </div>
-                                <div style="font-size: 12px; color: #666;">ผู้พัฒนาสายพันธุ์</div>
-                                ${reviews.length > 0 ? `
-                                    <div style="margin-top: 10px; padding: 8px; background: white; border-radius: 8px;">
-                                        <div style="font-size: 11px; color: #666; margin-bottom: 3px;">สายพันธุ์ที่รีวิว:</div>
-                                        <div style="font-size: 12px; font-weight: bold; color: #333;">${reviews[0].strain_name_th || 'ไม่ระบุชื่อไทย'}</div>
-                                        <div style="font-size: 10px; color: #666;">(${reviews[0].strain_name_en || 'ไม่ระบุชื่ออังกฤษ'})</div>
-                                    </div>
-                                ` : ''}
-                            </div>
-                            
-                            <!-- วิดีโอรีวิว -->
-                            <div style="border-top: 1px solid #eee; padding-top: 15px;">
-                                <div style="font-size: 14px; font-weight: bold; margin-bottom: 10px; color: #333;">🎥 วิดีโอรีวิว</div>
-                                ${reviews.length > 0 && reviews[0].video_review_url ? `
-                                    <div style="width: 100%; height: 120px; border-radius: 8px; overflow: hidden; background: #000; margin-bottom: 8px;">
-                                        <video controls style="width: 100%; height: 100%; object-fit: cover;">
-                                            <source src="${reviews[0].video_review_url}" type="video/mp4">
-                                            เบราว์เซอร์ไม่รองรับการเล่นวิดีโอ
-                                        </video>
-                                    </div>
-                                    <a href="${reviews[0].video_review_url}" target="_blank" style="background: #ff4757; color: white; padding: 6px 10px; border-radius: 6px; text-decoration: none; text-align: center; font-size: 11px; font-weight: bold; display: block;">
-                                        🎥 เปิดวิดีโอ
-                                    </a>
-                                ` : `
-                                    <div style="width: 100%; height: 120px; background: #e9ecef; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #6c757d; margin-bottom: 8px;">
-                                        <div style="font-size: 24px; margin-bottom: 8px;">🎥</div>
-                                        <div style="font-size: 11px;">ไม่มีวิดีโอรีวิว</div>
-                                    </div>
-                                    <div style="background: #6c757d; color: white; padding: 6px 10px; border-radius: 6px; text-align: center; font-size: 11px; opacity: 0.5;">
-                                        ไม่มีลิงค์วิดีโอ
-                                    </div>
-                                `}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            // รวม HTML ทั้งหมด
-            reviewsList.innerHTML = column1Html + column2Html + column3Html + reviewsHtml;
+            reviewsList.innerHTML = reviewsHtml;
         }
 
         // Function to navigate to edit review page

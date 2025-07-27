@@ -907,6 +907,26 @@
         .video-link:hover {
             background: #d50000;
         }
+
+        .review-media-section {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .video-review-btn {
+            padding: 4px 8px;
+            background: #ff1744;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -1182,7 +1202,7 @@
                                         <div class="tags-container">${effectsTags}</div>
                                     </div>
                                 </div>` : ''}
-                                
+
                                 ${aromaTags ? `<div class="tags-section">
                                     <div class="tags-row">
                                         <span class="tags-label">👃 กลิ่น/รส:</span>
@@ -1199,17 +1219,16 @@
                                         `<button class="expand-btn" onclick="expandContent(${review.id})">อ่านเพิ่มเติม</button>` : ''}
                                 </div>` : ''}
 
-                                <!-- รูปภาพรีวิว -->
-                                ${reviewImages}
+                                <!-- รูปภาพประกอบการรีวิว และปุ่มวิดีโอรีวิว -->
+                                <div class="review-media-section">
+                                    ${reviewImages ? reviewImages : ''}
+                                    ${review.video_review_url ? `
+                                        <button class="video-review-btn" onclick="playVideoReview('${review.video_review_url}')">
+                                            🎥 ดูรีวิว
+                                        </button>
+                                    ` : ''}
+                                </div>
 
-                                <!-- Video Review Link -->
-                                ${review.video_review_url && review.video_review_url !== null && review.video_review_url.trim() !== '' ? `
-                                <div class="video-section">
-                                    <a href="#" onclick="openVideoModal('${review.video_review_url}'); return false;" class="video-link">
-                                        🎥 ดูวิดีโอรีวิว
-                                    </a>
-                                </div>` : ''}
-                                
                             </div>
                         </div>
                     </div>
@@ -1314,7 +1333,7 @@
         function openVideoModal(videoUrl) {
             const modal = document.getElementById('videoModal');
             const player = document.getElementById('youtubePlayer');
-            
+
             // แปลง YouTube URL เป็น embed URL
             let embedUrl = '';
             if (videoUrl.includes('youtube.com/watch?v=')) {
@@ -1330,7 +1349,7 @@
                 window.open(videoUrl, '_blank');
                 return;
             }
-            
+
             player.src = embedUrl;
             modal.style.display = 'block';
         }
@@ -1347,11 +1366,11 @@
         window.onclick = function(event) {
             const imageModal = document.getElementById('imageModal');
             const videoModal = document.getElementById('videoModal');
-            
+
             if (event.target == imageModal) {
                 imageModal.style.display = 'none';
             }
-            
+
             if (event.target == videoModal) {
                 closeVideoModal();
             }
@@ -1361,7 +1380,7 @@
         function expandContent(reviewId) {
             const contentDiv = document.querySelector(`[data-review-id="${reviewId}"] .content-preview`);
             const expandBtn = document.querySelector(`[data-review-id="${reviewId}"] .expand-btn`);
-            
+
             // ค้นหารีวิวจากข้อมูล
             const review = reviewsData.find(r => r.id === reviewId);
             if (review && contentDiv) {

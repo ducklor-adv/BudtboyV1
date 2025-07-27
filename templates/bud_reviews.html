@@ -77,6 +77,88 @@
             margin-bottom: 20px;
         }
 
+        .bud-images-section {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+        }
+
+        .bud-image-container {
+            position: relative;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .bud-image {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .bud-image-placeholder {
+            width: 100%;
+            height: 120px;
+            background: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .bud-image-label {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 5px;
+            font-size: 10px;
+            text-align: center;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .action-btn {
+            background: #FF9800;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+            text-align: center;
+        }
+
+        .action-btn:hover {
+            background: #F57C00;
+            transform: translateY(-2px);
+        }
+
+        .action-btn.secondary {
+            background: #2196F3;
+        }
+
+        .action-btn.secondary:hover {
+            background: #1976D2;
+        }
+
         .rating-summary {
             display: flex;
             align-items: center;
@@ -304,6 +386,21 @@
                 font-size: 24px;
             }
 
+            .bud-images-section {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+                padding: 15px;
+            }
+
+            .bud-image, .bud-image-placeholder {
+                height: 100px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+
             .rating-summary {
                 flex-direction: column;
                 text-align: center;
@@ -370,11 +467,30 @@
 
         async function loadBudInfo() {
             try {
+                // โหลดข้อมูลดอกรวมถึงรูปภาพ
                 const response = await fetch(`/api/buds/${budId}/info`);
                 const result = await response.json();
 
                 if (response.ok && result.success) {
-                    displayBudInfo(result.bud);
+                    // เพิ่มข้อมูลรูปภาพถ้าไม่มี
+                    const bud = result.bud;
+                    
+                    // ถ้าไม่มีข้อมูลรูปใน API response ให้โหลดจาก buds data
+                    if (!bud.image_1_url) {
+                        const budDataResponse = await fetch(`/api/buds`);
+                        if (budDataResponse.ok) {
+                            const allBuds = await budDataResponse.json();
+                            const fullBudData = allBuds.find(b => b.id === parseInt(budId));
+                            if (fullBudData) {
+                                bud.image_1_url = fullBudData.image_1_url;
+                                bud.image_2_url = fullBudData.image_2_url;
+                                bud.image_3_url = fullBudData.image_3_url;
+                                bud.image_4_url = fullBudData.image_4_url;
+                            }
+                        }
+                    }
+                    
+                    displayBudInfo(bud);
                 } else {
                     document.getElementById('budInfo').innerHTML = '<div class="error">ไม่พบข้อมูลดอก</div>';
                 }
@@ -402,6 +518,9 @@
         function displayBudInfo(bud) {
             const avgRating = calculateAverageRating();
 
+            // สร้างส่วนแสดงรูปดอก
+            const budImages = createBudImagesSection(bud);
+
             document.getElementById('budInfo').innerHTML = `
                 <div class="bud-name">${bud.strain_name_en || 'ไม่ระบุชื่อ'}</div>
                 <div class="bud-details">
@@ -412,12 +531,53 @@
                     <strong>CBD:</strong> ${bud.cbd_percentage || 'ไม่ระบุ'}%<br>
                     <strong>เจ้าของดอก:</strong> ${bud.grower_name || 'ไม่ระบุ'}
                 </div>
+                
+                ${budImages}
+                
                 <div class="rating-summary">
                     <div class="avg-rating">${avgRating.toFixed(1)}</div>
                     <div class="rating-details">
                         <div class="stars">${'⭐'.repeat(Math.round(avgRating))}</div>
                         <div class="review-count">${allReviews.length} รีวิว</div>
                     </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <a href="/bud-report?id=${bud.id}" class="action-btn">📋 ไปม full Report</a>
+                </div>
+            `;
+        }
+
+        function createBudImagesSection(bud) {
+            const budImageData = [
+                { url: bud.image_1_url, label: 'รูปดอก รีวิว 1' },
+                { url: bud.image_2_url, label: 'รูปโปรไฟล์ใส่ปิดปุก' },
+                { url: bud.image_3_url, label: 'รูปดอก 3' },
+                { url: bud.image_4_url, label: 'รูปดอก 4' }
+            ];
+
+            const imageElements = budImageData.map((imageData, index) => {
+                if (imageData.url && imageData.url.trim()) {
+                    return `
+                        <div class="bud-image-container">
+                            <img src="${imageData.url}" alt="${imageData.label}" class="bud-image">
+                            <div class="bud-image-label">${imageData.label}</div>
+                        </div>
+                    `;
+                } else {
+                    return `
+                        <div class="bud-image-container">
+                            <div class="bud-image-placeholder">
+                                ไม่มีรูปภาพ<br>${imageData.label}
+                            </div>
+                        </div>
+                    `;
+                }
+            }).join('');
+
+            return `
+                <div class="bud-images-section">
+                    ${imageElements}
                 </div>
             `;
         }
@@ -457,7 +617,8 @@
                 `<span class="aroma-tag">${aroma}</span>`
             ).join('');
 
-            // Create reviewer avatar - show profile image if available, otherwise show first letter
+            // Create reviewer avatar - show grower profile image if available, otherwise show first letter
+            // Note: ในอนาคตควรเพิ่ม grower_profile_image ใน API response
             const reviewerAvatar = review.reviewer_profile_image ? 
                 `<img src="${review.reviewer_profile_image}" alt="Profile">` :
                 (review.reviewer_name ? review.reviewer_name.charAt(0).toUpperCase() : '👤');

@@ -655,6 +655,175 @@
             font-weight: 600;
             color: #333;
         }
+
+        .review-ratings-section {
+            margin: 10px 0;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        .rating-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 5px;
+        }
+
+        .rating-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .rating-stars {
+            font-size: 12px;
+            color: #ff9800;
+        }
+
+        .aroma-rating {
+            font-size: 11px;
+            color: #9c27b0;
+            margin-left: 8px;
+        }
+
+        .review-summary-text {
+            font-size: 13px;
+            color: #333;
+            font-style: italic;
+            margin-top: 5px;
+        }
+
+        .tags-section {
+            margin: 8px 0;
+        }
+
+        .tags-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+            margin-bottom: 5px;
+        }
+
+        .tags-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #666;
+            min-width: 70px;
+        }
+
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .effect-tag {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 2px 6px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 500;
+        }
+
+        .aroma-tag {
+            background: #f3e5f5;
+            color: #7b1fa2;
+            padding: 2px 6px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 500;
+        }
+
+        .more-tag {
+            background: #e0e0e0;
+            color: #666;
+            padding: 2px 6px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 500;
+        }
+
+        .review-full-content {
+            margin: 8px 0;
+            padding: 8px;
+            background: #ffffff;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .content-preview {
+            font-size: 12px;
+            line-height: 1.4;
+            color: #333;
+        }
+
+        .expand-btn {
+            background: none;
+            border: none;
+            color: #1976d2;
+            font-size: 11px;
+            cursor: pointer;
+            text-decoration: underline;
+            margin-top: 5px;
+        }
+
+        .review-images-section {
+            margin: 8px 0;
+        }
+
+        .review-images-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 4px;
+            max-width: 200px;
+        }
+
+        .review-image-thumb {
+            width: 100%;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .review-image-thumb:hover {
+            transform: scale(1.1);
+        }
+
+        .more-images {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 10px;
+            color: #666;
+            height: 40px;
+        }
+
+        .video-section {
+            margin: 8px 0;
+        }
+
+        .video-link {
+            display: inline-block;
+            padding: 4px 8px;
+            background: #ff1744;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .video-link:hover {
+            background: #d50000;
+        }
     </style>
 </head>
 <body>
@@ -818,6 +987,7 @@
 
         function displayReviews(reviews) {
             const reviewsList = document.getElementById('reviewsList');
+            reviewsData = reviews; // เก็บข้อมูลไว้ใช้กับฟังก์ชันอื่น
 
             if (reviews.length === 0) {
                 reviewsList.innerHTML = `
@@ -832,11 +1002,40 @@
 
             const reviewsHtml = reviews.map(review => {
                 const createdDate = formatDate(review.created_at);
+                const updatedDate = review.updated_at && review.updated_at !== review.created_at ? 
+                    ` (แก้ไขล่าสุด: ${formatDate(review.updated_at)})` : '';
 
                 // สร้าง avatar สำหรับคนรีวิว
                 const reviewerAvatar = review.reviewer_profile_image ? 
                     `<img src="${review.reviewer_profile_image}" alt="Profile" class="reviewer-avatar-img">` :
                     (review.reviewer_name ? review.reviewer_name.charAt(0).toUpperCase() : '👤');
+
+                // สร้าง stars สำหรับคะแนน
+                const overallStars = '⭐'.repeat(review.overall_rating);
+                const aromaStars = review.aroma_rating ? '👃' + '⭐'.repeat(review.aroma_rating) : '';
+
+                // สร้าง effects tags
+                const effectsTags = review.selected_effects && review.selected_effects.length > 0 ? 
+                    review.selected_effects.slice(0, 4).map(effect => 
+                        `<span class="effect-tag">${effect}</span>`
+                    ).join('') + (review.selected_effects.length > 4 ? '<span class="more-tag">+${review.selected_effects.length - 4}</span>' : '') : '';
+
+                // สร้าง aroma tags
+                const aromaTags = review.aroma_flavors && review.aroma_flavors.length > 0 ? 
+                    review.aroma_flavors.slice(0, 3).map(aroma => 
+                        `<span class="aroma-tag">${aroma}</span>`
+                    ).join('') + (review.aroma_flavors.length > 3 ? '<span class="more-tag">+${review.aroma_flavors.length - 3}</span>' : '') : '';
+
+                // สร้าง review images
+                const reviewImages = review.review_images && review.review_images.length > 0 ? 
+                    `<div class="review-images-section">
+                        <div class="review-images-grid">
+                            ${review.review_images.slice(0, 4).map((img, index) => 
+                                `<img src="${img}" alt="Review image ${index + 1}" class="review-image-thumb" onclick="viewImage('${img}')">`
+                            ).join('')}
+                            ${review.review_images.length > 4 ? `<div class="more-images">+${review.review_images.length - 4}</div>` : ''}
+                        </div>
+                    </div>` : '';
 
                 return `
                     <div class="item-card">
@@ -846,7 +1045,7 @@
                                     <div class="item-name">
                                         ${review.strain_name_th || 'ไม่ระบุชื่อไทย'} (${review.strain_name_en || 'ไม่ระบุชื่ออังกฤษ'}) - Bud ID: ${review.bud_reference_id}
                                     </div>
-                                    <div class="item-date">${createdDate}</div>
+                                    <div class="item-date">${createdDate}${updatedDate}</div>
                                 </div>
 
                                 <div class="reviewer-info-section">
@@ -864,6 +1063,50 @@
                                         <div class="reviewer-name-display">${review.reviewer_name || 'ผู้ใช้ไม่ระบุชื่อ'}</div>
                                     </div>
                                 </div>
+
+                                <!-- คะแนนและสรุปรีวิว -->
+                                <div class="review-ratings-section">
+                                    <div class="rating-row">
+                                        <span class="rating-label">คะแนนรวม:</span>
+                                        <span class="rating-stars">${overallStars} (${review.overall_rating}/5)</span>
+                                        ${aromaStars ? `<span class="aroma-rating">${aromaStars} (${review.aroma_rating}/5)</span>` : ''}
+                                    </div>
+                                    <div class="review-summary-text">${review.short_summary || 'ไม่มีสรุป'}</div>
+                                </div>
+
+                                <!-- Effects และ Aromas -->
+                                ${effectsTags ? `<div class="tags-section">
+                                    <div class="tags-row">
+                                        <span class="tags-label">🧠 ผลกระทบ:</span>
+                                        <div class="tags-container">${effectsTags}</div>
+                                    </div>
+                                </div>` : ''}
+                                
+                                ${aromaTags ? `<div class="tags-section">
+                                    <div class="tags-row">
+                                        <span class="tags-label">👃 กลิ่น/รส:</span>
+                                        <div class="tags-container">${aromaTags}</div>
+                                    </div>
+                                </div>` : ''}
+
+                                <!-- เนื้อหารีวิวเต็ม (ย่อ) -->
+                                ${review.full_review_content ? `<div class="review-full-content">
+                                    <div class="content-preview">${review.full_review_content.length > 100 ? 
+                                        review.full_review_content.substring(0, 100) + '...' : 
+                                        review.full_review_content}</div>
+                                    ${review.full_review_content.length > 100 ? 
+                                        `<button class="expand-btn" onclick="expandContent(${review.id})">อ่านเพิ่มเติม</button>` : ''}
+                                </div>` : ''}
+
+                                <!-- รูปภาพรีวิว -->
+                                ${reviewImages}
+
+                                <!-- วิดีโอรีวิว -->
+                                ${review.video_review_url ? `<div class="video-section">
+                                    <a href="${review.video_review_url}" target="_blank" class="video-link">
+                                        🎥 ดูวิดีโอรีวิว
+                                    </a>
+                                </div>` : ''}
                             </div>
                         </div>
                     </div>
@@ -950,6 +1193,29 @@
                 });
             }
         }
+
+        // ฟังก์ชันสำหรับดูรูปภาพแบบเต็ม
+        function viewImage(imageUrl) {
+            window.open(imageUrl, '_blank');
+        }
+
+        // ฟังก์ชันสำหรับขยายเนื้อหารีวิว
+        function expandContent(reviewId) {
+            const contentDiv = document.querySelector(`[data-review-id="${reviewId}"] .content-preview`);
+            const expandBtn = document.querySelector(`[data-review-id="${reviewId}"] .expand-btn`);
+            
+            // ค้นหารีวิวจากข้อมูล
+            const review = reviewsData.find(r => r.id === reviewId);
+            if (review && contentDiv) {
+                contentDiv.textContent = review.full_review_content;
+                if (expandBtn) {
+                    expandBtn.style.display = 'none';
+                }
+            }
+        }
+
+        // เก็บข้อมูลรีวิวไว้ใช้กับฟังก์ชันอื่น
+        let reviewsData = [];
 
         // Load data when page loads
         window.addEventListener('load', () => {

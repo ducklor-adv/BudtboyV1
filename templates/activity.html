@@ -131,23 +131,23 @@
             border-left: 4px solid #4CAF50;
         }
 
-        .clickable-review {
-            cursor: pointer;
-            transition: all 0.2s ease;
+        .review-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 15px;
         }
 
-        .clickable-review:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            border-left-color: #45a049;
+        .review-main-info {
+            flex: 1;
         }
 
-        .edit-hint {
-            font-size: 12px;
-            color: #666;
-            text-align: center;
-            margin-top: 8px;
-            opacity: 0.7;
+        .review-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100px;
+            flex-shrink: 0;
         }
 
         .item-header {
@@ -609,23 +609,30 @@
                     : 'ไม่ระบุ';
 
                 return `
-                    <div class="item-card clickable-review" data-review-id="${review.id}" onclick="editReview(${review.id})">
+                    <div class="item-card">
                         <div class="item-header">
                             <div class="item-title">
                                 ${review.strain_name_th} (${review.strain_name_en})
                             </div>
                             <div class="item-date">${formatDate(review.created_at)}</div>
                         </div>
-                        <div class="item-rating">
-                            <span class="stars">${stars}</span>
-                            <span class="rating-text">${review.overall_rating}/5</span>
+                        <div class="review-content">
+                            <div class="review-main-info">
+                                <div class="item-rating">
+                                    <span class="stars">${stars}</span>
+                                    <span class="rating-text">${review.overall_rating}/5</span>
+                                </div>
+                                <div class="item-summary">${review.short_summary}</div>
+                                <div class="item-effects">
+                                    <strong>เอฟเฟกต์:</strong> ${effectsText}
+                                </div>
+                                ${review.breeder ? `<div class="item-breeder">📦 ${review.breeder}</div>` : ''}
+                            </div>
+                            <div class="review-actions">
+                                <button class="action-btn primary" onclick="editReview(${review.id})">✏️ แก้ไข</button>
+                                <button class="action-btn danger" onclick="deleteReview(${review.id})">🗑️ ลบ</button>
+                            </div>
                         </div>
-                        <div class="item-summary">${review.short_summary}</div>
-                        <div class="item-effects">
-                            <strong>เอฟเฟกต์:</strong> ${effectsText}
-                        </div>
-                        ${review.breeder ? `<div class="item-breeder">📦 ${review.breeder}</div>` : ''}
-                        <div class="edit-hint">👆 คลิกเพื่อแก้ไขรีวิว</div>
                     </div>
                 `;
             }).join('');

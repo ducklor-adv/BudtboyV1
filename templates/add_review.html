@@ -947,8 +947,8 @@
         function displayBudInfo(bud, budInfo) {
             budInfo.innerHTML = `
                 <div class="bud-details">
-                    <div class="bud-image" style="width: 80px; height: 80px; border-radius: 10px; object-fit: cover; border: 2px solid #ddd; display: flex; align-items: center; justify-content: center; font-size: 24px;">🌿
-                    <a href="/bud_report/${bud.id}" target="_blank" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); color: white; opacity: 0; transition: opacity 0.3s;">Bud Report</a>
+                    <div class="bud-image" style="width: 80px; height: 80px; border-radius: 10px; object-fit: cover; border: 2px solid #ddd; display: flex; align-items: center; justify-content: center; font-size: 24px; position: relative;">🌿
+                    <a href="/bud_report/${bud.id}" target="_blank" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); color: white; opacity: 0; transition: opacity 0.3s; text-decoration: none; font-size: 12px;">Report</a>
                     </div>
                     <div class="bud-text-info">
                         <div class="bud-name">${bud.strain_name_en || 'ไม่ระบุชื่อ'}</div>

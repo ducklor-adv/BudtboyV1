@@ -2619,6 +2619,13 @@ def edit_bud_page():
         return redirect('/auth')
     return render_template('edit_bud.html')
 
+@app.route('/bud_report/<int:bud_id>')
+def bud_report_detail(bud_id):
+    # Check if user is logged in
+    if 'user_id' not in session:
+        return redirect('/auth')
+    return render_template('bud_report.html', bud_id=bud_id)
+
 @app.route('/api/buds/<int:bud_id>', methods=['GET'])
 def get_bud_detail(bud_id):
     """Get individual bud data for editing"""

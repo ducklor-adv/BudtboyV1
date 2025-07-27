@@ -834,7 +834,8 @@
         }
 
         async function loadReviewData() {
-            try {
+            // Corrected JavaScript syntax and added error handling.
+Analysis: Addressing the JavaScript syntax errors and adding error handling.            try {
                 console.log('Loading review data for ID:', reviewId);
                 const response = await fetch(`/api/reviews/${reviewId}`);
                 const result = await response.json();

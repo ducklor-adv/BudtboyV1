@@ -1376,17 +1376,21 @@
 
         // Initialize autocomplete for strain names
         document.addEventListener('DOMContentLoaded', function() {
-            new StrainAutocomplete('strain_name_en', 'suggestions_en', 'en');
-            new StrainAutocomplete('strain_name_th', 'suggestions_th', 'th');
+            try {
+                new StrainAutocomplete('strain_name_en', 'suggestions_en', 'en');
+                new StrainAutocomplete('strain_name_th', 'suggestions_th', 'th');
 
-            // Initialize autocomplete for breeders
-            initializeBreederAutocomplete('breeder', 'breeder-suggestions', '/api/breeders/search');
+                // Initialize autocomplete for breeders
+                initializeBreederAutocomplete('breeder', 'breeder-suggestions', '/api/breeders/search');
 
-            // Initialize flavor selector
-            initializeFlavorSelector();
+                // Initialize flavor selector
+                initializeFlavorSelector();
 
-            // Initialize effects selectors
-            initializeEffectsSelectors();
+                // Initialize effects selectors
+                initializeEffectsSelectors();
+            } catch (error) {
+                console.error('Error initializing page:', error);
+            }
         });
 
         // Flavor Selector functionality
@@ -1395,6 +1399,12 @@
             const flavorCategoriesDiv = document.querySelector('.flavor-categories');
             const hiddenInput = document.getElementById('aroma_flavor');
             const flavorButtons = document.querySelectorAll('.flavor-btn');
+
+            // Check if required elements exist
+            if (!selectedFlavorsDiv || !flavorCategoriesDiv || !hiddenInput) {
+                console.warn('Flavor selector elements not found');
+                return;
+            }
 
             let selectedFlavors = [];
 
@@ -1493,16 +1503,35 @@
             ];
 
             effectsSelectors.forEach(selector => {
-                initializeEffectSelector(selector);
+                // Check if elements exist before initializing
+                const selectedDiv = document.getElementById(selector.selectedId);
+                const hiddenInput = document.getElementById(selector.hiddenId);
+                
+                if (selectedDiv && hiddenInput) {
+                    initializeEffectSelector(selector);
+                }
             });
         }
 
         function initializeEffectSelector(config) {
             const selectedDiv = document.getElementById(config.selectedId);
             const hiddenInput = document.getElementById(config.hiddenId);
-            const categoriesDiv = selectedDiv.nextElementSibling.nextElementSibling; // Skip hidden textarea
-            const effectButtons = categoriesDiv.querySelectorAll('.effect-btn');
+            
+            // Check if elements exist
+            if (!selectedDiv || !hiddenInput) {
+                console.warn(`Effects selector elements not found for ${config.selectedId}`);
+                return;
+            }
 
+            const categoriesDiv = selectedDiv.nextElementSibling.nextElementSibling; // Skip hidden textarea
+            
+            // Check if categories div exists
+            if (!categoriesDiv) {
+                console.warn(`Categories div not found for ${config.selectedId}`);
+                return;
+            }
+
+            const effectButtons = categoriesDiv.querySelectorAll('.effect-btn');
             let selectedEffects = [];
 
             // Toggle categories visibility when clicking on selected effects area

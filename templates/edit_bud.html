@@ -1,0 +1,674 @@
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cannabis App - แก้ไขข้อมูลดอก</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e8f5e8 0%, #f0f8ff 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #FF9800, #F57C00);
+            padding: 20px 30px;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .header-title {
+            text-align: center;
+            flex: 1;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .form-container {
+            padding: 30px;
+        }
+
+        .form-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #FF9800;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #FF9800;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #FF9800, #F57C00);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 152, 0, 0.3);
+        }
+
+        .cancel-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .cancel-btn:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .loading-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #FF9800;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #f5c6cb;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #c3e6cb;
+        }
+
+        .autocomplete-container {
+            position: relative;
+        }
+
+        .suggestions-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+
+        .suggestion-item {
+            padding: 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #f8f9fa;
+            transition: background-color 0.2s ease;
+        }
+
+        .suggestion-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .suggestion-item.selected {
+            background-color: #FF9800;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+
+            .form-container {
+                padding: 20px;
+            }
+
+            .form-row {
+                flex-direction: column;
+            }
+
+            .form-group {
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="/activity" class="back-btn">← กลับ</a>
+            <div class="header-title">
+                <h1>🌿 แก้ไขข้อมูลดอก</h1>
+            </div>
+            <div style="width: 60px;"></div>
+        </div>
+
+        <div class="form-container">
+            <div id="loadingState" class="loading-state">
+                <div class="loading-spinner"></div>
+                <p>กำลังโหลดข้อมูล...</p>
+            </div>
+
+            <div id="errorMessage" class="error-message" style="display: none;"></div>
+            <div id="successMessage" class="success-message" style="display: none;"></div>
+
+            <form id="editBudForm" style="display: none;">
+                <!-- ข้อมูลพื้นฐาน -->
+                <div class="form-section">
+                    <div class="section-title">
+                        🌱 ข้อมูลพื้นฐาน
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="strain_name_th">ชื่อสายพันธุ์ (ไทย) *</label>
+                            <div class="autocomplete-container">
+                                <input type="text" id="strain_name_th" name="strain_name_th" required>
+                                <div class="suggestions-list" id="strainThSuggestions"></div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="strain_name_en">ชื่อสายพันธุ์ (อังกฤษ) *</label>
+                            <div class="autocomplete-container">
+                                <input type="text" id="strain_name_en" name="strain_name_en" required>
+                                <div class="suggestions-list" id="strainEnSuggestions"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="breeder">ผู้พัฒนาสายพันธุ์</label>
+                            <div class="autocomplete-container">
+                                <input type="text" id="breeder" name="breeder">
+                                <div class="suggestions-list" id="breederSuggestions"></div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="strain_type">ประเภทสายพันธุ์ *</label>
+                            <select id="strain_type" name="strain_type" required>
+                                <option value="">เลือกประเภท</option>
+                                <option value="Indica">Indica</option>
+                                <option value="Sativa">Sativa</option>
+                                <option value="Hybrid">Hybrid</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="thc_percentage">THC % (0-100)</label>
+                            <input type="number" id="thc_percentage" name="thc_percentage" min="0" max="100" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label for="cbd_percentage">CBD % (0-100)</label>
+                            <input type="number" id="cbd_percentage" name="cbd_percentage" min="0" max="100" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label for="grade">เกรด</label>
+                            <select id="grade" name="grade">
+                                <option value="">เลือกเกรด</option>
+                                <option value="A+">A+</option>
+                                <option value="A">A</option>
+                                <option value="B+">B+</option>
+                                <option value="B">B</option>
+                                <option value="C">C</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ข้อมูลกลิ่นและรส -->
+                <div class="form-section">
+                    <div class="section-title">
+                        🌸 กลิ่นและรสชาติ
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="aroma_flavor">คำอธิบายกลิ่นและรส</label>
+                        <textarea id="aroma_flavor" name="aroma_flavor" placeholder="เช่น หวาน, เปรียว, ดิน, สน..."></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="top_terpenes_1">เทอร์พีนหลัก 1</label>
+                            <input type="text" id="top_terpenes_1" name="top_terpenes_1">
+                        </div>
+                        <div class="form-group">
+                            <label for="top_terpenes_2">เทอร์พีนหลัก 2</label>
+                            <input type="text" id="top_terpenes_2" name="top_terpenes_2">
+                        </div>
+                        <div class="form-group">
+                            <label for="top_terpenes_3">เทอร์พีนหลัก 3</label>
+                            <input type="text" id="top_terpenes_3" name="top_terpenes_3">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ข้อมูลเอฟเฟกต์ -->
+                <div class="form-section">
+                    <div class="section-title">
+                        🧠 เอฟเฟกต์และผลกระทบ
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="mental_effects_positive">ผลกระทบทางจิต (ด้านบวก)</label>
+                            <textarea id="mental_effects_positive" name="mental_effects_positive" placeholder="เช่น ผ่อนคลาย, สร้างสรรค์, มีความสุข..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="mental_effects_negative">ผลกระทบทางจิต (ด้านลบ)</label>
+                            <textarea id="mental_effects_negative" name="mental_effects_negative" placeholder="เช่น วิตก, หวาดระแวง..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="physical_effects_positive">ผลกระทบทางกาย (ด้านบวก)</label>
+                            <textarea id="physical_effects_positive" name="physical_effects_positive" placeholder="เช่น บรรเทาปวด, คลายกล้าม..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="physical_effects_negative">ผลกระทบทางกาย (ด้านลบ)</label>
+                            <textarea id="physical_effects_negative" name="physical_effects_negative" placeholder="เช่น ปากแห้ง, ตาแห้ง..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="recommended_time">เวลาที่แนะนำ</label>
+                        <select id="recommended_time" name="recommended_time">
+                            <option value="">เลือกเวลา</option>
+                            <option value="กลางวัน">กลางวัน</option>
+                            <option value="กลางคืน">กลางคืน</option>
+                            <option value="ตลอดวัน">ตลอดวัน</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- ข้อมูลการปลูก -->
+                <div class="form-section">
+                    <div class="section-title">
+                        🌾 ข้อมูลการปลูก
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="grow_method">วิธีการปลูก</label>
+                            <select id="grow_method" name="grow_method">
+                                <option value="">เลือกวิธีการปลูก</option>
+                                <option value="Indoor">Indoor</option>
+                                <option value="Outdoor">Outdoor</option>
+                                <option value="Greenhouse">Greenhouse</option>
+                                <option value="Hydroponic">Hydroponic</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="fertilizer_type">ประเภทปุ่ย</label>
+                            <select id="fertilizer_type" name="fertilizer_type">
+                                <option value="">เลือกประเภทปุ่ย</option>
+                                <option value="Organic">Organic</option>
+                                <option value="Chemical">Chemical</option>
+                                <option value="Mixed">Mixed</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="flowering_type">ประเภทการออกดอก</label>
+                            <select id="flowering_type" name="flowering_type">
+                                <option value="">เลือกประเภท</option>
+                                <option value="Photoperiod">Photoperiod</option>
+                                <option value="Autoflower">Autoflower</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="harvest_date">วันที่เก็บเกี่ยว</label>
+                            <input type="date" id="harvest_date" name="harvest_date">
+                        </div>
+                        <div class="form-group">
+                            <label for="batch_number">หมายเลขแบทช์</label>
+                            <input type="text" id="batch_number" name="batch_number">
+                        </div>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 30px;">
+                    <button type="submit" class="submit-btn">💾 บันทึกการแก้ไข</button>
+                    <a href="/activity" class="cancel-btn">❌ ยกเลิก</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let budData = null;
+        let budId = null;
+
+        // Get bud ID from URL parameters
+        function getBudIdFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('id');
+        }
+
+        // Load bud data for editing
+        async function loadBudData() {
+            budId = getBudIdFromUrl();
+            
+            if (!budId) {
+                showError('ไม่พบ ID ของดอกที่ต้องการแก้ไข');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/buds/${budId}`);
+                if (response.ok) {
+                    budData = await response.json();
+                    populateForm(budData);
+                    document.getElementById('loadingState').style.display = 'none';
+                    document.getElementById('editBudForm').style.display = 'block';
+                } else {
+                    const errorData = await response.json();
+                    showError(errorData.error || 'ไม่สามารถโหลดข้อมูลได้');
+                }
+            } catch (error) {
+                console.error('Error loading bud data:', error);
+                showError('เกิดข้อผิดพลาดในการโหลดข้อมูล');
+            }
+        }
+
+        // Populate form with existing data
+        function populateForm(data) {
+            document.getElementById('strain_name_th').value = data.strain_name_th || '';
+            document.getElementById('strain_name_en').value = data.strain_name_en || '';
+            document.getElementById('breeder').value = data.breeder || '';
+            document.getElementById('strain_type').value = data.strain_type || '';
+            document.getElementById('thc_percentage').value = data.thc_percentage || '';
+            document.getElementById('cbd_percentage').value = data.cbd_percentage || '';
+            document.getElementById('grade').value = data.grade || '';
+            document.getElementById('aroma_flavor').value = data.aroma_flavor || '';
+            document.getElementById('top_terpenes_1').value = data.top_terpenes_1 || '';
+            document.getElementById('top_terpenes_2').value = data.top_terpenes_2 || '';
+            document.getElementById('top_terpenes_3').value = data.top_terpenes_3 || '';
+            document.getElementById('mental_effects_positive').value = data.mental_effects_positive || '';
+            document.getElementById('mental_effects_negative').value = data.mental_effects_negative || '';
+            document.getElementById('physical_effects_positive').value = data.physical_effects_positive || '';
+            document.getElementById('physical_effects_negative').value = data.physical_effects_negative || '';
+            document.getElementById('recommended_time').value = data.recommended_time || '';
+            document.getElementById('grow_method').value = data.grow_method || '';
+            document.getElementById('fertilizer_type').value = data.fertilizer_type || '';
+            document.getElementById('flowering_type').value = data.flowering_type || '';
+            document.getElementById('harvest_date').value = data.harvest_date || '';
+            document.getElementById('batch_number').value = data.batch_number || '';
+        }
+
+        // Handle form submission
+        async function handleSubmit(event) {
+            event.preventDefault();
+            
+            const formData = new FormData(event.target);
+            const data = Object.fromEntries(formData.entries());
+
+            // Convert empty strings to null for optional fields
+            Object.keys(data).forEach(key => {
+                if (data[key] === '') {
+                    data[key] = null;
+                }
+            });
+
+            try {
+                const response = await fetch(`/api/buds/${budId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showSuccess('แก้ไขข้อมูลสำเร็จ! กำลังเปลี่ยนหน้า...');
+                    setTimeout(() => {
+                        window.location.href = '/activity';
+                    }, 2000);
+                } else {
+                    showError(result.error || 'เกิดข้อผิดพลาดในการแก้ไข');
+                }
+            } catch (error) {
+                console.error('Error updating bud:', error);
+                showError('เกิดข้อผิดพลาดในการส่งข้อมูล');
+            }
+        }
+
+        // Setup autocomplete for strain names
+        function setupAutocomplete() {
+            setupStrainAutocomplete('strain_name_th', 'strainThSuggestions', 'th');
+            setupStrainAutocomplete('strain_name_en', 'strainEnSuggestions', 'en');
+            setupBreederAutocomplete('breeder', 'breederSuggestions');
+        }
+
+        function setupStrainAutocomplete(inputId, suggestionsId, lang) {
+            const input = document.getElementById(inputId);
+            const suggestionsList = document.getElementById(suggestionsId);
+
+            input.addEventListener('input', async function() {
+                const query = this.value.trim();
+                
+                if (query.length < 2) {
+                    suggestionsList.style.display = 'none';
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/api/strains/search?q=${encodeURIComponent(query)}&lang=${lang}&limit=10`);
+                    const suggestions = await response.json();
+
+                    if (suggestions.length > 0) {
+                        suggestionsList.innerHTML = suggestions.map(suggestion => 
+                            `<div class="suggestion-item" onclick="selectSuggestion('${inputId}', '${suggestionsId}', '${suggestion.name}')">${suggestion.name}</div>`
+                        ).join('');
+                        suggestionsList.style.display = 'block';
+                    } else {
+                        suggestionsList.style.display = 'none';
+                    }
+                } catch (error) {
+                    console.error('Error fetching suggestions:', error);
+                }
+            });
+
+            // Hide suggestions when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!input.contains(event.target) && !suggestionsList.contains(event.target)) {
+                    suggestionsList.style.display = 'none';
+                }
+            });
+        }
+
+        function setupBreederAutocomplete(inputId, suggestionsId) {
+            const input = document.getElementById(inputId);
+            const suggestionsList = document.getElementById(suggestionsId);
+
+            input.addEventListener('input', async function() {
+                const query = this.value.trim();
+                
+                if (query.length < 2) {
+                    suggestionsList.style.display = 'none';
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/api/breeders/search?q=${encodeURIComponent(query)}&limit=10`);
+                    const suggestions = await response.json();
+
+                    if (suggestions.length > 0) {
+                        suggestionsList.innerHTML = suggestions.map(suggestion => 
+                            `<div class="suggestion-item" onclick="selectSuggestion('${inputId}', '${suggestionsId}', '${suggestion.name}')">${suggestion.name}</div>`
+                        ).join('');
+                        suggestionsList.style.display = 'block';
+                    } else {
+                        suggestionsList.style.display = 'none';
+                    }
+                } catch (error) {
+                    console.error('Error fetching suggestions:', error);
+                }
+            });
+
+            // Hide suggestions when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!input.contains(event.target) && !suggestionsList.contains(event.target)) {
+                    suggestionsList.style.display = 'none';
+                }
+            });
+        }
+
+        function selectSuggestion(inputId, suggestionsId, value) {
+            document.getElementById(inputId).value = value;
+            document.getElementById(suggestionsId).style.display = 'none';
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            document.getElementById('successMessage').style.display = 'none';
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+
+        // Initialize page
+        window.addEventListener('load', function() {
+            document.getElementById('editBudForm').addEventListener('submit', handleSubmit);
+            setupAutocomplete();
+            loadBudData();
+        });
+    </script>
+</body>
+</html>

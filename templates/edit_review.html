@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -63,10 +64,10 @@
         }
 
         .form-section {
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             background: #f8f9fa;
             border-radius: 15px;
-            padding: 25px;
+            padding: 20px;
             border-left: 4px solid #FF9800;
         }
 
@@ -74,14 +75,14 @@
             font-size: 18px;
             font-weight: 600;
             color: #333;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .form-group label {
@@ -109,20 +110,27 @@
         }
 
         textarea.form-control {
-            min-height: 120px;
+            min-height: 100px;
             resize: vertical;
         }
 
-        .rating-group {
+        .rating-section {
             display: flex;
             gap: 15px;
             align-items: center;
             margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .rating-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .rating-stars {
             display: flex;
-            gap: 5px;
+            gap: 3px;
         }
 
         .star {
@@ -144,10 +152,16 @@
             transform: scale(1.1);
         }
 
+        .rating-text {
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+        }
+
         .effects-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 10px;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 8px;
             margin-top: 10px;
         }
 
@@ -242,29 +256,44 @@
             background: #F57C00;
         }
 
-        .image-preview {
+        .images-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            grid-template-columns: repeat(2, 1fr);
             gap: 10px;
             margin-top: 15px;
+            border: 3px solid #dc3545;
+            border-radius: 15px;
+            padding: 10px;
+            background: #f8f9fa;
         }
 
-        .preview-image {
+        .image-slot {
             position: relative;
-            width: 100px;
-            height: 100px;
-            border-radius: 8px;
+            width: 100%;
+            height: 120px;
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fafafa;
             overflow: hidden;
-            border: 2px solid #ddd;
         }
 
-        .preview-image img {
+        .image-slot img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            border-radius: 8px;
         }
 
-        .remove-image {
+        .image-placeholder {
+            text-align: center;
+            color: #999;
+            font-size: 12px;
+        }
+
+        .remove-image-btn {
             position: absolute;
             top: 5px;
             right: 5px;
@@ -272,13 +301,14 @@
             color: white;
             border: none;
             border-radius: 50%;
-            width: 20px;
-            height: 20px;
+            width: 24px;
+            height: 24px;
             cursor: pointer;
             font-size: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
+            z-index: 10;
         }
 
         .submit-btn {
@@ -313,23 +343,6 @@
             font-size: 16px;
         }
 
-        .loading::after {
-            content: '';
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 2px solid #f3f3f3;
-            border-top: 2px solid #FF9800;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-left: 10px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
         .error {
             background: #ffebee;
             border: 1px solid #f44336;
@@ -348,15 +361,14 @@
             margin-bottom: 20px;
         }
 
-        @media (max-width: 600px) {
+        @media (max-width: 768px) {
             body {
                 padding: 10px;
             }
 
             .container {
                 margin: 0;
-                border-radius: 0;
-                min-height: 100vh;
+                border-radius: 15px;
             }
 
             .content {
@@ -364,11 +376,21 @@
             }
 
             .effects-grid {
-                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
             }
 
             .aromas-grid {
                 grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            }
+
+            .images-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+                padding: 8px;
+            }
+
+            .image-slot {
+                height: 100px;
             }
         }
     </style>
@@ -389,7 +411,7 @@
             <div id="successMessage" class="success" style="display: none;"></div>
 
             <form id="editReviewForm" style="display: none;">
-                <!-- ข้อมูลพื้นฐาน -->
+                <!-- ข้อมูลดอกที่รีวิว -->
                 <div class="form-section">
                     <div class="section-title">
                         🌿 ข้อมูลดอกที่รีวิว
@@ -407,17 +429,38 @@
 
                     <div class="form-group">
                         <label>คะแนนรวม (1-5 ดาว) *</label>
-                        <div class="rating-group">
-                            <div class="rating-stars" id="overallRating">
-                                <span class="star" data-rating="1">⭐</span>
-                                <span class="star" data-rating="2">⭐</span>
-                                <span class="star" data-rating="3">⭐</span>
-                                <span class="star" data-rating="4">⭐</span>
-                                <span class="star" data-rating="5">⭐</span>
+                        <div class="rating-section">
+                            <div class="rating-group">
+                                <span style="font-size: 14px; color: #666;">รวม:</span>
+                                <div class="rating-stars" id="overallRating">
+                                    <span class="star" data-rating="1">⭐</span>
+                                    <span class="star" data-rating="2">⭐</span>
+                                    <span class="star" data-rating="3">⭐</span>
+                                    <span class="star" data-rating="4">⭐</span>
+                                    <span class="star" data-rating="5">⭐</span>
+                                </div>
+                                <span class="rating-text" id="overallRatingText">ยังไม่ได้เลือก</span>
                             </div>
-                            <span id="ratingText">ยังไม่ได้เลือก</span>
                         </div>
                         <input type="hidden" id="overallRatingValue" name="overall_rating" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>คะแนนกลิ่นและรส (1-5 ดาว)</label>
+                        <div class="rating-section">
+                            <div class="rating-group">
+                                <span style="font-size: 14px; color: #666;">กลิ่น:</span>
+                                <div class="rating-stars" id="aromaRating">
+                                    <span class="star" data-rating="1">👃</span>
+                                    <span class="star" data-rating="2">👃</span>
+                                    <span class="star" data-rating="3">👃</span>
+                                    <span class="star" data-rating="4">👃</span>
+                                    <span class="star" data-rating="5">👃</span>
+                                </div>
+                                <span class="rating-text" id="aromaRatingText">ไม่บังคับ</span>
+                            </div>
+                        </div>
+                        <input type="hidden" id="aromaRatingValue" name="aroma_rating">
                     </div>
                 </div>
 
@@ -481,7 +524,7 @@
                             name="full_review_content" 
                             class="form-control" 
                             placeholder="เขียนรีวิวแบบละเอียด..."
-                            rows="6"
+                            rows="4"
                         ></textarea>
                     </div>
                 </div>
@@ -495,13 +538,30 @@
                     <div class="form-group">
                         <label>รูปภาพรีวิว (ไม่บังคับ, สูงสุด 4 รูป)</label>
                         <div class="image-upload-section">
-                            <div>📷 เลือกรูปภาพ</div>
+                            <div>📷 เลือกรูปภาพสำหรับรีวิว</div>
+                            <div style="font-size: 12px; color: #666; margin: 5px 0;">
+                                คลิกเพื่อเลือกรูป หรือลากไฟล์มาวาง
+                            </div>
                             <input type="file" id="reviewImages" multiple accept="image/*" style="display: none;">
                             <button type="button" class="upload-btn" onclick="document.getElementById('reviewImages').click()">
                                 เลือกรูป
                             </button>
                         </div>
-                        <div id="imagePreview" class="image-preview"></div>
+
+                        <div class="images-grid" id="imagesGrid">
+                            <div class="image-slot" id="imageSlot1">
+                                <div class="image-placeholder">รูปที่ 1<br>ไม่มีรูป</div>
+                            </div>
+                            <div class="image-slot" id="imageSlot2">
+                                <div class="image-placeholder">รูปที่ 2<br>ไม่มีรูป</div>
+                            </div>
+                            <div class="image-slot" id="imageSlot3">
+                                <div class="image-placeholder">รูปที่ 3<br>ไม่มีรูป</div>
+                            </div>
+                            <div class="image-slot" id="imageSlot4">
+                                <div class="image-placeholder">รูปที่ 4<br>ไม่มีรูป</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -516,11 +576,13 @@
         // Global variables
         let reviewData = null;
         let currentImages = [];
-        let newImages = [];
+        let selectedFiles = [];
+        let overallRating = 0;
+        let aromaRating = 0;
 
         // Effects และ Aromas lists
         const effectsList = [
-            'ผ่อนคลาย', 'สุขใจ', 'หลับง่าย', 'สร้างสรรค์', 'โฟกัส', 'ตื่นตัว', 
+            'ผ่อนคลาย', 'สุขใจ', 'หลับง่าย', 'สร้างสรรค์', 'โฟกัส', 'ตื่นตัว',
             'หิวข้าว', 'คิดลึก', 'หัวเราะ', 'พูดเก่ง', 'ร่าเริง', 'ปลอดภัย',
             'ปวดศีรษะ', 'วิตก', 'หวาดระแวง', 'ความจำสั้น', 'เซื่องซึม', 'ง่วง',
             'คลายกล้าม', 'บรรเทาปวด', 'ต้านอักเสบ', 'คลายเกร็ง', 'สดชื่น', 'กระปรี้กระเปร่า',
@@ -570,6 +632,7 @@
                 // เติมข้อมูลในฟอร์ม
                 populateForm();
                 initializeEffectsAndAromas();
+                initializeEventListeners();
 
             } catch (error) {
                 console.error('Error loading review:', error);
@@ -589,7 +652,10 @@
             `;
 
             // ตั้งค่าคะแนน
-            setRating(reviewData.overall_rating);
+            setOverallRating(reviewData.overall_rating);
+            if (reviewData.aroma_rating) {
+                setAromaRating(reviewData.aroma_rating);
+            }
 
             // ตั้งค่าข้อความ
             document.getElementById('shortSummary').value = reviewData.short_summary || '';
@@ -627,11 +693,31 @@
                 `;
             }).join('');
 
-            // Add event listeners
+            // Add event listeners for checkboxes
             addCheckboxListeners();
-            addRatingListeners();
-            addImageUploadListeners();
-            addFormSubmitListener();
+        }
+
+        function initializeEventListeners() {
+            // Rating listeners
+            document.querySelectorAll('#overallRating .star').forEach(star => {
+                star.addEventListener('click', function() {
+                    const rating = parseInt(this.dataset.rating);
+                    setOverallRating(rating);
+                });
+            });
+
+            document.querySelectorAll('#aromaRating .star').forEach(star => {
+                star.addEventListener('click', function() {
+                    const rating = parseInt(this.dataset.rating);
+                    setAromaRating(rating);
+                });
+            });
+
+            // Image upload listener
+            document.getElementById('reviewImages').addEventListener('change', handleImageUpload);
+
+            // Form submit listener
+            document.getElementById('editReviewForm').addEventListener('submit', handleFormSubmit);
         }
 
         function addCheckboxListeners() {
@@ -650,119 +736,109 @@
             });
         }
 
-        function addRatingListeners() {
-            document.querySelectorAll('.star').forEach(star => {
-                star.addEventListener('click', function() {
-                    const rating = parseInt(this.dataset.rating);
-                    setRating(rating);
-                });
-            });
-        }
-
-        function setRating(rating) {
+        function setOverallRating(rating) {
+            overallRating = rating;
             document.getElementById('overallRatingValue').value = rating;
 
-            document.querySelectorAll('.star').forEach((star, index) => {
+            document.querySelectorAll('#overallRating .star').forEach((star, index) => {
                 star.classList.toggle('filled', index < rating);
                 star.classList.toggle('empty', index >= rating);
             });
 
             const ratingTexts = ['', 'แย่มาก', 'แย่', 'ปกติ', 'ดี', 'ดีมาก'];
-            document.getElementById('ratingText').textContent = ratingTexts[rating] || 'ยังไม่ได้เลือก';
+            document.getElementById('overallRatingText').textContent = ratingTexts[rating] || 'ยังไม่ได้เลือก';
         }
 
-        function addImageUploadListeners() {
-            document.getElementById('reviewImages').addEventListener('change', function(e) {
-                const files = Array.from(e.target.files);
-                if (files.length + currentImages.length + newImages.length > 4) {
-                    showError('สามารถอัปโหลดได้สูงสุด 4 รูป');
-                    return;
-                }
+        function setAromaRating(rating) {
+            aromaRating = rating;
+            document.getElementById('aromaRatingValue').value = rating;
 
-                files.forEach(file => {
-                    if (file.type.startsWith('image/')) {
-                        newImages.push(file);
-                    }
-                });
-
-                displayImagePreviews();
+            document.querySelectorAll('#aromaRating .star').forEach((star, index) => {
+                star.classList.toggle('filled', index < rating);
+                star.classList.toggle('empty', index >= rating);
             });
+
+            const ratingTexts = ['ไม่บังคับ', 'แย่มาก', 'แย่', 'ปกติ', 'ดี', 'ดีมาก'];
+            document.getElementById('aromaRatingText').textContent = rating > 0 ? ratingTexts[rating] : 'ไม่บังคับ';
         }
 
         function displayCurrentImages() {
-            const preview = document.getElementById('imagePreview');
-            const currentImagesHTML = currentImages.map((url, index) => `
-                <div class="preview-image">
-                    <img src="${url}" alt="Review image ${index + 1}">
-                    <button type="button" class="remove-image" onclick="removeCurrentImage(${index})">×</button>
-                </div>
-            `).join('');
-
-            preview.innerHTML = currentImagesHTML;
+            for (let i = 0; i < 4; i++) {
+                const slot = document.getElementById(`imageSlot${i + 1}`);
+                if (currentImages[i]) {
+                    slot.innerHTML = `
+                        <img src="${currentImages[i]}" alt="Review image ${i + 1}">
+                        <button type="button" class="remove-image-btn" onclick="removeCurrentImage(${i})">×</button>
+                    `;
+                }
+            }
         }
 
-        function displayImagePreviews() {
-            const preview = document.getElementById('imagePreview');
+        function handleImageUpload(event) {
+            const files = Array.from(event.target.files);
+            const totalImages = currentImages.length + selectedFiles.length + files.length;
+            
+            if (totalImages > 4) {
+                showError('สามารถอัปโหลดได้สูงสุด 4 รูป');
+                return;
+            }
 
-            // แสดงรูปเดิม
-            const currentImagesHTML = currentImages.map((url, index) => `
-                <div class="preview-image">
-                    <img src="${url}" alt="Current image ${index + 1}">
-                    <button type="button" class="remove-image" onclick="removeCurrentImage(${index})">×</button>
-                </div>
-            `).join('');
+            files.forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    selectedFiles.push(file);
+                }
+            });
 
-            // แสดงรูปใหม่
-            const newImagesHTML = newImages.map((file, index) => `
-                <div class="preview-image">
-                    <img src="${URL.createObjectURL(file)}" alt="New image ${index + 1}">
-                    <button type="button" class="remove-image" onclick="removeNewImage(${index})">×</button>
-                </div>
-            `).join('');
+            displayAllImages();
+        }
 
-            preview.innerHTML = currentImagesHTML + newImagesHTML;
+        function displayAllImages() {
+            let allImages = [...currentImages];
+            
+            // Add selected files
+            selectedFiles.forEach(file => {
+                allImages.push(URL.createObjectURL(file));
+            });
+
+            for (let i = 0; i < 4; i++) {
+                const slot = document.getElementById(`imageSlot${i + 1}`);
+                if (allImages[i]) {
+                    const isCurrentImage = i < currentImages.length;
+                    slot.innerHTML = `
+                        <img src="${allImages[i]}" alt="Review image ${i + 1}">
+                        <button type="button" class="remove-image-btn" onclick="${isCurrentImage ? `removeCurrentImage(${i})` : `removeSelectedFile(${i - currentImages.length})`}">×</button>
+                    `;
+                } else {
+                    slot.innerHTML = `
+                        <div class="image-placeholder">รูปที่ ${i + 1}<br>ไม่มีรูป</div>
+                    `;
+                }
+            }
         }
 
         function removeCurrentImage(index) {
             currentImages.splice(index, 1);
-            displayImagePreviews();
+            displayAllImages();
         }
 
-        function removeNewImage(index) {
-            newImages.splice(index, 1);
-            displayImagePreviews();
+        function removeSelectedFile(index) {
+            selectedFiles.splice(index, 1);
+            displayAllImages();
         }
 
-        function addFormSubmitListener() {
-            document.getElementById('editReviewForm').addEventListener('submit', async function(e) {
-                e.preventDefault();
-                await updateReview();
-            });
-        }
-
-        async function updateReview() {
+        async function handleFormSubmit(event) {
+            event.preventDefault();
+            
             try {
                 const submitBtn = document.getElementById('submitBtn');
                 submitBtn.disabled = true;
                 submitBtn.textContent = 'กำลังบันทึก...';
 
-                // รวบรวมข้อมูลฟอร์ม
-                const formData = new FormData();
-
-                // ข้อมูลพื้นฐาน
-                const reviewUpdate = {
-                    overall_rating: parseInt(document.getElementById('overallRatingValue').value),
-                    short_summary: document.getElementById('shortSummary').value,
-                    full_review_content: document.getElementById('fullReview').value,
-                    selected_effects: Array.from(document.querySelectorAll('input[name="selected_effects"]:checked')).map(cb => cb.value),
-                    aroma_flavors: Array.from(document.querySelectorAll('input[name="aroma_flavors"]:checked')).map(cb => cb.value),
-                    review_images: currentImages // เก็บรูปเดิมที่ยังอยู่
-                };
-
-                // อัปโหลดรูปใหม่ถ้ามี
-                if (newImages.length > 0) {
+                // Upload new images if any
+                let newImageUrls = [];
+                if (selectedFiles.length > 0) {
                     const imageFormData = new FormData();
-                    newImages.forEach((file, index) => {
+                    selectedFiles.forEach((file, index) => {
                         imageFormData.append(`image_${index}`, file);
                     });
 
@@ -773,11 +849,22 @@
 
                     if (imageResponse.ok) {
                         const imageResult = await imageResponse.json();
-                        reviewUpdate.review_images = [...currentImages, ...imageResult.image_urls];
+                        newImageUrls = imageResult.image_urls;
                     }
                 }
 
-                // อัปเดตรีวิว
+                // Prepare review update data
+                const reviewUpdate = {
+                    overall_rating: overallRating,
+                    aroma_rating: aromaRating || null,
+                    short_summary: document.getElementById('shortSummary').value,
+                    full_review_content: document.getElementById('fullReview').value,
+                    selected_effects: Array.from(document.querySelectorAll('input[name="selected_effects"]:checked')).map(cb => cb.value),
+                    aroma_flavors: Array.from(document.querySelectorAll('input[name="aroma_flavors"]:checked')).map(cb => cb.value),
+                    review_images: [...currentImages, ...newImageUrls]
+                };
+
+                // Update review
                 const urlParams = new URLSearchParams(window.location.search);
                 const reviewId = urlParams.get('id');
 
@@ -815,8 +902,6 @@
             errorDiv.style.display = 'block';
             document.getElementById('successMessage').style.display = 'none';
             document.getElementById('loading').style.display = 'none';
-
-            // Scroll to top
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -825,8 +910,6 @@
             successDiv.textContent = message;
             successDiv.style.display = 'block';
             document.getElementById('errorMessage').style.display = 'none';
-
-            // Scroll to top
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     </script>

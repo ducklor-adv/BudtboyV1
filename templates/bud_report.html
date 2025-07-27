@@ -464,28 +464,14 @@
             </div>
             
             <div class="content">
-                <!-- ข้อมูลพื้นฐาน -->
+                <!-- แสดงข้อมูลทั้งหมดเป็นรายการ -->
                 <div class="section">
-                    <div class="section-title">🌿 ข้อมูลพื้นฐาน</div>
-                    <div class="info-grid" id="basicInfoGrid">
-                        <!-- Basic info will be populated here -->
+                    <div class="section-title">📊 ข้อมูลดอกทั้งหมด</div>
+                    <div class="simple-info-list" id="allBudInfo">
+                        <!-- All bud info will be populated here -->
                     </div>
                 </div>
                 
-                <!-- Terpenes และผลกระทบ -->
-                <div class="section">
-                    <div class="section-title">🧪 Terpenes Profile & ผลกระทบ</div>
-                    <div class="simple-info-list">
-                        <div id="terpenesInfo">
-                            <!-- Terpenes info will be populated here -->
-                        </div>
-                        <div style="height: 20px;"></div>
-                        <div id="effectsInfo">
-                            <!-- Effects info will be populated here -->
-                        </div>
-                    </div>
-                </div>
-
                 <!-- คะแนนรีวิว -->
                 <div class="section">
                     <div class="section-title">📊 คะแนนรีวิว</div>
@@ -493,39 +479,6 @@
                         <div class="stars" id="ratingStars">-</div>
                         <div class="rating-number" id="ratingNumber">0.0</div>
                         <div class="review-count" id="reviewCount">(0 รีวิว)</div>
-                    </div>
-                </div>
-                
-                <!-- ข้อมูลการปลูก -->
-                <div class="section">
-                    <div class="section-title">🌱 ข้อมูลการปลูก</div>
-                    <div class="info-grid" id="growingInfoGrid">
-                        <!-- Growing info will be populated here -->
-                    </div>
-                </div>
-                
-                <!-- ผลกระทบ -->
-                <div class="section">
-                    <div class="section-title">🎯 ผลกระทบ</div>
-                    <div class="effects-grid" id="effectsGrid">
-                        <!-- Effects will be populated here -->
-                    </div>
-                </div>
-                
-                <!-- Terpenes -->
-                <div class="section">
-                    <div class="section-title">🧪 Terpenes</div>
-                    <div class="terpenes-list" id="terpenesList">
-                        <!-- Terpenes will be populated here -->
-                    </div>
-                </div>
-                
-                <!-- ข้อมูลผู้ปลูก -->
-                <div class="section">
-                    <div class="section-title">👨‍🌾 ข้อมูลผู้ปลูก</div>
-                    <div class="grower-info">
-                        <div class="grower-name" id="growerName">-</div>
-                        <div class="verified-badge" id="verifiedBadge" style="display: none;">✅ ยืนยันแล้ว</div>
                     </div>
                 </div>
                 
@@ -592,17 +545,8 @@
             document.getElementById('budNameThai').textContent = bud.strain_name_th || '';
             document.getElementById('budId').textContent = `Bud ID: ${bud.id}`;
             
-            // Basic info grid
-            displayBasicInfo(bud);
-            
-            // Growing info grid
-            displayGrowingInfo(bud);
-            
-            // Terpenes info (new position)
-            displayTerpenesInfo(bud);
-            
-            // Effects info (new position)
-            displayEffectsInfo(bud);
+            // Display all info as list
+            displayAllBudInfo(bud);
             
             // Rating calculation
             const avgRating = reviews.length > 0 
@@ -612,18 +556,6 @@
             document.getElementById('ratingStars').textContent = '⭐'.repeat(Math.round(avgRating));
             document.getElementById('ratingNumber').textContent = avgRating.toFixed(1);
             document.getElementById('reviewCount').textContent = `(${reviews.length} รีวิว)`;
-            
-            // Effects
-            displayEffects(bud);
-            
-            // Terpenes
-            displayTerpenes(bud);
-            
-            // Grower info
-            document.getElementById('growerName').textContent = bud.grower_name || 'ไม่ระบุ';
-            if (bud.grower_license_verified) {
-                document.getElementById('verifiedBadge').style.display = 'inline-block';
-            }
             
             // Reviews
             displayReviews(reviews);
@@ -789,48 +721,45 @@
             }).join('');
         }
         
-        function displayTerpenesInfo(bud) {
-            const terpenesInfo = document.getElementById('terpenesInfo');
-            const terpenes = [
+        function displayAllBudInfo(bud) {
+            const allBudInfo = document.getElementById('allBudInfo');
+            
+            // รวมข้อมูลทั้งหมด
+            const allInfo = [
+                { label: 'ผู้พัฒนา', value: bud.breeder },
+                { label: 'ประเภท', value: bud.strain_type },
+                { label: 'THC', value: bud.thc_percentage ? `${bud.thc_percentage}%` : null },
+                { label: 'CBD', value: bud.cbd_percentage ? `${bud.cbd_percentage}%` : null },
+                { label: 'เกรด', value: bud.grade },
+                { label: 'กลิ่นและรส', value: bud.aroma_flavor },
+                { label: 'เวลาที่แนะนำ', value: bud.recommended_time },
+                { label: 'วิธีการปลูก', value: bud.grow_method },
+                { label: 'ประเภทปุ๋ย', value: bud.fertilizer_type },
+                { label: 'ประเภทการออกดอก', value: bud.flowering_type },
+                { label: 'วันที่เก็บเกี่ยว', value: bud.harvest_date },
+                { label: 'หมายเลข Batch', value: bud.batch_number },
                 { label: 'Terpene อันดับ 1', value: bud.top_terpenes_1 },
                 { label: 'Terpene อันดับ 2', value: bud.top_terpenes_2 },
-                { label: 'Terpene อันดับ 3', value: bud.top_terpenes_3 }
-            ];
-            
-            terpenesInfo.innerHTML = terpenes.map(terpene => {
-                if (terpene.value && terpene.value.trim()) {
-                    return `
-                        <div class="simple-info-item">
-                            <div class="simple-info-label">${terpene.label}:</div>
-                            <div class="simple-info-value">${terpene.value}</div>
-                        </div>
-                    `;
-                }
-                return '';
-            }).join('') || '<div class="simple-info-item"><div class="simple-info-value">ไม่มีข้อมูล Terpenes</div></div>';
-        }
-        
-        function displayEffectsInfo(bud) {
-            const effectsInfo = document.getElementById('effectsInfo');
-            const effects = [
+                { label: 'Terpene อันดับ 3', value: bud.top_terpenes_3 },
                 { label: 'ผลทางจิต (บวก)', value: bud.mental_effects_positive },
                 { label: 'ผลทางจิต (ลบ)', value: bud.mental_effects_negative },
                 { label: 'ผลทางกาย (บวก)', value: bud.physical_effects_positive },
                 { label: 'ผลทางกาย (ลบ)', value: bud.physical_effects_negative },
-                { label: 'เวลาที่แนะนำ', value: bud.recommended_time }
+                { label: 'ผู้ปลูก', value: bud.grower_name },
+                { label: 'วันที่เพิ่มข้อมูล', value: formatDate(bud.created_at) }
             ];
             
-            effectsInfo.innerHTML = effects.map(effect => {
-                if (effect.value && effect.value.trim()) {
+            allBudInfo.innerHTML = allInfo.map(info => {
+                if (info.value && info.value.toString().trim()) {
                     return `
                         <div class="simple-info-item">
-                            <div class="simple-info-label">${effect.label}:</div>
-                            <div class="simple-info-value">${effect.value}</div>
+                            <div class="simple-info-label">${info.label}:</div>
+                            <div class="simple-info-value">${info.value}</div>
                         </div>
                     `;
                 }
                 return '';
-            }).join('') || '<div class="simple-info-item"><div class="simple-info-value">ไม่มีข้อมูลผลกระทบ</div></div>';
+            }).filter(item => item).join('');
         }
 
         function formatDate(dateString) {

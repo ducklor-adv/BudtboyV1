@@ -88,7 +88,7 @@ def get_db_connection():
     try:
         if connection_pool is None:
             init_connection_pool()
-        
+
         if connection_pool:
             conn = connection_pool.getconn()
             if conn:
@@ -96,7 +96,7 @@ def get_db_connection():
                 with conn.cursor() as test_cur:
                     test_cur.execute("SELECT 1")
                 return conn
-        
+
         # Fallback to direct connection
         database_url = os.environ.get('DATABASE_URL')
         if not database_url:
@@ -148,7 +148,7 @@ def create_tables():
                     id SERIAL PRIMARY KEY,
                     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
                     token VARCHAR(128) UNIQUE NOT NULL,
-                    expires_at TIMESTAMP NOT NULL,
+                    expires_at TIMESTAMP TIMESTAMP NOT NULL,
                     is_used BOOLEAN DEFAULT FALSE,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
@@ -761,8 +761,8 @@ def create_tables():
                     ('Ocean Grown Seeds', False),
                     ('Oni Seed Co', False),
                     ('Paradise Seeds', True),
-                    ('Philosopher Seeds', False),
-                    ('Positronics Seeds', False),
+                    ('Philosopher Seeds', False),```python
+Positronics Seeds', False),
                     ('Premium Cultivars', False),
                     ('Purple City Genetics', False),
                     ('Pyramid Seeds', False),
@@ -882,7 +882,7 @@ def create_tables():
                 ALTER TABLE reviews 
                 ADD COLUMN IF NOT EXISTS selected_effects TEXT[] DEFAULT '{}';
             """)
-            
+
             # Add video_review_url column if it doesn't exist (for existing databases)
             cur.execute("""
                 ALTER TABLE reviews 
@@ -992,7 +992,7 @@ def create_tables():
             print(f"Error creating tables: {e}")
         finally:
             cur.close()
-            conn.close()
+            return_db_connection(conn)
 
 def generate_verification_token():
     return secrets.token_urlsafe(32)
@@ -1104,7 +1104,7 @@ def get_user_buds():
             })
 
         cur.close()
-        conn.close()
+        return_db_connection(conn)
 
         return jsonify({'buds': buds})
     except Exception as e:
@@ -1134,7 +1134,7 @@ def get_user_reviews():
             WHERE r.reviewer_id = %s 
             ORDER BY r.created_at DESC
         """, (user_id,))
-        
+
         print(f"Debug: Query executed for user_id {user_id}")
 
         reviews = []
@@ -1168,14 +1168,14 @@ def get_user_reviews():
                 'reviewer_profile_image': reviewer_profile_image,
                 'bud_reference_id': row[16]  # Add bud reference ID from reviews table
             }
-            
+
             # Debug log for video_review_url
             print(f"Debug: Review ID {row[0]} video_review_url: {row[10]}")
-            
+
             reviews.append(review_data)
 
         cur.close()
-        conn.close()
+        return_db_connection(conn)
 
         return jsonify({'reviews': reviews})
     except Exception as e:
@@ -1244,7 +1244,7 @@ def login():
             return jsonify({'success': False, 'error': str(e)}), 500
         finally:
             cur.close()
-            conn.close()
+            return_db_connection(conn)
     else:
         return jsonify({'success': False, 'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
@@ -1299,7 +1299,7 @@ def quick_signup():
             return jsonify({'success': False, 'error': str(e)}), 500
         finally:
             cur.close()
-            conn.close()
+            return_db_connection(conn)
     else:
         return jsonify({'success': False, 'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
@@ -1362,7 +1362,7 @@ def verify_email(token):
             return f"เกิดข้อผิดพลาด: {str(e)}"
         finally:
             cur.close()
-            conn.close()
+            return_db_connection(conn)
     else:
         return "ไม่สามารถเชื่อมต่อฐานข้อมูลได้"
 
@@ -1373,7 +1373,7 @@ def get_profile():
 
     user_id = session['user_id']
     cache_key = f"profile_{user_id}"
-    
+
     # Check cache first
     cached_data = get_cache(cache_key)
     if cached_data:
@@ -1414,10 +1414,10 @@ def get_profile():
                     'grow_license_file_url': user[9],
                     'profile_image_url': profile_image_url
                 }
-                
+
                 # Cache the result
                 set_cache(cache_key, user_data)
-                
+
                 return jsonify(user_data)
             else:
                 return jsonify({'error': 'ไม่พบข้อมูลผู้ใช้'}), 404
@@ -1496,7 +1496,7 @@ def update_profile():
             return jsonify({'error': str(e)}), 500
         finally:
             cur.close()
-            conn.close()
+            return_db_connection(conn)
     else:
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
@@ -1578,7 +1578,7 @@ def get_buds():
             return jsonify({'error': str(e)}), 500
         finally:
             cur.close()
-            conn.close()
+            return_db_connection(conn)
     else:
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
@@ -1657,7 +1657,7 @@ def add_bud():
             return jsonify({'error': str(e)}), 500
         finally:
             cur.close()
-            conn.close()
+            return_db_connection(conn)
     else:
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
@@ -1739,7 +1739,7 @@ def update_bud(bud_id):
             return jsonify({'error': str(e)}), 500
         finally:
             cur.close()
-            conn.close()
+            return_db_connection(conn)
     else:
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
@@ -1812,7 +1812,7 @@ def upload_bud_images(bud_id):
             return jsonify({'error': str(e)}), 500
         finally:
             cur.close()
-            conn.close()
+            return_db_connection(conn)
     else:
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
@@ -1854,7 +1854,7 @@ def delete_bud(bud_id):
             return jsonify({'error': str(e)}), 500
         finally:
             cur.close()
-            conn.close()
+            return_db_connection(conn)
     else:
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
@@ -1907,7 +1907,7 @@ def add_strain():
             return jsonify({'error': str(e)}), 500
         finally:
             cur.close()
-            conn.close()
+            return_db_connection(conn)
     else:
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
@@ -1963,7 +1963,7 @@ def search_breeders():
             return jsonify({'error': str(e)}), 500
         finally:
             cur.close()
-            conn.close()
+            return_db_connection(conn)
     else:
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
@@ -2079,7 +2079,7 @@ def search_strains():
             return jsonify({'error': str(e)}), 500
         finally:
             cur.close()
-            conn.close()
+            return_db_connection(conn)
     else:
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
@@ -2166,7 +2166,7 @@ def get_reviews():
             return jsonify({'error': str(e)}), 500
         finally:
             cur.close()
-            conn.close()
+            return_db_connection(conn)
     else:
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
@@ -2238,7 +2238,7 @@ def add_review():
             return jsonify({'error': str(e)}), 500
         finally:
             cur.close()
-            conn.close()
+            return_db_connection(conn)
     else:
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
@@ -2288,7 +2288,7 @@ def get_review(review_id):
             }
 
             cur.close()
-            conn.close()
+            return_db_connection(conn)
             return jsonify(review_data)
 
         except Exception as e:
@@ -2297,7 +2297,7 @@ def get_review(review_id):
             if cur:
                 cur.close()
             if conn:
-                conn.close()
+                return_db_connection(conn)
     else:
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
@@ -2355,7 +2355,7 @@ def update_review(review_id):
             return jsonify({'error': str(e)}), 500
         finally:
             cur.close()
-            conn.close()
+            return_db_connection(conn)
     else:
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
@@ -2395,7 +2395,7 @@ def delete_review(review_id):
             return jsonify({'error': str(e)}), 500
         finally:
             cur.close()
-            conn.close()
+            return_db_connection(conn)
     else:
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
@@ -2472,7 +2472,7 @@ def get_all_buds_report():
             })
 
         cur.close()
-        conn.close()
+        return_db_connection(conn)
 
         return jsonify({'buds': buds})
     except Exception as e:
@@ -2481,7 +2481,7 @@ def get_all_buds_report():
         if cur:
             cur.close()
         if conn:
-            conn.close()
+            return_db_connection(conn)
 
 @app.route('/api/buds/for-review')
 def get_buds_for_review():
@@ -2514,7 +2514,7 @@ def get_buds_for_review():
                 })
 
             cur.close()
-            conn.close()
+            return_db_connection(conn)
             return jsonify({'buds': buds})
         except Exception as e:
             return jsonify({'error': str(e)}), 500
@@ -2522,7 +2522,7 @@ def get_buds_for_review():
             if cur:
                 cur.close()
             if conn:
-                conn.close()
+                return_db_connection(conn)
     else:
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
@@ -2580,7 +2580,7 @@ def get_bud_info(bud_id):
             }
 
             cur.close()
-            conn.close()
+            return_db_connection(conn)
 
             return jsonify({
                 'success': True,
@@ -2596,7 +2596,7 @@ def get_bud_info(bud_id):
             if cur:
                 cur.close()
             if conn:
-                conn.close()
+                return_db_connection(conn)
     else:
         return jsonify({
             'success': False,
@@ -2714,7 +2714,7 @@ def get_bud_detail(bud_id):
             }
 
             cur.close()
-            conn.close()
+            return_db_connection(conn)
             return jsonify(bud_data)
 
         except Exception as e:
@@ -2723,7 +2723,7 @@ def get_bud_detail(bud_id):
             if cur:
                 cur.close()
             if conn:
-                conn.close()
+                return_db_connection(conn)
     else:
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
@@ -2765,12 +2765,12 @@ def upload_profile_image():
         return jsonify({'error': 'ไม่ได้เข้าสู่ระบบ'}), 401
 
     user_id = session['user_id']
-    
+
     if 'profile_image' not in request.files:
         return jsonify({'error': 'ไม่พบไฟล์รูปภาพ'}), 400
 
     file = request.files['profile_image']
-    
+
     if file.filename == '':
         return jsonify({'error': 'ไม่ได้เลือกไฟล์'}), 400
 
@@ -2781,25 +2781,25 @@ def upload_profile_image():
             filename = f"{timestamp}profile_{user_id}_{filename}"
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(file_path)
-            
+
             # Update database with new profile image URL
             conn = get_db_connection()
             if conn:
                 cur = conn.cursor()
                 profile_image_url = f'/uploads/{filename}'
-                
+
                 cur.execute("""
                     UPDATE users SET profile_image_url = %s WHERE id = %s
                 """, (profile_image_url, user_id))
-                
+
                 conn.commit()
-                
+
                 # Clear cache for this user
                 clear_cache_pattern(f"profile_{user_id}")
-                
+
                 cur.close()
                 return_db_connection(conn)
-                
+
                 return jsonify({
                     'success': True,
                     'message': 'อัปโหลดรูปโปรไฟล์สำเร็จ',
@@ -2807,7 +2807,7 @@ def upload_profile_image():
                 })
             else:
                 return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
-                
+
         except Exception as e:
             return jsonify({'error': str(e)}), 500
     else:
@@ -2847,7 +2847,7 @@ def list_users():
             return jsonify({'error': str(e)}), 500
         finally:
             cur.close()
-            conn.close()
+            return_db_connection(conn)
     else:
         return jsonify({'error': 'Database connection failed'}), 500
 
@@ -2952,14 +2952,14 @@ def register_user():
             return jsonify({'success': False, 'error': str(e)}), 500
         finally:
             cur.close()
-            conn.close()
+            return_db_connection(conn)
     else:
         return jsonify({'success': False, 'error': 'Database connection failed'}), 500
 
 if __name__ == '__main__':
     # Initialize connection pool
     init_connection_pool()
-    
+
     # Create tables on startup
     create_tables()
     app.run(host='0.0.0.0', port=3000, debug=True)

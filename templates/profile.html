@@ -348,7 +348,7 @@
             
             <div id="errorState" class="error-message" style="display: none;">
                 <div id="errorMessage"></div>
-                <button onclick="loadProfile()" style="margin-top: 10px; padding: 5px 10px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                <button onclick="retryLoadProfile()" style="margin-top: 10px; padding: 5px 10px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">
                     🔄 ลองใหม่
                 </button>
             </div>
@@ -449,6 +449,7 @@
     <script>
         let currentUserData = null;
         let isLoading = false;
+        let isProfileLoaded = false;
 
         function showError(message) {
             const errorState = document.getElementById('errorState');
@@ -466,6 +467,8 @@
         }
 
         function showLoading() {
+            if (isProfileLoaded) return; // ไม่แสดงการโหลดถ้าข้อมูลถูกโหลดแล้ว
+            
             const errorState = document.getElementById('errorState');
             const loadingState = document.getElementById('loadingState');
             const profileInfo = document.getElementById('profileInfo');
@@ -485,10 +488,13 @@
             if (actionButtons) actionButtons.style.display = 'flex';
             if (loadingState) loadingState.style.display = 'none';
             if (errorState) errorState.style.display = 'none';
+            
+            isProfileLoaded = true;
         }
 
         async function loadProfile() {
-            if (isLoading) return;
+            // ป้องกันการเรียกซ้ำ
+            if (isLoading || isProfileLoaded) return;
             
             isLoading = true;
             showLoading();
@@ -789,10 +795,73 @@
             }
         }
 
+        function retryLoadProfile() {
+            // รีเซ็ตสถานะเพื่อให้สามารถโหลดใหม่ได้
+            isProfileLoaded = false;
+            isLoading = false;
+            loadProfile();
+        }
+
+        // ปรับปรุงฟังก์ชัน saveProfile ให้รีโหลดข้อมูลใหม่
+        async function saveProfileImproved() {
+            const usernameEdit = document.getElementById('username-edit');
+            const emailEdit = document.getElementById('email-edit');
+            const birthYearEdit = document.getElementById('birth-year-edit');
+            const consumerCheck = document.getElementById('is_consumer_edit');
+            const growerCheck = document.getElementById('is_grower_edit');
+            const budtenderCheck = document.getElementById('is_budtender_edit');
+
+            if (!usernameEdit || !emailEdit) {
+                alert('❌ ไม่พบข้อมูลฟอร์ม');
+                return;
+            }
+
+            const updatedData = {
+                username: usernameEdit.value,
+                email: emailEdit.value,
+                birth_year: birthYearEdit ? birthYearEdit.value : '',
+                is_consumer: consumerCheck ? consumerCheck.checked : false,
+                is_grower: growerCheck ? growerCheck.checked : false,
+                is_budtender: budtenderCheck ? budtenderCheck.checked : false
+            };
+
+            try {
+                const response = await fetch('/api/update_profile', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updatedData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert('✅ บันทึกข้อมูลสำเร็จ!');
+                    // รีเซ็ตสถานะและโหลดข้อมูลใหม่
+                    isProfileLoaded = false;
+                    await loadProfile();
+                    cancelEdit();
+                } else {
+                    alert('❌ เกิดข้อผิดพลาด: ' + (result.error || 'ไม่สามารถบันทึกได้'));
+                }
+            } catch (error) {
+                console.error('Error saving profile:', error);
+                alert('❌ เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+            }
+        }
+
+        // แทนที่ฟังก์ชัน saveProfile เดิม
+        window.saveProfile = saveProfileImproved;
+
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
             setupEventListeners();
-            loadProfile();
+            
+            // ป้องกันการโหลดซ้ำโดยตรวจสอบว่ามีการโหลดแล้วหรือยัง
+            if (!isProfileLoaded && !isLoading) {
+                loadProfile();
+            }
         });
     </script>
 </body>

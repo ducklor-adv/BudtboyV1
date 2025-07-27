@@ -77,28 +77,39 @@
             margin-bottom: 20px;
         }
 
-        .bud-single-image {
-            margin: 20px 0;
+        .bud-content-layout {
             display: flex;
-            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
             padding: 20px;
             background: #f8f9fa;
             border-radius: 15px;
         }
 
-        .main-bud-image {
-            max-width: 300px;
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
+        .bud-main-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .bud-image-section {
+            width: 200px;
+            height: 160px;
+            background: #e0e0e0;
             border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            border: 3px solid #FF9800;
+            overflow: hidden;
+        }
+
+        .main-bud-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .main-bud-image-placeholder {
-            width: 300px;
-            height: 200px;
+            width: 100%;
+            height: 100%;
             background: #e0e0e0;
             display: flex;
             align-items: center;
@@ -106,8 +117,31 @@
             color: #666;
             font-size: 16px;
             text-align: center;
+        }
+
+        .grower-profile-section {
+            width: 120px;
+            height: 160px;
+            border: 3px solid #000;
             border-radius: 15px;
-            border: 3px solid #ddd;
+            overflow: hidden;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .grower-profile-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .grower-profile-placeholder {
+            color: #666;
+            font-size: 14px;
+            text-align: center;
+            padding: 10px;
         }
 
         .action-buttons {
@@ -370,15 +404,28 @@
                 font-size: 24px;
             }
 
-            .main-bud-image {
-                max-width: 250px;
-                height: 150px;
+            .bud-content-layout {
+                flex-direction: column;
+                gap: 15px;
             }
 
-            .main-bud-image-placeholder {
-                width: 250px;
-                height: 150px;
-                font-size: 14px;
+            .bud-main-section {
+                order: 1;
+            }
+
+            .grower-profile-section {
+                order: 2;
+                width: 100%;
+                height: 120px;
+                margin: 0 auto;
+                max-width: 200px;
+            }
+
+            .bud-image-section {
+                width: 100%;
+                height: 120px;
+                max-width: 250px;
+                margin: 0 auto;
             }
 
             .action-buttons {
@@ -503,8 +550,8 @@
         function displayBudInfo(bud) {
             const avgRating = calculateAverageRating();
 
-            // สร้างส่วนแสดงรูปดอก
-            const budImages = createBudImagesSection(bud);
+            // สร้างส่วนแสดงรูปดอกและผู้ปลูก
+            const budContentLayout = createBudContentLayout(bud);
 
             document.getElementById('budInfo').innerHTML = `
                 <div class="bud-name">${bud.strain_name_en || 'ไม่ระบุชื่อ'}</div>
@@ -517,7 +564,7 @@
                     <strong>เจ้าของดอก:</strong> ${bud.grower_name || 'ไม่ระบุ'}
                 </div>
                 
-                ${budImages}
+                ${budContentLayout}
                 
                 <div class="rating-summary">
                     <div class="avg-rating">${avgRating.toFixed(1)}</div>
@@ -533,23 +580,28 @@
             `;
         }
 
-        function createBudImagesSection(bud) {
-            // แสดงเฉพาะรูปดอกรูปที่ 1
-            if (bud.image_1_url && bud.image_1_url.trim()) {
-                return `
-                    <div class="bud-single-image">
-                        <img src="${bud.image_1_url}" alt="รูปดอก ${bud.strain_name_en}" class="main-bud-image">
-                    </div>
-                `;
-            } else {
-                return `
-                    <div class="bud-single-image">
-                        <div class="main-bud-image-placeholder">
-                            ไม่มีรูปภาพดอก
+        function createBudContentLayout(bud) {
+            const budImageHtml = bud.image_1_url && bud.image_1_url.trim() ? 
+                `<img src="${bud.image_1_url}" alt="รูปดอก ${bud.strain_name_en}" class="main-bud-image">` :
+                `<div class="main-bud-image-placeholder">ไม่มีรูปภาพดอก</div>`;
+
+            // ดึงรูปผู้ปลูกจากข้อมูลดอก (สมมติว่ามีฟิลด์ grower_profile_image)
+            const growerImageHtml = bud.grower_profile_image && bud.grower_profile_image.trim() ? 
+                `<img src="${bud.grower_profile_image}" alt="รูปผู้ปลูก ${bud.grower_name}" class="grower-profile-image">` :
+                `<div class="grower-profile-placeholder">ไม่มีรูปผู้ปลูก</div>`;
+
+            return `
+                <div class="bud-content-layout">
+                    <div class="bud-main-section">
+                        <div class="bud-image-section">
+                            ${budImageHtml}
                         </div>
                     </div>
-                `;
-            }
+                    <div class="grower-profile-section">
+                        ${growerImageHtml}
+                    </div>
+                </div>
+            `;
         }
 
         function displayReviews(reviews) {

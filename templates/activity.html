@@ -381,8 +381,15 @@
         }
 
         .item-list.reviews-list {
-            grid-template-columns: repeat(3, 1fr); /* Modified to display in 3 columns */
+            display: flex;
+            flex-direction: column;
             gap: 15px;
+            width: 100%;
+        }
+
+        .item-list.reviews-list .item-card {
+            width: 100%;
+            max-width: none;
         }
 
         @media (max-width: 1200px) {
@@ -391,7 +398,9 @@
             }
 
             .item-list.reviews-list {
-                grid-template-columns: repeat(2, 1fr); /* Adjust for medium screens */
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
             }
         }
 
@@ -401,7 +410,9 @@
             }
 
             .item-list.reviews-list {
-                grid-template-columns: 1fr; /* Adjust for small screens */
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
             }
         }
 

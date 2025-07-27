@@ -24,7 +24,7 @@
         }
         
         .header {
-            background: linear-gradient(135deg, #ff9800, #ff6f00);
+            background: linear-gradient(135deg, #FF9800, #F57C00);
             padding: 20px 30px;
             color: white;
             display: flex;
@@ -65,7 +65,7 @@
         }
         
         .bud-name {
-            font-size: 24px;
+            font-size: 28px;
             font-weight: 600;
             color: #333;
             margin-bottom: 10px;
@@ -74,23 +74,23 @@
         .bud-details {
             color: #666;
             font-size: 14px;
-            line-height: 1.6;
+            line-height: 1.8;
+            margin-bottom: 20px;
         }
         
         .rating-summary {
             display: flex;
             align-items: center;
-            gap: 15px;
-            margin-top: 15px;
-            padding: 15px;
+            gap: 20px;
+            padding: 20px;
             background: #f8f9fa;
-            border-radius: 10px;
+            border-radius: 15px;
         }
         
         .avg-rating {
-            font-size: 32px;
+            font-size: 36px;
             font-weight: 600;
-            color: #ff9800;
+            color: #FF9800;
         }
         
         .rating-details {
@@ -99,37 +99,76 @@
         
         .stars {
             color: #ffd700;
-            font-size: 18px;
-            margin-bottom: 5px;
+            font-size: 20px;
+            margin-bottom: 8px;
         }
         
         .review-count {
             color: #666;
             font-size: 14px;
+            font-weight: 500;
         }
         
         .reviews-container {
-            padding: 20px 30px;
+            padding: 30px;
         }
         
-        .review-item {
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .review-card {
             background: #f8f9fa;
             border-radius: 15px;
-            padding: 20px;
+            padding: 25px;
             margin-bottom: 20px;
-            border-left: 4px solid #ff9800;
+            border-left: 4px solid #FF9800;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
         
         .review-header {
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            gap: 15px;
             margin-bottom: 15px;
+        }
+        
+        .reviewer-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #a78bfa, #60a5fa);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: white;
+            font-weight: 600;
+            overflow: hidden;
+        }
+        
+        .reviewer-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        
+        .reviewer-info {
+            flex: 1;
         }
         
         .reviewer-name {
             font-weight: 600;
             color: #333;
+            font-size: 16px;
+            margin-bottom: 5px;
         }
         
         .review-date {
@@ -138,101 +177,163 @@
         }
         
         .review-rating {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .rating-stars {
             color: #ffd700;
             font-size: 16px;
-            margin-bottom: 10px;
+        }
+        
+        .rating-number {
+            background: #FF9800;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
         }
         
         .review-summary {
+            font-size: 16px;
             font-weight: 600;
-            margin-bottom: 10px;
             color: #333;
+            margin: 15px 0;
+            line-height: 1.5;
         }
         
         .review-content {
-            color: #666;
+            color: #555;
             line-height: 1.6;
             margin-bottom: 15px;
         }
         
-        .review-effects {
+        .review-tags {
             display: flex;
             flex-wrap: wrap;
-            gap: 5px;
-            margin-top: 10px;
+            gap: 8px;
+            margin-bottom: 15px;
         }
         
         .effect-tag {
             background: #e3f2fd;
             color: #1976d2;
-            padding: 4px 8px;
-            border-radius: 12px;
+            padding: 6px 12px;
+            border-radius: 20px;
             font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .aroma-tag {
+            background: #f3e5f5;
+            color: #7b1fa2;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
         }
         
         .review-images {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
             gap: 10px;
             margin-top: 15px;
         }
         
         .review-image {
             width: 100%;
-            height: 100px;
+            height: 120px;
             object-fit: cover;
-            border-radius: 8px;
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
             cursor: pointer;
-            transition: transform 0.3s ease;
+            transition: all 0.3s ease;
         }
         
         .review-image:hover {
             transform: scale(1.05);
-        }
-        
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #666;
-        }
-        
-        .empty-icon {
-            font-size: 64px;
-            margin-bottom: 20px;
+            border-color: #FF9800;
         }
         
         .loading {
             text-align: center;
-            padding: 40px;
+            padding: 60px;
             color: #666;
+            font-size: 16px;
         }
         
         .error {
             text-align: center;
-            padding: 40px;
-            color: #f44336;
+            padding: 60px;
+            color: #dc3545;
+            font-size: 16px;
         }
         
-        @media (max-width: 600px) {
+        .empty-state {
+            text-align: center;
+            padding: 60px;
+            color: #666;
+        }
+        
+        .empty-state .empty-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+        
+        @media (max-width: 768px) {
             .container {
                 margin: 10px;
                 border-radius: 15px;
             }
             
-            .bud-info, .reviews-container {
+            .header {
+                padding: 15px 20px;
+            }
+            
+            .header h1 {
+                font-size: 20px;
+            }
+            
+            .bud-info {
                 padding: 20px;
+            }
+            
+            .bud-name {
+                font-size: 24px;
             }
             
             .rating-summary {
                 flex-direction: column;
                 text-align: center;
-                gap: 10px;
+                gap: 15px;
+            }
+            
+            .reviews-container {
+                padding: 20px;
+            }
+            
+            .review-card {
+                padding: 20px;
             }
             
             .review-header {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 5px;
+                gap: 10px;
+            }
+            
+            .reviewer-info {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                width: 100%;
+            }
+            
+            .review-images {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
     </style>
@@ -258,6 +359,7 @@
 
     <script>
         const budId = new URLSearchParams(window.location.search).get('bud_id');
+        let allReviews = [];
         
         if (!budId) {
             document.getElementById('budInfo').innerHTML = '<div class="error">ไม่พบข้อมูลดอกที่ต้องการ</div>';
@@ -288,6 +390,7 @@
                 const reviews = await response.json();
                 
                 if (response.ok) {
+                    allReviews = reviews;
                     displayReviews(reviews);
                 } else {
                     document.getElementById('reviewsContainer').innerHTML = '<div class="error">เกิดข้อผิดพลาดในการโหลดรีวิว</div>';
@@ -310,82 +413,98 @@
                     <strong>CBD:</strong> ${bud.cbd_percentage || 'ไม่ระบุ'}%<br>
                     <strong>เจ้าของดอก:</strong> ${bud.grower_name || 'ไม่ระบุ'}
                 </div>
-                <div class="rating-summary" id="ratingSummary">
-                    <div class="loading">กำลังคำนวณคะแนนเฉลี่ย...</div>
+                <div class="rating-summary">
+                    <div class="avg-rating">${avgRating.toFixed(1)}</div>
+                    <div class="rating-details">
+                        <div class="stars">${'⭐'.repeat(Math.round(avgRating))}</div>
+                        <div class="review-count">${allReviews.length} รีวิว</div>
+                    </div>
                 </div>
             `;
         }
         
-        let allReviews = [];
-        
         function displayReviews(reviews) {
-            allReviews = reviews;
-            updateRatingSummary();
-            
             const container = document.getElementById('reviewsContainer');
             
             if (reviews.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
-                        <div class="empty-icon">📝</div>
-                        <h3>ยังไม่มีรีวิว</h3>
-                        <p>เป็นคนแรกที่รีวิวดอกนี้!</p>
-                        <a href="/add-review" style="color: #ff9800; text-decoration: none;">เขียนรีวิว →</a>
+                        <div class="empty-icon">💬</div>
+                        <h3>ยังไม่มีรีวิวสำหรับดอกนี้</h3>
+                        <p>เป็นคนแรกที่แชร์ประสบการณ์ของคุณ!</p>
                     </div>
                 `;
                 return;
             }
             
-            container.innerHTML = reviews.map(review => `
-                <div class="review-item">
-                    <div class="review-header">
-                        <div class="reviewer-name">👤 ${review.reviewer_name}</div>
-                        <div class="review-date">${formatDate(review.created_at)}</div>
-                    </div>
-                    <div class="review-rating">${'⭐'.repeat(review.overall_rating)} (${review.overall_rating}/5)</div>
-                    <div class="review-summary">${review.short_summary}</div>
-                    ${review.full_review_content ? `<div class="review-content">${review.full_review_content}</div>` : ''}
-                    ${review.selected_effects && review.selected_effects.length > 0 ? `
-                        <div class="review-effects">
-                            ${review.selected_effects.map(effect => `<span class="effect-tag">${effect}</span>`).join('')}
-                        </div>
-                    ` : ''}
-                    ${review.review_images && review.review_images.length > 0 ? `
-                        <div class="review-images">
-                            ${review.review_images.map(img => `<img src="${img}" alt="รีวิวภาพ" class="review-image" onclick="window.open('${img}', '_blank')">`).join('')}
-                        </div>
-                    ` : ''}
-                </div>
-            `).join('');
+            container.innerHTML = `
+                <div class="section-title">💬 รีวิวทั้งหมด (${reviews.length})</div>
+                ${reviews.map(review => createReviewCard(review)).join('')}
+            `;
         }
         
-        function calculateAverageRating() {
-            if (allReviews.length === 0) return 0;
-            const sum = allReviews.reduce((acc, review) => acc + review.overall_rating, 0);
-            return (sum / allReviews.length).toFixed(1);
-        }
-        
-        function updateRatingSummary() {
-            const avgRating = calculateAverageRating();
-            const reviewCount = allReviews.length;
+        function createReviewCard(review) {
+            const reviewDate = new Date(review.created_at).toLocaleDateString('th-TH', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+            });
             
-            document.getElementById('ratingSummary').innerHTML = `
-                <div class="avg-rating">${avgRating}</div>
-                <div class="rating-details">
-                    <div class="stars">${'⭐'.repeat(Math.round(avgRating))}</div>
-                    <div class="review-count">${reviewCount} รีวิว</div>
+            const effectTags = (review.selected_effects || []).map(effect => 
+                `<span class="effect-tag">${effect}</span>`
+            ).join('');
+            
+            const aromaTags = (review.aroma_flavors || []).map(aroma => 
+                `<span class="aroma-tag">${aroma}</span>`
+            ).join('');
+            
+            const reviewImages = (review.review_images || []).length > 0 ? `
+                <div class="review-images">
+                    ${review.review_images.map(image => 
+                        `<img src="${image}" alt="Review Image" class="review-image" onclick="window.open('${image}', '_blank')">`
+                    ).join('')}
+                </div>
+            ` : '';
+            
+            // Create reviewer avatar - show first letter if no profile image
+            const reviewerInitial = review.reviewer_name ? review.reviewer_name.charAt(0).toUpperCase() : '👤';
+            
+            return `
+                <div class="review-card">
+                    <div class="review-header">
+                        <div class="reviewer-avatar">
+                            ${reviewerInitial}
+                        </div>
+                        <div class="reviewer-info">
+                            <div class="reviewer-name">${review.reviewer_name || 'ผู้ใช้ไม่ระบุชื่อ'}</div>
+                            <div class="review-date">${reviewDate}</div>
+                        </div>
+                        <div class="review-rating">
+                            <div class="rating-stars">${'⭐'.repeat(review.overall_rating)}</div>
+                            <div class="rating-number">(${review.overall_rating}/5)</div>
+                        </div>
+                    </div>
+                    
+                    <div class="review-summary">${review.short_summary || ''}</div>
+                    
+                    ${review.full_review_content ? `<div class="review-content">${review.full_review_content}</div>` : ''}
+                    
+                    ${effectTags || aromaTags ? `
+                        <div class="review-tags">
+                            ${effectTags}
+                            ${aromaTags}
+                        </div>
+                    ` : ''}
+                    
+                    ${reviewImages}
                 </div>
             `;
         }
         
-        function formatDate(dateString) {
-            if (!dateString) return 'ไม่ระบุ';
-            const date = new Date(dateString);
-            return date.toLocaleDateString('th-TH', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
+        function calculateAverageRating() {
+            if (allReviews.length === 0) return 0;
+            const sum = allReviews.reduce((total, review) => total + review.overall_rating, 0);
+            return sum / allReviews.length;
         }
     </script>
 </body>

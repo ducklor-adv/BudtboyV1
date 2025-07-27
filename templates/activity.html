@@ -381,7 +381,7 @@
         }
 
         .item-list.reviews-list {
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 15px;
         }
 
@@ -391,7 +391,7 @@
             }
 
             .item-list.reviews-list {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(3, 1fr);
             }
         }
 
@@ -400,6 +400,12 @@
                 grid-template-columns: repeat(2, 1fr);
             }
 
+            .item-list.reviews-list {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
             .item-list.reviews-list {
                 grid-template-columns: 1fr;
             }
@@ -760,7 +766,7 @@
                 return;
             }
 
-            // แสดงแค่ 2 คอลัมน์ ด้วยตัวเลข 1 และ 2
+            // แสดง 3 คอลัมน์ ด้วยตัวเลข 1, 2, และ 3
             const reviewsHtml = `
                 <div class="item-card">
                     <div class="item-header">
@@ -779,6 +785,16 @@
                     <div class="review-content">
                         <div style="text-align: center; font-size: 48px; font-weight: bold; color: #FF9800; padding: 40px;">
                             2
+                        </div>
+                    </div>
+                </div>
+                <div class="item-card">
+                    <div class="item-header">
+                        <div class="item-name">รีวิวคอลัมน์ 3</div>
+                    </div>
+                    <div class="review-content">
+                        <div style="text-align: center; font-size: 48px; font-weight: bold; color: #2196F3; padding: 40px;">
+                            3
                         </div>
                     </div>
                 </div>

@@ -273,9 +273,10 @@
         }
         .bud-header {
             display: flex;
-            flex-direction: column;
+            justify-content: space-between;
+            align-items: flex-start;
             gap: 8px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .bud-title {
@@ -283,43 +284,40 @@
         }
 
         .strain-name {
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             color: #333;
-            margin-bottom: 3px;
+            margin-bottom: 2px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
         .bud-date {
-            font-size: 9px;
+            font-size: 8px;
             color: #666;
             background: #f0f0f0;
-            padding: 2px 6px;
-            border-radius: 8px;
+            padding: 2px 5px;
+            border-radius: 6px;
             display: inline-block;
-        }
-
-        .bud-full-report {
-            width: 100%;
+            white-space: nowrap;
         }
 
         .full-report-btn {
             background: linear-gradient(135deg, #ff4757, #ff3742);
             color: white;
             border: none;
-            padding: 6px 8px;
-            border-radius: 15px;
+            padding: 4px 8px;
+            border-radius: 10px;
             cursor: pointer;
-            font-size: 9px;
+            font-size: 8px;
             font-weight: 600;
             text-decoration: none;
             transition: all 0.3s ease;
-            border: 2px solid #ff4757;
             display: inline-block;
-            width: 100%;
             text-align: center;
+            width: 100%;
+            margin-top: 5px;
         }
 
         .full-report-btn:hover {
@@ -337,22 +335,22 @@
         .bud-content {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 6px;
             flex: 1;
         }
 
         .bud-main-content {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 6px;
             flex: 1;
         }
 
         .bud-image-display {
             width: 100%;
-            height: 120px;
+            height: 80px;
             border: 2px solid #ffd700;
-            border-radius: 10px;
+            border-radius: 8px;
             overflow: hidden;
             background: #f8f9fa;
             display: flex;
@@ -380,11 +378,11 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 2px;
         }
 
         .bud-detail {
-            font-size: 11px;
+            font-size: 9px;
             color: #333;
             white-space: nowrap;
             overflow: hidden;
@@ -392,37 +390,37 @@
         }
 
         .rating-section {
-            margin-top: 5px;
+            margin-top: 3px;
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 3px;
         }
 
         .rating-stars {
             color: #ffd700;
-            font-size: 12px;
+            font-size: 10px;
         }
 
         .rating-text {
             color: #666;
-            font-size: 10px;
+            font-size: 8px;
         }
 
         .bud-actions {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 3px;
             width: 100%;
-            margin-top: auto;
+            margin-top: 5px;
         }
 
         .action-btn {
             width: 100%;
-            padding: 6px 8px;
+            padding: 4px 6px;
             border: none;
-            border-radius: 15px;
+            border-radius: 10px;
             cursor: pointer;
-            font-size: 9px;
+            font-size: 8px;
             font-weight: 600;
             transition: all 0.3s ease;
             text-decoration: none;
@@ -552,9 +550,6 @@
                             <div class="strain-name">${bud.strain_name_en || 'ไม่ระบุชื่อ'} ${bud.strain_name_th ? `(${bud.strain_name_th})` : ''}</div>
                             <div class="bud-date">${formatDate(bud.created_at)}</div>
                         </div>
-                        <div class="bud-full-report">
-                            <a href="/bud-report?id=${bud.id}" class="full-report-btn">📊 Full Report</a>
-                        </div>
                     </div>
 
                     <div class="bud-content">
@@ -566,6 +561,8 @@
                                     `<div class="bud-image-placeholder">🌿</div>`
                                 }
                             </div>
+                            
+                            <a href="/bud-report?id=${bud.id}" class="full-report-btn">📊 Full Report</a>
 
                             <div class="bud-info">
                                 <div class="bud-detail"><strong>Bud ID:</strong> ${bud.id}</div>

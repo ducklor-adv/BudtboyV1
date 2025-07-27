@@ -655,7 +655,6 @@
                             <label for="aroma_cheese">🧀 ชีส</label>
                         </div>
                     </div>
-                    </div>
                 </div>
 
                 <!-- คะแนนกลิ่น -->
@@ -672,7 +671,6 @@
                             </div>
                             <input type="hidden" id="aromaRating">
                         </div>
-                    </div>
                     </div>
                 </div>
 
@@ -850,7 +848,7 @@
                                 <label for="physical_neg_blood_pressure">📉 ความดันตก</label>
                             </div>
                             <div class="effect-item">
-                                                               <input type="checkbox" value="มือสั่น" id="physical_neg_tremor">
+                                <input type="checkbox" value="มือสั่น" id="physical_neg_tremor">
                                 <label for="physical_neg_tremor">🤝 มือสั่น</label>
                             </div>
                             <div class="effect-item">
@@ -866,7 +864,6 @@
                                 <label for="physical_neg_cough">🤧 ไอ/เจ็บคอ</label>
                             </div>
                         </div>
-                    </div>
                     </div>
                 </div>
 
@@ -1299,6 +1296,8 @@
         // Initialize form state when page loads
         window.addEventListener('load', function() {
             toggleReviewForm(false); // Disable form initially
+            initializeFlavorSelector();
+            initializeEffectsSelector();
         });
 
         function initializeFlavorSelector() {
@@ -1327,22 +1326,62 @@
             const selectedEffectsDiv = document.getElementById('selectedEffects');
             const effectsCategories = document.getElementById('effectsCategories');
 
-            selectedEffectsDiv.addEventListener('click', function() {
-                effectsCategories.classList.toggle('active');
-            });
+            if (selectedEffectsDiv && effectsCategories) {
+                selectedEffectsDiv.addEventListener('click', function() {
+                    effectsCategories.classList.toggle('active');
+                });
 
-            // Close when clicking outside
-            document.addEventListener('click', function(event) {
-                if (!selectedEffectsDiv.contains(event.target) && !effectsCategories.contains(event.target)) {
-                    effectsCategories.classList.remove('active');
+                // Close when clicking outside
+                document.addEventListener('click', function(event) {
+                    if (!selectedEffectsDiv.contains(event.target) && !effectsCategories.contains(event.target)) {
+                        effectsCategories.classList.remove('active');
+                    }
+                });
+
+                // Handle checkbox changes
+                const checkboxes = effectsCategories.querySelectorAll('input[type="checkbox"]');
+                checkboxes.forEach(checkbox => {
+                    checkbox.addEventListener('change', updateSelectedEffects);
+                });
+            }
+        }
+
+        function updateSelectedFlavors() {
+            const selectedFlavorsDiv = document.getElementById('selectedFlavors');
+            const flavorCategories = document.getElementById('flavorCategories');
+            
+            if (selectedFlavorsDiv && flavorCategories) {
+                const checkedBoxes = flavorCategories.querySelectorAll('input[type="checkbox"]:checked');
+                const selectedTexts = Array.from(checkedBoxes).map(cb => {
+                    const label = flavorCategories.querySelector(`label[for="${cb.id}"]`);
+                    return label ? label.textContent.trim() : cb.value;
+                });
+
+                if (selectedTexts.length > 0) {
+                    selectedFlavorsDiv.innerHTML = selectedTexts.join(', ');
+                } else {
+                    selectedFlavorsDiv.innerHTML = 'เลือกกลิ่นและรส';
                 }
-            });
+            }
+        }
 
-            // Handle checkbox changes
-            const checkboxes = effectsCategories.querySelectorAll('input[type="checkbox"]');
-            checkboxes.forEach(checkbox => {
-                checkbox.addEventListener('change', updateSelectedEffects);
-            });
+        function updateSelectedEffects() {
+            const selectedEffectsDiv = document.getElementById('selectedEffects');
+            const effectsCategories = document.getElementById('effectsCategories');
+            
+            if (selectedEffectsDiv && effectsCategories) {
+                const checkedBoxes = effectsCategories.querySelectorAll('input[type="checkbox"]:checked');
+                const selectedTexts = Array.from(checkedBoxes).map(cb => {
+                    const label = effectsCategories.querySelector(`label[for="${cb.id}"]`);
+                    return label ? label.textContent.trim() : cb.value;
+                });
+
+                if (selectedTexts.length > 0) {
+                    selectedEffectsDiv.innerHTML = selectedTexts.join(', ');
+                } else {
+                    selectedEffectsDiv.innerHTML = 'เลือกผลกระทบที่รู้สึก';
+                }
+            }
         }
     </script>
 </body>

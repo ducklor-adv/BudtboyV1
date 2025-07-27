@@ -25,11 +25,42 @@
         
         .header {
             background: linear-gradient(135deg, #2196F3, #1976D2);
-            padding: 20px 30px;
+            padding: 15px 20px;
             color: white;
             display: flex;
             align-items: center;
             justify-content: space-between;
+        }
+        
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .grower-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(255,255,255,0.3);
+            background: white;
+        }
+        
+        .header-text {
+            line-height: 1.2;
+        }
+        
+        .header-main {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+        
+        .header-sub {
+            font-size: 14px;
+            opacity: 0.9;
+            font-weight: 400;
         }
         
         .back-btn {
@@ -474,6 +505,27 @@
                 border-radius: 10px;
             }
             
+            .header {
+                padding: 10px 15px;
+            }
+            
+            .grower-logo {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .header-content {
+                gap: 8px;
+            }
+            
+            .header-main {
+                font-size: 16px;
+            }
+            
+            .header-sub {
+                font-size: 12px;
+            }
+            
             .content {
                 padding: 8px;
             }
@@ -597,7 +649,13 @@
         <div class="header">
             <a href="/activity" class="back-btn">← กลับ</a>
             <div class="header-title">
-                <h1>📊 รายงานดอกแบบละเอียด</h1>
+                <div class="header-content">
+                    <img src="/uploads/20250727_055943_review_1_budtboy1_V2.png" alt="โลโก้" class="grower-logo">
+                    <div class="header-text">
+                        <div class="header-main">รายงาน</div>
+                        <div class="header-sub">ดอกแบบละเอียด</div>
+                    </div>
+                </div>
             </div>
             <div style="width: 60px;"></div>
         </div>

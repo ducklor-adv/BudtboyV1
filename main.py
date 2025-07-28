@@ -1947,9 +1947,11 @@ def update_bud(bud_id):
         conn.commit()
         print(f"Successfully updated bud {bud_id}")
 
-        # Clear cache
+        # Clear all related cache
         clear_cache_pattern(f"bud_detail_{bud_id}")
+        clear_cache_pattern(f"bud_info_{bud_id}")
         clear_cache_pattern(f"user_buds_{user_id}")
+        clear_cache_pattern("all_buds_report")
 
         return jsonify({
             'success': True,
@@ -2842,6 +2844,10 @@ def get_bud_info(bud_id):
     if not is_authenticated():
         return jsonify({'error': 'Unauthorized'}), 401
 
+    # Clear any existing cache for this bud
+    clear_cache_pattern(f"bud_info_{bud_id}")
+    clear_cache_pattern(f"bud_detail_{bud_id}")
+
     conn = get_db_connection()
     if conn:
         try:
@@ -2853,7 +2859,7 @@ def get_bud_info(bud_id):
                        b.harvest_date, b.batch_number, b.grower_license_verified,
                        b.fertilizer_type, b.flowering_type, 
                        b.created_at, b.grower_id,
-                       u.username as grower_name, u.is_grower
+                       u.username as grower_name, u.is_grower, u.profile_image_url
                 FROM buds_data b
                 LEFT JOIN users u ON b.grower_id = u.id
                 WHERE b.id = %s
@@ -2865,6 +2871,9 @@ def get_bud_info(bud_id):
                     'success': False,
                     'error': f'ไม่พบข้อมูลดอก ID: {bud_id}'
                 }), 404
+
+            # Log the actual database result
+            print(f"Database result for bud {bud_id}: grower_name = {result[18]}")
 
             bud_info = {
                 'id': result[0],
@@ -2885,8 +2894,9 @@ def get_bud_info(bud_id):
                 'flowering_type': result[15],
                 'created_at': result[16].strftime('%Y-%m-%d %H:%M:%S') if result[16] else None,
                 'grower_id': result[17],
-                'grower_name': result[18],
-                'is_grower': result[19]
+                'grower_name': result[18],  # This should now get the updated value
+                'is_grower': result[19],
+                'grower_profile_image': result[20]
             }
 
             cur.close()

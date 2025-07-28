@@ -894,6 +894,52 @@
             word-break: break-word;
         }
 
+        .no-contacts {
+            color: #999;
+            font-style: italic;
+            font-size: 12px;
+        }
+
+        .contact-link {
+            display: inline-block;
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 2px 6px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 10px;
+            font-weight: 600;
+            margin: 2px 2px 2px 0;
+            transition: all 0.3s ease;
+        }
+
+        .contact-link:hover {
+            background: #1976d2;
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .contact-link.facebook { background: #e8f4fd; color: #1877f2; }
+        .contact-link.facebook:hover { background: #1877f2; color: white; }
+
+        .contact-link.line { background: #e8f9e8; color: #00c300; }
+        .contact-link.line:hover { background: #00c300; color: white; }
+
+        .contact-link.instagram { background: #fce4ec; color: #e91e63; }
+        .contact-link.instagram:hover { background: #e91e63; color: white; }
+
+        .contact-link.twitter { background: #e3f2fd; color: #1da1f2; }
+        .contact-link.twitter:hover { background: #1da1f2; color: white; }
+
+        .contact-link.telegram { background: #e8f4fd; color: #0088cc; }
+        .contact-link.telegram:hover { background: #0088cc; color: white; }
+
+        .contact-link.phone { background: #fff3e0; color: #ff9800; }
+        .contact-link.phone:hover { background: #ff9800; color: white; }
+
+        .contact-link.other { background: #f3e5f5; color: #9c27b0; }
+        .contact-link.other:hover { background: #9c27b0; color: white; }
+
         @media (max-width: 768px) {
             .container {
                 margin: 5px;
@@ -1535,6 +1581,21 @@
                     title: '🌿 ข้อมูลพื้นฐาน',
                     items: [
                         { label: 'ผู้ปลูก', value: bud.grower_name || (bud.created_by && typeof bud.created_by === 'string' && bud.created_by.trim()) || 'บัดท์บอย' },
+                         // ช่องทางติดต่อของผู้ปลูก
+                        {
+                            label: 'ช่องทางติดต่อ',
+                            value: bud.contacts ? Object.entries(bud.contacts).map(([platform, link]) => {
+                                let className = `contact-link ${platform}`;
+                                if (['facebook', 'line', 'instagram', 'twitter', 'telegram'].includes(platform)) {
+                                    className = `contact-link ${platform}`;
+                                } else if (platform === 'phone') {
+                                     className = `contact-link phone`;
+                                } else{
+                                    className = `contact-link other`;
+                                }
+                                return `<a href="${link}" class="${className}" target="_blank">${platform}</a>`;
+                            }).join('') : '<span class="no-contacts">ไม่มีช่องทางติดต่อ</span>'
+                        },
                         { label: 'ผู้พัฒนาสายพันธ์', value: bud.breeder },
                         { label: 'ประเภท', value: bud.strain_type },
                         { label: 'เกรด', value: bud.grade }

@@ -2987,7 +2987,14 @@ def get_bud_info(bud_id):
                        b.created_at, b.updated_at, b.created_by,
                        COALESCE(u_grower.username, u_creator.username, 'บัดท์บอย') as grower_name, 
                        COALESCE(u_grower.is_grower, u_creator.is_grower, false) as is_grower, 
-                       COALESCE(u_grower.profile_image_url, u_creator.profile_image_url) as grower_profile_image
+                       COALESCE(u_grower.profile_image_url, u_creator.profile_image_url) as grower_profile_image,
+                       COALESCE(u_grower.contact_facebook, u_creator.contact_facebook) as grower_contact_facebook,
+                       COALESCE(u_grower.contact_line, u_creator.contact_line) as grower_contact_line,
+                       COALESCE(u_grower.contact_instagram, u_creator.contact_instagram) as grower_contact_instagram,
+                       COALESCE(u_grower.contact_twitter, u_creator.contact_twitter) as grower_contact_twitter,
+                       COALESCE(u_grower.contact_telegram, u_creator.contact_telegram) as grower_contact_telegram,
+                       COALESCE(u_grower.contact_phone, u_creator.contact_phone) as grower_contact_phone,
+                       COALESCE(u_grower.contact_other, u_creator.contact_other) as grower_contact_other
                 FROM buds_data b
                 LEFT JOIN users u_grower ON b.grower_id = u_grower.id
                 LEFT JOIN users u_creator ON b.created_by = u_creator.id
@@ -3038,7 +3045,14 @@ def get_bud_info(bud_id):
                 'created_by': result[30],
                 'grower_name': result[31],
                 'is_grower': result[32],
-                'grower_profile_image': result[33]
+                'grower_profile_image': result[33],
+                'grower_contact_facebook': result[34],
+                'grower_contact_line': result[35],
+                'grower_contact_instagram': result[36],
+                'grower_contact_twitter': result[37],
+                'grower_contact_telegram': result[38],
+                'grower_contact_phone': result[39],
+                'grower_contact_other': result[40]
             }
 
             cur.close()

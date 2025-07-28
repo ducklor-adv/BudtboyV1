@@ -793,8 +793,10 @@
             border-radius: 15px;
             padding: 10px;
             background: #f8f9fa;
-            width: 600px;
+            width: 100%;
+            max-width: 800px;
             height: 160px;
+            margin: 0 auto;
         }
         
         .bud-image {
@@ -1039,8 +1041,9 @@
                 gap: 6px;
                 padding: 8px;
                 width: 100%;
-                max-width: 280px;
-                height: 160px;
+                max-width: 320px;
+                height: 140px;
+                margin: 0 auto;
             }
             
             .bud-image {
@@ -1084,10 +1087,8 @@
                 <!-- รูปดอก 4 รูป -->
                 <div class="section">
                     <div class="section-title">📸 รูปดอก</div>
-                    <div style="display: flex; justify-content: center;">
-                        <div class="bud-images-display" id="budImagesDisplay">
-                            <!-- Bud images will be populated here -->
-                        </div>
+                    <div class="bud-images-display" id="budImagesDisplay">
+                        <!-- Bud images will be populated here -->
                     </div>
                 </div>
                 
@@ -1202,9 +1203,20 @@
             // Update grower name in header with better handling
             const growerNameElement = document.getElementById('growerName');
             if (growerNameElement) {
-                const growerName = bud.grower_name || 'ไม่ทราบชื่อ';
+                let growerName = 'ไม่ทราบชื่อ';
+                
+                // Check multiple possible sources for grower name
+                if (bud.grower_name && bud.grower_name.trim()) {
+                    growerName = bud.grower_name;
+                } else if (bud.username && bud.username.trim()) {
+                    growerName = bud.username;
+                } else if (bud.grower_id) {
+                    growerName = `ผู้ปลูก ID: ${bud.grower_id}`;
+                }
+                
                 growerNameElement.textContent = growerName;
                 console.log('Updated grower name element with:', growerName);
+                console.log('Bud grower_id:', bud.grower_id, 'grower_name:', bud.grower_name);
             } else {
                 console.error('Grower name element not found');
             }

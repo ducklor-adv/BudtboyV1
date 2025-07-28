@@ -3483,24 +3483,35 @@ def chat_with_ai():
                 'message': 'ขออภัย ระบบ AI ยังไม่พร้อมใช้งาน กรุณาติดต่อผู้ดูแลระบบ'
             })
 
-        # ขั้นตอนที่ 1: วิเคราะห์ความต้องการของ user
-        search_criteria = analyze_user_request(user_message)
+        # ตรวจสอบคำขอดอกอย่างง่าย ๆ ก่อน
+        bud_request_keywords = [
+            'หาดอก', 'แนะนำดอก', 'อยากได้ดอก', 'ช่วยหาดอก', 'ขอดอก', 
+            'ดอกไหนดี', 'มีดอกอะไร', 'ดอกแบบไหน', 'แนะนำสายพันธุ์',
+            'strain ไหนดี', 'ดอกสำหรับ', 'หาสายพันธุ์'
+        ]
         
-        if search_criteria:
-            # ขั้นตอนที่ 2: ค้นหา bud ที่เหมาะสม
-            recommended_buds = find_matching_buds(search_criteria)
+        # ตรวจสอบว่ามีคำขอดอกในข้อความหรือไม่
+        has_bud_request = any(keyword in user_message.lower() for keyword in bud_request_keywords)
+        
+        if has_bud_request:
+            # ขั้นตอนที่ 1: วิเคราะห์ความต้องการของ user
+            search_criteria = analyze_user_request(user_message)
             
-            if recommended_buds:
-                # ขั้นตอนที่ 3: สร้างคำตอบที่มี link bud report
-                ai_response = generate_recommendation_response(search_criteria, recommended_buds, user_message)
+            if search_criteria:
+                # ขั้นตอนที่ 2: ค้นหา bud ที่เหมาะสม
+                recommended_buds = find_matching_buds(search_criteria)
                 
-                return jsonify({
-                    'success': True,
-                    'message': ai_response,
-                    'has_recommendations': True,
-                    'recommended_buds': recommended_buds,
-                    'search_criteria': search_criteria
-                })
+                if recommended_buds:
+                    # ขั้นตอนที่ 3: สร้างคำตอบที่มี link bud report
+                    ai_response = generate_recommendation_response(search_criteria, recommended_buds, user_message)
+                    
+                    return jsonify({
+                        'success': True,
+                        'message': ai_response,
+                        'has_recommendations': True,
+                        'recommended_buds': recommended_buds,
+                        'search_criteria': search_criteria
+                    })
 
         # ถ้าไม่ใช่การขอคำแนะนำดอก ให้ตอบแบบปกติ
         # Build conversation context

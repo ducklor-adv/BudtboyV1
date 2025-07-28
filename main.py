@@ -1831,38 +1831,81 @@ def update_bud(bud_id):
             'updated_at = CURRENT_TIMESTAMP'
         ]
 
-        # Validate and clean constraint fields
-        grow_method = data.get('grow_method', '').strip()
-        if grow_method not in ['Indoor', 'Outdoor', 'Greenhouse', 'Hydroponic']:
+        # Validate and clean constraint fields with better handling
+        grow_method = data.get('grow_method')
+        if grow_method:
+            grow_method = grow_method.strip()
+            if grow_method not in ['Indoor', 'Outdoor', 'Greenhouse', 'Hydroponic']:
+                grow_method = None
+        else:
             grow_method = None
             
-        strain_type = data.get('strain_type', '').strip()
-        if strain_type not in ['Indica', 'Sativa', 'Hybrid']:
+        strain_type = data.get('strain_type')
+        if strain_type:
+            strain_type = strain_type.strip()
+            if strain_type not in ['Indica', 'Sativa', 'Hybrid']:
+                strain_type = None
+        else:
             strain_type = None
             
-        grade = data.get('grade', '').strip()
-        if grade not in ['A+', 'A', 'B+', 'B', 'C']:
+        grade = data.get('grade')
+        if grade:
+            grade = grade.strip()
+            if grade not in ['A+', 'A', 'B+', 'B', 'C']:
+                grade = None
+        else:
             grade = None
             
-        recommended_time = data.get('recommended_time', '').strip()
-        if recommended_time not in ['กลางวัน', 'กลางคืน', 'ตลอดวัน']:
+        recommended_time = data.get('recommended_time')
+        if recommended_time:
+            recommended_time = recommended_time.strip()
+            if recommended_time not in ['กลางวัน', 'กลางคืน', 'ตลอดวัน']:
+                recommended_time = None
+        else:
             recommended_time = None
             
-        fertilizer_type = data.get('fertilizer_type', '').strip()
-        if fertilizer_type not in ['Organic', 'Chemical', 'Mixed']:
+        fertilizer_type = data.get('fertilizer_type')
+        if fertilizer_type:
+            fertilizer_type = fertilizer_type.strip()
+            if fertilizer_type not in ['Organic', 'Chemical', 'Mixed']:
+                fertilizer_type = None
+        else:
             fertilizer_type = None
             
-        flowering_type = data.get('flowering_type', '').strip()
-        if flowering_type not in ['Photoperiod', 'Autoflower']:
+        flowering_type = data.get('flowering_type')
+        if flowering_type:
+            flowering_type = flowering_type.strip()
+            if flowering_type not in ['Photoperiod', 'Autoflower']:
+                flowering_type = None
+        else:
             flowering_type = None
+            
+        # Validate percentage fields
+        thc_percentage = data.get('thc_percentage')
+        if thc_percentage is not None:
+            try:
+                thc_percentage = float(thc_percentage)
+                if thc_percentage < 0 or thc_percentage > 100:
+                    thc_percentage = None
+            except (ValueError, TypeError):
+                thc_percentage = None
+                
+        cbd_percentage = data.get('cbd_percentage')
+        if cbd_percentage is not None:
+            try:
+                cbd_percentage = float(cbd_percentage)
+                if cbd_percentage < 0 or cbd_percentage > 100:
+                    cbd_percentage = None
+            except (ValueError, TypeError):
+                cbd_percentage = None
 
         update_values = [
             data.get('strain_name_th'),
             data.get('strain_name_en'),
             data.get('breeder'),
             strain_type,
-            data.get('thc_percentage'),
-            data.get('cbd_percentage'),
+            thc_percentage,
+            cbd_percentage,
             grade,
             data.get('aroma_flavor'),
             data.get('top_terpenes_1'),
@@ -2912,9 +2955,9 @@ def bud_report_detail(bud_id):
         return redirect('/auth')
     return render_template('bud_report.html', bud_id=bud_id)
 
-@app.route('/api/buds/<int:bud_id>', methods=['GET'])
+@app.route('/api/buds/<int:bud_id>/detail', methods=['GET'])
 def get_bud_detail(bud_id):
-    """Get individual bud data for editing"""
+    """Get individual bud data for editing (renamed route to avoid conflict)"""
     if 'user_id' not in session:
         return jsonify({'error': 'ไม่ได้เข้าสู่ระบบ'}), 401
 

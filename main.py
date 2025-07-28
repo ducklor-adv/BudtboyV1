@@ -2849,13 +2849,19 @@ def get_bud_detail(bud_id):
         return jsonify({'error': 'ไม่ได้เข้าสู่ระบบ'}), 401
 
     user_id = session['user_id']
+    cache_key = f"bud_detail_{bud_id}_{user_id}"
+
+    # Check cache first
+    cached_data = get_cache(cache_key)
+    if cached_data:
+        return jsonify(cached_data)
 
     conn = get_db_connection()
     if conn:
         try:
             cur = conn.cursor()
 
-            # Get bud data - only allow user to access their own buds
+            # Optimized query with image URLs
             cur.execute("""
                 SELECT id, strain_name_th, strain_name_en, breeder, strain_type,
                        thc_percentage, cbd_percentage, grade, aroma_flavor,
@@ -2864,7 +2870,8 @@ def get_bud_detail(bud_id):
                        physical_effects_positive, physical_effects_negative,
                        recommended_time, grow_method, harvest_date, batch_number,
                        grower_id, grower_license_verified, fertilizer_type, 
-                       flowering_type, created_at, updated_at, created_by
+                       flowering_type, image_1_url, image_2_url, image_3_url, image_4_url,
+                       created_at, updated_at, created_by
                 FROM buds_data
                 WHERE id = %s AND created_by = %s
             """, (bud_id, user_id))
@@ -2906,6 +2913,9 @@ def get_bud_detail(bud_id):
                 'updated_at': result[29].strftime('%Y-%m-%d %H:%M:%S') if result[29] else None,
                 'created_by': result[30]
             }
+
+            # Cache for 5 minutes
+            set_cache(cache_key, bud_data)
 
             cur.close()
             return_db_connection(conn)

@@ -1771,7 +1771,7 @@
             }
         });
 
-        // Load bud data for editing
+        // Load bud data for editing with timeout
         async function loadBudData() {
             budId = getBudIdFromUrl();
             
@@ -1781,7 +1781,16 @@
             }
 
             try {
-                const response = await fetch(`/api/buds/${budId}`);
+                // Add timeout to prevent hanging
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+                const response = await fetch(`/api/buds/${budId}`, {
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+
                 if (response.ok) {
                     budData = await response.json();
                     populateForm(budData);
@@ -1790,14 +1799,20 @@
                 } else {
                     const errorData = await response.json();
                     showError(errorData.error || 'ไม่สามารถโหลดข้อมูลได้');
+                    document.getElementById('loadingState').style.display = 'none';
                 }
             } catch (error) {
                 console.error('Error loading bud data:', error);
-                showError('เกิดข้อผิดพลาดในการโหลดข้อมูล');
+                if (error.name === 'AbortError') {
+                    showError('การโหลดข้อมูลใช้เวลานานเกินไป กรุณาลองใหม่อีกครั้ง');
+                } else {
+                    showError('เกิดข้อผิดพลาดในการโหลดข้อมูล');
+                }
+                document.getElementById('loadingState').style.display = 'none';
             }
         }
 
-        // Display current images
+        // Display current images with lazy loading
         function displayCurrentImages(data) {
             const currentImagesSection = document.getElementById('currentImagesSection');
             const currentImagesGrid = document.getElementById('currentImagesGrid');
@@ -1823,7 +1838,9 @@
                     
                     imagesHtml += `
                         <div class="current-image-item">
-                            <img src="${imageUrl}" alt="${img.label}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                            <img loading="lazy" src="${imageUrl}" alt="${img.label}" 
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+                                 style="max-width: 100%; height: auto;">
                             <div class="current-image-label" style="display: none;">ไม่สามารถโหลดรูปได้</div>
                             <div class="current-image-label">${img.label}</div>
                         </div>
@@ -1995,26 +2012,33 @@
             showAlert(message, 'success');
         }
 
-        // Initialize page
+        // Initialize page with optimized loading order
         document.addEventListener('DOMContentLoaded', function() {
             try {
-                // Initialize autocomplete first
-                new StrainAutocomplete('strain_name_en', 'suggestions_en', 'en');
-                new StrainAutocomplete('strain_name_th', 'suggestions_th', 'th');
-                initializeBreederAutocomplete('breeder', 'breeder-suggestions', '/api/breeders/search');
+                console.log('DOM loaded, initializing...');
+                
+                // Load critical data first
+                loadBudData();
 
-                // Initialize flavor and effects selectors
-                initializeFlavorSelector();
-                initializeEffectsSelectors();
-
-                // Set up form submission
+                // Initialize form submission immediately
                 document.getElementById('editBudForm').addEventListener('submit', handleSubmit);
 
-                // Load existing bud data
-                loadBudData();
+                // Initialize components in background after a delay
+                setTimeout(() => {
+                    // Initialize autocomplete
+                    new StrainAutocomplete('strain_name_en', 'suggestions_en', 'en');
+                    new StrainAutocomplete('strain_name_th', 'suggestions_th', 'th');
+                    initializeBreederAutocomplete('breeder', 'breeder-suggestions', '/api/breeders/search');
+
+                    // Initialize selectors
+                    initializeFlavorSelector();
+                    initializeEffectsSelectors();
+                }, 100);
+
             } catch (error) {
                 console.error('Error initializing page:', error);
                 showError('เกิดข้อผิดพลาดในการโหลดหน้า');
+                document.getElementById('loadingState').style.display = 'none';
             }
         });
     </script>

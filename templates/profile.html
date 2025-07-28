@@ -1436,7 +1436,7 @@
             messagesContainer.appendChild(messageDiv);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
-            chatHistory.push({ role: 'bot', message, time: new Date() });
+            chatHistory.push({ role: 'assistant', message, time: new Date() });
         }
 
         function showTypingIndicator() {

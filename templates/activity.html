@@ -344,6 +344,50 @@
             text-overflow: ellipsis;
         }
 
+        .status-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 9px;
+            font-weight: 600;
+            margin-left: 5px;
+        }
+
+        .status-available {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .status-sold-out {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .status-toggle-btn {
+            background: #ff9800;
+            color: white;
+            border: none;
+            padding: 4px 6px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-bottom: 2px;
+        }
+
+        .status-toggle-btn:hover {
+            background: #f57c00;
+            transform: translateY(-1px);
+        }
+
+        .status-toggle-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         .bud-date {
             font-size: 8px;
             color: #666;
@@ -1206,11 +1250,20 @@ displayBuds(budsData);
                 return;
             }
 
-            budsList.innerHTML = buds.map(bud => `
+            budsList.innerHTML = buds.map(bud => {
+                const statusText = bud.status === 'available' ? 'ยังเหลือ' : 'หมดแล้ว';
+                const statusClass = bud.status === 'available' ? 'status-available' : 'status-sold-out';
+                const toggleText = bud.status === 'available' ? 'เปลี่ยนเป็น หมดแล้ว' : 'เปลี่ยนเป็น ยังเหลือ';
+                const newStatus = bud.status === 'available' ? 'sold_out' : 'available';
+
+                return `
                 <div class="item-card">
                     <div class="bud-header">
                         <div class="bud-title">
-                            <div class="strain-name">${bud.strain_name_en || 'ไม่ระบุชื่อ'} ${bud.strain_name_th ? `(${bud.strain_name_th})` : ''}</div>
+                            <div class="strain-name">
+                                ${bud.strain_name_en || 'ไม่ระบุชื่อ'} ${bud.strain_name_th ? `(${bud.strain_name_th})` : ''}
+                                <span class="status-badge ${statusClass}">${statusText}</span>
+                            </div>
                             <div class="bud-date">${formatDate(bud.created_at)}</div>
                         </div>
                     </div>
@@ -1240,6 +1293,10 @@ displayBuds(budsData);
                         </div>
 
                         <div class="bud-actions">
+                            <button class="status-toggle-btn" onclick="toggleBudStatus(${bud.id}, '${newStatus}', this)">
+                                🔄 ${toggleText}
+                            </button>
+                            
                             <a href="/bud-report?id=${bud.id}" class="action-btn primary">
                                 📊 Full Report & all Review
                             </a>
@@ -1249,7 +1306,8 @@ displayBuds(budsData);
                         </div>
                     </div>
                 </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         function displayReviews(reviews) {
@@ -1402,6 +1460,44 @@ displayBuds(budsData);
         function editReview(reviewId) {
             if (reviewId) {
                 window.location.href = `/edit-review?id=${reviewId}`;
+            }
+        }
+
+        function toggleBudStatus(budId, newStatus, buttonElement) {
+            if (!budId || !newStatus) return;
+
+            const statusText = newStatus === 'available' ? 'ยังเหลือ' : 'หมดแล้ว';
+
+            if (confirm(`คุณต้องการเปลี่ยนสถานะเป็น "${statusText}" หรือไม่?`)) {
+                // Disable button during request
+                const originalText = buttonElement.textContent;
+                buttonElement.disabled = true;
+                buttonElement.textContent = '⏳ กำลังเปลี่ยน...';
+
+                fetch(`/api/buds/${budId}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        loadBuds(); // Reload the list to reflect changes
+                    } else {
+                        alert('เกิดข้อผิดพลาด: ' + (data.error || 'ไม่สามารถเปลี่ยนสถานะได้'));
+                        buttonElement.disabled = false;
+                        buttonElement.textContent = originalText;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('เกิดข้อผิดพลาดในการเปลี่ยนสถานะ');
+                    buttonElement.disabled = false;
+                    buttonElement.textContent = originalText;
+                });
             }
         }
 

@@ -894,6 +894,7 @@ def create_tables():
                     grower_license_verified BOOLEAN DEFAULT FALSE,
                     fertilizer_type VARCHAR(20) CHECK (fertilizer_type IN ('Organic', 'Chemical', 'Mixed')),
                     flowering_type VARCHAR(20) CHECK (flowering_type IN ('Photoperiod', 'Autoflower')),
+                    status VARCHAR(20) CHECK (status IN ('available', 'sold_out')) DEFAULT 'available',
                     image_1_url VARCHAR(500),
                     image_2_url VARCHAR(500),
                     image_3_url VARCHAR(500),
@@ -915,6 +916,17 @@ def create_tables():
                 """)
             except Exception as e:
                 print(f"Note: Image columns may already exist: {e}")
+
+            # Add status column if it doesn't exist (for existing databases)
+            try:
+                cur.execute("""
+                    ALTER TABLE buds_data 
+                    ADD COLUMN IF NOT EXISTS status VARCHAR(20) CHECK (status IN ('available', 'sold_out')) DEFAULT 'available';
+                """)
+                # Set default status for existing records
+                cur.execute("UPDATE buds_data SET status = 'available' WHERE status IS NULL;")
+            except Exception as e:
+                print(f"Note: Status column may already exist: {e}")
 
             # Create reviews table
             cur.execute("""
@@ -1150,14 +1162,14 @@ def get_user_buds():
         # Optimized query with better performance
         cur.execute("""
             SELECT b.id, b.strain_name_en, b.strain_name_th, b.breeder, b.thc_percentage, 
-                   b.cbd_percentage, b.strain_type, b.created_at, b.image_1_url,
+                   b.cbd_percentage, b.strain_type, b.created_at, b.image_1_url, b.status,
                    COALESCE(AVG(r.overall_rating), 0) as avg_rating,
                    COUNT(r.id) as review_count
             FROM buds_data b
             LEFT JOIN reviews r ON b.id = r.bud_reference_id
             WHERE b.created_by = %s 
             GROUP BY b.id, b.strain_name_en, b.strain_name_th, b.breeder, 
-                     b.thc_percentage, b.cbd_percentage, b.strain_type, b.created_at, b.image_1_url
+                     b.thc_percentage, b.cbd_percentage, b.strain_type, b.created_at, b.image_1_url, b.status
             ORDER BY b.created_at DESC
             LIMIT 50
         """, (user_id,))
@@ -1174,8 +1186,9 @@ def get_user_buds():
                 'strain_type': row[6],
                 'created_at': row[7].strftime('%Y-%m-%d %H:%M:%S') if row[7] else None,
                 'image_1_url': f'/uploads/{row[8].split("/")[-1]}' if row[8] else None,
-                'avg_rating': float(row[9]) if row[9] else 0,
-                'review_count': row[10]
+                'status': row[9] or 'available',
+                'avg_rating': float(row[10]) if row[10] else 0,
+                'review_count': row[11]
             })
 
         # Cache for 2 minutes
@@ -2125,6 +2138,65 @@ def get_bud(bud_id):
                 cur.close()
             if conn:
                 return_db_connection(conn)
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+@app.route('/api/buds/<int:bud_id>/status', methods=['PUT'])
+def update_bud_status(bud_id):
+    """Update bud status (available/sold_out)"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'ไม่ได้เข้าสู่ระบบ'}), 401
+
+    data = request.get_json()
+    user_id = session['user_id']
+    new_status = data.get('status')
+
+    if new_status not in ['available', 'sold_out']:
+        return jsonify({'error': 'สถานะไม่ถูกต้อง'}), 400
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+
+            # Check if user has permission to update (owner of the bud)
+            cur.execute("""
+                SELECT created_by FROM buds_data WHERE id = %s
+            """, (bud_id,))
+            result = cur.fetchone()
+
+            if not result:
+                return jsonify({'error': 'ไม่พบข้อมูล Bud'}), 404
+
+            if result[0] != user_id:
+                return jsonify({'error': 'ไม่มีสิทธิ์เปลี่ยนสถานะของ Bud นี้'}), 403
+
+            # Update status
+            cur.execute("""
+                UPDATE buds_data 
+                SET status = %s, updated_at = CURRENT_TIMESTAMP
+                WHERE id = %s
+            """, (new_status, bud_id))
+
+            conn.commit()
+
+            # Clear cache
+            clear_cache_pattern(f"user_buds_{user_id}")
+            clear_cache_pattern("all_buds_report")
+
+            status_text = 'ยังเหลือ' if new_status == 'available' else 'หมดแล้ว'
+            return jsonify({
+                'success': True,
+                'message': f'เปลี่ยนสถานะเป็น "{status_text}" สำเร็จ',
+                'new_status': new_status
+            })
+
+        except Exception as e:
+            conn.rollback()
+            return jsonify({'error': str(e)}), 500
+        finally:
+            cur.close()
+            return_db_connection(conn)
     else:
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 

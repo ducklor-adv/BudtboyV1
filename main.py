@@ -762,7 +762,7 @@ def create_tables():
                     ('Night Owl Seeds', False),
                     ('Nirvana Seeds', True),
                     ('OG Raskal Genetics', False),
-                    ('Ocean Grown Seeds', False),
+                    ('Ocean Grown Seeds',False),
                     ('Oni Seed Co', False),
                     ('Paradise Seeds', True),
                     ('Philosopher Seeds', False),
@@ -1077,7 +1077,7 @@ def get_user_buds():
 
     user_id = session.get('user_id')
     cache_key = f"user_buds_{user_id}"
-    
+
     # Check cache first
     cached_data = get_cache(cache_key)
     if cached_data:
@@ -1139,7 +1139,7 @@ def get_user_reviews():
 
     user_id = session.get('user_id')
     cache_key = f"user_reviews_{user_id}"
-    
+
     # Check cache first
     cached_data = get_cache(cache_key)
     if cached_data:
@@ -1549,8 +1549,7 @@ def get_buds():
 
     conn = get_db_connection()
     if conn:
-        try:
-            cur = conn.cursor()
+        try:            cur = conn.cursor()
 
             # Build query with filters
             query = """
@@ -2755,13 +2754,6 @@ def bud_report_page():
     if 'user_id' not in session:
         return redirect('/auth')
     return render_template('bud_report.html')
-
-@app.route('/edit-bud')
-def edit_bud_page():
-    # Check if user is logged in
-    if 'user_id' not in session:
-        return redirect('/auth')
-    return render_template('edit_bud.html')
 
 @app.route('/bud_report/<int:bud_id>')
 def bud_report_detail(bud_id):

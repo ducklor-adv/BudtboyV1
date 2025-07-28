@@ -3673,30 +3673,48 @@ def chat_with_ai():
         }), 500
 
 def analyze_user_request(user_message):
-    """วิเคราะห์ความต้องการของ user และแปลงเป็นเกณฑ์การค้นหา"""
+    """วิเคราะห์ความต้องการของ user และแปลงเป็นเกณฑ์การค้นหาแบบละเอียด"""
     try:
-        # ใช้ OpenAI เพื่อวิเคราะห์ความต้องการ
+        # ใช้ OpenAI เพื่อวิเคราะห์ความต้องการอย่างละเอียด
         analysis_prompt = f"""
-วิเคราะห์ข้อความต่อไปนี้และระบุว่าผู้ใช้กำลังขอคำแนะนำดอกกัญชาหรือไม่:
+วิเคราะห์ข้อความต่อไปนี้อย่างละเอียดและระบุว่าผู้ใช้กำลังขอคำแนะนำดอกกัญชาหรือไม่:
 
 ข้อความ: "{user_message}"
 
-หากใช่ ให้แยกข้อมูลต่อไปนี้ออกมา (ถ้าไม่มีให้ใส่ null):
-- strain_type: "Indica", "Sativa", "Hybrid" หรือ null
-- desired_effects: รายการผลกระทบที่ต้องการ (เช่น ผ่อนคลาย, กระตุ้น, ช่วยนอน)
+ให้วิเคราะห์ดังนี้:
+1. ตรวจสอบว่ามีการขอคำแนะนำดอกหรือไม่
+2. หากใช่ ให้วิเคราะห์ข้อมูลเหล่านี้อย่างละเอียด:
+
+**ข้อมูลพื้นฐาน:**
+- strain_type: "Indica" (ผ่อนคลาย, ง่วง), "Sativa" (กระตุ้น, ตื่นตัว), "Hybrid" หรือ null
+- specific_strain_name: ชื่อสายพันธุ์ที่เฉพาะเจาะจง (เช่น "คุช", "Blue Dream") หรือ null
+
+**ผลกระทบที่ต้องการ:**
+- desired_effects: ["ผ่อนคลาย", "ช่วยนอน", "กระตุ้น", "สร้างสรรค์", "บรรเทาปวด"] หรือ []
 - time_preference: "กลางวัน", "กลางคืน", "ตลอดวัน" หรือ null
-- thc_range: [min, max] หรือ null
-- cbd_preference: "สูง", "ต่ำ", "ปกติ" หรือ null
-- grade_preference: "A+", "A", "B+" หรือ null
+
+**ความต้องการเฉพาะ:**
+- aroma_keywords: คำคีย์เวิร์ดเกี่ยวกับกลิ่น/รส (เช่น ["หวาน", "ส้ม", "ดิน"]) หรือ []
+- terpene_keywords: terpene ที่ต้องการ (เช่น ["myrcene", "limonene"]) หรือ []
+- thc_preference: "สูง" (>20%), "ปกติ" (15-20%), "ต่ำ" (<15%) หรือ null
+- cbd_preference: "สูง" (>5%), "ปกติ" (1-5%), "ต่ำ" (<1%) หรือ null
+- grade_preference: "A+" (คุณภาพสูงสุด), "A", "B+" หรือ null
+
+**คะแนนความเฉพาะเจาะจง (1-10):**
+- specificity_score: ระดับความเฉพาะเจาะจงของคำขอ (10 = มีรายละเอียดมาก, 1 = ทั่วไปมาก)
 
 ตอบเป็น JSON format:
 {{
   "is_recommendation_request": true/false,
+  "specificity_score": 1-10,
   "criteria": {{
     "strain_type": "...",
+    "specific_strain_name": "...",
     "desired_effects": [...],
     "time_preference": "...",
-    "thc_range": [...],
+    "aroma_keywords": [...],
+    "terpene_keywords": [...],
+    "thc_preference": "...",
     "cbd_preference": "...",
     "grade_preference": "..."
   }}
@@ -3707,7 +3725,7 @@ def analyze_user_request(user_message):
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[{"role": "user", "content": analysis_prompt}],
-            max_tokens=300,
+            max_tokens=400,
             temperature=0.1
         )
         
@@ -3718,7 +3736,9 @@ def analyze_user_request(user_message):
         try:
             parsed_result = json.loads(analysis_result)
             if parsed_result.get('is_recommendation_request'):
-                return parsed_result.get('criteria', {})
+                criteria = parsed_result.get('criteria', {})
+                criteria['specificity_score'] = parsed_result.get('specificity_score', 5)
+                return criteria
         except json.JSONDecodeError:
             print(f"Failed to parse JSON: {analysis_result}")
             
@@ -3728,7 +3748,7 @@ def analyze_user_request(user_message):
     return None
 
 def find_matching_buds(search_criteria):
-    """ค้นหา bud ที่ตรงกับเกณฑ์ที่กำหนด"""
+    """ค้นหา bud ที่ตรงกับเกณฑ์ที่กำหนดแบบชาญฉลาด"""
     try:
         conn = get_db_connection()
         if not conn:
@@ -3736,64 +3756,124 @@ def find_matching_buds(search_criteria):
         
         cur = conn.cursor()
         
-        # สร้าง query แบบไดนามิก
+        # เก็บเงื่อนไขและคะแนนการจับคู่
         where_conditions = []
         params = []
+        scoring_conditions = []
         
-        # กรองตาม strain_type
+        # 1. ค้นหาตามชื่อสายพันธุ์เฉพาะเจาะจง (ความสำคัญสูงสุด)
+        if search_criteria.get('specific_strain_name'):
+            strain_name = search_criteria['specific_strain_name']
+            where_conditions.append("""
+                (strain_name_en ILIKE %s OR strain_name_th ILIKE %s OR 
+                 strain_name_en ILIKE %s OR strain_name_th ILIKE %s)
+            """)
+            params.extend([f'%{strain_name}%', f'%{strain_name}%', 
+                          f'{strain_name}%', f'{strain_name}%'])
+            scoring_conditions.append("""
+                CASE 
+                    WHEN strain_name_en ILIKE %s OR strain_name_th ILIKE %s THEN 100
+                    WHEN strain_name_en ILIKE %s OR strain_name_th ILIKE %s THEN 80
+                    ELSE 0 
+                END
+            """)
+            params.extend([f'{strain_name}%', f'{strain_name}%', 
+                          f'%{strain_name}%', f'%{strain_name}%'])
+        
+        # 2. ค้นหาตามกลิ่น/รส (สำคัญมาก)
+        if search_criteria.get('aroma_keywords'):
+            for keyword in search_criteria['aroma_keywords']:
+                where_conditions.append("aroma_flavor ILIKE %s")
+                params.append(f'%{keyword}%')
+                scoring_conditions.append(f"""
+                    CASE WHEN aroma_flavor ILIKE %s THEN 50 ELSE 0 END
+                """)
+                params.append(f'%{keyword}%')
+        
+        # 3. ค้นหาตาม terpene (สำคัญมาก)
+        if search_criteria.get('terpene_keywords'):
+            for terpene in search_criteria['terpene_keywords']:
+                where_conditions.append("""
+                    (top_terpenes_1 ILIKE %s OR top_terpenes_2 ILIKE %s OR top_terpenes_3 ILIKE %s)
+                """)
+                params.extend([f'%{terpene}%', f'%{terpene}%', f'%{terpene}%'])
+                scoring_conditions.append(f"""
+                    CASE 
+                        WHEN top_terpenes_1 ILIKE %s THEN 40
+                        WHEN top_terpenes_2 ILIKE %s OR top_terpenes_3 ILIKE %s THEN 30
+                        ELSE 0 
+                    END
+                """)
+                params.extend([f'%{terpene}%', f'%{terpene}%', f'%{terpene}%'])
+        
+        # 4. กรองตาม strain_type
         if search_criteria.get('strain_type'):
             where_conditions.append("strain_type = %s")
             params.append(search_criteria['strain_type'])
+            scoring_conditions.append("CASE WHEN strain_type = %s THEN 20 ELSE 0 END")
+            params.append(search_criteria['strain_type'])
         
-        # กรองตาม time_preference
+        # 5. กรองตาม time_preference
         if search_criteria.get('time_preference'):
             where_conditions.append("recommended_time = %s")
             params.append(search_criteria['time_preference'])
+            scoring_conditions.append("CASE WHEN recommended_time = %s THEN 15 ELSE 0 END")
+            params.append(search_criteria['time_preference'])
         
-        # กรองตาม THC range
-        if search_criteria.get('thc_range') and len(search_criteria['thc_range']) == 2:
-            min_thc, max_thc = search_criteria['thc_range']
-            if min_thc is not None:
-                where_conditions.append("thc_percentage >= %s")
-                params.append(min_thc)
-            if max_thc is not None:
-                where_conditions.append("thc_percentage <= %s")
-                params.append(max_thc)
+        # 6. กรองตาม THC preference
+        if search_criteria.get('thc_preference'):
+            if search_criteria['thc_preference'] == 'สูง':
+                where_conditions.append("thc_percentage > 20")
+                scoring_conditions.append("CASE WHEN thc_percentage > 20 THEN 10 ELSE 0 END")
+            elif search_criteria['thc_preference'] == 'ปกติ':
+                where_conditions.append("thc_percentage BETWEEN 15 AND 20")
+                scoring_conditions.append("CASE WHEN thc_percentage BETWEEN 15 AND 20 THEN 10 ELSE 0 END")
+            elif search_criteria['thc_preference'] == 'ต่ำ':
+                where_conditions.append("thc_percentage < 15")
+                scoring_conditions.append("CASE WHEN thc_percentage < 15 THEN 10 ELSE 0 END")
         
-        # กรองตาม grade
-        if search_criteria.get('grade_preference'):
-            where_conditions.append("grade = %s")
-            params.append(search_criteria['grade_preference'])
-        
-        # กรองตาม CBD preference
+        # 7. กรองตาม CBD preference
         if search_criteria.get('cbd_preference'):
             if search_criteria['cbd_preference'] == 'สูง':
                 where_conditions.append("cbd_percentage > 5")
+                scoring_conditions.append("CASE WHEN cbd_percentage > 5 THEN 10 ELSE 0 END")
             elif search_criteria['cbd_preference'] == 'ต่ำ':
-                where_conditions.append("cbd_percentage < 2")
+                where_conditions.append("cbd_percentage < 1")
+                scoring_conditions.append("CASE WHEN cbd_percentage < 1 THEN 10 ELSE 0 END")
         
-        # สร้าง query
-        base_query = """
+        # 8. กรองตาม grade
+        if search_criteria.get('grade_preference'):
+            where_conditions.append("grade = %s")
+            params.append(search_criteria['grade_preference'])
+            scoring_conditions.append("CASE WHEN grade = %s THEN 15 ELSE 0 END")
+            params.append(search_criteria['grade_preference'])
+        
+        # สร้าง query พร้อมคะแนนการจับคู่
+        if not where_conditions:
+            # หากไม่มีเงื่อนไข ให้ส่งกลับรายการว่าง
+            return []
+        
+        # สร้าง scoring expression
+        scoring_expr = " + ".join(scoring_conditions) if scoring_conditions else "0"
+        
+        base_query = f"""
             SELECT b.id, b.strain_name_en, b.strain_name_th, b.breeder, b.strain_type,
                    b.thc_percentage, b.cbd_percentage, b.grade, b.aroma_flavor,
                    b.mental_effects_positive, b.physical_effects_positive,
-                   b.recommended_time, b.created_at,
+                   b.recommended_time, b.created_at, b.top_terpenes_1, b.top_terpenes_2, b.top_terpenes_3,
                    COALESCE(AVG(r.overall_rating), 0) as avg_rating,
-                   COUNT(r.id) as review_count
+                   COUNT(r.id) as review_count,
+                   ({scoring_expr}) as match_score
             FROM buds_data b
             LEFT JOIN reviews r ON b.id = r.bud_reference_id
-        """
-        
-        if where_conditions:
-            base_query += " WHERE " + " AND ".join(where_conditions)
-        
-        base_query += """
+            WHERE {' AND '.join(where_conditions)}
             GROUP BY b.id, b.strain_name_en, b.strain_name_th, b.breeder, b.strain_type,
                      b.thc_percentage, b.cbd_percentage, b.grade, b.aroma_flavor,
                      b.mental_effects_positive, b.physical_effects_positive,
-                     b.recommended_time, b.created_at
-            ORDER BY avg_rating DESC, review_count DESC
-            LIMIT 5
+                     b.recommended_time, b.created_at, b.top_terpenes_1, b.top_terpenes_2, b.top_terpenes_3
+            HAVING ({scoring_expr}) > 0
+            ORDER BY match_score DESC, avg_rating DESC, review_count DESC
+            LIMIT 3
         """
         
         cur.execute(base_query, params)
@@ -3815,8 +3895,12 @@ def find_matching_buds(search_criteria):
                 'physical_effects_positive': row[10],
                 'recommended_time': row[11],
                 'created_at': row[12].strftime('%Y-%m-%d') if row[12] else None,
-                'avg_rating': float(row[13]) if row[13] else 0,
-                'review_count': row[14],
+                'top_terpenes_1': row[13],
+                'top_terpenes_2': row[14],
+                'top_terpenes_3': row[15],
+                'avg_rating': float(row[16]) if row[16] else 0,
+                'review_count': row[17],
+                'match_score': row[18],
                 'report_link': f"/bud-report?id={row[0]}"
             }
             buds.append(bud)
@@ -3830,27 +3914,162 @@ def find_matching_buds(search_criteria):
         return []
 
 def generate_recommendation_response(search_criteria, recommended_buds, original_message):
-    """สร้างคำตอบที่มีคำแนะนำและ link"""
+    """สร้างคำตอบที่มีคำแนะนำและ link พร้อมทางเลือกใหม่หากไม่พบ"""
     if not recommended_buds:
-        return f"ขออภัยครับ ไม่พบดอกที่ตรงกับความต้องการของคุณในขณะนี้ 😔\n\nกรุณาลองปรับเกณฑ์การค้นหาใหม่ หรือสอบถามข้อมูลเพิ่มเติมได้เลยครับ!"
+        # หากไม่พบดอกที่ตรงตามเกณฑ์ ให้หาทางเลือกใหม่
+        alternative_buds = get_alternative_recommendations(search_criteria)
+        
+        response = f"🔍 ไม่พบดอกที่ตรงกับเกณฑ์ที่คุณต้องการทุกประการครับ\n\n"
+        
+        if alternative_buds:
+            response += f"💡 แต่ผมขอแนะนำทางเลือกที่น่าสนใจเหล่านี้:\n\n"
+            
+            for i, bud in enumerate(alternative_buds, 1):
+                rating_stars = "⭐" * int(round(bud['avg_rating'])) if bud['avg_rating'] > 0 else "ยังไม่มีรีวิว"
+                
+                response += f"**{i}. {bud['strain_name_th'] or 'ไม่ระบุชื่อไทย'}** ({bud['strain_name_en']})\n"
+                response += f"   • ประเภท: {bud['strain_type']}"
+                if bud.get('why_recommended'):
+                    response += f" | {bud['why_recommended']}\n"
+                else:
+                    response += "\n"
+                response += f"   • THC: {bud['thc_percentage']}% | CBD: {bud['cbd_percentage']}%\n"
+                response += f"   • เกรด: {bud['grade']} | คะแนน: {rating_stars} ({bud['avg_rating']:.1f}/5)\n"
+                if bud['aroma_flavor']:
+                    response += f"   • กลิ่น/รส: {bud['aroma_flavor']}\n"
+                response += f"   • 📊 **[ดูรายละเอียดเต็ม]({bud['report_link']})**\n\n"
+            
+            response += "✨ หรือคุณสามารถปรับเกณฑ์การค้นหาใหม่ เช่น:\n"
+            response += "• ลองใช้ชื่อสายพันธุ์อื่น\n"
+            response += "• ระบุกลิ่น/รสที่ต้องการ\n"
+            response += "• เปลี่ยนประเภท (Indica/Sativa/Hybrid)\n"
+            response += "• ระบุช่วงเวลาที่ต้องการใช้"
+        else:
+            response += "😅 ขณะนี้ยังไม่มีดอกในระบบที่ตรงกับความต้องการของคุณ\n\n"
+            response += "💭 คุณสามารถ:\n"
+            response += "• ลองใช้คำค้นหาที่กว้างขึ้น\n"
+            response += "• สอบถามเกี่ยวกับสายพันธุ์อื่นๆ\n"
+            response += "• ถามเกี่ยวกับผลกระทบที่ต้องการแทน"
+        
+        return response
     
-    response = f"🌿 ตามความต้องการของคุณ ผมแนะนำดอกเหล่านี้ครับ:\n\n"
+    # หากพบดอกที่ตรงตามเกณฑ์
+    response = f"🎯 พบดอกที่ตรงกับความต้องการของคุณ! ผมแนะนำ:\n\n"
     
     for i, bud in enumerate(recommended_buds, 1):
         rating_stars = "⭐" * int(round(bud['avg_rating'])) if bud['avg_rating'] > 0 else "ยังไม่มีรีวิว"
         
         response += f"**{i}. {bud['strain_name_th'] or 'ไม่ระบุชื่อไทย'}** ({bud['strain_name_en']})\n"
-        response += f"   • ประเภท: {bud['strain_type']}\n"
+        response += f"   • ประเภท: {bud['strain_type']}"
+        
+        # แสดงคะแนนการจับคู่
+        if bud.get('match_score') and bud['match_score'] > 0:
+            response += f" | ความตรง: {min(100, int(bud['match_score']))}%\n"
+        else:
+            response += "\n"
+            
         response += f"   • THC: {bud['thc_percentage']}% | CBD: {bud['cbd_percentage']}%\n"
-        response += f"   • เกรด: {bud['grade']}\n"
-        response += f"   • คะแนน: {rating_stars} ({bud['avg_rating']:.1f}/5)\n"
+        response += f"   • เกรด: {bud['grade']} | คะแนน: {rating_stars} ({bud['avg_rating']:.1f}/5)\n"
+        
         if bud['aroma_flavor']:
             response += f"   • กลิ่น/รส: {bud['aroma_flavor']}\n"
+            
+        # แสดง terpenes หลัก
+        terpenes = []
+        if bud.get('top_terpenes_1'): terpenes.append(bud['top_terpenes_1'])
+        if bud.get('top_terpenes_2'): terpenes.append(bud['top_terpenes_2'])
+        if bud.get('top_terpenes_3'): terpenes.append(bud['top_terpenes_3'])
+        if terpenes:
+            response += f"   • Terpenes หลัก: {', '.join(terpenes[:2])}\n"
+            
         response += f"   • 📊 **[ดูรายละเอียดเต็ม]({bud['report_link']})**\n\n"
     
-    response += "💡 คลิกที่ลิงก์ 'ดูรายละเอียดเต็ม' เพื่อดูข้อมูลครบถ้วนและรีวิวจากผู้ใช้งานจริงครับ!"
+    response += "🌟 คลิกลิงก์เพื่อดูข้อมูลครบถ้วน รีวิว และการติดต่อผู้ปลูกครับ!"
     
     return response
+
+def get_alternative_recommendations(search_criteria):
+    """หาทางเลือกใหม่เมื่อไม่พบดอกที่ตรงกับเกณฑ์ที่กำหนด"""
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return []
+        
+        cur = conn.cursor()
+        
+        # ใช้เกณฑ์ที่ผ่อนคลายลง
+        alternative_conditions = []
+        params = []
+        reasons = []
+        
+        # ลองหาตาม strain_type ก่อน
+        if search_criteria.get('strain_type'):
+            alternative_conditions.append("strain_type = %s")
+            params.append(search_criteria['strain_type'])
+            reasons.append(f"ประเภท {search_criteria['strain_type']}")
+        
+        # หากไม่มี strain_type ลองหาตาม time_preference
+        elif search_criteria.get('time_preference'):
+            alternative_conditions.append("recommended_time = %s")
+            params.append(search_criteria['time_preference'])
+            reasons.append(f"เหมาะสำหรับ{search_criteria['time_preference']}")
+        
+        # หากไม่มีเงื่อนไขใดๆ ให้แสดงดอกยอดนิยม
+        if not alternative_conditions:
+            alternative_conditions.append("1=1")  # แสดงทุกดอก
+            reasons.append("ยอดนิยม")
+        
+        query = f"""
+            SELECT b.id, b.strain_name_en, b.strain_name_th, b.breeder, b.strain_type,
+                   b.thc_percentage, b.cbd_percentage, b.grade, b.aroma_flavor,
+                   b.mental_effects_positive, b.physical_effects_positive,
+                   b.recommended_time, b.created_at,
+                   COALESCE(AVG(r.overall_rating), 0) as avg_rating,
+                   COUNT(r.id) as review_count
+            FROM buds_data b
+            LEFT JOIN reviews r ON b.id = r.bud_reference_id
+            WHERE {' AND '.join(alternative_conditions)}
+            GROUP BY b.id, b.strain_name_en, b.strain_name_th, b.breeder, b.strain_type,
+                     b.thc_percentage, b.cbd_percentage, b.grade, b.aroma_flavor,
+                     b.mental_effects_positive, b.physical_effects_positive,
+                     b.recommended_time, b.created_at
+            ORDER BY avg_rating DESC, review_count DESC
+            LIMIT 3
+        """
+        
+        cur.execute(query, params)
+        results = cur.fetchall()
+        
+        alternatives = []
+        for i, row in enumerate(results):
+            alternative = {
+                'id': row[0],
+                'strain_name_en': row[1],
+                'strain_name_th': row[2],
+                'breeder': row[3],
+                'strain_type': row[4],
+                'thc_percentage': float(row[5]) if row[5] else None,
+                'cbd_percentage': float(row[6]) if row[6] else None,
+                'grade': row[7],
+                'aroma_flavor': row[8],
+                'mental_effects_positive': row[9],
+                'physical_effects_positive': row[10],
+                'recommended_time': row[11],
+                'created_at': row[12].strftime('%Y-%m-%d') if row[12] else None,
+                'avg_rating': float(row[13]) if row[13] else 0,
+                'review_count': row[14],
+                'report_link': f"/bud-report?id={row[0]}",
+                'why_recommended': reasons[0] if reasons else "ยอดนิยม"
+            }
+            alternatives.append(alternative)
+        
+        cur.close()
+        return_db_connection(conn)
+        return alternatives
+        
+    except Exception as e:
+        print(f"Error in get_alternative_recommendations: {e}")
+        return []
 
 if __name__ == '__main__':
     # Initialize connection pool

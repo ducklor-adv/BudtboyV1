@@ -251,7 +251,7 @@
             }
 
             .bud-image-display {
-                height: 100px;
+                aspect-ratio: 1;
             }
 
             .strain-name {
@@ -436,7 +436,7 @@
 
         .bud-image-display {
             width: 100%;
-            height: 120px;
+            aspect-ratio: 1;
             border: 2px solid #ffd700;
             border-radius: 8px;
             overflow: hidden;
@@ -445,12 +445,16 @@
             align-items: center;
             justify-content: center;
             margin-bottom: 5px;
+            position: relative;
         }
 
         .bud-display-image {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
         }
 
         .bud-image-placeholder {

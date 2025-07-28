@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -634,7 +633,7 @@
             <div id="loadingState" class="loading">
                 <div>🔄 กำลังโหลดข้อมูล...</div>
             </div>
-            
+
             <div id="errorState" class="error-message" style="display: none;">
                 <div id="errorMessage"></div>
                 <button onclick="retryLoadProfile()" style="margin-top: 10px; padding: 5px 10px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">
@@ -788,15 +787,15 @@
                 <div class="chat-title">🤖 Budt.Boy AI Assistant</div>
                 <div class="chat-subtitle">ผู้ช่วยอัจฉริยะด้านกัญชา</div>
             </div>
-            
+
             <div class="chat-messages" id="chatMessages">
                 <!-- Messages will be populated here -->
             </div>
-            
+
             <div class="chat-input-container">
                 <div class="chat-input-wrapper">
                     <input type="text" id="chatInput" class="chat-input" placeholder="พิมพ์ข้อความของคุณ..." onkeypress="handleChatKeyPress(event)">
-                    <button id="chatSendBtn" class="chat-send-btn" onclick="sendMessage()">
+                    <button id="chatSendBtn" class="chat-send-btn" onclick="sendChatMessage()">
                         <span>ส่ง</span> 📤
                     </button>
                 </div>
@@ -814,23 +813,23 @@
             const errorMessage = document.getElementById('errorMessage');
             const loadingState = document.getElementById('loadingState');
             const profileInfo = document.getElementById('profileInfo');
-            
+
             if (errorState && errorMessage) {
                 errorMessage.textContent = message;
                 errorState.style.display = 'block';
             }
-            
+
             if (loadingState) loadingState.style.display = 'none';
             if (profileInfo) profileInfo.style.display = 'none';
         }
 
         function showLoading() {
             if (isProfileLoaded) return; // ไม่แสดงการโหลดถ้าข้อมูลถูกโหลดแล้ว
-            
+
             const errorState = document.getElementById('errorState');
             const loadingState = document.getElementById('loadingState');
             const profileInfo = document.getElementById('profileInfo');
-            
+
             if (loadingState) loadingState.style.display = 'block';
             if (errorState) errorState.style.display = 'none';
             if (profileInfo) profileInfo.style.display = 'none';
@@ -841,22 +840,22 @@
             const loadingState = document.getElementById('loadingState');
             const profileInfo = document.getElementById('profileInfo');
             const actionButtons = document.getElementById('actionButtons');
-            
+
             if (profileInfo) profileInfo.style.display = 'block';
             if (actionButtons) actionButtons.style.display = 'flex';
             if (loadingState) loadingState.style.display = 'none';
             if (errorState) errorState.style.display = 'none';
-            
+
             isProfileLoaded = true;
         }
 
         async function loadProfile() {
             // ป้องกันการเรียกซ้ำ
             if (isLoading || isProfileLoaded) return;
-            
+
             isLoading = true;
             showLoading();
-            
+
             try {
                 const response = await fetch('/api/profile');
                 if (response.ok) {
@@ -877,7 +876,7 @@
 
         function displayProfile(user) {
             if (!user) return;
-            
+
             currentUserData = user;
 
             const usernameEl = document.getElementById('username-display');
@@ -890,7 +889,7 @@
             const usernameEdit = document.getElementById('username-edit');
             const emailEdit = document.getElementById('email-edit');
             const birthYearEdit = document.getElementById('birth-year-edit');
-            
+
             if (usernameEdit) usernameEdit.value = user.username || '';
             if (emailEdit) emailEdit.value = user.email || '';
             if (birthYearEdit) birthYearEdit.value = user.birth_year || '';
@@ -946,7 +945,7 @@
             const consumerCheck = document.getElementById('is_consumer_edit');
             const growerCheck = document.getElementById('is_grower_edit');
             const budtenderCheck = document.getElementById('is_budtender_edit');
-            
+
             if (consumerCheck) consumerCheck.checked = user.is_consumer || false;
             if (growerCheck) growerCheck.checked = user.is_grower || false;
             if (budtenderCheck) budtenderCheck.checked = user.is_budtender || false;
@@ -985,9 +984,9 @@
         function toggleEditMode() {
             const usernameDisplay = document.getElementById('username-display');
             const usernameEdit = document.getElementById('username-edit');
-            
+
             if (!usernameDisplay || !usernameEdit) return;
-            
+
             const isEditing = usernameEdit.style.display !== 'none';
 
             if (isEditing) {
@@ -1073,7 +1072,7 @@
             elements.forEach(([displayId, editId]) => {
                 const displayEl = document.getElementById(displayId);
                 const editEl = document.getElementById(editId);
-                
+
                 if (displayEl) displayEl.style.display = 'none';
                 if (editEl) editEl.style.display = 'block';
             });
@@ -1081,7 +1080,7 @@
             const saveCancelBtns = document.getElementById('saveCancelBtns');
             const actionButtons = document.getElementById('actionButtons');
             const editBtn = document.getElementById('editBtn');
-            
+
             if (saveCancelBtns) saveCancelBtns.style.display = 'flex';
             if (actionButtons) actionButtons.style.display = 'none';
             if (editBtn) editBtn.textContent = '❌ ยกเลิกแก้ไข';
@@ -1099,7 +1098,7 @@
             elements.forEach(([displayId, editId]) => {
                 const displayEl = document.getElementById(displayId);
                 const editEl = document.getElementById(editId);
-                
+
                 if (displayEl) displayEl.style.display = 'inline';
                 if (editEl) editEl.style.display = 'none';
             });
@@ -1107,7 +1106,7 @@
             const saveCancelBtns = document.getElementById('saveCancelBtns');
             const actionButtons = document.getElementById('actionButtons');
             const editBtn = document.getElementById('editBtn');
-            
+
             if (saveCancelBtns) saveCancelBtns.style.display = 'none';
             if (actionButtons) actionButtons.style.display = 'flex';
             if (editBtn) editBtn.textContent = '✏️ แก้ไขโปรไฟล์';
@@ -1213,12 +1212,12 @@
         function setupEventListeners() {
             const profileAvatar = document.getElementById('profileAvatar');
             const avatarInput = document.getElementById('avatarInput');
-            
+
             if (profileAvatar && avatarInput) {
                 profileAvatar.addEventListener('click', function() {
                     avatarInput.click();
                 });
-                
+
                 avatarInput.addEventListener('change', function() {
                     uploadProfileImage(this);
                 });
@@ -1306,12 +1305,12 @@
         function openChatWithBudtBoy() {
             const modal = document.getElementById('chatModal');
             modal.style.display = 'block';
-            
+
             // Initialize chat if empty
             if (chatHistory.length === 0) {
                 addBotMessage("สวัสดีครับ! ผม Budt.Boy ผู้ช่วยอัจฉริยะด้านกัญชา 🌿\n\nผมพร้อมช่วยตอบคำถามเกี่ยวกับ:\n• สายพันธุ์กัญชา\n• วิธีการปลูก\n• ผลกระทบและคุณสมบัติ\n• คำแนะนำทั่วไป\n\nมีอะไรอยากถามไหมครับ?");
             }
-            
+
             // Focus on input
             document.getElementById('chatInput').focus();
         }
@@ -1324,41 +1323,65 @@
         function handleChatKeyPress(event) {
             if (event.key === 'Enter' && !event.shiftKey) {
                 event.preventDefault();
-                sendMessage();
+                sendChatMessage();
             }
         }
 
-        function sendMessage() {
+        async function sendChatMessage() {
             const input = document.getElementById('chatInput');
             const message = input.value.trim();
-            
+
             if (!message) return;
-            
-            // Add user message
+
+            // Add user message to chat
             addUserMessage(message);
-            
+
             // Clear input
             input.value = '';
-            
+
             // Show typing indicator
             showTypingIndicator();
-            
-            // Simulate AI response (in real implementation, this would call an AI API)
-            setTimeout(() => {
+
+            try {
+                // Send message to AI API
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        history: chatHistory.slice(-10) // Send last 10 messages for context
+                    })
+                });
+
+                const result = await response.json();
                 hideTypingIndicator();
-                const response = generateBotResponse(message);
-                addBotMessage(response);
-            }, 1000 + Math.random() * 2000);
+
+                if (result.success) {
+                    addBotMessage(result.message);
+
+                    // Add to chat history for context
+                    chatHistory.push({ role: 'user', message });
+                    chatHistory.push({ role: 'bot', message: result.message });
+                } else {
+                    addBotMessage(result.message || 'ขออภัย เกิดข้อผิดพลาดในการตอบกลับ');
+                }
+            } catch (error) {
+                hideTypingIndicator();
+                console.error('Chat error:', error);
+                addBotMessage('ขออภัย ไม่สามารถเชื่อมต่อกับระบบ AI ได้ กรุณาลองใหม่อีกครั้ง');
+            }
         }
 
         function addUserMessage(message) {
             const messagesContainer = document.getElementById('chatMessages');
             const messageDiv = document.createElement('div');
             messageDiv.className = 'message user';
-            
+
             const currentUser = currentUserData || { username: 'คุณ' };
             const avatarLetter = currentUser.username ? currentUser.username.charAt(0).toUpperCase() : 'U';
-            
+
             messageDiv.innerHTML = `
                 <div class="message-avatar">${avatarLetter}</div>
                 <div class="message-content">
@@ -1366,10 +1389,10 @@
                     <div class="message-time">${new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}</div>
                 </div>
             `;
-            
+
             messagesContainer.appendChild(messageDiv);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            
+
             chatHistory.push({ role: 'user', message, time: new Date() });
         }
 
@@ -1377,7 +1400,7 @@
             const messagesContainer = document.getElementById('chatMessages');
             const messageDiv = document.createElement('div');
             messageDiv.className = 'message bot';
-            
+
             messageDiv.innerHTML = `
                 <div class="message-avatar">🤖</div>
                 <div class="message-content">
@@ -1385,10 +1408,10 @@
                     <div class="message-time">${new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}</div>
                 </div>
             `;
-            
+
             messagesContainer.appendChild(messageDiv);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            
+
             chatHistory.push({ role: 'bot', message, time: new Date() });
         }
 
@@ -1397,7 +1420,7 @@
             const typingDiv = document.createElement('div');
             typingDiv.className = 'message bot';
             typingDiv.id = 'typingIndicator';
-            
+
             typingDiv.innerHTML = `
                 <div class="message-avatar">🤖</div>
                 <div class="typing-indicator" style="display: block;">
@@ -1408,7 +1431,7 @@
                     </div>
                 </div>
             `;
-            
+
             messagesContainer.appendChild(typingDiv);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
@@ -1422,32 +1445,32 @@
 
         function generateBotResponse(userMessage) {
             const message = userMessage.toLowerCase();
-            
+
             // Simple keyword-based responses (in real implementation, this would use AI)
             if (message.includes('สวัสดี') || message.includes('หวัดดี') || message.includes('ดี')) {
                 return "สวัสดีครับ! ยินดีที่ได้รู้จัก มีอะไรเกี่ยวกับกัญชาที่อยากถามไหมครับ? 😊";
             }
-            
+
             if (message.includes('สายพันธุ์') || message.includes('strain')) {
                 return "เรามีข้อมูลสายพันธุ์กัญชามากมายครับ! \n\nสายพันธุ์ยอดนิยม:\n• Blue Dream - Hybrid (Sativa โดด)\n• OG Kush - Indica โดด\n• White Widow - Hybrid สมดุล\n• Girl Scout Cookies - Hybrid (Indica โดด)\n\nอยากรู้เพิ่มเติมเกี่ยวกับสายพันธุ์ไหนเป็นพิเศษไหมครับ?";
             }
-            
+
             if (message.includes('ปลูก') || message.includes('grow')) {
                 return "การปลูกกัญชานั้นต้องคำนึงถึงหลายปัจจัยครับ:\n\n🌱 ปัจจัยสำคัญ:\n• แสงแดด/แสงไฟ LED\n• ความชื้น 40-60%\n• อุณหภูมิ 20-26°C\n• ปุ่ยและสารอาหาร\n• การระบายอากาศ\n\nต้องการคำแนะนำเฉพาะด้านไหนไหมครับ?";
             }
-            
+
             if (message.includes('ผลกระทบ') || message.includes('effect')) {
                 return "ผลกระทบของกัญชาแบ่งได้เป็น:\n\n😊 ผลกระทบเชิงบวก:\n• ผ่อนคลาย\n• สร้างสรรค์\n• บรรเทาปวด\n• ช่วยให้หลับ\n\n⚠️ ผลข้างเคียง:\n• ปากแห้ง\n• ตาแดง\n• วิตกกังวล (ในบางคน)\n• ความจำระยะสั้น\n\nควรใช้อย่างรับผิดชอบครับ!";
             }
-            
+
             if (message.includes('ขอบคุณ') || message.includes('thank')) {
                 return "ด้วยความยินดีครับ! หากมีคำถามอื่นๆ เกี่ยวกับกัญชา สามารถถามได้เสมอนะครับ 🌿✨";
             }
-            
+
             if (message.includes('thc') || message.includes('cbd')) {
                 return "THC และ CBD เป็นสารสำคัญในกัญชาครับ:\n\n🔥 THC (Tetrahydrocannabinol):\n• ทำให้เมา/เหิม\n• บรรเทาปวด\n• กระตุ้นความอยาก\n\n🌿 CBD (Cannabidiol):\n• ไม่ทำให้เมา\n• ต้านอักเสบ\n• ลดวิตกกังวล\n• ช่วยผ่อนคลาย\n\nอัตราส่วนที่แตกต่างกันจะให้ผลที่แตกต่างกันครับ!";
             }
-            
+
             // Default response
             return "ขออภัยครับ ผมยังไม่เข้าใจคำถามนี้ดี ลองถามเกี่ยวกับ:\n• สายพันธุ์กัญชา\n• การปลูก\n• ผลกระทบ\n• THC/CBD\n\nหรือถามในรูปแบบอื่นได้ครับ 😊";
         }
@@ -1463,7 +1486,7 @@
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
             setupEventListeners();
-            
+
             // ป้องกันการโหลดซ้ำโดยตรวจสอบว่ามีการโหลดแล้วหรือยัง
             if (!isProfileLoaded && !isLoading) {
                 loadProfile();

@@ -9,6 +9,8 @@ import secrets
 import hashlib
 import threading
 import time
+import openai
+import os
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'budtboy-secret-key-2024')
@@ -26,6 +28,9 @@ app.config['MAIL_USE_SSL'] = False
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg'}
+
+# OpenAI configuration
+openai.api_key = os.environ.get('OPENAI_API_KEY')
 
 mail = Mail(app)
 
@@ -3456,6 +3461,104 @@ def register_user():
             return_db_connection(conn)
     else:
         return jsonify({'success': False, 'error': 'Database connection failed'}), 500
+
+@app.route('/api/chat', methods=['POST'])
+def chat_with_ai():
+    """Chat with AI assistant about cannabis topics"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'ไม่ได้เข้าสู่ระบบ'}), 401
+
+    data = request.get_json()
+    user_message = data.get('message', '').strip()
+    chat_history = data.get('history', [])
+
+    if not user_message:
+        return jsonify({'error': 'กรุณาพิมพ์ข้อความ'}), 400
+
+    try:
+        # Check if OpenAI API key is available
+        if not openai.api_key:
+            return jsonify({
+                'success': False,
+                'message': 'ขออภัย ระบบ AI ยังไม่พร้อมใช้งาน กรุณาติดต่อผู้ดูแลระบบ'
+            })
+
+        # Build conversation context
+        messages = [
+            {
+                "role": "system",
+                "content": """คุณคือ Budt.Boy AI Assistant ผู้ช่วยอัจฉริยะสำหรับแอป Cannabis 
+
+คุณมีความรู้เกี่ยวกับ:
+- สายพันธุ์กัญชา (Cannabis strains)
+- ข้อมูล THC, CBD และเทอปีน (Terpenes)
+- วิธีการปลูกกัญชา (Growing methods)
+- ผลกระทบของกัญชา (Effects)
+- การรีวิวและการประเมินคุณภาพ
+- กฎหมายเกี่ยวกับกัญชาในประเทศไทย
+
+กรุณาตอบเป็นภาษาไทยที่เป็นมิตรและให้ข้อมูลที่ถูกต้อง แม่นยำ
+หากไม่แน่ใจในข้อมูล ให้บอกว่าไม่แน่ใจและแนะนำให้ปรึกษาผู้เชี่ยวชาญ
+ห้ามให้คำแนะนำทางการแพทย์โดยตรง"""
+            }
+        ]
+
+        # Add chat history
+        for msg in chat_history[-10:]:  # Keep last 10 messages for context
+            messages.append({
+                "role": msg.get('role', 'user'),
+                "content": msg.get('content', '')
+            })
+
+        # Add current user message
+        messages.append({
+            "role": "user",
+            "content": user_message
+        })
+
+        # Call OpenAI API
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=messages,
+            max_tokens=500,
+            temperature=0.7,
+            presence_penalty=0.1,
+            frequency_penalty=0.1
+        )
+
+        ai_response = response.choices[0].message.content.strip()
+
+        return jsonify({
+            'success': True,
+            'message': ai_response,
+            'usage': {
+                'prompt_tokens': response.usage.prompt_tokens,
+                'completion_tokens': response.usage.completion_tokens,
+                'total_tokens': response.usage.total_tokens
+            }
+        })
+
+    except openai.error.AuthenticationError:
+        return jsonify({
+            'success': False,
+            'message': 'ขออภัย ระบบ AI มีปัญหาการยืนยันตัวตน กรุณาลองใหม่อีกครั้ง'
+        }), 500
+    except openai.error.RateLimitError:
+        return jsonify({
+            'success': False,
+            'message': 'ขออภัย ระบบ AI ใช้งานหนักเกินไป กรุณารอสักครู่แล้วลองใหม่'
+        }), 429
+    except openai.error.APIError as e:
+        return jsonify({
+            'success': False,
+            'message': f'ขออภัย เกิดข้อผิดพลาดในระบบ AI: {str(e)}'
+        }), 500
+    except Exception as e:
+        print(f"Chat AI error: {e}")
+        return jsonify({
+            'success': False,
+            'message': 'ขออภัย เกิดข้อผิดพลาดที่ไม่คาดคิด กรุณาลองใหม่อีกครั้ง'
+        }), 500
 
 if __name__ == '__main__':
     # Initialize connection pool

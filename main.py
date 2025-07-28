@@ -1817,7 +1817,7 @@ def update_bud(bud_id):
             if data.get(deleted_key) == 'true':
                 image_updates[f'image_{i}_url'] = None
 
-        # Build update query with image deletions
+        # Build update query with image deletions and constraint validation
         update_fields = [
             'strain_name_th = %s', 'strain_name_en = %s', 'breeder = %s',
             'strain_type = %s', 'thc_percentage = %s', 'cbd_percentage = %s',
@@ -1831,14 +1831,39 @@ def update_bud(bud_id):
             'updated_at = CURRENT_TIMESTAMP'
         ]
 
+        # Validate and clean constraint fields
+        grow_method = data.get('grow_method', '').strip()
+        if grow_method not in ['Indoor', 'Outdoor', 'Greenhouse', 'Hydroponic']:
+            grow_method = None
+            
+        strain_type = data.get('strain_type', '').strip()
+        if strain_type not in ['Indica', 'Sativa', 'Hybrid']:
+            strain_type = None
+            
+        grade = data.get('grade', '').strip()
+        if grade not in ['A+', 'A', 'B+', 'B', 'C']:
+            grade = None
+            
+        recommended_time = data.get('recommended_time', '').strip()
+        if recommended_time not in ['กลางวัน', 'กลางคืน', 'ตลอดวัน']:
+            recommended_time = None
+            
+        fertilizer_type = data.get('fertilizer_type', '').strip()
+        if fertilizer_type not in ['Organic', 'Chemical', 'Mixed']:
+            fertilizer_type = None
+            
+        flowering_type = data.get('flowering_type', '').strip()
+        if flowering_type not in ['Photoperiod', 'Autoflower']:
+            flowering_type = None
+
         update_values = [
             data.get('strain_name_th'),
             data.get('strain_name_en'),
             data.get('breeder'),
-            data.get('strain_type'),
+            strain_type,
             data.get('thc_percentage'),
             data.get('cbd_percentage'),
-            data.get('grade'),
+            grade,
             data.get('aroma_flavor'),
             data.get('top_terpenes_1'),
             data.get('top_terpenes_2'),
@@ -1847,14 +1872,14 @@ def update_bud(bud_id):
             data.get('mental_effects_negative'),
             data.get('physical_effects_positive'),
             data.get('physical_effects_negative'),
-            data.get('recommended_time'),
-            data.get('grow_method'),
+            recommended_time,
+            grow_method,
             data.get('harvest_date'),
             data.get('batch_number'),
             data.get('grower_id'),
             data.get('grower_license_verified', False),
-            data.get('fertilizer_type'),
-            data.get('flowering_type')
+            fertilizer_type,
+            flowering_type
         ]
 
         # Add image deletion updates

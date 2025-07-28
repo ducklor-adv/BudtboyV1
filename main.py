@@ -3471,6 +3471,12 @@ def chat_with_ai():
     data = request.get_json()
     user_message = data.get('message', '').strip()
     chat_history = data.get('history', [])
+    action_type = data.get('action_type', 'message')  # เพิ่มประเภทของ action
+
+    # Handle search form submission
+    if action_type == 'search_form':
+        search_criteria = data.get('search_criteria', {})
+        return handle_search_form_submission(search_criteria, user_message)
 
     if not user_message:
         return jsonify({'error': 'กรุณาพิมพ์ข้อความ'}), 400
@@ -3933,6 +3939,165 @@ def generate_recommendation_response(search_criteria, recommended_buds, original
         if bud.get('top_terpenes_3'): terpenes.append(bud['top_terpenes_3'])
         if terpenes:
             response += f"   • Terpenes หลัก: {', '.join(terpenes[:2])}\n"
+            
+        response += f"   • 📊 **[ดูรายละเอียดเต็ม]({bud['report_link']})**\n\n"
+    
+    response += "🌟 คลิกลิงก์เพื่อดูข้อมูลครบถ้วน รีวิว และการติดต่อผู้ปลูกครับ!"
+    
+    return response
+
+def handle_search_form_submission(search_criteria, user_message):
+    """จัดการการส่งฟอร์มค้นหาดอก"""
+    try:
+        # วิเคราะห์เกณฑ์การค้นหาจากฟอร์ม
+        processed_criteria = process_search_form_criteria(search_criteria)
+        
+        if not processed_criteria:
+            return jsonify({
+                'success': False,
+                'message': 'กรุณากรอกข้อมูลการค้นหาอย่างน้อย 1 เกณฑ์'
+            })
+        
+        # ค้นหาดอกที่ตรงกับเกณฑ์
+        recommended_buds = find_matching_buds(processed_criteria)
+        
+        if recommended_buds:
+            # สร้างคำตอบสำหรับผลการค้นหา
+            response = generate_search_result_response(processed_criteria, recommended_buds, user_message)
+            
+            return jsonify({
+                'success': True,
+                'message': response,
+                'has_recommendations': True,
+                'recommended_buds': recommended_buds,
+                'search_criteria': processed_criteria,
+                'search_type': 'form_search'
+            })
+        else:
+            # หาทางเลือกใหม่หากไม่พบผลลัพธ์
+            alternative_buds = get_alternative_recommendations(processed_criteria)
+            
+            if alternative_buds:
+                response = f"🔍 ไม่พบดอกที่ตรงกับเกณฑ์ทุกประการ แต่มีทางเลือกที่น่าสนใจ:\n\n"
+                
+                for i, bud in enumerate(alternative_buds, 1):
+                    rating_stars = "⭐" * int(round(bud['avg_rating'])) if bud['avg_rating'] > 0 else "ยังไม่มีรีวิว"
+                    
+                    response += f"**{i}. {bud['strain_name_th'] or 'ไม่ระบุชื่อไทย'}** ({bud['strain_name_en']})\n"
+                    response += f"   • ประเภท: {bud['strain_type']} | เกรด: {bud['grade']}\n"
+                    response += f"   • THC: {bud['thc_percentage']}% | CBD: {bud['cbd_percentage']}%\n"
+                    response += f"   • คะแนน: {rating_stars} ({bud['avg_rating']:.1f}/5)\n"
+                    response += f"   • 📊 **[ดูรายละเอียดเต็ม]({bud['report_link']})**\n\n"
+                
+                return jsonify({
+                    'success': True,
+                    'message': response,
+                    'has_recommendations': True,
+                    'recommended_buds': alternative_buds,
+                    'search_type': 'alternative_search'
+                })
+            else:
+                return jsonify({
+                    'success': True,
+                    'message': '😅 ขออภัย ไม่พบดอกที่ตรงกับเกณฑ์ที่คุณระบุ กรุณาลองปรับเกณฑ์การค้นหาใหม่',
+                    'has_recommendations': False,
+                    'search_type': 'no_results'
+                })
+    
+    except Exception as e:
+        print(f"Error handling search form: {e}")
+        return jsonify({
+            'success': False,
+            'message': 'เกิดข้อผิดพลาดในการค้นหา กรุณาลองใหม่อีกครั้ง'
+        }), 500
+
+def process_search_form_criteria(form_data):
+    """ประมวลผลข้อมูลจากฟอร์มค้นหา"""
+    criteria = {}
+    has_criteria = False
+    
+    # ประเภทดอก
+    if form_data.get('strain_type') and form_data['strain_type'] != '':
+        criteria['strain_type'] = form_data['strain_type']
+        has_criteria = True
+    
+    # ชื่อสายพันธุ์
+    if form_data.get('strain_name') and form_data['strain_name'].strip():
+        criteria['specific_strain_name'] = form_data['strain_name'].strip()
+        has_criteria = True
+    
+    # ผลกระทบที่ต้องการ
+    desired_effects = []
+    if form_data.get('effect_relax'):
+        desired_effects.append('ผ่อนคลาย')
+    if form_data.get('effect_sleep'):
+        desired_effects.append('ช่วยนอน')
+    if form_data.get('effect_energize'):
+        desired_effects.append('กระตุ้น')
+    if form_data.get('effect_creative'):
+        desired_effects.append('สร้างสรรค์')
+    if form_data.get('effect_pain_relief'):
+        desired_effects.append('บรรเทาปวด')
+    
+    if desired_effects:
+        criteria['desired_effects'] = desired_effects
+        has_criteria = True
+    
+    # ช่วงเวลาการใช้
+    if form_data.get('time_preference') and form_data['time_preference'] != '':
+        criteria['time_preference'] = form_data['time_preference']
+        has_criteria = True
+    
+    # กลิ่น/รส
+    if form_data.get('aroma_flavor') and form_data['aroma_flavor'].strip():
+        aroma_keywords = [keyword.strip() for keyword in form_data['aroma_flavor'].split(',') if keyword.strip()]
+        if aroma_keywords:
+            criteria['aroma_keywords'] = aroma_keywords
+            has_criteria = True
+    
+    # THC Level
+    if form_data.get('thc_level') and form_data['thc_level'] != '':
+        criteria['thc_preference'] = form_data['thc_level']
+        has_criteria = True
+    
+    # CBD Level
+    if form_data.get('cbd_level') and form_data['cbd_level'] != '':
+        criteria['cbd_preference'] = form_data['cbd_level']
+        has_criteria = True
+    
+    # เกรด
+    if form_data.get('grade') and form_data['grade'] != '':
+        criteria['grade_preference'] = form_data['grade']
+        has_criteria = True
+    
+    # กำหนดคะแนนความเฉพาะเจาะจง
+    if has_criteria:
+        criteria['specificity_score'] = len([k for k in criteria.keys() if k != 'specificity_score'])
+        return criteria
+    
+    return None
+
+def generate_search_result_response(criteria, recommended_buds, original_message):
+    """สร้างคำตอบสำหรับผลการค้นหาจากฟอร์ม"""
+    response = f"🎯 ผลการค้นหาดอกตามเกณฑ์ที่คุณระบุ:\n\n"
+    
+    for i, bud in enumerate(recommended_buds, 1):
+        rating_stars = "⭐" * int(round(bud['avg_rating'])) if bud['avg_rating'] > 0 else "ยังไม่มีรีวิว"
+        
+        response += f"**{i}. {bud['strain_name_th'] or 'ไม่ระบุชื่อไทย'}** ({bud['strain_name_en']})\n"
+        response += f"   • ประเภท: {bud['strain_type']}"
+        
+        # แสดงคะแนนการจับคู่
+        if bud.get('match_score') and bud['match_score'] > 0:
+            response += f" | ความตรง: {min(100, int(bud['match_score']))}%\n"
+        else:
+            response += "\n"
+            
+        response += f"   • THC: {bud['thc_percentage']}% | CBD: {bud['cbd_percentage']}%\n"
+        response += f"   • เกรด: {bud['grade']} | คะแนน: {rating_stars} ({bud['avg_rating']:.1f}/5)\n"
+        
+        if bud['aroma_flavor']:
+            response += f"   • กลิ่น/รส: {bud['aroma_flavor']}\n"
             
         response += f"   • 📊 **[ดูรายละเอียดเต็ม]({bud['report_link']})**\n\n"
     

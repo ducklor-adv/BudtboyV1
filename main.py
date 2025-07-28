@@ -3484,11 +3484,11 @@ def chat_with_ai():
             })
 
         # ขั้นตอนที่ 1: วิเคราะห์ความต้องการของ user
-        search_criteria = await analyze_user_request(user_message)
+        search_criteria = analyze_user_request(user_message)
         
         if search_criteria:
             # ขั้นตอนที่ 2: ค้นหา bud ที่เหมาะสม
-            recommended_buds = await find_matching_buds(search_criteria)
+            recommended_buds = find_matching_buds(search_criteria)
             
             if recommended_buds:
                 # ขั้นตอนที่ 3: สร้างคำตอบที่มี link bud report
@@ -3587,7 +3587,7 @@ def chat_with_ai():
             'message': 'ขออภัย เกิดข้อผิดพลาดที่ไม่คาดคิด กรุณาลองใหม่อีกครั้ง'
         }), 500
 
-async def analyze_user_request(user_message):
+def analyze_user_request(user_message):
     """วิเคราะห์ความต้องการของ user และแปลงเป็นเกณฑ์การค้นหา"""
     try:
         # ใช้ OpenAI เพื่อวิเคราะห์ความต้องการ
@@ -3641,7 +3641,7 @@ async def analyze_user_request(user_message):
     
     return None
 
-async def find_matching_buds(search_criteria):
+def find_matching_buds(search_criteria):
     """ค้นหา bud ที่ตรงกับเกณฑ์ที่กำหนด"""
     try:
         conn = get_db_connection()

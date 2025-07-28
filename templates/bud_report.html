@@ -1034,15 +1034,25 @@
         
         async function loadBudReport() {
             try {
+                console.log(`Loading bud report for ID: ${budId}`);
+                
                 // Load bud info
                 const budResponse = await fetch(`/api/buds/${budId}/info`);
                 
                 if (!budResponse.ok) {
+                    console.error(`Bud info API error: ${budResponse.status}`);
                     throw new Error('ไม่พบข้อมูลดอก');
                 }
                 
                 const budData = await budResponse.json();
+                console.log('Bud data loaded:', budData);
+                
+                if (!budData.success || !budData.bud) {
+                    throw new Error('ไม่พบข้อมูลดอก');
+                }
+                
                 const bud = budData.bud;
+                console.log('Grower name from API:', bud.grower_name);
                 
                 // Load reviews
                 const reviewsResponse = await fetch(`/api/reviews?bud_id=${budId}`);
@@ -1062,13 +1072,23 @@
         }
         
         function displayBudReport(bud, reviews) {
+            console.log('Displaying bud report for:', bud);
+            console.log('Grower name received:', bud.grower_name);
+            
             // Basic info
             document.getElementById('budName').textContent = bud.strain_name_en || 'ไม่ระบุชื่อ';
             document.getElementById('budNameThai').textContent = bud.strain_name_th || '';
             document.getElementById('budId').textContent = `Bud ID: ${bud.id}`;
             
-            // Update grower name in header
-            document.getElementById('growerName').textContent = bud.grower_name || 'ไม่ทราบชื่อ';
+            // Update grower name in header with better handling
+            const growerNameElement = document.getElementById('growerName');
+            if (growerNameElement) {
+                const growerName = bud.grower_name || 'ไม่ทราบชื่อ';
+                growerNameElement.textContent = growerName;
+                console.log('Updated grower name element with:', growerName);
+            } else {
+                console.error('Grower name element not found');
+            }
             
             // Display bud images
             displayBudImages(bud);
@@ -1373,9 +1393,11 @@
         function displayAllBudInfo(bud) {
             const allBudInfo = document.getElementById('allBudInfo');
             
+            console.log('DisplayAllBudInfo - Grower name:', bud.grower_name);
+            
             // รวมข้อมูลทั้งหมด - ย้าย ผู้ปลูก ขึ้นไปข้างบนและแก้ ผู้พัฒนา
             const allInfo = [
-                { label: 'ผู้ปลูก', value: bud.grower_name },
+                { label: 'ผู้ปลูก', value: bud.grower_name || 'ไม่ทราบชื่อ' },
                 { label: 'ผู้พัฒนาสายพันธ์', value: bud.breeder },
                 { label: 'ประเภท', value: bud.strain_type },
                 { label: 'THC', value: bud.thc_percentage ? `${bud.thc_percentage}%` : null },

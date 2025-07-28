@@ -787,27 +787,29 @@
         
         .bud-images-display {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
             border: 3px solid #ffd700;
             border-radius: 15px;
-            padding: 10px;
+            padding: 15px;
             background: #f8f9fa;
             width: 100%;
-            max-width: 800px;
-            height: 160px;
+            max-width: 100%;
+            height: auto;
             margin: 0 auto;
+            box-sizing: border-box;
         }
         
         .bud-image {
             width: 100%;
-            height: 120px;
+            height: 150px;
             object-fit: cover;
             border-radius: 8px;
             border: 2px solid #e9ecef;
             background: #f8f9fa;
             cursor: pointer;
             transition: all 0.3s ease;
+            box-sizing: border-box;
         }
         
         .bud-image:hover {
@@ -1038,16 +1040,16 @@
             
             .bud-images-display {
                 grid-template-columns: repeat(2, 1fr);
-                gap: 6px;
-                padding: 8px;
+                gap: 8px;
+                padding: 10px;
                 width: 100%;
-                max-width: 320px;
-                height: 140px;
+                max-width: 100%;
+                height: auto;
                 margin: 0 auto;
             }
             
             .bud-image {
-                height: 80px;
+                height: 120px;
             }
             
             .info-group-content {
@@ -1203,20 +1205,22 @@
             // Update grower name in header with better handling
             const growerNameElement = document.getElementById('growerName');
             if (growerNameElement) {
-                let growerName = 'ไม่ทราบชื่อ';
+                let growerName = 'บัดท์บอย';  // Default fallback name
                 
                 // Check multiple possible sources for grower name
                 if (bud.grower_name && bud.grower_name.trim()) {
                     growerName = bud.grower_name;
                 } else if (bud.username && bud.username.trim()) {
                     growerName = bud.username;
+                } else if (bud.created_by && bud.created_by.trim()) {
+                    growerName = bud.created_by;
                 } else if (bud.grower_id) {
                     growerName = `ผู้ปลูก ID: ${bud.grower_id}`;
                 }
                 
                 growerNameElement.textContent = growerName;
                 console.log('Updated grower name element with:', growerName);
-                console.log('Bud grower_id:', bud.grower_id, 'grower_name:', bud.grower_name);
+                console.log('Bud grower_id:', bud.grower_id, 'grower_name:', bud.grower_name, 'created_by:', bud.created_by);
             } else {
                 console.error('Grower name element not found');
             }
@@ -1531,7 +1535,7 @@
                 {
                     title: '🌿 ข้อมูลพื้นฐาน',
                     items: [
-                        { label: 'ผู้ปลูก', value: bud.grower_name || 'ไม่ทราบชื่อ' },
+                        { label: 'ผู้ปลูก', value: bud.grower_name || bud.created_by || 'บัดท์บอย' },
                         { label: 'ผู้พัฒนาสายพันธ์', value: bud.breeder },
                         { label: 'ประเภท', value: bud.strain_type },
                         { label: 'เกรด', value: bud.grade }

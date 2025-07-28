@@ -1506,7 +1506,10 @@
                         { label: 'THC', value: bud.thc_percentage ? `${bud.thc_percentage}%` : null },
                         { label: 'CBD', value: bud.cbd_percentage ? `${bud.cbd_percentage}%` : null },
                         { label: 'กลิ่นและรส', value: bud.aroma_flavor },
-                        { label: 'เวลาที่แนะนำ', value: bud.recommended_time }
+                        { label: 'เวลาที่แนะนำ', value: bud.recommended_time },
+                        { label: 'Terpene อันดับ 1', value: bud.top_terpenes_1 },
+                        { label: 'Terpene อันดับ 2', value: bud.top_terpenes_2 },
+                        { label: 'Terpene อันดับ 3', value: bud.top_terpenes_3 }
                     ]
                 },
                 {
@@ -1519,14 +1522,7 @@
                         { label: 'หมายเลข Batch', value: bud.batch_number }
                     ]
                 },
-                {
-                    title: '🌬️ Terpenes',
-                    items: [
-                        { label: 'อันดับ 1', value: bud.top_terpenes_1 },
-                        { label: 'อันดับ 2', value: bud.top_terpenes_2 },
-                        { label: 'อันดับ 3', value: bud.top_terpenes_3 }
-                    ]
-                },
+                
                 {
                     title: '🧠 ผลกระทบทางจิต',
                     items: [

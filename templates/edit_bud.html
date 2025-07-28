@@ -1448,12 +1448,22 @@
         }
 
         async function loadBudData() {
-            if (isLoading) return;
+            if (isLoading) {
+                console.log('Already loading, skipping duplicate request');
+                return;
+            }
 
             currentBudId = getBudIdFromUrl();
 
             if (!currentBudId) {
                 showError('ไม่พบ ID ของดอกที่ต้องการแก้ไข กรุณาเลือกดอกจากหน้ากิจกรรม', false);
+                return;
+            }
+
+            // Check if data is already loaded
+            if (currentBudId && document.getElementById('strain_name_en').value) {
+                console.log('Data already loaded, skipping...');
+                showForm();
                 return;
             }
 
@@ -1800,6 +1810,16 @@
         window.replaceCurrentImage = replaceCurrentImage;
 
         function retryLoadBud() {
+            // Reset loading state before retry
+            isLoading = false;
+            currentBudId = null;
+            
+            // Clear form to force reload
+            const form = document.getElementById('editBudForm');
+            if (form) {
+                form.reset();
+            }
+            
             loadBudData();
         }
 
@@ -2340,18 +2360,30 @@
             }
         };
 
-        // Close effects categories when clicking outside
-        document.addEventListener('click', function(e) {
-            if (!e.target.closest('.effects-selector')) {
-                document.querySelectorAll('.effects-categories').forEach(cat => {
-                    cat.style.display = 'none';
-                });
-            }
-        });
+        // Close effects categories when clicking outside (only add once)
+        if (!window.effectsClickHandlerAdded) {
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.effects-selector')) {
+                    document.querySelectorAll('.effects-categories').forEach(cat => {
+                        cat.style.display = 'none';
+                    });
+                }
+            });
+            window.effectsClickHandlerAdded = true;
+        }
+
+        // Prevent multiple initialization
+        let isPageInitialized = false;
 
         // Initialize page when DOM is ready
         document.addEventListener('DOMContentLoaded', function() {
+            if (isPageInitialized) {
+                console.log('Page already initialized, skipping...');
+                return;
+            }
+            
             console.log('Edit bud page initialized');
+            isPageInitialized = true;
 
             const editForm = document.getElementById('editBudForm');
             if (editForm) {
@@ -2369,8 +2401,10 @@
                 console.error('Error initializing page features:', error);
             }
 
-            // Load bud data
-            loadBudData();
+            // Load bud data only once
+            if (!currentBudId) {
+                loadBudData();
+            }
         });
     </script>
 </body>

@@ -1549,7 +1549,8 @@ def get_buds():
 
     conn = get_db_connection()
     if conn:
-        try:            cur = conn.cursor()
+        try:
+            cur = conn.cursor()
 
             # Build query with filters
             query = """

@@ -51,18 +51,23 @@ def init_connection_pool():
                     database_url = os.environ.get('DATABASE_URL')
                     if database_url:
                         connection_pool = psycopg2.pool.ThreadedConnectionPool(
-                            2, 15,  # min and max connections - reduced for better memory usage
+                            1, 8,  # Reduced connection count for stability
                             database_url,
-                            # Add connection optimization
+                            # Add connection optimization with keepalive
                             sslmode='prefer',
-                            connect_timeout=10,
-                            application_name='cannabis_app'
+                            connect_timeout=15,
+                            application_name='cannabis_app',
+                            keepalives=1,
+                            keepalives_idle=30,
+                            keepalives_interval=10,
+                            keepalives_count=5
                         )
                         print("Connection pool initialized successfully")
                     else:
                         print("DATABASE_URL not found")
                 except Exception as e:
                     print(f"Error initializing connection pool: {e}")
+                    connection_pool = None
 
 def get_cache(key):
     with cache_lock:
@@ -94,19 +99,40 @@ def get_db_connection():
             init_connection_pool()
 
         if connection_pool:
-            conn = connection_pool.getconn()
-            if conn:
-                # Test connection
-                with conn.cursor() as test_cur:
-                    test_cur.execute("SELECT 1")
-                return conn
+            try:
+                conn = connection_pool.getconn()
+                if conn:
+                    # Test connection
+                    with conn.cursor() as test_cur:
+                        test_cur.execute("SELECT 1")
+                    return conn
+            except (psycopg2.OperationalError, psycopg2.InterfaceError) as e:
+                print(f"Connection pool error: {e}, trying to reinitialize...")
+                # Reset connection pool and try again
+                global connection_pool
+                connection_pool = None
+                init_connection_pool()
+                if connection_pool:
+                    try:
+                        conn = connection_pool.getconn()
+                        if conn:
+                            with conn.cursor() as test_cur:
+                                test_cur.execute("SELECT 1")
+                            return conn
+                    except Exception:
+                        pass
 
         # Fallback to direct connection
         database_url = os.environ.get('DATABASE_URL')
         if not database_url:
             raise Exception("DATABASE_URL environment variable not set")
 
-        conn = psycopg2.connect(database_url)
+        conn = psycopg2.connect(
+            database_url,
+            sslmode='prefer',
+            connect_timeout=10,
+            application_name='cannabis_app_direct'
+        )
         return conn
     except Exception as e:
         print(f"Database connection error: {e}")
@@ -115,9 +141,22 @@ def get_db_connection():
 def return_db_connection(conn):
     try:
         if connection_pool and conn:
-            connection_pool.putconn(conn)
+            try:
+                # Check if connection is still alive before returning to pool
+                with conn.cursor() as test_cur:
+                    test_cur.execute("SELECT 1")
+                connection_pool.putconn(conn)
+            except (psycopg2.OperationalError, psycopg2.InterfaceError):
+                # Connection is dead, close it instead of returning to pool
+                try:
+                    conn.close()
+                except:
+                    pass
         elif conn:
-            conn.close()
+            try:
+                conn.close()
+            except:
+                pass
     except Exception as e:
         print(f"Error returning connection: {e}")
 
@@ -1083,10 +1122,13 @@ def get_user_buds():
     if cached_data:
         return jsonify({'buds': cached_data})
 
+    conn = None
+    cur = None
     try:
         conn = get_db_connection()
         if not conn:
-            return jsonify({'error': 'Database connection failed'}), 500
+            print("Failed to get database connection")
+            return jsonify({'error': 'Database connection failed', 'buds': []}), 500
 
         cur = conn.cursor()
 
@@ -1121,16 +1163,25 @@ def get_user_buds():
                 'review_count': row[10]
             })
 
-        cur.close()
-        return_db_connection(conn)
-
         # Cache for 2 minutes
         set_cache(cache_key, buds)
 
         return jsonify({'buds': buds})
+
+    except psycopg2.OperationalError as e:
+        print(f"Database operational error in get_user_buds: {e}")
+        return jsonify({'error': 'Database connection lost', 'buds': []}), 500
     except Exception as e:
         print(f"Error in get_user_buds: {e}")
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Internal server error', 'buds': []}), 500
+    finally:
+        if cur:
+            try:
+                cur.close()
+            except:
+                pass
+        if conn:
+            return_db_connection(conn)
 
 @app.route('/api/user_reviews')
 def get_user_reviews():
@@ -1145,8 +1196,14 @@ def get_user_reviews():
     if cached_data:
         return jsonify({'reviews': cached_data})
 
+    conn = None
+    cur = None
     try:
         conn = get_db_connection()
+        if not conn:
+            print("Failed to get database connection")
+            return jsonify({'error': 'Database connection failed', 'reviews': []}), 500
+
         cur = conn.cursor()
 
         # Optimized query with limit
@@ -1199,20 +1256,27 @@ def get_user_reviews():
                 'bud_reference_id': row[16]  # Add bud reference ID from reviews table
             }
 
-            # Debug log for video_review_url
-            print(f"Debug: Review ID {row[0]} video_review_url: {row[10]}")
-
             reviews.append(review_data)
-
-        cur.close()
-        return_db_connection(conn)
 
         # Cache for 2 minutes
         set_cache(cache_key, reviews)
 
         return jsonify({'reviews': reviews})
+
+    except psycopg2.OperationalError as e:
+        print(f"Database operational error in get_user_reviews: {e}")
+        return jsonify({'error': 'Database connection lost', 'reviews': []}), 500
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        print(f"Error in get_user_reviews: {e}")
+        return jsonify({'error': 'Internal server error', 'reviews': []}), 500
+    finally:
+        if cur:
+            try:
+                cur.close()
+            except:
+                pass
+        if conn:
+            return_db_connection(conn)
 
 @app.route('/register')
 def register_page():

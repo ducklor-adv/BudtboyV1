@@ -1211,8 +1211,10 @@
                     growerName = bud.grower_name;
                 } else if (bud.username && bud.username.trim()) {
                     growerName = bud.username;
-                } else if (bud.created_by) {
-                    growerName = `ผู้ปลูก ID: ${bud.grower_id}`;
+                } else if (bud.created_by && bud.created_by.trim()) {
+                    growerName = bud.created_by;
+                } else {
+                    growerName = 'บัดท์บอย';  // Keep default name instead of showing ID
                 }
 
                 growerNameElement.textContent = growerName;
@@ -1532,7 +1534,7 @@
                 {
                     title: '🌿 ข้อมูลพื้นฐาน',
                     items: [
-                        { label: 'ผู้ปลูก', value: bud.grower_name || bud.created_by || 'บัดท์บอย' },
+                        { label: 'ผู้ปลูก', value: bud.grower_name || (bud.created_by && bud.created_by.trim()) || 'บัดท์บอย' },
                         { label: 'ผู้พัฒนาสายพันธ์', value: bud.breeder },
                         { label: 'ประเภท', value: bud.strain_type },
                         { label: 'เกรด', value: bud.grade }

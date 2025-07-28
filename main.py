@@ -2854,13 +2854,17 @@ def get_bud_detail(bud_id):
     # Check cache first
     cached_data = get_cache(cache_key)
     if cached_data:
+        print(f"Returning cached data for bud {bud_id}")
         return jsonify(cached_data)
 
     conn = None
     cur = None
     try:
+        print(f"Loading bud detail for ID: {bud_id}, User: {user_id}")
+        
         conn = get_db_connection()
         if not conn:
+            print("Failed to get database connection")
             return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
         cur = conn.cursor()
@@ -2881,54 +2885,61 @@ def get_bud_detail(bud_id):
         """, (bud_id, user_id))
 
         result = cur.fetchone()
+        print(f"Query result: {result is not None}")
+        
         if not result:
+            print(f"No bud found with ID {bud_id} for user {user_id}")
             return jsonify({'error': 'ไม่พบข้อมูลดอกหรือไม่มีสิทธิ์เข้าถึง'}), 404
 
         bud_data = {
             'id': result[0],
-            'strain_name_th': result[1],
-            'strain_name_en': result[2],
-            'breeder': result[3],
-            'strain_type': result[4],
+            'strain_name_th': result[1] or '',
+            'strain_name_en': result[2] or '',
+            'breeder': result[3] or '',
+            'strain_type': result[4] or '',
             'thc_percentage': float(result[5]) if result[5] else None,
             'cbd_percentage': float(result[6]) if result[6] else None,
-            'grade': result[7],
-            'aroma_flavor': result[8],
-            'top_terpenes_1': result[9],
-            'top_terpenes_2': result[10],
-            'top_terpenes_3': result[11],
-            'mental_effects_positive': result[12],
-            'mental_effects_negative': result[13],
-            'physical_effects_positive': result[14],
-            'physical_effects_negative': result[15],
-            'recommended_time': result[16],
-            'grow_method': result[17],
-            'harvest_date': result[18].strftime('%Y-%m-%d') if result[18] else None,
-            'batch_number': result[19],
+            'grade': result[7] or '',
+            'aroma_flavor': result[8] or '',
+            'top_terpenes_1': result[9] or '',
+            'top_terpenes_2': result[10] or '',
+            'top_terpenes_3': result[11] or '',
+            'mental_effects_positive': result[12] or '',
+            'mental_effects_negative': result[13] or '',
+            'physical_effects_positive': result[14] or '',
+            'physical_effects_negative': result[15] or '',
+            'recommended_time': result[16] or '',
+            'grow_method': result[17] or '',
+            'harvest_date': result[18].strftime('%Y-%m-%d') if result[18] else '',
+            'batch_number': result[19] or '',
             'grower_id': result[20],
-            'grower_license_verified': result[21],
-            'fertilizer_type': result[22],
-            'flowering_type': result[23],
-            'image_1_url': result[24],
-            'image_2_url': result[25],
-            'image_3_url': result[26],
-            'image_4_url': result[27],
-            'created_at': result[28].strftime('%Y-%m-%d %H:%M:%S') if result[28] else None,
-            'updated_at': result[29].strftime('%Y-%m-%d %H:%M:%S') if result[29] else None,
+            'grower_license_verified': result[21] or False,
+            'fertilizer_type': result[22] or '',
+            'flowering_type': result[23] or '',
+            'image_1_url': result[24] or '',
+            'image_2_url': result[25] or '',
+            'image_3_url': result[26] or '',
+            'image_4_url': result[27] or '',
+            'created_at': result[28].strftime('%Y-%m-%d %H:%M:%S') if result[28] else '',
+            'updated_at': result[29].strftime('%Y-%m-%d %H:%M:%S') if result[29] else '',
             'created_by': result[30]
         }
 
-        # Cache for 5 minutes
+        print(f"Successfully loaded bud data: {bud_data['strain_name_en']}")
+
+        # Cache for 2 minutes (shorter cache for edit operations)
         set_cache(cache_key, bud_data)
 
         return jsonify(bud_data)
 
     except psycopg2.OperationalError as e:
         print(f"Database operational error in get_bud_detail: {e}")
-        return jsonify({'error': 'เกิดข้อผิดพลาดในการเชื่อมต่อฐานข้อมูล'}), 500
+        return jsonify({'error': 'เกิดข้อผิดพลาดในการเชื่อมต่อฐานข้อมูล กรุณาลองใหม่อีกครั้ง'}), 500
     except Exception as e:
-        print(f"Error in get_bud_detail: {e}")
-        return jsonify({'error': 'เกิดข้อผิดพลาดในการโหลดข้อมูล'}), 500
+        print(f"Error in get_bud_detail for bud {bud_id}: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': f'เกิดข้อผิดพลาดในการโหลดข้อมูล: {str(e)}'}), 500
     finally:
         if cur:
             try:

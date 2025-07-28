@@ -1,57 +1,49 @@
-Analysis: The code changes address CSS closing issues, missing form sections, and potential multiple initialization problems in the JavaScript. The JavaScript fix aims to prevent multiple event listener bindings and component initializations by using flags and checks.
-</tool_code>
-```replit_final_file>
 <!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cannabis App - แก้ไขข้อมูลดอก</title>
+    <title>แก้ไขข้อมูลดอก - Cannabis App</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            margin: 0;
-            padding: 20px;
+            background: linear-gradient(135deg, #e8f5e8 0%, #f0f8ff 100%);
             min-height: 100vh;
+            padding: 20px;
         }
 
         .container {
-            max-width: 900px;
+            max-width: 800px;
             margin: 0 auto;
             background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             overflow: hidden;
         }
 
         .header {
-            background: linear-gradient(135deg, #FF9800, #F57C00);
+            background: linear-gradient(135deg, #FF8C00, #FF7F50);
             color: white;
-            padding: 30px;
-            text-align: center;
-            position: relative;
-        }
-
-        .header h1 {
-            margin: 0;
-            font-size: 2.5em;
-            font-weight: 300;
+            padding: 20px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
         .back-btn {
-            position: absolute;
-            top: 20px;
-            left: 20px;
             background: rgba(255,255,255,0.2);
             color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 25px;
-            cursor: pointer;
+            padding: 8px 15px;
+            border-radius: 20px;
+            text-decoration: none;
             font-size: 14px;
             transition: all 0.3s ease;
-            text-decoration: none;
         }
 
         .back-btn:hover {
@@ -59,536 +51,28 @@ Analysis: The code changes address CSS closing issues, missing form sections, an
             transform: translateY(-2px);
         }
 
-        .form-content {
-            padding: 40px;
-        }
-
-        .form-section {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 30px;
-            margin-bottom: 30px;
-            border-left: 5px solid #FF9800;
-        }
-
-        .section-title {
-            font-size: 1.3em;
-            font-weight: 600;
-            color: #2c5530;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .form-row {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        .form-group {
+        .header-title {
+            text-align: center;
             flex: 1;
-            min-width: 250px;
         }
 
-        .form-group.full-width {
-            flex: 100%;
-        }
-
-        .form-group.half-width {
-            flex: 1;
-            min-width: 200px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: #495057;
-        }
-
-        input, select, textarea {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s ease;
-            box-sizing: border-box;
-        }
-
-        input[type="file"] {
-            padding: 8px;
-            background: #f8f9fa;
-            border: 2px dashed #e9ecef;
-        }
-
-        input[type="file"]:hover {
-            border-color: #FF9800;
-            background: #fff3e0;
-        }
-
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: #FF9800;
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        .required {
-            color: #dc3545;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            text-decoration: none;
-            display: inline-block;
-            text-align: center;
-            transition: all 0.3s ease;
-            margin: 8px 5px;
-        }
-
-        .btn-primary {
-            background: #FF9800;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #F57C00;
-            transform: translateY(-2px);
-        }
-
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #5a6268;
-        }
-
-        .form-actions {
-            text-align: center;
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid #e9ecef;
-        }
-
-        .alert {
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            font-weight: 500;
-        }
-
-        .alert-success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .alert-error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .help-text {
-            font-size: 14px;
-            color: #6c757d;
-            margin-top: 5px;
-            font-style: italic;
-        }
-
-        .loading-dropdown {
-            color: #6c757d;
-            font-style: italic;
-        }
-
-        /* Autocomplete Styles */
-        .autocomplete-container {
-            position: relative;
-        }
-
-        .suggestions-list {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: white;
-            border: 2px solid #e9ecef;
-            border-top: none;
-            border-radius: 0 0 8px 8px;
-            max-height: 200px;
-            overflow-y: auto;
-            z-index: 1000;
-            display: none;
-        }
-
-        .suggestion-item {
-            padding: 12px;
-            cursor: pointer;
-            border-bottom: 1px solid #f8f9fa;
-            transition: background-color 0.2s ease;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .suggestion-item:hover {
-            background-color: #f8f9fa;
-        }
-
-        .suggestion-item:last-child {
-            border-bottom: none;
-        }
-
-        .suggestion-item.selected {
-            background-color: #FF9800;
-            color: white;
-        }
-
-        .suggestion-main {
-            font-weight: 500;
-        }
-
-        .suggestion-meta {
-            font-size: 12px;
-            color: #6c757d;
-            display: flex;
-            gap: 8px;
-        }
-
-        .suggestion-item.selected .suggestion-meta {
-            color: rgba(255, 255, 255, 0.8);
-        }
-
-        .popular-badge {
-            background: #ffc107;
-            color: #212529;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 10px;
-            font-weight: bold;
-        }
-
-        .strain-type-badge {
-            background: #6f42c1;
-            color: white;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 10px;
-        }
-
-        .no-suggestions {
-            padding: 12px;
-            text-align: center;
-            color: #6c757d;
-            font-style: italic;
-        }
-
-        /* Flavor Selector Styles */
-        .aroma-selector {
-            width: 100%;
-        }
-
-        .selected-flavors {
-            min-height: 30px;
-            border: 1px solid #e9ecef;
-            border-radius: 5px;
-            padding: 5px;
-            background: white;
-            cursor: pointer;
-            margin-bottom: 8px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 3px;
-            align-items: center;
-        }
-
-        .selected-flavors:hover {
-            border-color: #FF9800;
-        }
-
-        .selected-flavors .placeholder {
-            color: #6c757d;
-            font-style: italic;
-        }
-
-        .flavor-tag {
-            background: #FF9800;
-            color: white;
-            padding: 3px 6px;
-            border-radius: 12px;
-            font-size: 11px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .flavor-tag .remove-btn {
-            background: rgba(255, 255, 255, 0.3);
-            border: none;
-            color: white;
-            border-radius: 50%;
-            width: 16px;
-            height: 16px;
-            font-size: 10px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .flavor-tag .remove-btn:hover {
-            background: rgba(255, 255, 255, 0.5);
-        }
-
-        .flavor-categories {
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 5px;
-            padding: 10px;
-            max-height: 250px;
-            overflow-y: auto;
-            display: none;
-        }
-
-        .flavor-categories.active {
-            display: block;
-        }
-
-        .flavor-category {
-            margin-bottom: 12px;
-        }
-
-        .category-title {
-            font-weight: 600;
-            color: #2c5530;
-            margin-bottom: 8px;
-            padding-bottom: 4px;
-            border-bottom: 1px solid #e9ecef;
-            font-size: 13px;
-        }
-
-        .flavor-options {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px;
-        }
-
-        .flavor-btn {
-            background: white;
-            border: 1px solid #e9ecef;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 11px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            color: #495057;
-        }
-
-        .flavor-btn:hover {
-            background: #fff3e0;
-            border-color: #FF9800;
-            color: #F57C00;
-        }
-
-        .flavor-btn.selected {
-            background: #FF9800;
-            border-color: #FF9800;
-            color: white;
-        }
-
-        .clear-all-btn {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-size: 12px;
-            cursor: pointer;
-            margin-left: 10px;
-        }
-
-        .clear-all-btn:hover {
-            background: #c82333;
-        }
-
-        /* Effects Two-Column Layout */
-        .effects-two-columns {
-            display: flex;
-            gap: 30px;
-            margin-bottom: 20px;
-        }
-
-        .effects-column {
-            flex: 1;
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 20px;
-            border: 1px solid #e9ecef;
-        }
-
-        .column-title {
-            font-size: 1.2em;
-            font-weight: 600;
-            color: #2c5530;
-            margin-bottom: 20px;
-            text-align: center;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #FF9800;
-        }
-
-        /* Effects Selector Styles */
-        .effects-selector {
-            width: 100%;
-            margin-bottom: 20px;
-        }
-
-        .selected-effects {
-            min-height: 30px;
-            border: 1px solid #e9ecef;
-            border-radius: 5px;
-            padding: 5px;
-            background: white;
-            cursor: pointer;
-            margin-bottom: 8px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 3px;
-            align-items: center;
-        }
-
-        .selected-effects:hover {
-            border-color: #FF9800;
-        }
-
-        .selected-effects .placeholder {
-            color: #6c757d;
-            font-style: italic;
-        }
-
-        .effect-tag {
-            background: #FF9800;
-            color: white;
-            padding: 3px 6px;
-            border-radius: 12px;
-            font-size: 11px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .effect-tag.negative {
-            background: #dc3545;
-        }
-
-        .effect-tag .remove-btn {
-            background: rgba(255, 255, 255, 0.3);
-            border: none;
-            color: white;
-            border-radius: 50%;
-            width: 16px;
-            height: 16px;
-            font-size: 10px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .effect-tag .remove-btn:hover {
-            background: rgba(255, 255, 255, 0.5);
-        }
-
-        .effects-categories {
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 5px;
-            padding: 10px;
-            max-height: 250px;
-            overflow-y: auto;
-            display: none;
-        }
-
-        .effects-categories.active {
-            display: block;
-        }
-
-        .effect-category {
-            margin-bottom: 12px;
-        }
-
-        .effect-options {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px;
-        }
-
-        .effect-btn {
-            background: white;
-            border: 1px solid #e9ecef;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 11px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            color: #495057;
-        }
-
-        .effect-btn:hover {
-            background: #fff3e0;
-            border-color: #FF9800;
-            color: #F57C00;
-        }
-
-        .effect-btn.selected {
-            background: #FF9800;
-            border-color: #FF9800;
-            color: white;
-        }
-
-        .effect-btn.negative {
-            background: white;
-            border: 1px solid #e9ecef;
-            color: #dc3545;
-        }
-
-        .effect-btn.negative:hover {
-            background: #fdedee;
-            border-color: #dc3545;
-            color: #a71d2a;
-        }
-
-        .effect-btn.negative.selected {
-            background: #dc3545;
-            border-color: #dc3545;
-            color: white;
+        .header h1 {
+            font-size: 24px;
+            margin: 0;
         }
 
         .loading-state {
             text-align: center;
-            padding: 40px;
+            padding: 60px 20px;
             color: #666;
         }
 
         .loading-spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #FF9800;
-            border-radius: 50%;
             width: 40px;
             height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #FF8C00;
+            border-radius: 50%;
             animation: spin 1s linear infinite;
             margin: 0 auto 20px;
         }
@@ -598,97 +82,128 @@ Analysis: The code changes address CSS closing issues, missing form sections, an
             100% { transform: rotate(360deg); }
         }
 
-        /* Current Images Styles */
-        .current-image-item {
-            position: relative;
-            width: 120px;
-            height: 120px;
-            border-radius: 8px;
-            overflow: hidden;
-            border: 2px solid #e9ecef;
-            background: #f8f9fa;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .current-image-item img {
-            width: 100%;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 4px;
-        }
-
-        .current-image-label {
-            font-size: 11px;
-            color: #666;
+        .error-state {
             text-align: center;
-            padding: 4px;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 0 0 4px 4px;
-            width: 100%;
+            padding: 60px 20px;
+            color: #d32f2f;
         }
 
-        .no-current-image {
-            color: #999;
-            font-size: 12px;
-            text-align: center;
-            background: #f8f9fa;
-            border: 2px dashed #e9ecef;
+        .error-state h3 {
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+
+        .retry-btn {
+            background: #FF8C00;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .retry-btn:hover {
+            background: #e67e00;
+            transform: translateY(-2px);
+        }
+
+        .form-container {
+            padding: 30px;
+            display: none;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #FF8C00;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-row-three {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #FF8C00, #FF7F50);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 140, 0, 0.3);
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
 
         @media (max-width: 768px) {
-            .form-row {
-                flex-direction: column;
-            }
-
-            .form-group {
-                min-width: auto;
-            }
-
             .container {
                 margin: 10px;
+                border-radius: 15px;
             }
 
-            .form-content {
-                padding: 15px;
+            .form-row,
+            .form-row-three {
+                grid-template-columns: 1fr;
+                gap: 15px;
             }
 
             .header {
-                padding: 15px;
+                padding: 15px 20px;
             }
 
             .header h1 {
-                font-size: 1.5em;
+                font-size: 20px;
             }
 
-            .form-section {
-                padding: 15px;
-                margin-bottom: 15px;
-            }
-
-            .effects-two-columns {
-                flex-direction: column;
-                gap: 20px;
-            }
-
-            .effects-column {
-                padding: 15px;
-            }
-
-            .column-title {
-                font-size: 1.1em;
-                margin-bottom: 15px;
-            }
-
-            .current-image-item {
-                width: 100px;
-                height: 100px;
-            }
-
-            .current-image-item img {
-                height: 70px;
+            .form-container {
+                padding: 20px;
             }
         }
     </style>
@@ -697,204 +212,366 @@ Analysis: The code changes address CSS closing issues, missing form sections, an
     <div class="container">
         <div class="header">
             <a href="/activity" class="back-btn">← กลับ</a>
-            <div style="display: flex; align-items: center; justify-content: center; gap: 15px;">
-                <img src="/uploads/20250727_055943_review_1_budtboy1_V2.png" alt="Budt.Boy Logo" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;">
-                <h1>แก้ไขข้อมูลดอก</h1>
+            <div class="header-title">
+                <h1>🌿 แก้ไขข้อมูลดอก</h1>
             </div>
-            <div class="subtitle">แก้ไขข้อมูลรายละเอียดของดอกที่คุณมี</div>
+            <div style="width: 80px;"></div>
         </div>
 
-        <div class="form-content">
-            <div id="loadingState" class="loading-state">
-                <div class="loading-spinner"></div>
-                <p>กำลังโหลดข้อมูล...</p>
-            </div>
+        <div id="loadingState" class="loading-state">
+            <div class="loading-spinner"></div>
+            <p>กำลังโหลดข้อมูล...</p>
+        </div>
 
-            <div id="alertContainer"></div>
+        <div id="errorState" class="error-state" style="display: none;">
+            <h3>❌ เกิดข้อผิดพลาด</h3>
+            <p id="errorMessage">ไม่สามารถโหลดข้อมูลได้</p>
+            <button class="retry-btn" onclick="retryLoadBud()">🔄 ลองใหม่</button>
+        </div>
 
-            <form id="editBudForm" style="display: none;">
-                <!-- Basic Information -->
-                <div class="form-section">
-                    <div class="section-title">
-                        📋 ข้อมูลพื้นฐาน
+        <div id="formContainer" class="form-container">
+            <form id="editBudForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="strain_name_th">ชื่อสายพันธุ์ (ไทย)</label>
+                        <input type="text" id="strain_name_th" name="strain_name_th" class="form-control" required>
                     </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="strain_name_en">ชื่อสายพันธุ์ (อังกฤษ) <span class="required">*</span></label>
-                            <div class="autocomplete-container">
-                                <input type="text" id="strain_name_en" name="strain_name_en" 
-                                       placeholder="พิมพ์ชื่อสายพันธุ์ภาษาอังกฤษ..." required
-                                       autocomplete="off">
-                                <div id="suggestions_en" class="suggestions-list"></div>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="strain_name_th">ชื่อสายพันธุ์ (ไทย)</label>
-                            <div class="autocomplete-container">
-                                <input type="text" id="strain_name_th" name="strain_name_th" 
-                                       placeholder="พิมพ์ชื่อสายพันธุ์ภาษาไทย..."
-                                       autocomplete="off">
-                                <div id="suggestions_th" class="suggestions-list"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="breeder">ผู้พัฒนาสายพันธุ์</label>
-                            <div class="autocomplete-container">
-                                <input type="text" id="breeder" name="breeder" placeholder="เช่น DNA Genetics, Barney's Farm" autocomplete="off">
-                                <div id="breeder-suggestions" class="suggestions-list"></div>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="strain_type">ประเภทสายพันธุ์ <span class="required">*</span></label>
-                            <select id="strain_type" name="strain_type" required>
-                                <option value="">เลือกประเภท</option>
-                                <option value="Indica">Indica</option>
-                                <option value="Sativa">Sativa</option>
-                                <option value="Hybrid">Hybrid</option>
-                            </select>
-                        </div>
+                    <div class="form-group">
+                        <label for="strain_name_en">ชื่อสายพันธุ์ (อังกฤษ)</label>
+                        <input type="text" id="strain_name_en" name="strain_name_en" class="form-control" required>
                     </div>
                 </div>
 
-                <!-- Chemical Properties -->
-                <div class="form-section">
-                    <div class="section-title">
-                        🧪 ข้อมูลทางเคมี
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="breeder">ผู้พัฒนาสายพันธุ์</label>
+                        <input type="text" id="breeder" name="breeder" class="form-control">
                     </div>
-
-                    <div class="form-row">
-                        <div class="form-group half-width">
-                            <label for="thc_percentage">THC (%)</label>
-                            <input type="number" id="thc_percentage" name="thc_percentage" step="0.01" min="0" max="100">
-                            <div class="help-text">ระดับ THC เป็นเปอร์เซ็นต์</div>
-                        </div>
-                        <div class="form-group half-width">
-                            <label for="cbd_percentage">CBD (%)</label>
-                            <input type="number" id="cbd_percentage" name="cbd_percentage" step="0.01" min="0" max="100">
-                            <div class="help-text">ระดับ CBD เป็นเปอร์เซ็นต์</div>
-                        </div>
-                        <div class="form-group half-width">
-                            <label for="grade">เกรด</label>
-                            <select id="grade" name="grade">
-                                <option value="">เลือกเกรด</option>
-                                <option value="A+">A+</option>
-                                <option value="A">A</option>
-                                <option value="B+">B+</option>
-                                <option value="B">B</option>
-                                <option value="C">C</option>
-                            </select>
-                        </div>
+                    <div class="form-group">
+                        <label for="strain_type">ประเภทสายพันธุ์</label>
+                        <select id="strain_type" name="strain_type" class="form-control" required>
+                            <option value="">เลือกประเภท</option>
+                            <option value="Indica">Indica</option>
+                            <option value="Sativa">Sativa</option>
+                            <option value="Hybrid">Hybrid</option>
+                        </select>
                     </div>
                 </div>
 
-                <!-- Sensory Properties -->
-                <div class="form-section">
-                    <div class="section-title">
-                        👃 คุณสมบัติทางประสาทสัมผัส
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="thc_percentage">THC (%)</label>
+                        <input type="number" id="thc_percentage" name="thc_percentage" class="form-control" 
+                               min="0" max="100" step="0.1">
                     </div>
+                    <div class="form-group">
+                        <label for="cbd_percentage">CBD (%)</label>
+                        <input type="number" id="cbd_percentage" name="cbd_percentage" class="form-control" 
+                               min="0" max="100" step="0.1">
+                    </div>
+                </div>
 
-                    <div class="form-row">
-                        <div class="form-group full-width">
-                            <label for="aroma_flavor">กลิ่นและรส (เลือกได้หลายตัว)</label>
-                            <div class="aroma-selector">
-                                <!-- Selected flavors display -->
-                                <div id="selected-flavors" class="selected-flavors">
-                                    <span class="placeholder">คลิกเพื่อเลือกกลิ่นและรส...</span>
-                                </div>
+                <div class="form-group">
+                    <label for="grade">เกรด</label>
+                    <select id="grade" name="grade" class="form-control">
+                        <option value="">เลือกเกรด</option>
+                        <option value="A+">A+</option>
+                        <option value="A">A</option>
+                        <option value="B+">B+</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                    </select>
+                </div>
 
-                                <!-- Hidden input to store selected values -->
-                                <textarea id="aroma_flavor" name="aroma_flavor" style="display: none;"></textarea>
+                <div class="form-group">
+                    <label for="aroma_flavor">กลิ่นและรส</label>
+                    <input type="text" id="aroma_flavor" name="aroma_flavor" class="form-control" 
+                           placeholder="เช่น หวาน, เบอร์รี่, ซิตรัส">
+                </div>
 
-                                <!-- Flavor categories -->
-                                <div class="flavor-categories">
-                                    <div class="flavor-category">
-                                        <div class="category-title">🍊 ผลไม้</div>
-                                        <div class="flavor-options">
-                                            <button type="button" class="flavor-btn" data-flavor="เลมอน">เลมอน</button>
-                                            <button type="button" class="flavor-btn" data-flavor="ส้ม">ส้ม</button>
-                                            <button type="button" class="flavor-btn" data-flavor="มะนาว">มะนาว</button>
-                                            <button type="button" class="flavor-btn" data-flavor="เกรปฟรุต">เกรปฟรุต</button>
-                                            <button type="button" class="flavor-btn" data-flavor="เบอร์รี่">เบอร์รี่</button>
-                                            <button type="button" class="flavor-btn" data-flavor="สตรอว์เบอร์รี่">สตรอว์เบอร์รี่</button>
-                                            <button type="button" class="flavor-btn" data-flavor="บลูเบอร์รี่">บลูเบอร์รี่</button>
-                                            <button type="button" class="flavor-btn" data-flavor="เชอร์รี่">เชอร์รี่</button>
-                                            <button type="button" class="flavor-btn" data-flavor="องุ่น">องุ่น</button>
-                                            <button type="button" class="flavor-btn" data-flavor="แอปเปิ้ล">แอปเปิ้ล</button>
-                                            <button type="button" class="flavor-btn" data-flavor="มะม่วง">มะม่วง</button>
-                                            <button type="button" class="flavor-btn" data-flavor="สับปะรด">สับปะรด</button>
-                                            <button type="button" class="flavor-btn" data-flavor="กล้วย">กล้วย</button>
-                                            <button type="button" class="flavor-btn" data-flavor="พีช">พีช</button>
-                                            <button type="button" class="flavor-btn" data-flavor="แตงโม">แตงโม</button>
-                                            <button type="button" class="flavor-btn" data-flavor="กีวี">กีวี</button>
-                                            <button type="button" class="flavor-btn" data-flavor="มะพร้าว">มะพร้าว</button>
-                                        </div>
-                                    </div>
+                <div class="form-row-three">
+                    <div class="form-group">
+                        <label for="top_terpenes_1">Terpene 1</label>
+                        <input type="text" id="top_terpenes_1" name="top_terpenes_1" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="top_terpenes_2">Terpene 2</label>
+                        <input type="text" id="top_terpenes_2" name="top_terpenes_2" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="top_terpenes_3">Terpene 3</label>
+                        <input type="text" id="top_terpenes_3" name="top_terpenes_3" class="form-control">
+                    </div>
+                </div>
 
-                                    <div class="flavor-category">
-                                        <div class="category-title">🍰 หวาน‑ขนม</div>
-                                        <div class="flavor-options">
-                                            <button type="button" class="flavor-btn" data-flavor="น้ำผึ้ง">น้ำผึ้ง</button>
-                                            <button type="button" class="flavor-btn" data-flavor="วนิลา">วนิลา</button>
-                                            <button type="button" class="flavor-btn" data-flavor="คาราเมล">คาราเมล</button>
-                                            <button type="button" class="flavor-btn" data-flavor="ช็อกโก">ช็อกโก</button>
-                                            <button type="button" class="flavor-btn" data-flavor="กาแฟ">กาแฟ</button>
-                                            <button type="button" class="flavor-btn" data-flavor="เค้ก">เค้ก</button>
-                                            <button type="button" class="flavor-btn" data-flavor="คุกกี้">คุกกี้</button>
-                                        </div>
-                                    </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="mental_effects_positive">ผลกระทบทางจิต (บวก)</label>
+                        <input type="text" id="mental_effects_positive" name="mental_effects_positive" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="mental_effects_negative">ผลกระทบทางจิต (ลบ)</label>
+                        <input type="text" id="mental_effects_negative" name="mental_effects_negative" class="form-control">
+                    </div>
+                </div>
 
-                                    <div class="flavor-category">
-                                        <div class="category-title">🥛 ครีม‑นม</div>
-                                        <div class="flavor-options">
-                                            <button type="button" class="flavor-btn" data-flavor="ครีม">ครีม</button>
-                                            <button type="button" class="flavor-btn" data-flavor="บัตเตอร์">บัตเตอร์</button>
-                                            <button type="button" class="flavor-btn" data-flavor="ชีส">ชีส</button>
-                                        </div>
-                                    </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="physical_effects_positive">ผลกระทบทางกาย (บวก)</label>
+                        <input type="text" id="physical_effects_positive" name="physical_effects_positive" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="physical_effects_negative">ผลกระทบทางกาย (ลบ)</label>
+                        <input type="text" id="physical_effects_negative" name="physical_effects_negative" class="form-control">
+                    </div>
+                </div>
 
-                                    <div class="flavor-category">
-                                        <div class="category-title">🥜 ถั่ว‑เมล็ด</div>
-                                        <div class="flavor-options">
-                                            <button type="button" class="flavor-btn" data-flavor="ถั่ว">ถั่ว</button>
-                                            <button type="button" class="flavor-btn" data-flavor="อัลมอนด์">อัลมอนด์</button>
-                                            <button type="button" class="flavor-btn" data-flavor="วอลนัท">วอลนัท</button>
-                                        </div>
-                                    </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="recommended_time">เวลาที่แนะนำ</label>
+                        <select id="recommended_time" name="recommended_time" class="form-control">
+                            <option value="">เลือกเวลา</option>
+                            <option value="กลางวัน">กลางวัน</option>
+                            <option value="กลางคืน">กลางคืน</option>
+                            <option value="ตลอดวัน">ตลอดวัน</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="grow_method">วิธีการปลูก</label>
+                        <select id="grow_method" name="grow_method" class="form-control">
+                            <option value="">เลือกวิธีการ</option>
+                            <option value="Indoor">Indoor</option>
+                            <option value="Outdoor">Outdoor</option>
+                            <option value="Greenhouse">Greenhouse</option>
+                            <option value="Hydroponic">Hydroponic</option>
+                        </select>
+                    </div>
+                </div>
 
-                                    <div class="flavor-category">
-                                        <div class="category-title">🌿 สมุนไพร‑เครื่องเทศ</div>
-                                        <div class="flavor-options">
-                                            <button type="button" class="flavor-btn" data-flavor="พริกไทย">พริกไทย</button>
-                                            <button type="button" class="flavor-btn" data-flavor="อบเชย">อบเชย</button>
-                                            <button type="button" class="flavor-btn" data-flavor="จันทน์เทศ">จันทน์เทศ</button>
-                                            <button type="button" class="flavor-btn" data-flavor="ขิง">ขิง</button>
-                                            <button type="button" class="flavor-btn" data-flavor="กานพลู">กานพลู</button>
-                                            <button type="button" class="flavor-btn" data-flavor="ยี่หร่า">ยี่หร่า</button>
-                                            <button type="button" class="flavor-btn" data-flavor="ฮ็อปส์">ฮ็อปส์</button>
-                                            <button type="button" class="flavor-btn" data-flavor="มิ้นต์">มิ้นต์</button>
-                                            <button type="button" class="flavor-btn" data-flavor="โรสแมรี่">โรสแมรี่</button>
-                                            <button type="button" class="flavor-btn" data-flavor="ไทม์">ไทม์</button>
-                                            <button type="button" class="flavor-btn" data-flavor="เสจ">เสจ</button>
-                                        </div>
-                                    </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="harvest_date">วันที่เก็บเกี่ยว</label>
+                        <input type="date" id="harvest_date" name="harvest_date" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="batch_number">หมายเลขแบทช์</label>
+                        <input type="text" id="batch_number" name="batch_number" class="form-control">
+                    </div>
+                </div>
 
-                                    <div class="flavor-category">
-                                        <div class="category-title">🌸 ดอกไม้</div>
-                                        <div class="flavor-options">
-                                            <button type="button" class="flavor-btn" data-flavor="กุหลาบ">กุหลาบ</button>
-                                            <button type="button" class="flavor-btn" data-flavor="ลาเวนเดอร์">ลาเวนเดอร์</button>
-                                            <button type="button" class="flavor-btn" data-flavor="มะลิ">มะลิ</button>
-                                            <button type="button" class="flavor-btn" data-flavor="ดอกส้ม">ดอกส้ม</button>
-                                        </div>
-                                    </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="fertilizer_type">ประเภทปุ่ย</label>
+                        <select id="fertilizer_type" name="fertilizer_type" class="form-control">
+                            <option value="">เลือกประเภทปุ่ย</option>
+                            <option value="Organic">Organic</option>
+                            <option value="Chemical">Chemical</option>
+                            <option value="Mixed">Mixed</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="flowering_type">ประเภทการออกดอก</label>
+                        <select id="flowering_type" name="flowering_type" class="form-control">
+                            <option value="">เลือกประเภท</option>
+                            <option value="Photoperiod">Photoperiod</option>
+                            <option value="Autoflower">Autoflower</option>
+                        </select>
+                    </div>
+                </div>
 
-                                    <div class="flavor-category">
-                                        <div class="category-title">🌲 ไม้‑ดิน</div>
-                                        <div class="flavor-options">
-                                            <button type="button" class="flavor-btn" data-flavor="ไม้สน">ไม้สน</button>
-                                            <button type="button" class="flavor-btn" data-flavor="ไม้ซีดาร์">ไม้ซีดาร์</button>
-                                            <
+                <button type="submit" id="submitBtn" class="submit-btn">
+                    💾 บันทึกการแก้ไข
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentBudId = null;
+        let isLoading = false;
+
+        // Get bud ID from URL parameters
+        function getBudIdFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('id');
+        }
+
+        function showError(message, canRetry = true) {
+            console.error('Error:', message);
+
+            const loadingState = document.getElementById('loadingState');
+            const errorState = document.getElementById('errorState');
+            const formContainer = document.getElementById('formContainer');
+            const errorMessage = document.getElementById('errorMessage');
+
+            if (loadingState) loadingState.style.display = 'none';
+            if (formContainer) formContainer.style.display = 'none';
+            if (errorState) {
+                errorState.style.display = 'block';
+                if (errorMessage) {
+                    errorMessage.textContent = message;
+                }
+
+                const retryBtn = errorState.querySelector('.retry-btn');
+                if (retryBtn) {
+                    retryBtn.style.display = canRetry ? 'inline-block' : 'none';
+                }
+            }
+        }
+
+        function showLoading() {
+            const loadingState = document.getElementById('loadingState');
+            const errorState = document.getElementById('errorState');
+            const formContainer = document.getElementById('formContainer');
+
+            if (loadingState) loadingState.style.display = 'block';
+            if (errorState) errorState.style.display = 'none';
+            if (formContainer) formContainer.style.display = 'none';
+        }
+
+        function showForm() {
+            const loadingState = document.getElementById('loadingState');
+            const errorState = document.getElementById('errorState');
+            const formContainer = document.getElementById('formContainer');
+
+            if (loadingState) loadingState.style.display = 'none';
+            if (errorState) errorState.style.display = 'none';
+            if (formContainer) formContainer.style.display = 'block';
+        }
+
+        async function loadBudData() {
+            if (isLoading) return;
+
+            currentBudId = getBudIdFromUrl();
+
+            if (!currentBudId) {
+                showError('ไม่พบ ID ของดอกที่ต้องการแก้ไข กรุณาเลือกดอกจากหน้ากิจกรรม', false);
+                return;
+            }
+
+            isLoading = true;
+            showLoading();
+
+            try {
+                console.log(`Loading bud data for ID: ${currentBudId}`);
+
+                const response = await fetch(`/api/buds/${currentBudId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        throw new Error('ไม่พบข้อมูลดอกหรือคุณไม่มีสิทธิ์เข้าถึง');
+                    } else if (response.status === 401) {
+                        throw new Error('กรุณาเข้าสู่ระบบใหม่');
+                    } else {
+                        throw new Error(`เกิดข้อผิดพลาดในการโหลดข้อมูล (${response.status})`);
+                    }
+                }
+
+                const budData = await response.json();
+
+                if (budData.error) {
+                    throw new Error(budData.error);
+                }
+
+                console.log('Bud data loaded successfully:', budData.strain_name_en);
+                populateForm(budData);
+                showForm();
+
+            } catch (error) {
+                console.error('Error loading bud data:', error);
+                showError(error.message || 'ไม่สามารถโหลดข้อมูลดอกได้ กรุณาลองใหม่อีกครั้ง');
+            } finally {
+                isLoading = false;
+            }
+        }
+
+        function populateForm(budData) {
+            const fields = [
+                'strain_name_th', 'strain_name_en', 'breeder', 'strain_type',
+                'thc_percentage', 'cbd_percentage', 'grade', 'aroma_flavor',
+                'top_terpenes_1', 'top_terpenes_2', 'top_terpenes_3',
+                'mental_effects_positive', 'mental_effects_negative',
+                'physical_effects_positive', 'physical_effects_negative',
+                'recommended_time', 'grow_method', 'harvest_date',
+                'batch_number', 'fertilizer_type', 'flowering_type'
+            ];
+
+            fields.forEach(field => {
+                const element = document.getElementById(field);
+                if (element && budData[field] !== undefined && budData[field] !== null) {
+                    element.value = budData[field];
+                }
+            });
+        }
+
+        async function handleSubmit(event) {
+            event.preventDefault();
+
+            if (isLoading || !currentBudId) return;
+
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.textContent;
+
+            try {
+                isLoading = true;
+                submitBtn.disabled = true;
+                submitBtn.textContent = '💾 กำลังบันทึก...';
+
+                const formData = new FormData(document.getElementById('editBudForm'));
+                const data = Object.fromEntries(formData);
+
+                // Convert numeric fields
+                if (data.thc_percentage) data.thc_percentage = parseFloat(data.thc_percentage);
+                if (data.cbd_percentage) data.cbd_percentage = parseFloat(data.cbd_percentage);
+
+                const response = await fetch(`/api/buds/${currentBudId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    alert('✅ แก้ไขข้อมูลดอกสำเร็จ!');
+                    window.location.href = '/activity';
+                } else {
+                    throw new Error(result.error || 'ไม่สามารถบันทึกข้อมูลได้');
+                }
+
+            } catch (error) {
+                console.error('Error updating bud:', error);
+                alert('❌ เกิดข้อผิดพลาด: ' + error.message);
+            } finally {
+                isLoading = false;
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+        }
+
+        function retryLoadBud() {
+            loadBudData();
+        }
+
+        // Initialize page when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Edit bud page initialized');
+
+            const editForm = document.getElementById('editBudForm');
+            if (editForm) {
+                editForm.addEventListener('submit', handleSubmit);
+            }
+
+            // Load bud data
+            loadBudData();
+        });
+    </script>
+</body>
+</html>

@@ -1379,8 +1379,7 @@
                 </div>
 
                 <div class="actions">
-                    <a href="/add-review" class="action-btn">⭐ เขียนรีวิว</a>
-                    <a href="#" class="action-btn secondary" id="viewReviewsBtn">📖 ดูรีวิวทั้งหมด</a>
+                    <a href="#" class="action-btn" id="writeReviewBtn">⭐ เขียนรีวิว</a>
                 </div>
             </div>
         </div>
@@ -1501,8 +1500,8 @@
             // Reviews
             displayReviews(reviews);
 
-            // Set up view reviews button
-            document.getElementById('viewReviewsBtn').href = `/bud-reviews?bud_id=${bud.id}`;
+            // Set up write review button with bud ID
+            document.getElementById('writeReviewBtn').href = `/add-review?bud_id=${bud.id}`;
         }
 
         // Event listeners

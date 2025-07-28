@@ -825,9 +825,27 @@
         .info-group {
             background: #f8f9fa;
             border-left: 4px solid #4CAF50;
-            border-radius: 8px;
+            border-radius: 0;
             padding: 12px;
-            margin-bottom: 15px;
+            margin-bottom: 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .info-group:first-child {
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+        
+        .info-group:last-child {
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+            border-bottom: none;
+        }
+        
+        .info-groups-container {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         
         .info-group-title {
@@ -1542,7 +1560,7 @@
                 }
             ];
             
-            groupedBudInfo.innerHTML = infoGroups.map(group => {
+            const groupsHtml = infoGroups.map(group => {
                 // สำหรับกลุ่ม "ผลกระทบและการใช้งาน" ให้แสดงเสมอ
                 if (group.title === '💭 ผลกระทบและการใช้งาน') {
                     return `
@@ -1578,7 +1596,9 @@
                         </div>
                     `;
                 }
-            }).filter(group => group).join('');
+            }).filter(group => group);
+            
+            groupedBudInfo.innerHTML = `<div class="info-groups-container">${groupsHtml.join('')}</div>`;
         }
 
         function formatDate(dateString) {

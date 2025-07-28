@@ -605,43 +605,48 @@
             color: white;
         }
 
-        /* Current Images Display */
-        .current-images {
-            margin-bottom: 20px;
-        }
-
-        .current-images h4 {
-            margin-bottom: 10px;
-            color: #2c5530;
-        }
-
-        .images-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 10px;
-        }
-
-        .image-item {
+        /* Current Image Display */
+        .current-image {
             position: relative;
+            width: 100%;
+            height: 120px;
             border-radius: 8px;
             overflow: hidden;
-            border: 2px solid #e9ecef;
+            border: 2px solid #28a745;
+            background: #f8f9fa;
         }
 
-        .image-item img {
+        .current-image img {
             width: 100%;
-            height: 100px;
+            height: 100%;
             object-fit: cover;
             cursor: pointer;
         }
 
-        .no-images {
-            text-align: center;
-            color: #6c757d;
-            font-style: italic;
-            padding: 20px;
-            border: 2px dashed #e9ecef;
-            border-radius: 8px;
+        .current-image:hover {
+            border-color: #1e7e34;
+        }
+
+        .replace-image-btn {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background: rgba(0, 123, 255, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s ease;
+        }
+
+        .replace-image-btn:hover {
+            background: rgba(0, 86, 179, 1);
         }
 
         /* Image Upload Styles */
@@ -1213,25 +1218,13 @@
                     </div>
                 </div>
 
-                <!-- Current Images Display -->
+                <!-- Image Management Section -->
                 <div class="form-section">
                     <div class="section-title">
-                        📸 รูปภาพปัจจุบัน
-                    </div>
-                    <div id="currentImagesSection" class="current-images">
-                        <div id="currentImagesGrid" class="images-grid">
-                            <!-- Current images will be loaded here -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Image Upload Section -->
-                <div class="form-section">
-                    <div class="section-title">
-                        📷 อัพโหลดรูปภาพใหม่
+                        📸 จัดการรูปภาพ
                     </div>
                     <div class="image-upload-section">
-                        <p class="help-text">เลือกรูปภาพที่ต้องการอัพโหลด (สูงสุด 4 รูป, ขนาดไม่เกิน 16MB ต่อรูป)</p>
+                        <p class="help-text">จัดการรูปภาพดอก (สูงสุด 4 รูป, ขนาดไม่เกิน 16MB ต่อรูป) - กดลบรูปเดิมหรือเพิ่มรูปใหม่ได้</p>
                         
                         <div class="image-upload-grid">
                             <div class="image-upload-item">
@@ -1245,6 +1238,11 @@
                                 <div class="image-preview" id="preview_1" style="display: none;">
                                     <img src="" alt="Preview">
                                     <button type="button" class="remove-image-btn" onclick="removeImage(1)">×</button>
+                                </div>
+                                <div class="current-image" id="current_1" style="display: none;">
+                                    <img src="" alt="Current Image">
+                                    <button type="button" class="remove-image-btn" onclick="removeCurrentImage(1)">×</button>
+                                    <button type="button" class="replace-image-btn" onclick="replaceCurrentImage(1)">🔄</button>
                                 </div>
                             </div>
 
@@ -1260,6 +1258,11 @@
                                     <img src="" alt="Preview">
                                     <button type="button" class="remove-image-btn" onclick="removeImage(2)">×</button>
                                 </div>
+                                <div class="current-image" id="current_2" style="display: none;">
+                                    <img src="" alt="Current Image">
+                                    <button type="button" class="remove-image-btn" onclick="removeCurrentImage(2)">×</button>
+                                    <button type="button" class="replace-image-btn" onclick="replaceCurrentImage(2)">🔄</button>
+                                </div>
                             </div>
 
                             <div class="image-upload-item">
@@ -1274,6 +1277,11 @@
                                     <img src="" alt="Preview">
                                     <button type="button" class="remove-image-btn" onclick="removeImage(3)">×</button>
                                 </div>
+                                <div class="current-image" id="current_3" style="display: none;">
+                                    <img src="" alt="Current Image">
+                                    <button type="button" class="remove-image-btn" onclick="removeCurrentImage(3)">×</button>
+                                    <button type="button" class="replace-image-btn" onclick="replaceCurrentImage(3)">🔄</button>
+                                </div>
                             </div>
 
                             <div class="image-upload-item">
@@ -1287,6 +1295,11 @@
                                 <div class="image-preview" id="preview_4" style="display: none;">
                                     <img src="" alt="Preview">
                                     <button type="button" class="remove-image-btn" onclick="removeImage(4)">×</button>
+                                </div>
+                                <div class="current-image" id="current_4" style="display: none;">
+                                    <img src="" alt="Current Image">
+                                    <button type="button" class="remove-image-btn" onclick="removeCurrentImage(4)">×</button>
+                                    <button type="button" class="replace-image-btn" onclick="replaceCurrentImage(4)">🔄</button>
                                 </div>
                             </div>
                         </div>
@@ -1487,31 +1500,51 @@
         }
 
         function loadCurrentImages(budData) {
-            const currentImagesGrid = document.getElementById('currentImagesGrid');
-            
-            if (!currentImagesGrid) return;
-
-            // Get image URLs from bud data
-            const images = [];
+            // Load current images into the unified interface
             for (let i = 1; i <= 4; i++) {
-                if (budData[`image_${i}_url`]) {
-                    images.push({
-                        url: budData[`image_${i}_url`],
-                        title: `รูปที่ ${i}`
-                    });
+                const imageUrl = budData[`image_${i}_url`];
+                if (imageUrl) {
+                    showCurrentImage(i, imageUrl);
                 }
             }
+        }
 
-            if (images.length === 0) {
-                currentImagesGrid.innerHTML = '<div class="no-images">ยังไม่มีรูปภาพ</div>';
-                return;
+        function showCurrentImage(index, imageUrl) {
+            const label = document.querySelector(`label[for="image_${index}"]`);
+            const preview = document.getElementById(`preview_${index}`);
+            const current = document.getElementById(`current_${index}`);
+            
+            if (label && current) {
+                label.style.display = 'none';
+                if (preview) preview.style.display = 'none';
+                current.style.display = 'block';
+                current.querySelector('img').src = imageUrl;
             }
+        }
 
-            currentImagesGrid.innerHTML = images.map(image => `
-                <div class="image-item">
-                    <img src="${image.url}" alt="${image.title}" onclick="viewImage('${image.url}')">
-                </div>
-            `).join('');
+        function removeCurrentImage(index) {
+            const label = document.querySelector(`label[for="image_${index}"]`);
+            const current = document.getElementById(`current_${index}`);
+            const input = document.getElementById(`image_${index}`);
+            
+            if (label && current) {
+                current.style.display = 'none';
+                current.querySelector('img').src = '';
+                label.style.display = 'block';
+                
+                // Clear any new file selection too
+                if (input) input.value = '';
+                
+                // Mark for deletion (you might want to track this)
+                current.setAttribute('data-deleted', 'true');
+            }
+        }
+
+        function replaceCurrentImage(index) {
+            const input = document.getElementById(`image_${index}`);
+            if (input) {
+                input.click();
+            }
         }
 
         function viewImage(url) {
@@ -1602,9 +1635,11 @@
         function showImagePreview(index, src) {
             const label = document.querySelector(`label[for="image_${index}"]`);
             const preview = document.getElementById(`preview_${index}`);
+            const current = document.getElementById(`current_${index}`);
             
             if (label && preview) {
                 label.style.display = 'none';
+                if (current) current.style.display = 'none';
                 preview.style.display = 'block';
                 preview.querySelector('img').src = src;
             }
@@ -1614,6 +1649,7 @@
             const input = document.getElementById(`image_${index}`);
             const label = document.querySelector(`label[for="image_${index}"]`);
             const preview = document.getElementById(`preview_${index}`);
+            const current = document.getElementById(`current_${index}`);
             
             if (input) input.value = '';
             if (label) label.style.display = 'block';
@@ -1621,11 +1657,16 @@
                 preview.style.display = 'none';
                 preview.querySelector('img').src = '';
             }
+            if (current) {
+                current.style.display = 'none';
+                current.querySelector('img').src = '';
+            }
         }
 
         function clearAllImages() {
             for (let i = 1; i <= 4; i++) {
                 removeImage(i);
+                removeCurrentImage(i);
             }
         }
 
@@ -1729,6 +1770,8 @@
         // Make functions globally accessible
         window.removeImage = removeImage;
         window.clearAllImages = clearAllImages;
+        window.removeCurrentImage = removeCurrentImage;
+        window.replaceCurrentImage = replaceCurrentImage;
 
         function retryLoadBud() {
             loadBudData();

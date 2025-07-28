@@ -2862,9 +2862,12 @@ def get_bud_info(bud_id):
                        b.grower_id, b.grower_license_verified, b.fertilizer_type, 
                        b.flowering_type, b.image_1_url, b.image_2_url, b.image_3_url, b.image_4_url,
                        b.created_at, b.updated_at, b.created_by,
-                       u.username as grower_name, u.is_grower, u.profile_image_url
+                       COALESCE(u_grower.username, u_creator.username, 'บัดท์บอย') as grower_name, 
+                       COALESCE(u_grower.is_grower, u_creator.is_grower, false) as is_grower, 
+                       COALESCE(u_grower.profile_image_url, u_creator.profile_image_url) as grower_profile_image
                 FROM buds_data b
-                LEFT JOIN users u ON b.grower_id = u.id
+                LEFT JOIN users u_grower ON b.grower_id = u_grower.id
+                LEFT JOIN users u_creator ON b.created_by = u_creator.id
                 WHERE b.id = %s
             """, (bud_id,))
 
@@ -2876,7 +2879,7 @@ def get_bud_info(bud_id):
                 }), 404
 
             # Log the actual database result
-            print(f"Database result for bud {bud_id}: grower_name = {result[18]}")
+            print(f"Database result for bud {bud_id}: grower_name = {result[31]}")
 
             bud_info = {
                 'id': result[0],

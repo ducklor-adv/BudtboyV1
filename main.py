@@ -772,7 +772,7 @@ def create_tables():
                     ('Ethos Seeds', False),
                     ('Exotic Genetix', False),
                     ('Fast Buds', True),
-                    ('Fast Buds 420', False),```python
+                    ('Fast Buds 420', False),
                     ('Fast Flowers', False),
                     ('Feminized Seeds Co', False),
                     ('Flash Seeds', False),

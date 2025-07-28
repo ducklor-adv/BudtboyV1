@@ -2855,10 +2855,13 @@ def get_bud_info(bud_id):
             cur.execute("""
                 SELECT b.id, b.strain_name_en, b.strain_name_th, b.breeder, 
                        b.strain_type, b.thc_percentage, b.cbd_percentage, 
-                       b.grade, b.aroma_flavor, b.recommended_time, b.grow_method,
-                       b.harvest_date, b.batch_number, b.grower_license_verified,
-                       b.fertilizer_type, b.flowering_type, 
-                       b.created_at, b.grower_id,
+                       b.grade, b.aroma_flavor, b.top_terpenes_1, b.top_terpenes_2, b.top_terpenes_3,
+                       b.mental_effects_positive, b.mental_effects_negative,
+                       b.physical_effects_positive, b.physical_effects_negative,
+                       b.recommended_time, b.grow_method, b.harvest_date, b.batch_number,
+                       b.grower_id, b.grower_license_verified, b.fertilizer_type, 
+                       b.flowering_type, b.image_1_url, b.image_2_url, b.image_3_url, b.image_4_url,
+                       b.created_at, b.updated_at, b.created_by,
                        u.username as grower_name, u.is_grower, u.profile_image_url
                 FROM buds_data b
                 LEFT JOIN users u ON b.grower_id = u.id
@@ -2885,18 +2888,31 @@ def get_bud_info(bud_id):
                 'cbd_percentage': float(result[6]) if result[6] else None,
                 'grade': result[7],
                 'aroma_flavor': result[8],
-                'recommended_time': result[9],
-                'grow_method': result[10],
-                'harvest_date': result[11].strftime('%Y-%m-%d') if result[11] else None,
-                'batch_number': result[12],
-                'grower_license_verified': result[13],
-                'fertilizer_type': result[14],
-                'flowering_type': result[15],
-                'created_at': result[16].strftime('%Y-%m-%d %H:%M:%S') if result[16] else None,
-                'grower_id': result[17],
-                'grower_name': result[18],  # This should now get the updated value
-                'is_grower': result[19],
-                'grower_profile_image': result[20]
+                'top_terpenes_1': result[9],
+                'top_terpenes_2': result[10],
+                'top_terpenes_3': result[11],
+                'mental_effects_positive': result[12],
+                'mental_effects_negative': result[13],
+                'physical_effects_positive': result[14],
+                'physical_effects_negative': result[15],
+                'recommended_time': result[16],
+                'grow_method': result[17],
+                'harvest_date': result[18].strftime('%Y-%m-%d') if result[18] else None,
+                'batch_number': result[19],
+                'grower_id': result[20],
+                'grower_license_verified': result[21],
+                'fertilizer_type': result[22],
+                'flowering_type': result[23],
+                'image_1_url': result[24],
+                'image_2_url': result[25],
+                'image_3_url': result[26],
+                'image_4_url': result[27],
+                'created_at': result[28].strftime('%Y-%m-%d %H:%M:%S') if result[28] else None,
+                'updated_at': result[29].strftime('%Y-%m-%d %H:%M:%S') if result[29] else None,
+                'created_by': result[30],
+                'grower_name': result[31],
+                'is_grower': result[32],
+                'grower_profile_image': result[33]
             }
 
             cur.close()

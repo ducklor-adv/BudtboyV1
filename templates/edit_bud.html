@@ -117,6 +117,17 @@
             box-sizing: border-box;
         }
 
+        input[type="file"] {
+            padding: 8px;
+            background: #f8f9fa;
+            border: 2px dashed #e9ecef;
+        }
+
+        input[type="file"]:hover {
+            border-color: #FF9800;
+            background: #fff3e0;
+        }
+
         input:focus, select:focus, textarea:focus {
             outline: none;
             border-color: #FF9800;
@@ -636,7 +647,7 @@
         <div class="header">
             <a href="/activity" class="back-btn">← กลับ</a>
             <div style="display: flex; align-items: center; justify-content: center; gap: 15px;">
-                <img src="/attached_assets/budt_boy_logo.png" alt="Budt.Boy Logo" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;">
+                <img src="/uploads/20250727_055943_review_1_budtboy1_V2.png" alt="Budt.Boy Logo" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;">
                 <h1>แก้ไขข้อมูลดอก</h1>
             </div>
             <div class="subtitle">แก้ไขข้อมูลรายละเอียดของดอกที่คุณมี</div>
@@ -1051,6 +1062,39 @@
                                 <option value="กลางคืน">🌙 กลางคืน</option>
                                 <option value="ตลอดวัน">🌅 ตลอดวัน</option>
                             </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Image Upload Section -->
+                <div class="form-section">
+                    <div class="section-title">
+                        📸 รูปภาพดอก
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group half-width">
+                            <label for="image_1">รูปภาพที่ 1</label>
+                            <input type="file" id="image_1" name="image_1" accept=".png,.jpg,.jpeg">
+                            <div class="help-text">รองรับไฟล์: PNG, JPG, JPEG</div>
+                        </div>
+                        <div class="form-group half-width">
+                            <label for="image_2">รูปภาพที่ 2</label>
+                            <input type="file" id="image_2" name="image_2" accept=".png,.jpg,.jpeg">
+                            <div class="help-text">รองรับไฟล์: PNG, JPG, JPEG</div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group half-width">
+                            <label for="image_3">รูปภาพที่ 3</label>
+                            <input type="file" id="image_3" name="image_3" accept=".png,.jpg,.jpeg">
+                            <div class="help-text">รองรับไฟล์: PNG, JPG, JPEG</div>
+                        </div>
+                        <div class="form-group half-width">
+                            <label for="image_4">รูปภาพที่ 4</label>
+                            <input type="file" id="image_4" name="image_4" accept=".png,.jpg,.jpeg">
+                            <div class="help-text">รองรับไฟล์: PNG, JPG, JPEG</div>
                         </div>
                     </div>
                 </div>
@@ -1737,16 +1781,27 @@
             event.preventDefault();
             
             const formData = new FormData(event.target);
-            const data = Object.fromEntries(formData.entries());
+            const data = {};
+            const imageFiles = new FormData();
 
-            // Convert empty strings to null for optional fields
-            Object.keys(data).forEach(key => {
-                if (data[key] === '') {
+            // Separate text data and image files
+            for (let [key, value] of formData.entries()) {
+                if (key.startsWith('image_') && value instanceof File && value.size > 0) {
+                    imageFiles.append(key, value);
+                } else if (typeof value === 'string' && value.trim() !== '') {
+                    // Convert numeric fields
+                    if (key === 'thc_percentage' || key === 'cbd_percentage') {
+                        data[key] = parseFloat(value);
+                    } else {
+                        data[key] = value;
+                    }
+                } else if (value === '') {
                     data[key] = null;
                 }
-            });
+            }
 
             try {
+                // First, update the bud data
                 const response = await fetch(`/api/buds/${budId}`, {
                     method: 'PUT',
                     headers: {
@@ -1758,7 +1813,38 @@
                 const result = await response.json();
 
                 if (response.ok) {
-                    showSuccess('แก้ไขข้อมูลสำเร็จ! กำลังเปลี่ยนหน้า...');
+                    let updateMessage = result.message;
+
+                    // Then, upload images if any
+                    let hasImages = false;
+                    for (let [key, value] of imageFiles.entries()) {
+                        if (value instanceof File && value.size > 0) {
+                            hasImages = true;
+                            break;
+                        }
+                    }
+
+                    if (hasImages) {
+                        try {
+                            const imageResponse = await fetch(`/api/buds/${budId}/upload-images`, {
+                                method: 'POST',
+                                body: imageFiles
+                            });
+
+                            const imageResult = await imageResponse.json();
+
+                            if (imageResponse.ok && imageResult.success) {
+                                updateMessage += ` และอัพโหลดรูปภาพสำเร็จ (${imageResult.uploaded_images.length} รูป)`;
+                            } else {
+                                updateMessage += ` แต่การอัพโหลดรูปภาพล้มเหลว: ${imageResult.error}`;
+                            }
+                        } catch (imageError) {
+                            console.error('Image upload error:', imageError);
+                            updateMessage += ` แต่การอัพโหลดรูปภาพล้มเหลว`;
+                        }
+                    }
+
+                    showSuccess(updateMessage + ' กำลังเปลี่ยนหน้า...');
                     setTimeout(() => {
                         window.location.href = '/activity';
                     }, 2000);

@@ -144,9 +144,19 @@ def return_db_connection(conn):
                 # Check if connection is still alive before returning to pool
                 with conn.cursor() as test_cur:
                     test_cur.execute("SELECT 1")
-                connection_pool.putconn(conn)
+                # Check if connection was obtained from pool before returning
+                if hasattr(conn, '_from_pool') or connection_pool:
+                    connection_pool.putconn(conn)
+                else:
+                    conn.close()
             except (psycopg2.OperationalError, psycopg2.InterfaceError):
                 # Connection is dead, close it instead of returning to pool
+                try:
+                    conn.close()
+                except:
+                    pass
+            except Exception as pool_error:
+                # If putconn fails, just close the connection
                 try:
                     conn.close()
                 except:
@@ -158,6 +168,12 @@ def return_db_connection(conn):
                 pass
     except Exception as e:
         print(f"Error returning connection: {e}")
+        # Ensure connection is closed
+        try:
+            if conn:
+                conn.close()
+        except:
+            pass
 
 # Create tables if they don't exist
 def create_tables():

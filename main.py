@@ -3483,6 +3483,26 @@ def chat_with_ai():
                 'message': 'ขออภัย ระบบ AI ยังไม่พร้อมใช้งาน กรุณาติดต่อผู้ดูแลระบบ'
             })
 
+        # ขั้นตอนที่ 1: วิเคราะห์ความต้องการของ user
+        search_criteria = await analyze_user_request(user_message)
+        
+        if search_criteria:
+            # ขั้นตอนที่ 2: ค้นหา bud ที่เหมาะสม
+            recommended_buds = await find_matching_buds(search_criteria)
+            
+            if recommended_buds:
+                # ขั้นตอนที่ 3: สร้างคำตอบที่มี link bud report
+                ai_response = generate_recommendation_response(search_criteria, recommended_buds, user_message)
+                
+                return jsonify({
+                    'success': True,
+                    'message': ai_response,
+                    'has_recommendations': True,
+                    'recommended_buds': recommended_buds,
+                    'search_criteria': search_criteria
+                })
+
+        # ถ้าไม่ใช่การขอคำแนะนำดอก ให้ตอบแบบปกติ
         # Build conversation context
         messages = [
             {
@@ -3496,6 +3516,12 @@ def chat_with_ai():
 - ผลกระทบของกัญชา (Effects)
 - การรีวิวและการประเมินคุณภาพ
 - กฎหมายเกี่ยวกับกัญชาในประเทศไทย
+
+หากผู้ใช้ถามหาดอกที่เหมาะสม ให้ถามรายละเอียดเพิ่มเติม เช่น:
+- ต้องการประเภทไหน (Indica, Sativa, Hybrid)
+- ระดับ THC/CBD ที่ต้องการ
+- ผลกระทบที่ต้องการ (ผ่อนคลาย, กระตุ้น, ช่วยนอน, ฯลฯ)
+- เวลาที่จะใช้ (กลางวัน, กลางคืน, ตลอดวัน)
 
 กรุณาตอบเป็นภาษาไทยที่เป็นมิตรและให้ข้อมูลที่ถูกต้อง แม่นยำ
 หากไม่แน่ใจในข้อมูล ให้บอกว่าไม่แน่ใจและแนะนำให้ปรึกษาผู้เชี่ยวชาญ
@@ -3531,6 +3557,7 @@ def chat_with_ai():
         return jsonify({
             'success': True,
             'message': ai_response,
+            'has_recommendations': False,
             'usage': {
                 'prompt_tokens': response.usage.prompt_tokens,
                 'completion_tokens': response.usage.completion_tokens,
@@ -3559,6 +3586,185 @@ def chat_with_ai():
             'success': False,
             'message': 'ขออภัย เกิดข้อผิดพลาดที่ไม่คาดคิด กรุณาลองใหม่อีกครั้ง'
         }), 500
+
+async def analyze_user_request(user_message):
+    """วิเคราะห์ความต้องการของ user และแปลงเป็นเกณฑ์การค้นหา"""
+    try:
+        # ใช้ OpenAI เพื่อวิเคราะห์ความต้องการ
+        analysis_prompt = f"""
+วิเคราะห์ข้อความต่อไปนี้และระบุว่าผู้ใช้กำลังขอคำแนะนำดอกกัญชาหรือไม่:
+
+ข้อความ: "{user_message}"
+
+หากใช่ ให้แยกข้อมูลต่อไปนี้ออกมา (ถ้าไม่มีให้ใส่ null):
+- strain_type: "Indica", "Sativa", "Hybrid" หรือ null
+- desired_effects: รายการผลกระทบที่ต้องการ (เช่น ผ่อนคลาย, กระตุ้น, ช่วยนอน)
+- time_preference: "กลางวัน", "กลางคืน", "ตลอดวัน" หรือ null
+- thc_range: [min, max] หรือ null
+- cbd_preference: "สูง", "ต่ำ", "ปกติ" หรือ null
+- grade_preference: "A+", "A", "B+" หรือ null
+
+ตอบเป็น JSON format:
+{{
+  "is_recommendation_request": true/false,
+  "criteria": {{
+    "strain_type": "...",
+    "desired_effects": [...],
+    "time_preference": "...",
+    "thc_range": [...],
+    "cbd_preference": "...",
+    "grade_preference": "..."
+  }}
+}}
+"""
+
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": analysis_prompt}],
+            max_tokens=300,
+            temperature=0.1
+        )
+        
+        analysis_result = response.choices[0].message.content.strip()
+        
+        # พยายาม parse JSON response
+        import json
+        try:
+            parsed_result = json.loads(analysis_result)
+            if parsed_result.get('is_recommendation_request'):
+                return parsed_result.get('criteria', {})
+        except json.JSONDecodeError:
+            print(f"Failed to parse JSON: {analysis_result}")
+            
+    except Exception as e:
+        print(f"Error in analyze_user_request: {e}")
+    
+    return None
+
+async def find_matching_buds(search_criteria):
+    """ค้นหา bud ที่ตรงกับเกณฑ์ที่กำหนด"""
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return []
+        
+        cur = conn.cursor()
+        
+        # สร้าง query แบบไดนามิก
+        where_conditions = []
+        params = []
+        
+        # กรองตาม strain_type
+        if search_criteria.get('strain_type'):
+            where_conditions.append("strain_type = %s")
+            params.append(search_criteria['strain_type'])
+        
+        # กรองตาม time_preference
+        if search_criteria.get('time_preference'):
+            where_conditions.append("recommended_time = %s")
+            params.append(search_criteria['time_preference'])
+        
+        # กรองตาม THC range
+        if search_criteria.get('thc_range') and len(search_criteria['thc_range']) == 2:
+            min_thc, max_thc = search_criteria['thc_range']
+            if min_thc is not None:
+                where_conditions.append("thc_percentage >= %s")
+                params.append(min_thc)
+            if max_thc is not None:
+                where_conditions.append("thc_percentage <= %s")
+                params.append(max_thc)
+        
+        # กรองตาม grade
+        if search_criteria.get('grade_preference'):
+            where_conditions.append("grade = %s")
+            params.append(search_criteria['grade_preference'])
+        
+        # กรองตาม CBD preference
+        if search_criteria.get('cbd_preference'):
+            if search_criteria['cbd_preference'] == 'สูง':
+                where_conditions.append("cbd_percentage > 5")
+            elif search_criteria['cbd_preference'] == 'ต่ำ':
+                where_conditions.append("cbd_percentage < 2")
+        
+        # สร้าง query
+        base_query = """
+            SELECT b.id, b.strain_name_en, b.strain_name_th, b.breeder, b.strain_type,
+                   b.thc_percentage, b.cbd_percentage, b.grade, b.aroma_flavor,
+                   b.mental_effects_positive, b.physical_effects_positive,
+                   b.recommended_time, b.created_at,
+                   COALESCE(AVG(r.overall_rating), 0) as avg_rating,
+                   COUNT(r.id) as review_count
+            FROM buds_data b
+            LEFT JOIN reviews r ON b.id = r.bud_reference_id
+        """
+        
+        if where_conditions:
+            base_query += " WHERE " + " AND ".join(where_conditions)
+        
+        base_query += """
+            GROUP BY b.id, b.strain_name_en, b.strain_name_th, b.breeder, b.strain_type,
+                     b.thc_percentage, b.cbd_percentage, b.grade, b.aroma_flavor,
+                     b.mental_effects_positive, b.physical_effects_positive,
+                     b.recommended_time, b.created_at
+            ORDER BY avg_rating DESC, review_count DESC
+            LIMIT 5
+        """
+        
+        cur.execute(base_query, params)
+        results = cur.fetchall()
+        
+        buds = []
+        for row in results:
+            bud = {
+                'id': row[0],
+                'strain_name_en': row[1],
+                'strain_name_th': row[2],
+                'breeder': row[3],
+                'strain_type': row[4],
+                'thc_percentage': float(row[5]) if row[5] else None,
+                'cbd_percentage': float(row[6]) if row[6] else None,
+                'grade': row[7],
+                'aroma_flavor': row[8],
+                'mental_effects_positive': row[9],
+                'physical_effects_positive': row[10],
+                'recommended_time': row[11],
+                'created_at': row[12].strftime('%Y-%m-%d') if row[12] else None,
+                'avg_rating': float(row[13]) if row[13] else 0,
+                'review_count': row[14],
+                'report_link': f"/bud-report?id={row[0]}"
+            }
+            buds.append(bud)
+        
+        cur.close()
+        return_db_connection(conn)
+        return buds
+        
+    except Exception as e:
+        print(f"Error in find_matching_buds: {e}")
+        return []
+
+def generate_recommendation_response(search_criteria, recommended_buds, original_message):
+    """สร้างคำตอบที่มีคำแนะนำและ link"""
+    if not recommended_buds:
+        return f"ขออภัยครับ ไม่พบดอกที่ตรงกับความต้องการของคุณในขณะนี้ 😔\n\nกรุณาลองปรับเกณฑ์การค้นหาใหม่ หรือสอบถามข้อมูลเพิ่มเติมได้เลยครับ!"
+    
+    response = f"🌿 ตามความต้องการของคุณ ผมแนะนำดอกเหล่านี้ครับ:\n\n"
+    
+    for i, bud in enumerate(recommended_buds, 1):
+        rating_stars = "⭐" * int(round(bud['avg_rating'])) if bud['avg_rating'] > 0 else "ยังไม่มีรีวิว"
+        
+        response += f"**{i}. {bud['strain_name_th'] or 'ไม่ระบุชื่อไทย'}** ({bud['strain_name_en']})\n"
+        response += f"   • ประเภท: {bud['strain_type']}\n"
+        response += f"   • THC: {bud['thc_percentage']}% | CBD: {bud['cbd_percentage']}%\n"
+        response += f"   • เกรด: {bud['grade']}\n"
+        response += f"   • คะแนน: {rating_stars} ({bud['avg_rating']:.1f}/5)\n"
+        if bud['aroma_flavor']:
+            response += f"   • กลิ่น/รส: {bud['aroma_flavor']}\n"
+        response += f"   • 📊 **[ดูรายละเอียดเต็ม]({bud['report_link']})**\n\n"
+    
+    response += "💡 คลิกที่ลิงก์ 'ดูรายละเอียดเต็ม' เพื่อดูข้อมูลครบถ้วนและรีวิวจากผู้ใช้งานจริงครับ!"
+    
+    return response
 
 if __name__ == '__main__':
     # Initialize connection pool

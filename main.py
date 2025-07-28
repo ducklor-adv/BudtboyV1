@@ -44,9 +44,8 @@ CACHE_TTL = 300  # 5 minutes
 
 def init_connection_pool():
     global connection_pool
-    if connection_pool is None:
-        with pool_lock:
-            if connection_pool is None:
+    with pool_lock:
+        if connection_pool is None:
                 try:
                     database_url = os.environ.get('DATABASE_URL')
                     if database_url:
@@ -94,6 +93,7 @@ def allowed_file(filename):
 
 # Database connection function
 def get_db_connection():
+    global connection_pool
     try:
         if connection_pool is None:
             init_connection_pool()
@@ -109,7 +109,6 @@ def get_db_connection():
             except (psycopg2.OperationalError, psycopg2.InterfaceError) as e:
                 print(f"Connection pool error: {e}, trying to reinitialize...")
                 # Reset connection pool and try again
-                global connection_pool
                 connection_pool = None
                 init_connection_pool()
                 if connection_pool:

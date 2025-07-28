@@ -1959,7 +1959,7 @@ def get_bud(bud_id):
                        flowering_type, image_1_url, image_2_url, image_3_url, image_4_url,
                        created_at, updated_at, created_by
                 FROM buds_data WHERE id = %s AND created_by = %s
-            """, (bud_id, user_id))
+            """, (bud_id, user_id))</old_str>
 
             result = cur.fetchone()
             if not result:
@@ -2898,10 +2898,14 @@ def get_bud_detail(bud_id):
                 'grower_license_verified': result[21],
                 'fertilizer_type': result[22],
                 'flowering_type': result[23],
-                'created_at': result[24].strftime('%Y-%m-%d %H:%M:%S') if result[24] else None,
-                'updated_at': result[25].strftime('%Y-%m-%d %H:%M:%S') if result[25] else None,
-                'created_by': result[26]
-            }
+                'image_1_url': result[24],
+                'image_2_url': result[25],
+                'image_3_url': result[26],
+                'image_4_url': result[27],
+                'created_at': result[28].strftime('%Y-%m-%d %H:%M:%S') if result[28] else None,
+                'updated_at': result[29].strftime('%Y-%m-%d %H:%M:%S') if result[29] else None,
+                'created_by': result[30]
+            }</old_str>
 
             cur.close()
             return_db_connection(conn)

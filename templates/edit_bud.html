@@ -596,6 +596,46 @@
             100% { transform: rotate(360deg); }
         }
 
+        /* Current Images Styles */
+        .current-image-item {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid #e9ecef;
+            background: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .current-image-item img {
+            width: 100%;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .current-image-label {
+            font-size: 11px;
+            color: #666;
+            text-align: center;
+            padding: 4px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 0 0 4px 4px;
+            width: 100%;
+        }
+
+        .no-current-image {
+            color: #999;
+            font-size: 12px;
+            text-align: center;
+            background: #f8f9fa;
+            border: 2px dashed #e9ecef;
+        }
+
         @media (max-width: 768px) {
             .form-row {
                 flex-direction: column;
@@ -639,7 +679,16 @@
                 font-size: 1.1em;
                 margin-bottom: 15px;
             }
-        }
+
+            .current-image-item {
+                width: 100px;
+                height: 100px;
+            }
+
+            .current-image-item img {
+                height: 70px;
+            }
+        }</old_str>
     </style>
 </head>
 <body>
@@ -1072,14 +1121,25 @@
                         📸 รูปภาพดอก
                     </div>
 
+                    <!-- Current Images Display -->
+                    <div id="currentImagesSection" style="display: none;">
+                        <h4 style="color: #2c5530; margin-bottom: 15px;">🖼️ รูปภาพปัจจุบัน</h4>
+                        <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 20px;" id="currentImagesGrid">
+                            <!-- Current images will be populated here -->
+                        </div>
+                        <div style="padding: 10px; background: #e8f5e8; border-radius: 5px; margin-bottom: 20px;">
+                            <small style="color: #2c5530;">💡 หากต้องการเปลี่ยนรูปภาพ ให้เลือกไฟล์ใหม่ในช่องด้านล่าง</small>
+                        </div>
+                    </div>
+
                     <div class="form-row">
                         <div class="form-group half-width">
-                            <label for="image_1">รูปภาพที่ 1</label>
+                            <label for="image_1">รูปภาพที่ 1 <span style="font-size: 12px; color: #666;">(เลือกไฟล์ใหม่เพื่อเปลี่ยน)</span></label>
                             <input type="file" id="image_1" name="image_1" accept=".png,.jpg,.jpeg">
                             <div class="help-text">รองรับไฟล์: PNG, JPG, JPEG</div>
                         </div>
                         <div class="form-group half-width">
-                            <label for="image_2">รูปภาพที่ 2</label>
+                            <label for="image_2">รูปภาพที่ 2 <span style="font-size: 12px; color: #666;">(เลือกไฟล์ใหม่เพื่อเปลี่ยน)</span></label>
                             <input type="file" id="image_2" name="image_2" accept=".png,.jpg,.jpeg">
                             <div class="help-text">รองรับไฟล์: PNG, JPG, JPEG</div>
                         </div>
@@ -1087,17 +1147,17 @@
 
                     <div class="form-row">
                         <div class="form-group half-width">
-                            <label for="image_3">รูปภาพที่ 3</label>
+                            <label for="image_3">รูปภาพที่ 3 <span style="font-size: 12px; color: #666;">(เลือกไฟล์ใหม่เพื่อเปลี่ยน)</span></label>
                             <input type="file" id="image_3" name="image_3" accept=".png,.jpg,.jpeg">
                             <div class="help-text">รองรับไฟล์: PNG, JPG, JPEG</div>
                         </div>
                         <div class="form-group half-width">
-                            <label for="image_4">รูปภาพที่ 4</label>
+                            <label for="image_4">รูปภาพที่ 4 <span style="font-size: 12px; color: #666;">(เลือกไฟล์ใหม่เพื่อเปลี่ยน)</span></label>
                             <input type="file" id="image_4" name="image_4" accept=".png,.jpg,.jpeg">
                             <div class="help-text">รองรับไฟล์: PNG, JPG, JPEG</div>
                         </div>
                     </div>
-                </div>
+                </div></old_str>
 
                 <!-- Growing Information -->
                 <div class="form-section">
@@ -1737,6 +1797,58 @@
             }
         }
 
+        // Display current images
+        function displayCurrentImages(data) {
+            const currentImagesSection = document.getElementById('currentImagesSection');
+            const currentImagesGrid = document.getElementById('currentImagesGrid');
+            
+            const images = [
+                { url: data.image_1_url, label: 'รูปที่ 1' },
+                { url: data.image_2_url, label: 'รูปที่ 2' },
+                { url: data.image_3_url, label: 'รูปที่ 3' },
+                { url: data.image_4_url, label: 'รูปที่ 4' }
+            ];
+
+            let hasImages = false;
+            let imagesHtml = '';
+
+            images.forEach((img, index) => {
+                if (img.url && img.url.trim()) {
+                    hasImages = true;
+                    // Convert database path to proper URL format
+                    let imageUrl = img.url;
+                    if (!imageUrl.startsWith('/uploads/')) {
+                        imageUrl = `/uploads/${img.url.split('/').pop()}`;
+                    }
+                    
+                    imagesHtml += `
+                        <div class="current-image-item">
+                            <img src="${imageUrl}" alt="${img.label}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                            <div class="current-image-label" style="display: none;">ไม่สามารถโหลดรูปได้</div>
+                            <div class="current-image-label">${img.label}</div>
+                        </div>
+                    `;
+                } else {
+                    imagesHtml += `
+                        <div class="current-image-item no-current-image">
+                            <div style="text-align: center;">
+                                <div>📷</div>
+                                <div>${img.label}</div>
+                                <div style="font-size: 10px;">ไม่มีรูป</div>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            if (hasImages) {
+                currentImagesGrid.innerHTML = imagesHtml;
+                currentImagesSection.style.display = 'block';
+            } else {
+                currentImagesSection.style.display = 'none';
+            }
+        }
+
         // Populate form with existing data
         function populateForm(data) {
             document.getElementById('strain_name_th').value = data.strain_name_th || '';
@@ -1756,6 +1868,9 @@
             document.getElementById('harvest_date').value = data.harvest_date || '';
             document.getElementById('batch_number').value = data.batch_number || '';
 
+            // Display current images
+            displayCurrentImages(data);
+
             // Wait for flavor and effects selectors to be initialized, then load data
             setTimeout(() => {
                 if (window.loadExistingFlavors && data.aroma_flavor) {
@@ -1774,7 +1889,7 @@
                     window.loadExisting_selected_physical_negative(data.physical_effects_negative);
                 }
             }, 100);
-        }
+        }</old_str>
 
         // Handle form submission
         async function handleSubmit(event) {

@@ -1232,6 +1232,13 @@ def add_buds_page():
         return redirect('/auth')
     return render_template('add_buds.html')
 
+@app.route('/edit-bud')
+def edit_bud_page():
+    # Check if user is logged in
+    if 'user_id' not in session:
+        return redirect('/auth')
+    return render_template('edit_bud.html')
+
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
@@ -1846,6 +1853,84 @@ def upload_bud_images(bud_id):
         finally:
             cur.close()
             return_db_connection(conn)
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+@app.route('/api/buds/<int:bud_id>', methods=['GET'])
+def get_bud(bud_id):
+    """Get individual bud data for editing"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'ไม่ได้เข้าสู่ระบบ'}), 401
+
+    user_id = session['user_id']
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+
+            cur.execute("""
+                SELECT id, strain_name_th, strain_name_en, breeder, strain_type,
+                       thc_percentage, cbd_percentage, grade, aroma_flavor,
+                       top_terpenes_1, top_terpenes_2, top_terpenes_3,
+                       mental_effects_positive, mental_effects_negative,
+                       physical_effects_positive, physical_effects_negative,
+                       recommended_time, grow_method, harvest_date, batch_number,
+                       grower_id, grower_license_verified, fertilizer_type, 
+                       flowering_type, image_1_url, image_2_url, image_3_url, image_4_url,
+                       created_at, updated_at, created_by
+                FROM buds_data WHERE id = %s AND created_by = %s
+            """, (bud_id, user_id))
+
+            result = cur.fetchone()
+            if not result:
+                return jsonify({'error': 'ไม่พบข้อมูลดอกหรือไม่มีสิทธิ์เข้าถึง'}), 404
+
+            bud_data = {
+                'id': result[0],
+                'strain_name_th': result[1],
+                'strain_name_en': result[2],
+                'breeder': result[3],
+                'strain_type': result[4],
+                'thc_percentage': float(result[5]) if result[5] else None,
+                'cbd_percentage': float(result[6]) if result[6] else None,
+                'grade': result[7],
+                'aroma_flavor': result[8],
+                'top_terpenes_1': result[9],
+                'top_terpenes_2': result[10],
+                'top_terpenes_3': result[11],
+                'mental_effects_positive': result[12],
+                'mental_effects_negative': result[13],
+                'physical_effects_positive': result[14],
+                'physical_effects_negative': result[15],
+                'recommended_time': result[16],
+                'grow_method': result[17],
+                'harvest_date': result[18].strftime('%Y-%m-%d') if result[18] else None,
+                'batch_number': result[19],
+                'grower_id': result[20],
+                'grower_license_verified': result[21],
+                'fertilizer_type': result[22],
+                'flowering_type': result[23],
+                'image_1_url': result[24],
+                'image_2_url': result[25],
+                'image_3_url': result[26],
+                'image_4_url': result[27],
+                'created_at': result[28].strftime('%Y-%m-%d %H:%M:%S') if result[28] else None,
+                'updated_at': result[29].strftime('%Y-%m-%d %H:%M:%S') if result[29] else None,
+                'created_by': result[30]
+            }
+
+            cur.close()
+            return_db_connection(conn)
+            return jsonify(bud_data)
+
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+        finally:
+            if cur:
+                cur.close()
+            if conn:
+                return_db_connection(conn)
     else:
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 

@@ -1485,7 +1485,7 @@
 
             // Load existing flavors when editing
             window.loadExistingFlavors = function(existingFlavors) {
-                if (existingFlavors) {
+                if (existingFlavors && existingFlavors.trim()) {
                     selectedFlavors = existingFlavors.split(', ').filter(f => f.trim() !== '');
                     selectedFlavors.forEach(flavor => {
                         const button = document.querySelector(`[data-flavor="${flavor}"]`);
@@ -1624,8 +1624,9 @@
             };
 
             // Load existing effects when editing
-            window[`loadExisting_${config.selectedId.replace(/-/g, '_')}`] = function(existingEffects) {
-                if (existingEffects) {
+            const loadFunctionName = `loadExisting_${config.selectedId.replace(/-/g, '_')}`;
+            window[loadFunctionName] = function(existingEffects) {
+                if (existingEffects && existingEffects.trim()) {
                     selectedEffects = existingEffects.split(', ').filter(f => f.trim() !== '');
                     selectedEffects.forEach(effect => {
                         effectButtons.forEach(btn => {
@@ -1637,6 +1638,9 @@
                     updateSelectedEffectsDisplay();
                 }
             };
+
+            // Return the load function for immediate access
+            return window[loadFunctionName];
         }
 
         // Global functions for removing effects
@@ -1708,22 +1712,24 @@
             document.getElementById('harvest_date').value = data.harvest_date || '';
             document.getElementById('batch_number').value = data.batch_number || '';
 
-            // Load existing flavors and effects
-            if (window.loadExistingFlavors) {
-                window.loadExistingFlavors(data.aroma_flavor);
-            }
-            if (window.loadExisting_selected_mental_positive) {
-                window.loadExisting_selected_mental_positive(data.mental_effects_positive);
-            }
-            if (window.loadExisting_selected_mental_negative) {
-                window.loadExisting_selected_mental_negative(data.mental_effects_negative);
-            }
-            if (window.loadExisting_selected_physical_positive) {
-                window.loadExisting_selected_physical_positive(data.physical_effects_positive);
-            }
-            if (window.loadExisting_selected_physical_negative) {
-                window.loadExisting_selected_physical_negative(data.physical_effects_negative);
-            }
+            // Wait for flavor and effects selectors to be initialized, then load data
+            setTimeout(() => {
+                if (window.loadExistingFlavors && data.aroma_flavor) {
+                    window.loadExistingFlavors(data.aroma_flavor);
+                }
+                if (window.loadExisting_selected_mental_positive && data.mental_effects_positive) {
+                    window.loadExisting_selected_mental_positive(data.mental_effects_positive);
+                }
+                if (window.loadExisting_selected_mental_negative && data.mental_effects_negative) {
+                    window.loadExisting_selected_mental_negative(data.mental_effects_negative);
+                }
+                if (window.loadExisting_selected_physical_positive && data.physical_effects_positive) {
+                    window.loadExisting_selected_physical_positive(data.physical_effects_positive);
+                }
+                if (window.loadExisting_selected_physical_negative && data.physical_effects_negative) {
+                    window.loadExisting_selected_physical_negative(data.physical_effects_negative);
+                }
+            }, 100);
         }
 
         // Handle form submission
@@ -1791,18 +1797,23 @@
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
             try {
+                // Initialize autocomplete first
                 new StrainAutocomplete('strain_name_en', 'suggestions_en', 'en');
                 new StrainAutocomplete('strain_name_th', 'suggestions_th', 'th');
-
                 initializeBreederAutocomplete('breeder', 'breeder-suggestions', '/api/breeders/search');
 
+                // Initialize flavor and effects selectors
                 initializeFlavorSelector();
                 initializeEffectsSelectors();
 
+                // Set up form submission
                 document.getElementById('editBudForm').addEventListener('submit', handleSubmit);
+
+                // Load existing bud data
                 loadBudData();
             } catch (error) {
                 console.error('Error initializing page:', error);
+                showError('เกิดข้อผิดพลาดในการโหลดหน้า');
             }
         });
     </script>

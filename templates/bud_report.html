@@ -793,6 +793,8 @@
             border-radius: 15px;
             padding: 10px;
             background: #f8f9fa;
+            width: 300px;
+            height: 200px;
         }
         
         .bud-image {
@@ -1036,6 +1038,9 @@
                 grid-template-columns: repeat(2, 1fr);
                 gap: 6px;
                 padding: 8px;
+                width: 100%;
+                max-width: 280px;
+                height: auto;
             }
             
             .bud-image {
@@ -1076,22 +1081,21 @@
                 </div>
             
             <div class="content">
-                <!-- แสดงข้อมูลทั้งหมดเป็น 2 คอลัมน์ -->
+                <!-- รูปดอก 4 รูป -->
+                <div class="section">
+                    <div class="section-title">📸 รูปดอก</div>
+                    <div style="display: flex; justify-content: center;">
+                        <div class="bud-images-display" id="budImagesDisplay">
+                            <!-- Bud images will be populated here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- แสดงข้อมูลทั้งหมด -->
                 <div class="section">
                     <div class="section-title">📊 ข้อมูลดอกทั้งหมด</div>
-                    <div class="bud-info-layout">
-                        <div class="bud-info-left">
-                            <!-- ข้อมูลจัดกลุ่ม -->
-                            <div id="groupedBudInfo">
-                                <!-- Grouped bud info will be populated here -->
-                            </div>
-                        </div>
-                        <div class="bud-info-right">
-                            <!-- รูปดอก 4 รูป -->
-                            <div class="bud-images-display" id="budImagesDisplay">
-                                <!-- Bud images will be populated here -->
-                            </div>
-                        </div>
+                    <div id="groupedBudInfo">
+                        <!-- Grouped bud info will be populated here -->
                     </div>
                 </div>
                 

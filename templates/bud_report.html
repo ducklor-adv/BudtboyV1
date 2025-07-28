@@ -1528,10 +1528,10 @@
                 {
                     title: '💭 ผลกระทบและการใช้งาน',
                     items: [
-                        { label: 'ผลกระทบทางจิต (บวก)', value: bud.mental_effects_positive },
-                        { label: 'ผลกระทบทางจิต (ลบ)', value: bud.mental_effects_negative },
-                        { label: 'ผลกระทบทางกาย (บวก)', value: bud.physical_effects_positive },
-                        { label: 'ผลกระทบทางกาย (ลบ)', value: bud.physical_effects_negative }
+                        { label: 'ผลกระทบทางจิต (บวก)', value: bud.mental_effects_positive || 'ไม่มีข้อมูล' },
+                        { label: 'ผลกระทบทางจิต (ลบ)', value: bud.mental_effects_negative || 'ไม่มีข้อมูล' },
+                        { label: 'ผลกระทบทางกาย (บวก)', value: bud.physical_effects_positive || 'ไม่มีข้อมูล' },
+                        { label: 'ผลกระทบทางกาย (ลบ)', value: bud.physical_effects_negative || 'ไม่มีข้อมูล' }
                     ]
                 },
                 {
@@ -1543,23 +1543,41 @@
             ];
             
             groupedBudInfo.innerHTML = infoGroups.map(group => {
-                const validItems = group.items.filter(item => item.value && item.value.toString().trim());
-                
-                if (validItems.length === 0) return '';
-                
-                return `
-                    <div class="info-group">
-                        <div class="info-group-title">${group.title}</div>
-                        <div class="info-group-content">
-                            ${validItems.map(item => `
-                                <div class="info-item">
-                                    <div class="info-item-label">${item.label}:</div>
-                                    <div class="info-item-value">${item.value}</div>
-                                </div>
-                            `).join('')}
+                // สำหรับกลุ่ม "ผลกระทบและการใช้งาน" ให้แสดงเสมอ
+                if (group.title === '💭 ผลกระทบและการใช้งาน') {
+                    return `
+                        <div class="info-group">
+                            <div class="info-group-title">${group.title}</div>
+                            <div class="info-group-content">
+                                ${group.items.map(item => `
+                                    <div class="info-item">
+                                        <div class="info-item-label">${item.label}:</div>
+                                        <div class="info-item-value">${item.value}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
                         </div>
-                    </div>
-                `;
+                    `;
+                } else {
+                    // สำหรับกลุ่มอื่นๆ ให้กรองเฉพาะที่มีข้อมูล
+                    const validItems = group.items.filter(item => item.value && item.value.toString().trim() && item.value !== 'ไม่มีข้อมูล');
+                    
+                    if (validItems.length === 0) return '';
+                    
+                    return `
+                        <div class="info-group">
+                            <div class="info-group-title">${group.title}</div>
+                            <div class="info-group-content">
+                                ${validItems.map(item => `
+                                    <div class="info-item">
+                                        <div class="info-item-label">${item.label}:</div>
+                                        <div class="info-item-value">${item.value}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
             }).filter(group => group).join('');
         }
 

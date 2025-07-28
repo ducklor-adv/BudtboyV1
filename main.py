@@ -772,7 +772,7 @@ def create_tables():
                     ('Ethos Seeds', False),
                     ('Exotic Genetix', False),
                     ('Fast Buds', True),
-                    ('Fast Buds 420', False),
+                    ('Fast Buds 420', False),```python
                     ('Fast Flowers', False),
                     ('Feminized Seeds Co', False),
                     ('Flash Seeds', False),
@@ -1997,44 +1997,6 @@ def get_bud(bud_id):
                 'created_at': result[28].strftime('%Y-%m-%d %H:%M:%S') if result[28] else None,
                 'updated_at': result[29].strftime('%Y-%m-%d %H:%M:%S') if result[29] else None,
                 'created_by': result[30]
-            }</old_str>
-
-            result = cur.fetchone()
-            if not result:
-                return jsonify({'error': 'ไม่พบข้อมูลดอกหรือไม่มีสิทธิ์เข้าถึง'}), 404
-
-            bud_data = {
-                'id': result[0],
-                'strain_name_th': result[1],
-                'strain_name_en': result[2],
-                'breeder': result[3],
-                'strain_type': result[4],
-                'thc_percentage': float(result[5]) if result[5] else None,
-                'cbd_percentage': float(result[6]) if result[6] else None,
-                'grade': result[7],
-                'aroma_flavor': result[8],
-                'top_terpenes_1': result[9],
-                'top_terpenes_2': result[10],
-                'top_terpenes_3': result[11],
-                'mental_effects_positive': result[12],
-                'mental_effects_negative': result[13],
-                'physical_effects_positive': result[14],
-                'physical_effects_negative': result[15],
-                'recommended_time': result[16],
-                'grow_method': result[17],
-                'harvest_date': result[18].strftime('%Y-%m-%d') if result[18] else None,
-                'batch_number': result[19],
-                'grower_id': result[20],
-                'grower_license_verified': result[21],
-                'fertilizer_type': result[22],
-                'flowering_type': result[23],
-                'image_1_url': result[24],
-                'image_2_url': result[25],
-                'image_3_url': result[26],
-                'image_4_url': result[27],
-                'created_at': result[28].strftime('%Y-%m-%d %H:%M:%S') if result[28] else None,
-                'updated_at': result[29].strftime('%Y-%m-%d %H:%M:%S') if result[29] else None,
-                'created_by': result[30]
             }
 
             cur.close()
@@ -2943,7 +2905,7 @@ def get_bud_detail(bud_id):
                 'created_at': result[28].strftime('%Y-%m-%d %H:%M:%S') if result[28] else None,
                 'updated_at': result[29].strftime('%Y-%m-%d %H:%M:%S') if result[29] else None,
                 'created_by': result[30]
-            }</old_str>
+            }
 
             cur.close()
             return_db_connection(conn)

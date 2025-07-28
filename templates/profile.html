@@ -218,12 +218,12 @@
         }
 
         .btn-chat {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1a237e 0%, #0d47a1 100%);
             color: white;
         }
 
         .btn-chat:hover {
-            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+            background: linear-gradient(135deg, #283593 0%, #1565c0 100%);
             transform: translateY(-2px);
         }
 
@@ -256,7 +256,7 @@
         }
 
         .chat-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1a237e 0%, #0d47a1 100%);
             color: white;
             padding: 20px;
             text-align: center;
@@ -330,8 +330,12 @@
         }
 
         .message.bot .message-avatar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1a237e 0%, #0d47a1 100%);
             color: white;
+            background-image: url('/uploads/budtboy_avatar.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
         }
 
         .message.user .message-avatar {
@@ -382,12 +386,12 @@
         }
 
         .chat-input:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: #1a237e;
+            box-shadow: 0 0 0 3px rgba(26, 35, 126, 0.1);
         }
 
         .chat-send-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1a237e 0%, #0d47a1 100%);
             color: white;
             border: none;
             padding: 12px 20px;
@@ -402,7 +406,7 @@
         }
 
         .chat-send-btn:hover {
-            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+            background: linear-gradient(135deg, #283593 0%, #1565c0 100%);
             transform: translateY(-2px);
         }
 
@@ -1426,7 +1430,7 @@
                 messageContent += '</div>';
             }
             messageDiv.innerHTML = `
-                <div class="message-avatar">🤖</div>
+                <div class="message-avatar"></div>
                 <div class="message-content">
                     ${messageContent}
                     <div class="message-time">${new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}</div>
@@ -1446,7 +1450,7 @@
             typingDiv.id = 'typingIndicator';
 
             typingDiv.innerHTML = `
-                <div class="message-avatar">🤖</div>
+                <div class="message-avatar"></div>
                 <div class="typing-indicator" style="display: block;">
                     <div class="typing-dots">
                         <div class="typing-dot"></div>

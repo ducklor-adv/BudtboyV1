@@ -3542,8 +3542,9 @@ def chat_with_ai():
             "content": user_message
         })
 
-        # Call OpenAI API
-        response = openai.ChatCompletion.create(
+        # Call OpenAI API using new v1.0+ syntax
+        client = openai.OpenAI(api_key=openai.api_key)
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=messages,
             max_tokens=500,
@@ -3565,17 +3566,17 @@ def chat_with_ai():
             }
         })
 
-    except openai.error.AuthenticationError:
+    except openai.AuthenticationError:
         return jsonify({
             'success': False,
             'message': 'ขออภัย ระบบ AI มีปัญหาการยืนยันตัวตน กรุณาลองใหม่อีกครั้ง'
         }), 500
-    except openai.error.RateLimitError:
+    except openai.RateLimitError:
         return jsonify({
             'success': False,
             'message': 'ขออภัย ระบบ AI ใช้งานหนักเกินไป กรุณารอสักครู่แล้วลองใหม่'
         }), 429
-    except openai.error.APIError as e:
+    except openai.APIError as e:
         return jsonify({
             'success': False,
             'message': f'ขออภัย เกิดข้อผิดพลาดในระบบ AI: {str(e)}'
@@ -3618,7 +3619,8 @@ def analyze_user_request(user_message):
 }}
 """
 
-        response = openai.ChatCompletion.create(
+        client = openai.OpenAI(api_key=openai.api_key)
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[{"role": "user", "content": analysis_prompt}],
             max_tokens=300,

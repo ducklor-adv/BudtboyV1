@@ -2529,6 +2529,12 @@ def uploaded_file(filename):
     from flask import send_from_directory
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
+@app.route('/attached_assets/<filename>')
+def attached_assets_file(filename):
+    """Serve attached assets files"""
+    from flask import send_from_directory
+    return send_from_directory('attached_assets', filename)
+
 @app.route('/api/reviews', methods=['GET'])
 def get_reviews():
     """Get all reviews with optional filtering"""

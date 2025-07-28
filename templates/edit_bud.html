@@ -1771,43 +1771,79 @@
             }
         });
 
-        // Load bud data for editing with timeout
+        // Load bud data for editing with better error handling
         async function loadBudData() {
             budId = getBudIdFromUrl();
             
             if (!budId) {
                 showError('ไม่พบ ID ของดอกที่ต้องการแก้ไข');
+                document.getElementById('loadingState').style.display = 'none';
                 return;
             }
 
             try {
+                console.log(`Loading bud data for ID: ${budId}`);
+                
                 // Add timeout to prevent hanging
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+                const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
 
                 const response = await fetch(`/api/buds/${budId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
                     signal: controller.signal
                 });
                 
                 clearTimeout(timeoutId);
 
+                console.log(`Response status: ${response.status}`);
+                console.log(`Response headers:`, response.headers.get('Content-Type'));
+
+                // Check if response is JSON
+                const contentType = response.headers.get('Content-Type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('Server returned non-JSON response');
+                }
+
                 if (response.ok) {
                     budData = await response.json();
+                    console.log('Successfully loaded bud data:', budData);
                     populateForm(budData);
                     document.getElementById('loadingState').style.display = 'none';
                     document.getElementById('editBudForm').style.display = 'block';
                 } else {
-                    const errorData = await response.json();
-                    showError(errorData.error || 'ไม่สามารถโหลดข้อมูลได้');
+                    let errorMessage = 'ไม่สามารถโหลดข้อมูลได้';
+                    try {
+                        const errorData = await response.json();
+                        errorMessage = errorData.error || errorMessage;
+                    } catch (parseError) {
+                        console.error('Error parsing error response:', parseError);
+                        if (response.status === 401) {
+                            errorMessage = 'กรุณาเข้าสู่ระบบใหม่';
+                            setTimeout(() => {
+                                window.location.href = '/auth';
+                            }, 2000);
+                        } else if (response.status === 404) {
+                            errorMessage = 'ไม่พบข้อมูลดอกที่ต้องการแก้ไข';
+                        }
+                    }
+                    showError(errorMessage);
                     document.getElementById('loadingState').style.display = 'none';
                 }
             } catch (error) {
                 console.error('Error loading bud data:', error);
+                let errorMessage = 'เกิดข้อผิดพลาดในการโหลดข้อมูล';
+                
                 if (error.name === 'AbortError') {
-                    showError('การโหลดข้อมูลใช้เวลานานเกินไป กรุณาลองใหม่อีกครั้ง');
-                } else {
-                    showError('เกิดข้อผิดพลาดในการโหลดข้อมูล');
+                    errorMessage = 'การโหลดข้อมูลใช้เวลานานเกินไป กรุณาลองใหม่อีกครั้ง';
+                } else if (error.message.includes('non-JSON')) {
+                    errorMessage = 'เซิร์ฟเวอร์ส่งข้อมูลไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง';
                 }
+                
+                showError(errorMessage);
                 document.getElementById('loadingState').style.display = 'none';
             }
         }
@@ -2012,28 +2048,56 @@
             showAlert(message, 'success');
         }
 
-        // Initialize page with optimized loading order
+        // Add retry functionality
+        async function loadBudDataWithRetry(maxRetries = 3) {
+            for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                try {
+                    console.log(`Attempt ${attempt} to load bud data`);
+                    await loadBudData();
+                    return; // Success, exit retry loop
+                } catch (error) {
+                    console.error(`Attempt ${attempt} failed:`, error);
+                    if (attempt === maxRetries) {
+                        showError('ไม่สามารถโหลดข้อมูลได้หลังจากพยายามหลายครั้ง กรุณารีเฟรชหน้าเว็บ');
+                        document.getElementById('loadingState').style.display = 'none';
+                    } else {
+                        // Wait before retry
+                        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+                    }
+                }
+            }
+        }
+
+        // Initialize page with better error handling
         document.addEventListener('DOMContentLoaded', function() {
             try {
                 console.log('DOM loaded, initializing...');
                 
-                // Load critical data first
-                loadBudData();
+                // Load critical data first with retry
+                loadBudDataWithRetry();
 
                 // Initialize form submission immediately
-                document.getElementById('editBudForm').addEventListener('submit', handleSubmit);
+                const form = document.getElementById('editBudForm');
+                if (form) {
+                    form.addEventListener('submit', handleSubmit);
+                }
 
                 // Initialize components in background after a delay
                 setTimeout(() => {
-                    // Initialize autocomplete
-                    new StrainAutocomplete('strain_name_en', 'suggestions_en', 'en');
-                    new StrainAutocomplete('strain_name_th', 'suggestions_th', 'th');
-                    initializeBreederAutocomplete('breeder', 'breeder-suggestions', '/api/breeders/search');
+                    try {
+                        // Initialize autocomplete
+                        new StrainAutocomplete('strain_name_en', 'suggestions_en', 'en');
+                        new StrainAutocomplete('strain_name_th', 'suggestions_th', 'th');
+                        initializeBreederAutocomplete('breeder', 'breeder-suggestions', '/api/breeders/search');
 
-                    // Initialize selectors
-                    initializeFlavorSelector();
-                    initializeEffectsSelectors();
-                }, 100);
+                        // Initialize selectors
+                        initializeFlavorSelector();
+                        initializeEffectsSelectors();
+                    } catch (initError) {
+                        console.error('Error initializing components:', initError);
+                        // Don't show error for component initialization failures
+                    }
+                }, 500);
 
             } catch (error) {
                 console.error('Error initializing page:', error);

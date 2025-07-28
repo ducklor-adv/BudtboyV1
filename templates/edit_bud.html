@@ -1535,14 +1535,37 @@
                 // Clear any new file selection too
                 if (input) input.value = '';
                 
-                // Mark for deletion (you might want to track this)
+                // Mark for deletion - create hidden input to track deletion
                 current.setAttribute('data-deleted', 'true');
+                
+                // Add hidden field to form to indicate deletion
+                let deletionInput = document.getElementById(`deleted_image_${index}`);
+                if (!deletionInput) {
+                    deletionInput = document.createElement('input');
+                    deletionInput.type = 'hidden';
+                    deletionInput.id = `deleted_image_${index}`;
+                    deletionInput.name = `deleted_image_${index}`;
+                    document.getElementById('editBudForm').appendChild(deletionInput);
+                }
+                deletionInput.value = 'true';
             }
         }
 
         function replaceCurrentImage(index) {
             const input = document.getElementById(`image_${index}`);
             if (input) {
+                // Clear deletion flag when replacing image
+                const current = document.getElementById(`current_${index}`);
+                if (current) {
+                    current.removeAttribute('data-deleted');
+                }
+                
+                // Remove deletion input if exists
+                const deletionInput = document.getElementById(`deleted_image_${index}`);
+                if (deletionInput) {
+                    deletionInput.remove();
+                }
+                
                 input.click();
             }
         }
@@ -1723,6 +1746,9 @@
                 delete data.image_2;
                 delete data.image_3;
                 delete data.image_4;
+
+                // Keep deletion flags
+                // deleted_image_* fields will be included in data automatically
 
                 // Convert numeric fields
                 if (data.thc_percentage) data.thc_percentage = parseFloat(data.thc_percentage);

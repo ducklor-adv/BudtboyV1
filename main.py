@@ -1789,78 +1789,123 @@ def update_bud(bud_id):
     data = request.get_json()
     user_id = session['user_id']
 
-    conn = get_db_connection()
-    if conn:
-        try:
-            cur = conn.cursor()
+    conn = None
+    cur = None
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
-            # Check if user has permission to update (owner or admin)
-            cur.execute("""
-                SELECT created_by FROM buds_data WHERE id = %s
-            """, (bud_id,))
-            result = cur.fetchone()
+        cur = conn.cursor()
 
-            if not result:
-                return jsonify({'error': 'ไม่พบข้อมูล Bud'}), 404
+        # Check if user has permission to update (owner or admin)
+        cur.execute("""
+            SELECT created_by FROM buds_data WHERE id = %s
+        """, (bud_id,))
+        result = cur.fetchone()
 
-            if result[0] != user_id:
-                return jsonify({'error': 'ไม่มีสิทธิ์แก้ไขข้อมูลนี้'}), 403
+        if not result:
+            return jsonify({'error': 'ไม่พบข้อมูล Bud'}), 404
 
-            cur.execute("""
-                UPDATE buds_data SET
-                    strain_name_th = %s, strain_name_en = %s, breeder = %s,
-                    strain_type = %s, thc_percentage = %s, cbd_percentage = %s,
-                    grade = %s, aroma_flavor = %s, top_terpenes_1 = %s,
-                    top_terpenes_2 = %s, top_terpenes_3 = %s, 
-                    mental_effects_positive = %s, mental_effects_negative = %s,
-                    physical_effects_positive = %s, physical_effects_negative = %s,
-                    recommended_time = %s, grow_method = %s, harvest_date = %s,
-                    batch_number = %s, grower_id = %s, grower_license_verified = %s,
-                    fertilizer_type = %s, flowering_type = %s,
-                    updated_at = CURRENT_TIMESTAMP
-                WHERE id = %s
-            """, (
-                data.get('strain_name_th'),
-                data.get('strain_name_en'),
-                data.get('breeder'),
-                data.get('strain_type'),
-                data.get('thc_percentage'),
-                data.get('cbd_percentage'),
-                data.get('grade'),
-                data.get('aroma_flavor'),
-                data.get('top_terpenes_1'),
-                data.get('top_terpenes_2'),
-                data.get('top_terpenes_3'),
-                data.get('mental_effects_positive'),
-                data.get('mental_effects_negative'),
-                data.get('physical_effects_positive'),
-                data.get('physical_effects_negative'),
-                data.get('recommended_time'),
-                data.get('grow_method'),
-                data.get('harvest_date'),
-                data.get('batch_number'),
-                data.get('grower_id'),
-                data.get('grower_license_verified', False),
-                data.get('fertilizer_type'),
-                data.get('flowering_type'),
-                bud_id
-            ))
+        if result[0] != user_id:
+            return jsonify({'error': 'ไม่มีสิทธิ์แก้ไขข้อมูลนี้'}), 403
 
-            conn.commit()
+        # Handle deleted images - check for images marked for deletion
+        image_updates = {}
+        for i in range(1, 5):
+            deleted_key = f'deleted_image_{i}'
+            if data.get(deleted_key) == 'true':
+                image_updates[f'image_{i}_url'] = None
 
-            return jsonify({
-                'success': True,
-                'message': 'อัพเดทข้อมูล Bud สำเร็จ'
-            })
+        # Build update query with image deletions
+        update_fields = [
+            'strain_name_th = %s', 'strain_name_en = %s', 'breeder = %s',
+            'strain_type = %s', 'thc_percentage = %s', 'cbd_percentage = %s',
+            'grade = %s', 'aroma_flavor = %s', 'top_terpenes_1 = %s',
+            'top_terpenes_2 = %s', 'top_terpenes_3 = %s', 
+            'mental_effects_positive = %s', 'mental_effects_negative = %s',
+            'physical_effects_positive = %s', 'physical_effects_negative = %s',
+            'recommended_time = %s', 'grow_method = %s', 'harvest_date = %s',
+            'batch_number = %s', 'grower_id = %s', 'grower_license_verified = %s',
+            'fertilizer_type = %s', 'flowering_type = %s',
+            'updated_at = CURRENT_TIMESTAMP'
+        ]
 
-        except Exception as e:
+        update_values = [
+            data.get('strain_name_th'),
+            data.get('strain_name_en'),
+            data.get('breeder'),
+            data.get('strain_type'),
+            data.get('thc_percentage'),
+            data.get('cbd_percentage'),
+            data.get('grade'),
+            data.get('aroma_flavor'),
+            data.get('top_terpenes_1'),
+            data.get('top_terpenes_2'),
+            data.get('top_terpenes_3'),
+            data.get('mental_effects_positive'),
+            data.get('mental_effects_negative'),
+            data.get('physical_effects_positive'),
+            data.get('physical_effects_negative'),
+            data.get('recommended_time'),
+            data.get('grow_method'),
+            data.get('harvest_date'),
+            data.get('batch_number'),
+            data.get('grower_id'),
+            data.get('grower_license_verified', False),
+            data.get('fertilizer_type'),
+            data.get('flowering_type')
+        ]
+
+        # Add image deletion updates
+        for field, value in image_updates.items():
+            update_fields.append(f'{field} = %s')
+            update_values.append(value)
+
+        # Add bud_id for WHERE clause
+        update_values.append(bud_id)
+
+        query = f"""
+            UPDATE buds_data SET {', '.join(update_fields)}
+            WHERE id = %s
+        """
+
+        print(f"Executing update query for bud {bud_id}")
+        cur.execute(query, update_values)
+        
+        if cur.rowcount == 0:
+            return jsonify({'error': 'ไม่สามารถอัพเดทข้อมูลได้'}), 400
+
+        conn.commit()
+        print(f"Successfully updated bud {bud_id}")
+
+        # Clear cache
+        clear_cache_pattern(f"bud_detail_{bud_id}")
+        clear_cache_pattern(f"user_buds_{user_id}")
+
+        return jsonify({
+            'success': True,
+            'message': 'อัพเดทข้อมูล Bud สำเร็จ'
+        })
+
+    except psycopg2.Error as e:
+        print(f"Database error in update_bud: {e}")
+        if conn:
             conn.rollback()
-            return jsonify({'error': str(e)}), 500
-        finally:
-            cur.close()
+        return jsonify({'error': f'เกิดข้อผิดพลาดในฐานข้อมูล: {str(e)}'}), 500
+    except Exception as e:
+        print(f"General error in update_bud: {e}")
+        if conn:
+            conn.rollback()
+        return jsonify({'error': f'เกิดข้อผิดพลาด: {str(e)}'}), 500
+    finally:
+        if cur:
+            try:
+                cur.close()
+            except:
+                pass
+        if conn:
             return_db_connection(conn)
-    else:
-        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
 @app.route('/api/buds/<int:bud_id>/upload-images', methods=['POST'])
 def upload_bud_images(bud_id):

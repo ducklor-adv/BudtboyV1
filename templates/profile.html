@@ -530,6 +530,64 @@
             border-left: 4px solid #f44336;
         }
 
+        .contact-field {
+            margin-bottom: 10px;
+        }
+
+        .contact-field label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .contact-link {
+            display: inline-block;
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 4px 10px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 600;
+            margin: 2px 4px 2px 0;
+            transition: all 0.3s ease;
+        }
+
+        .contact-link:hover {
+            background: #1976d2;
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .contact-link.facebook { background: #e8f4fd; color: #1877f2; }
+        .contact-link.facebook:hover { background: #1877f2; color: white; }
+
+        .contact-link.line { background: #e8f9e8; color: #00c300; }
+        .contact-link.line:hover { background: #00c300; color: white; }
+
+        .contact-link.instagram { background: #fce4ec; color: #e91e63; }
+        .contact-link.instagram:hover { background: #e91e63; color: white; }
+
+        .contact-link.twitter { background: #e3f2fd; color: #1da1f2; }
+        .contact-link.twitter:hover { background: #1da1f2; color: white; }
+
+        .contact-link.telegram { background: #e8f4fd; color: #0088cc; }
+        .contact-link.telegram:hover { background: #0088cc; color: white; }
+
+        .contact-link.phone { background: #fff3e0; color: #ff9800; }
+        .contact-link.phone:hover { background: #ff9800; color: white; }
+
+        .contact-link.other { background: #f3e5f5; color: #9c27b0; }
+        .contact-link.other:hover { background: #9c27b0; color: white; }
+
+        .no-contacts {
+            color: #999;
+            font-style: italic;
+            font-size: 12px;
+        }
+
         @media (max-width: 400px) {
             .profile-card {
                 margin: 10px;
@@ -657,6 +715,48 @@
                     <div class="info-content">
                         <div class="info-label">สมัครเมื่อ</div>
                         <div class="info-value" id="created-date">-</div>
+                    </div>
+                </li>
+
+                <li class="info-item">
+                    <div class="info-icon">📞</div>
+                    <div class="info-content">
+                        <div class="info-label">ช่องทางติดต่อ</div>
+                        <div class="info-value">
+                            <div id="contact-display">
+                                <!-- Contact points will be loaded here -->
+                            </div>
+                            <div id="contact-edit" style="display: none;">
+                                <div class="contact-field">
+                                    <label>📘 Facebook:</label>
+                                    <input type="url" id="contact-facebook-edit" class="edit-input" placeholder="https://facebook.com/yourprofile">
+                                </div>
+                                <div class="contact-field">
+                                    <label>💚 Line ID:</label>
+                                    <input type="text" id="contact-line-edit" class="edit-input" placeholder="@yourlineid หรือ Line ID">
+                                </div>
+                                <div class="contact-field">
+                                    <label>📸 Instagram:</label>
+                                    <input type="url" id="contact-instagram-edit" class="edit-input" placeholder="https://instagram.com/yourprofile">
+                                </div>
+                                <div class="contact-field">
+                                    <label>🐦 Twitter:</label>
+                                    <input type="url" id="contact-twitter-edit" class="edit-input" placeholder="https://twitter.com/yourprofile">
+                                </div>
+                                <div class="contact-field">
+                                    <label>✈️ Telegram:</label>
+                                    <input type="text" id="contact-telegram-edit" class="edit-input" placeholder="@yourtelegram">
+                                </div>
+                                <div class="contact-field">
+                                    <label>📱 เบอร์โทร:</label>
+                                    <input type="tel" id="contact-phone-edit" class="edit-input" placeholder="08x-xxx-xxxx">
+                                </div>
+                                <div class="contact-field">
+                                    <label>🔗 อื่นๆ:</label>
+                                    <input type="url" id="contact-other-edit" class="edit-input" placeholder="ลิงก์อื่นๆ">
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </li>
             </ul>
@@ -851,6 +951,12 @@
             if (growerCheck) growerCheck.checked = user.is_grower || false;
             if (budtenderCheck) budtenderCheck.checked = user.is_budtender || false;
 
+            // Display contact points
+            displayContactPoints(user);
+
+            // Set contact edit fields
+            setContactEditFields(user);
+
             // Update avatar
             updateAvatar(user);
         }
@@ -891,12 +997,77 @@
             }
         }
 
+        function displayContactPoints(user) {
+            const contactDiv = document.getElementById('contact-display');
+            if (!contactDiv) return;
+
+            let contactLinks = [];
+
+            if (user.contact_facebook) {
+                contactLinks.push(`<a href="${user.contact_facebook}" target="_blank" class="contact-link facebook">📘 Facebook</a>`);
+            }
+            if (user.contact_line) {
+                const lineUrl = user.contact_line.startsWith('http') ? user.contact_line : `https://line.me/ti/p/${user.contact_line}`;
+                contactLinks.push(`<a href="${lineUrl}" target="_blank" class="contact-link line">💚 Line</a>`);
+            }
+            if (user.contact_instagram) {
+                contactLinks.push(`<a href="${user.contact_instagram}" target="_blank" class="contact-link instagram">📸 Instagram</a>`);
+            }
+            if (user.contact_twitter) {
+                contactLinks.push(`<a href="${user.contact_twitter}" target="_blank" class="contact-link twitter">🐦 Twitter</a>`);
+            }
+            if (user.contact_telegram) {
+                const telegramUrl = user.contact_telegram.startsWith('http') ? user.contact_telegram : `https://t.me/${user.contact_telegram}`;
+                contactLinks.push(`<a href="${telegramUrl}" target="_blank" class="contact-link telegram">✈️ Telegram</a>`);
+            }
+            if (user.contact_phone) {
+                contactLinks.push(`<a href="tel:${user.contact_phone}" class="contact-link phone">📱 ${user.contact_phone}</a>`);
+            }
+            if (user.contact_other) {
+                contactLinks.push(`<a href="${user.contact_other}" target="_blank" class="contact-link other">🔗 อื่นๆ</a>`);
+            }
+
+            if (contactLinks.length > 0) {
+                contactDiv.innerHTML = contactLinks.join(' ');
+            } else {
+                contactDiv.innerHTML = '<span class="no-contacts">ยังไม่มีช่องทางติดต่อ</span>';
+            }
+        }
+
+        function setContactEditFields(user) {
+            const fields = [
+                'contact-facebook-edit',
+                'contact-line-edit', 
+                'contact-instagram-edit',
+                'contact-twitter-edit',
+                'contact-telegram-edit',
+                'contact-phone-edit',
+                'contact-other-edit'
+            ];
+
+            const values = [
+                user.contact_facebook || '',
+                user.contact_line || '',
+                user.contact_instagram || '',
+                user.contact_twitter || '',
+                user.contact_telegram || '',
+                user.contact_phone || '',
+                user.contact_other || ''
+            ];
+
+            fields.forEach((fieldId, index) => {
+                const field = document.getElementById(fieldId);
+                if (field) field.value = values[index];
+            });
+        }
+
         function enterEditMode() {
             const elements = [
                 ['username-display', 'username-edit'],
                 ['email-display', 'email-edit'],
                 ['birth-year-display', 'birth-year-edit'],
-                ['user-types-display', 'user-types-edit']
+                ['user-types-display', 'user-types-edit'],
+                ['contact-display', 'contact-edit']
             ];
 
             elements.forEach(([displayId, editId]) => {
@@ -921,7 +1092,8 @@
                 ['username-display', 'username-edit'],
                 ['email-display', 'email-edit'],
                 ['birth-year-display', 'birth-year-edit'],
-                ['user-types-display', 'user-types-edit']
+                ['user-types-display', 'user-types-edit'],
+                ['contact-display', 'contact-edit']
             ];
 
             elements.forEach(([displayId, editId]) => {
@@ -1069,6 +1241,15 @@
             const growerCheck = document.getElementById('is_grower_edit');
             const budtenderCheck = document.getElementById('is_budtender_edit');
 
+            // Contact fields
+            const contactFacebookEdit = document.getElementById('contact-facebook-edit');
+            const contactLineEdit = document.getElementById('contact-line-edit');
+            const contactInstagramEdit = document.getElementById('contact-instagram-edit');
+            const contactTwitterEdit = document.getElementById('contact-twitter-edit');
+            const contactTelegramEdit = document.getElementById('contact-telegram-edit');
+            const contactPhoneEdit = document.getElementById('contact-phone-edit');
+            const contactOtherEdit = document.getElementById('contact-other-edit');
+
             if (!usernameEdit || !emailEdit) {
                 alert('❌ ไม่พบข้อมูลฟอร์ม');
                 return;
@@ -1080,7 +1261,14 @@
                 birth_year: birthYearEdit ? birthYearEdit.value : '',
                 is_consumer: consumerCheck ? consumerCheck.checked : false,
                 is_grower: growerCheck ? growerCheck.checked : false,
-                is_budtender: budtenderCheck ? budtenderCheck.checked : false
+                is_budtender: budtenderCheck ? budtenderCheck.checked : false,
+                contact_facebook: contactFacebookEdit ? contactFacebookEdit.value : '',
+                contact_line: contactLineEdit ? contactLineEdit.value : '',
+                contact_instagram: contactInstagramEdit ? contactInstagramEdit.value : '',
+                contact_twitter: contactTwitterEdit ? contactTwitterEdit.value : '',
+                contact_telegram: contactTelegramEdit ? contactTelegramEdit.value : '',
+                contact_phone: contactPhoneEdit ? contactPhoneEdit.value : '',
+                contact_other: contactOtherEdit ? contactOtherEdit.value : ''
             };
 
             try {

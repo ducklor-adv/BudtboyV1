@@ -196,9 +196,31 @@ def create_tables():
                     birth_year INTEGER NULL,
                     profile_image_url VARCHAR(255) NULL,
                     is_verified BOOLEAN DEFAULT FALSE,
+                    contact_facebook VARCHAR(500) NULL,
+                    contact_line VARCHAR(500) NULL,
+                    contact_instagram VARCHAR(500) NULL,
+                    contact_twitter VARCHAR(500) NULL,
+                    contact_telegram VARCHAR(500) NULL,
+                    contact_phone VARCHAR(20) NULL,
+                    contact_other VARCHAR(500) NULL,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
             """)
+
+            # Add contact fields if they don't exist (for existing databases)
+            try:
+                cur.execute("""
+                    ALTER TABLE users 
+                    ADD COLUMN IF NOT EXISTS contact_facebook VARCHAR(500),
+                    ADD COLUMN IF NOT EXISTS contact_line VARCHAR(500),
+                    ADD COLUMN IF NOT EXISTS contact_instagram VARCHAR(500),
+                    ADD COLUMN IF NOT EXISTS contact_twitter VARCHAR(500),
+                    ADD COLUMN IF NOT EXISTS contact_telegram VARCHAR(500),
+                    ADD COLUMN IF NOT EXISTS contact_phone VARCHAR(20),
+                    ADD COLUMN IF NOT EXISTS contact_other VARCHAR(500);
+                """)
+            except Exception as e:
+                print(f"Note: Contact columns may already exist: {e}")
 
             # Create email verification table
             cur.execute("""
@@ -1517,7 +1539,9 @@ def get_profile():
             cur = conn.cursor()
             cur.execute("""
                 SELECT id, username, email, is_grower, is_budtender, is_consumer, 
-                       birth_year, created_at, is_verified, grow_license_file_url, profile_image_url 
+                       birth_year, created_at, is_verified, grow_license_file_url, profile_image_url,
+                       contact_facebook, contact_line, contact_instagram, contact_twitter, 
+                       contact_telegram, contact_phone, contact_other
                 FROM users WHERE id = %s
             """, (user_id,))
             user = cur.fetchone()
@@ -1544,7 +1568,14 @@ def get_profile():
                     'created_at': user[7].strftime('%Y-%m-%d %H:%M:%S') if user[7] else None,
                     'is_verified': user[8],
                     'grow_license_file_url': user[9],
-                    'profile_image_url': profile_image_url
+                    'profile_image_url': profile_image_url,
+                    'contact_facebook': user[11],
+                    'contact_line': user[12],
+                    'contact_instagram': user[13],
+                    'contact_twitter': user[14],
+                    'contact_telegram': user[15],
+                    'contact_phone': user[16],
+                    'contact_other': user[17]
                 }
 
                 # Cache the result
@@ -1576,6 +1607,15 @@ def update_profile():
     is_consumer = data.get('is_consumer', False)
     is_grower = data.get('is_grower', False)
     is_budtender = data.get('is_budtender', False)
+    
+    # Contact fields
+    contact_facebook = data.get('contact_facebook', '')
+    contact_line = data.get('contact_line', '')
+    contact_instagram = data.get('contact_instagram', '')
+    contact_twitter = data.get('contact_twitter', '')
+    contact_telegram = data.get('contact_telegram', '')
+    contact_phone = data.get('contact_phone', '')
+    contact_other = data.get('contact_other', '')
 
     if not username or not email:
         return jsonify({'error': 'กรุณากรอกชื่อผู้ใช้และอีเมล'}), 400
@@ -1601,12 +1641,23 @@ def update_profile():
             cur.execute("""
                 UPDATE users 
                 SET username = %s, email = %s, birth_year = %s, 
-                    is_consumer = %s, is_grower = %s, is_budtender = %s
+                    is_consumer = %s, is_grower = %s, is_budtender = %s,
+                    contact_facebook = %s, contact_line = %s, contact_instagram = %s,
+                    contact_twitter = %s, contact_telegram = %s, contact_phone = %s,
+                    contact_other = %s
                 WHERE id = %s
             """, (
                 username, email, 
                 int(birth_year) if birth_year else None,
-                is_consumer, is_grower, is_budtender, user_id
+                is_consumer, is_grower, is_budtender,
+                contact_facebook if contact_facebook else None,
+                contact_line if contact_line else None,
+                contact_instagram if contact_instagram else None,
+                contact_twitter if contact_twitter else None,
+                contact_telegram if contact_telegram else None,
+                contact_phone if contact_phone else None,
+                contact_other if contact_other else None,
+                user_id
             ))
 
             conn.commit()

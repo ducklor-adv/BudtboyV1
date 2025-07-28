@@ -51,8 +51,12 @@ def init_connection_pool():
                     database_url = os.environ.get('DATABASE_URL')
                     if database_url:
                         connection_pool = psycopg2.pool.ThreadedConnectionPool(
-                            1, 20,  # min and max connections
-                            database_url
+                            2, 15,  # min and max connections - reduced for better memory usage
+                            database_url,
+                            # Add connection optimization
+                            sslmode='prefer',
+                            connect_timeout=10,
+                            application_name='cannabis_app'
                         )
                         print("Connection pool initialized successfully")
                     else:
@@ -900,9 +904,14 @@ def create_tables():
                 CREATE INDEX IF NOT EXISTS idx_buds_strain_name_en ON buds_data(strain_name_en);
                 CREATE INDEX IF NOT EXISTS idx_buds_strain_type ON buds_data(strain_type);
                 CREATE INDEX IF NOT EXISTS idx_buds_grower_id ON buds_data(grower_id);
+                CREATE INDEX IF NOT EXISTS idx_buds_created_by ON buds_data(created_by);
+                CREATE INDEX IF NOT EXISTS idx_buds_created_at ON buds_data(created_at);
                 CREATE INDEX IF NOT EXISTS idx_reviews_bud_id ON reviews(bud_reference_id);
                 CREATE INDEX IF NOT EXISTS idx_reviews_reviewer_id ON reviews(reviewer_id);
                 CREATE INDEX IF NOT EXISTS idx_reviews_rating ON reviews(overall_rating);
+                CREATE INDEX IF NOT EXISTS idx_reviews_created_at ON reviews(created_at);
+                CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
+                CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
             """)
 
             conn.commit()
@@ -1066,6 +1075,14 @@ def get_user_buds():
     if not is_authenticated():
         return jsonify({'error': 'Unauthorized'}), 401
 
+    user_id = session.get('user_id')
+    cache_key = f"user_buds_{user_id}"
+    
+    # Check cache first
+    cached_data = get_cache(cache_key)
+    if cached_data:
+        return jsonify({'buds': cached_data})
+
     try:
         conn = get_db_connection()
         if not conn:
@@ -1073,7 +1090,7 @@ def get_user_buds():
 
         cur = conn.cursor()
 
-        user_id = session.get('user_id')
+        # Optimized query with better performance
         cur.execute("""
             SELECT b.id, b.strain_name_en, b.strain_name_th, b.breeder, b.thc_percentage, 
                    b.cbd_percentage, b.strain_type, b.created_at, b.image_1_url,
@@ -1085,6 +1102,7 @@ def get_user_buds():
             GROUP BY b.id, b.strain_name_en, b.strain_name_th, b.breeder, 
                      b.thc_percentage, b.cbd_percentage, b.strain_type, b.created_at, b.image_1_url
             ORDER BY b.created_at DESC
+            LIMIT 50
         """, (user_id,))
 
         buds = []
@@ -1106,6 +1124,9 @@ def get_user_buds():
         cur.close()
         return_db_connection(conn)
 
+        # Cache for 2 minutes
+        set_cache(cache_key, buds)
+
         return jsonify({'buds': buds})
     except Exception as e:
         print(f"Error in get_user_buds: {e}")
@@ -1116,11 +1137,19 @@ def get_user_reviews():
     if not is_authenticated():
         return jsonify({'error': 'Unauthorized'}), 401
 
+    user_id = session.get('user_id')
+    cache_key = f"user_reviews_{user_id}"
+    
+    # Check cache first
+    cached_data = get_cache(cache_key)
+    if cached_data:
+        return jsonify({'reviews': cached_data})
+
     try:
         conn = get_db_connection()
         cur = conn.cursor()
 
-        user_id = session.get('user_id')
+        # Optimized query with limit
         cur.execute("""
             SELECT r.id, r.overall_rating, r.short_summary, r.full_review_content, 
                    r.aroma_rating, r.selected_effects, r.aroma_flavors, r.review_images,
@@ -1133,6 +1162,7 @@ def get_user_reviews():
             JOIN users u ON r.reviewer_id = u.id
             WHERE r.reviewer_id = %s 
             ORDER BY r.created_at DESC
+            LIMIT 50
         """, (user_id,))
 
         print(f"Debug: Query executed for user_id {user_id}")
@@ -1176,6 +1206,9 @@ def get_user_reviews():
 
         cur.close()
         return_db_connection(conn)
+
+        # Cache for 2 minutes
+        set_cache(cache_key, reviews)
 
         return jsonify({'reviews': reviews})
     except Exception as e:

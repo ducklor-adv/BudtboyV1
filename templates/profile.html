@@ -928,18 +928,11 @@
             showLoading();
 
             try {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-
                 const response = await fetch('/api/profile', {
-                    signal: controller.signal,
-                    headers
-</script: {
+                    headers: {
                         'Content-Type': 'application/json'
                     }
                 });
-
-                clearTimeout(timeoutId);
 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -947,7 +940,7 @@
 
                 const data = await response.json();
                 currentUserData = data;
-                console.log('Profile data loaded:', data);
+                console.log('Profile loaded successfully');
 
                 // Update the profile information on the page
                 document.getElementById('username-display').textContent = data.username || '-';
@@ -1355,3 +1348,6 @@
                 }
             });
         }
+</script>
+</body>
+</html>

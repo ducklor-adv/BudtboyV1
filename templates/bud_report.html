@@ -1379,7 +1379,7 @@
 
                 <div class="actions">
                     <a href="#" class="action-btn" id="writeReviewBtn">⭐ เขียนรีวิว</a>
-                    <button type="button" class="action-btn secondary" onclick="printToPDF()">📄 Print to PDF</button>
+                    <button type="button" class="action-btn secondary" onclick="captureAsImage()">📸 บันทึกเป็นรูปภาพ</button>
                 </div>
             </div>
         </div>
@@ -1398,6 +1398,9 @@
             <iframe id="youtubePlayer" width="800" height="450" frameborder="0" allowfullscreen></iframe>
         </div>
     </div>
+
+    <!-- html2canvas library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
@@ -2026,62 +2029,123 @@
             document.body.classList.remove('modal-open');
         }
 
-        function printToPDF() {
-            // ซ่อนปุ่มต่างๆ ก่อนพิมพ์
+        function captureAsImage() {
+            // ซ่อนปุ่มต่างๆ ก่อนจับภาพ
             const actions = document.querySelector('.actions');
             const backBtn = document.querySelector('.back-btn');
             
             if (actions) actions.style.display = 'none';
             if (backBtn) backBtn.style.display = 'none';
             
-            // ตั้งค่า CSS สำหรับการพิมพ์
-            const printStyle = document.createElement('style');
-            printStyle.innerHTML = `
-                @media print {
-                    body { 
-                        margin: 0; 
-                        padding: 0; 
-                        font-size: 12px;
-                        background: white !important;
-                    }
-                    .container { 
-                        max-width: none; 
-                        margin: 0; 
-                        box-shadow: none;
-                        border-radius: 0;
-                    }
-                    .header { 
-                        background: #2196F3 !important; 
-                        -webkit-print-color-adjust: exact;
-                        print-color-adjust: exact;
-                    }
-                    .actions, .back-btn { 
-                        display: none !important; 
-                    }
-                    .bud-images-display {
-                        page-break-inside: avoid;
-                    }
-                    .section {
-                        page-break-inside: avoid;
-                        margin-bottom: 15px;
-                    }
-                    .review-card {
-                        page-break-inside: avoid;
-                        margin-bottom: 10px;
-                    }
-                }
+            // แสดง loading message
+            const loadingMsg = document.createElement('div');
+            loadingMsg.innerHTML = '📸 กำลังสร้างรูปภาพ...';
+            loadingMsg.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgba(0,0,0,0.8);
+                color: white;
+                padding: 20px;
+                border-radius: 10px;
+                z-index: 10000;
+                font-size: 18px;
+                font-weight: bold;
             `;
-            document.head.appendChild(printStyle);
+            document.body.appendChild(loadingMsg);
             
-            // พิมพ์
-            window.print();
-            
-            // แสดงปุ่มกลับมาหลังจากพิมพ์
+            // รอให้ DOM update แล้วจับภาพ
             setTimeout(() => {
-                if (actions) actions.style.display = 'flex';
-                if (backBtn) backBtn.style.display = 'inline-block';
-                document.head.removeChild(printStyle);
-            }, 1000);
+                html2canvas(document.querySelector('.container'), {
+                    backgroundColor: '#ffffff',
+                    scale: 2, // คุณภาพสูง
+                    useCORS: true,
+                    allowTaint: true,
+                    scrollX: 0,
+                    scrollY: 0,
+                    width: document.querySelector('.container').scrollWidth,
+                    height: document.querySelector('.container').scrollHeight
+                }).then(canvas => {
+                    // สร้างลิงก์ดาวน์โหลด
+                    const link = document.createElement('a');
+                    const currentDate = new Date().toISOString().split('T')[0];
+                    const budName = document.getElementById('budName').textContent || 'bud-report';
+                    
+                    link.download = `${budName}_report_${currentDate}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    
+                    // ดาวน์โหลดไฟล์
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    // ลบ loading message
+                    document.body.removeChild(loadingMsg);
+                    
+                    // แสดงปุ่มกลับมา
+                    if (actions) actions.style.display = 'flex';
+                    if (backBtn) backBtn.style.display = 'inline-block';
+                    
+                    // แสดงข้อความสำเร็จ
+                    const successMsg = document.createElement('div');
+                    successMsg.innerHTML = '✅ บันทึกรูปภาพสำเร็จ!';
+                    successMsg.style.cssText = `
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        background: #4CAF50;
+                        color: white;
+                        padding: 15px 20px;
+                        border-radius: 10px;
+                        z-index: 10000;
+                        font-weight: bold;
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                    `;
+                    document.body.appendChild(successMsg);
+                    
+                    setTimeout(() => {
+                        if (document.body.contains(successMsg)) {
+                            document.body.removeChild(successMsg);
+                        }
+                    }, 3000);
+                    
+                }).catch(error => {
+                    console.error('Error capturing image:', error);
+                    
+                    // ลบ loading message
+                    if (document.body.contains(loadingMsg)) {
+                        document.body.removeChild(loadingMsg);
+                    }
+                    
+                    // แสดงปุ่มกลับมา
+                    if (actions) actions.style.display = 'flex';
+                    if (backBtn) backBtn.style.display = 'inline-block';
+                    
+                    // แสดงข้อความผิดพลาด
+                    const errorMsg = document.createElement('div');
+                    errorMsg.innerHTML = '❌ เกิดข้อผิดพลาดในการสร้างรูปภาพ';
+                    errorMsg.style.cssText = `
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        background: #f44336;
+                        color: white;
+                        padding: 15px 20px;
+                        border-radius: 10px;
+                        z-index: 10000;
+                        font-weight: bold;
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                    `;
+                    document.body.appendChild(errorMsg);
+                    
+                    setTimeout(() => {
+                        if (document.body.contains(errorMsg)) {
+                            document.body.removeChild(errorMsg);
+                        }
+                    }, 3000);
+                });
+            }, 100);
         }
     </script>
 </body>

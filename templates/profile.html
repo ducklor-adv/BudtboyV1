@@ -1307,46 +1307,31 @@
             }
         }
 
-        let pageInitialized = false;
-
-        // Initialize when DOM is loaded
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, initializing...');
-            if (!pageInitialized) {
-                initializePage();
-                pageInitialized = true;
-            }
-        });
+        // Initialize when DOM is loaded - single event listener
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializePage);
+        } else {
+            // DOM already loaded
+            initializePage();
+        }
 
         function initializePage() {
-            console.log('Initializing page...');
-            // เพิ่มการป้องกันการเรียกซ้ำ
+            // Prevent multiple initialization
             if (pageInitialized) {
                 console.log('Page already initialized');
                 return;
             }
+            
+            console.log('Initializing page...');
+            pageInitialized = true;
 
-            loadProfile();
+            // Load profile data
+            if (!isProfileLoaded) {
+                loadProfile();
+            }
 
             // Setup avatar upload
             setupAvatarUpload();
-
-            // ป้องกันการโหลดซ้ำเมื่อหน้าจอไม่ active
-            document.addEventListener('visibilitychange', function() {
-                if (document.hidden) {
-                    console.log('Page hidden, stopping any background processes');
-                    // หยุดการทำงานในพื้นหลัง
-                    isLoading = false;
-                }
-            });
-
-            // ป้องกันการ refresh อัตโนมัติในมือถือ
-            window.addEventListener('beforeunload', function(e) {
-                if (!document.hidden) {
-                    e.preventDefault();
-                    e.returnValue = '';
-                }
-            });
         }
 </script>
 </body>

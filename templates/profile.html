@@ -2,11 +2,7 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="format-detection" content="telephone=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cannabis App - โปรไฟล์ของฉัน</title>
     <style>
         body {
@@ -18,20 +14,6 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            /* Prevent pull-to-refresh on mobile */
-            overscroll-behavior: none;
-            /* Prevent bounce scrolling on iOS */
-            -webkit-overflow-scrolling: touch;
-            /* Prevent zoom and viewport issues on mobile */
-            -webkit-text-size-adjust: 100%;
-            -ms-text-size-adjust: 100%;
-            /* Prevent touch callouts */
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            -khtml-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
         }
 
         .profile-card {
@@ -614,22 +596,10 @@
             font-size: 12px;
         }
 
-        @media (max-width: 768px) {
-            body {
-                padding: 10px;
-                /* Fix mobile scrolling issues */
-                position: fixed;
-                width: 100%;
-                height: 100%;
-                overflow: auto;
-            }
-
+        @media (max-width: 400px) {
             .profile-card {
-                margin: 5px;
+                margin: 10px;
                 max-width: none;
-                width: calc(100% - 10px);
-                /* Prevent card from causing horizontal scroll */
-                box-sizing: border-box;
             }
 
             .card-header {
@@ -645,29 +615,6 @@
             .card-content {
                 padding: 50px 20px 20px 20px;
             }
-
-            /* Prevent mobile zoom on input focus */
-            input, select, textarea {
-                font-size: 16px !important;
-            }
-
-            /* Fix mobile scrolling for chat */
-            .chat-messages {
-                -webkit-overflow-scrolling: touch;
-                overscroll-behavior: contain;
-            }
-        }
-
-        @media (max-width: 400px) {
-            .profile-card {
-                margin: 2px;
-                width: calc(100% - 4px);
-            }
-        }
-
-        /* CSS สำหรับป้องกันการ scroll เมื่อ modal เปิด */
-        body.modal-open {
-            overflow: hidden;
         }
     </style>
 </head>
@@ -869,10 +816,8 @@
         let currentUserData = null;
         let isLoading = false;
         let isProfileLoaded = false;
-        let pageInitialized = false;
 
         function showError(message) {
-            console.log('Showing error:', message);
             const errorState = document.getElementById('errorState');
             const errorMessage = document.getElementById('errorMessage');
             const loadingState = document.getElementById('loadingState');
@@ -885,9 +830,6 @@
 
             if (loadingState) loadingState.style.display = 'none';
             if (profileInfo) profileInfo.style.display = 'none';
-
-            // Reset loading state to allow retry
-            isLoading = false;
         }
 
         function showLoading() {
@@ -918,421 +860,688 @@
 
         async function loadProfile() {
             // ป้องกันการเรียกซ้ำ
-            if (isLoading || isProfileLoaded) {
-                console.log('LoadProfile called but already loading or loaded');
-                return;
-            }
+            if (isLoading || isProfileLoaded) return;
 
-            console.log('Starting to load profile...');
             isLoading = true;
             showLoading();
 
             try {
-                const response = await fetch('/api/profile', {
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const data = await response.json();
-                currentUserData = data;
-                console.log('Profile loaded successfully');
-
-                // Update the profile information on the page
-                document.getElementById('username-display').textContent = data.username || '-';
-                document.getElementById('email-display').textContent = data.email || '-';
-                document.getElementById('birth-year-display').textContent = data.birth_year || '-';
-                document.getElementById('created-date').textContent = new Date(data.created_at).toLocaleDateString('th-TH');
-
-                // Set verification status
-                const verificationStatus = document.getElementById('verification-status');
-                const statusLabel = document.getElementById('status-label');
-
-                if (data.is_verified) {
-                    verificationStatus.textContent = 'ยืนยันแล้ว';
-                    statusLabel.textContent = 'สถานะยืนยัน';
-                    verificationStatus.style.color = 'green'; // Optional: Make it green for emphasis
+                const response = await fetch('/api/profile');
+                if (response.ok) {
+                    const user = await response.json();
+                    displayProfile(user);
+                    showProfile();
                 } else {
-                    verificationStatus.textContent = 'รอยืนยัน';
-                    statusLabel.textContent = 'สถานะยืนยัน';
-                    verificationStatus.style.color = 'red'; // Optional: Make it red for emphasis
+                    const errorData = await response.json().catch(() => ({}));
+                    showError(errorData.error || 'ไม่สามารถโหลดข้อมูลโปรไฟล์ได้');
                 }
-
-                // Set user types
-                const userTypesDisplay = document.getElementById('user-types-display');
-                userTypesDisplay.innerHTML = ''; // Clear existing badges
-
-                if (data.is_consumer) {
-                    const consumerBadge = document.createElement('span');
-                    consumerBadge.className = 'user-type-badge';
-                    consumerBadge.textContent = '👥 ผู้บริโภค';
-                    userTypesDisplay.appendChild(consumerBadge);
-                }
-                if (data.is_grower) {
-                    const growerBadge = document.createElement('span');
-                    growerBadge.className = 'user-type-badge';
-                    growerBadge.textContent = '🌱 ผู้ปลูก';
-                    userTypesDisplay.appendChild(growerBadge);
-                }
-                if (data.is_budtender) {
-                    const budtenderBadge = document.createElement('span');
-                    budtenderBadge.className = 'user-type-badge';
-                    budtenderBadge.textContent = '🏪 บัดเทนเดอร์';
-                    userTypesDisplay.appendChild(budtenderBadge);
-                }
-
-                if (!data.is_consumer && !data.is_grower && !data.is_budtender) {
-                    userTypesDisplay.textContent = 'ไม่มี';
-                }
-
-                // Display contact points
-                const contactDisplay = document.getElementById('contact-display');
-                contactDisplay.innerHTML = ''; // Clear existing contacts
-
-                if (data.contacts && Object.keys(data.contacts).length > 0) {
-                    for (const key in data.contacts) {
-                        if (data.contacts.hasOwnProperty(key) && data.contacts[key]) {
-                            const contactValue = data.contacts[key];
-                            let linkText = contactValue;
-                            let linkHref = contactValue;
-                            let linkClass = 'contact-link';
-
-                            switch (key) {
-                                case 'facebook':
-                                    linkHref = contactValue.startsWith('http') ? contactValue : `https://facebook.com/${contactValue}`;
-                                    linkClass += ' facebook';
-                                    break;
-                                case 'line':
-                                    linkText = `@${contactValue}`;
-                                    break;
-                                case 'instagram':
-                                    linkHref = contactValue.startsWith('http') ? contactValue : `https://instagram.com/${contactValue}`;
-                                    linkClass += ' instagram';
-                                    break;
-                                case 'twitter':
-                                    linkHref = contactValue.startsWith('http') ? contactValue : `https://twitter.com/${contactValue}`;
-                                    linkClass += ' twitter';
-                                    break;
-                                case 'telegram':
-                                    linkText = `@${contactValue}`;
-                                    linkClass += ' telegram';
-                                    break;
-                                case 'phone':
-                                    linkHref = `tel:${contactValue}`;
-                                    linkClass += ' phone';
-                                    break;
-                                default:
-                                    linkClass += ' other';
-                            }
-
-                            const contactLink = document.createElement('a');
-                            contactLink.href = linkHref;
-                            contactLink.textContent = linkText;
-                            contactLink.className = linkClass;
-                            contactLink.target = '_blank'; // Open in new tab
-                            contactDisplay.appendChild(contactLink);
-                        }
-                    }
-                } else {
-                    contactDisplay.innerHTML = '<div class="no-contacts">ไม่มีช่องทางติดต่อ</div>';
-                }
-
-                // Load avatar if exists
-                if (data.avatar_url) {
-                    const avatarImage = document.getElementById('avatarImage');
-                    const avatarPlaceholder = document.getElementById('avatarPlaceholder');
-
-                    avatarImage.src = data.avatar_url;
-                    avatarImage.style.display = 'block';
-                    avatarPlaceholder.style.display = 'none';
-                }
-
-                showProfile();
-
             } catch (error) {
                 console.error('Error loading profile:', error);
-                showError('ไม่สามารถโหลดข้อมูลโปรไฟล์ได้ กรุณาลองใหม่อีกครั้ง');
+                showError('เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต');
             } finally {
-                isLoading = false; // Set loading to false in finally block
+                isLoading = false;
             }
         }
 
-        function retryLoadProfile() {
-            if (!isLoading) {
-                loadProfile();
+        function displayProfile(user) {
+            if (!user) return;
+
+            currentUserData = user;
+
+            const usernameEl = document.getElementById('username-display');
+            const emailEl = document.getElementById('email-display');
+
+            if (usernameEl) usernameEl.textContent = user.username || '-';
+            if (emailEl) emailEl.textContent = user.email || '-';
+
+            // Set edit form values safely
+            const usernameEdit = document.getElementById('username-edit');
+            const emailEdit = document.getElementById('email-edit');
+            const birthYearEdit = document.getElementById('birth-year-edit');
+
+            if (usernameEdit) usernameEdit.value = user.username || '';
+            if (emailEdit) emailEdit.value = user.email || '';
+            if (birthYearEdit) birthYearEdit.value = user.birth_year || '';
+
+            // Verification status
+            const verificationStatus = document.getElementById('verification-status');
+            const statusLabel = document.getElementById('status-label');
+            if (verificationStatus && statusLabel) {
+                if (user.is_verified) {
+                    verificationStatus.innerHTML = '<span class="user-type-badge">ยืนยันแล้ว</span>';
+                    statusLabel.textContent = 'สถานะยืนยัน';
+                } else {
+                    verificationStatus.innerHTML = '<span style="color: #ff9800;">รอยืนยัน</span>';
+                    statusLabel.textContent = 'สถานะยืนยัน';
+                }
+            }
+
+            // Created date
+            const createdDateEl = document.getElementById('created-date');
+            if (createdDateEl && user.created_at) {
+                const date = new Date(user.created_at);
+                createdDateEl.textContent = date.toLocaleDateString('th-TH', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric'
+                });
+            }
+
+            // Birth year
+            const birthYearDisplay = document.getElementById('birth-year-display');
+            if (birthYearDisplay) {
+                birthYearDisplay.textContent = user.birth_year ? 
+                    (user.birth_year + 543) + ' พ.ศ.' : 'ไม่ระบุ';
+            }
+
+            // User types display
+            const userTypesDiv = document.getElementById('user-types-display');
+            if (userTypesDiv) {
+                let userTypes = [];
+
+                if (user.is_consumer) userTypes.push('<span class="user-type-badge">👥 ผู้บริโภค</span>');
+                if (user.is_grower) userTypes.push('<span class="user-type-badge">🌱 ผู้ปลูก</span>');
+                if (user.is_budtender) userTypes.push('<span class="user-type-badge">🏪 บัดเทนเดอร์</span>');
+
+                if (userTypes.length > 0) {
+                    userTypesDiv.innerHTML = userTypes.join(' ');
+                } else {
+                    userTypesDiv.innerHTML = '<span style="color: #999;">ไม่มีประเภทที่ระบุ</span>';
+                }
+            }
+
+            // Set user type checkboxes safely
+            const consumerCheck = document.getElementById('is_consumer_edit');
+            const growerCheck = document.getElementById('is_grower_edit');
+            const budtenderCheck = document.getElementById('is_budtender_edit');
+
+            if (consumerCheck) consumerCheck.checked = user.is_consumer || false;
+            if (growerCheck) growerCheck.checked = user.is_grower || false;
+            if (budtenderCheck) budtenderCheck.checked = user.is_budtender || false;
+
+            // Display contact points
+            displayContactPoints(user);
+
+            // Set contact edit fields
+            setContactEditFields(user);
+
+            // Update avatar
+            updateAvatar(user);
+        }
+
+        function updateAvatar(user) {
+            const avatarImage = document.getElementById('avatarImage');
+            const avatarPlaceholder = document.getElementById('avatarPlaceholder');
+
+            if (!avatarImage || !avatarPlaceholder) return;
+
+            if (user.profile_image_url) {
+                avatarImage.src = user.profile_image_url;
+                avatarImage.style.display = 'block';
+                avatarPlaceholder.style.display = 'none';
             } else {
-                console.log('Already loading, please wait.');
+                avatarImage.style.display = 'none';
+                avatarPlaceholder.style.display = 'flex';
+                if (user.username) {
+                    avatarPlaceholder.textContent = user.username.charAt(0).toUpperCase();
+                } else {
+                    avatarPlaceholder.textContent = '👤';
+                }
             }
         }
 
         function toggleEditMode() {
-            const displayElements = document.querySelectorAll('.info-value > span');
-            const editElements = document.querySelectorAll('.info-value > input, .info-value > select');
-            const userTypesDisplay = document.getElementById('user-types-display');
-            const userTypesEdit = document.getElementById('user-types-edit');
-            const contactDisplay = document.getElementById('contact-display');
-            const contactEdit = document.getElementById('contact-edit');
-            const saveCancelBtns = document.getElementById('saveCancelBtns');
-            const actionButtons = document.getElementById('actionButtons');
+            const usernameDisplay = document.getElementById('username-display');
+            const usernameEdit = document.getElementById('username-edit');
 
-            displayElements.forEach(el => el.style.display = el.style.display === 'none' ? 'inline' : 'none');
-            editElements.forEach(el => el.style.display = el.style.display === 'none' ? 'block' : 'none');
-            userTypesDisplay.style.display = 'none';
-            userTypesEdit.style.display = 'block';
-            contactDisplay.style.display = 'none';
-            contactEdit.style.display = 'block';
-            saveCancelBtns.style.display = 'flex';
-            actionButtons.style.display = 'none';
+            if (!usernameDisplay || !usernameEdit) return;
 
-            // Populate edit fields with current data
-            document.getElementById('username-edit').value = currentUserData.username || '';
-            document.getElementById('email-edit').value = currentUserData.email || '';
-            document.getElementById('birth-year-edit').value = currentUserData.birth_year || '';
+            const isEditing = usernameEdit.style.display !== 'none';
 
-            // Set user types checkboxes
-            document.getElementById('is_consumer_edit').checked = currentUserData.is_consumer || false;
-            document.getElementById('is_grower_edit').checked = currentUserData.is_grower || false;
-            document.getElementById('is_budtender_edit').checked = currentUserData.is_budtender || false;
-
-            // Populate contact edit fields
-            if (currentUserData.contacts) {
-                document.getElementById('contact-facebook-edit').value = currentUserData.contacts.facebook || '';
-                document.getElementById('contact-line-edit').value = currentUserData.contacts.line || '';
-                document.getElementById('contact-instagram-edit').value = currentUserData.contacts.instagram || '';
-                document.getElementById('contact-twitter-edit').value = currentUserData.contacts.twitter || '';
-                document.getElementById('contact-telegram-edit').value = currentUserData.contacts.telegram || '';
-                document.getElementById('contact-phone-edit').value = currentUserData.contacts.phone || '';
-                document.getElementById('contact-other-edit').value = currentUserData.contacts.other || '';
+            if (isEditing) {
+                cancelEdit();
+            } else {
+                enterEditMode();
             }
         }
 
-        function cancelEdit() {
-             const displayElements = document.querySelectorAll('.info-value > span');
-            const editElements = document.querySelectorAll('.info-value > input, .info-value > select');
-            const userTypesDisplay = document.getElementById('user-types-display');
-            const userTypesEdit = document.getElementById('user-types-edit');
-            const contactDisplay = document.getElementById('contact-display');
-            const contactEdit = document.getElementById('contact-edit');
+        function displayContactPoints(user) {
+            const contactDiv = document.getElementById('contact-display');
+            if (!contactDiv) return;
+
+            let contactLinks = [];
+
+            if (user.contact_facebook) {
+                contactLinks.push(`<a href="${user.contact_facebook}" target="_blank" class="contact-link facebook">📘 Facebook</a>`);
+            }
+            if (user.contact_line) {
+                const lineUrl = user.contact_line.startsWith('http') ? user.contact_line : `https://line.me/ti/p/${user.contact_line}`;
+                contactLinks.push(`<a href="${lineUrl}" target="_blank" class="contact-link line">💚 Line</a>`);
+            }
+            if (user.contact_instagram) {
+                contactLinks.push(`<a href="${user.contact_instagram}" target="_blank" class="contact-link instagram">📸 Instagram</a>`);
+            }
+            if (user.contact_twitter) {
+                contactLinks.push(`<a href="${user.contact_twitter}" target="_blank" class="contact-link twitter">🐦 Twitter</a>`);
+            }
+            if (user.contact_telegram) {
+                const telegramUrl = user.contact_telegram.startsWith('http') ? user.contact_telegram : `https://t.me/${user.contact_telegram}`;
+                contactLinks.push(`<a href="${telegramUrl}" target="_blank" class="contact-link telegram">✈️ Telegram</a>`);
+            }
+            if (user.contact_phone) {
+                contactLinks.push(`<a href="tel:${user.contact_phone}" class="contact-link phone">📱 ${user.contact_phone}</a>`);
+            }
+            if (user.contact_other) {
+                contactLinks.push(`<a href="${user.contact_other}" target="_blank" class="contact-link other">🔗 อื่นๆ</a>`);
+            }
+
+            if (contactLinks.length > 0) {
+                contactDiv.innerHTML = contactLinks.join(' ');
+            } else {
+                contactDiv.innerHTML = '<span class="no-contacts">ยังไม่มีช่องทางติดต่อ</span>';
+            }
+        }
+
+        function setContactEditFields(user) {
+            const fields = [
+                'contact-facebook-edit',
+                'contact-line-edit', 
+                'contact-instagram-edit',
+                'contact-twitter-edit',
+                'contact-telegram-edit',
+                'contact-phone-edit',
+                'contact-other-edit'
+            ];
+
+            const values = [
+                user.contact_facebook || '',
+                user.contact_line || '',
+                user.contact_instagram || '',
+                user.contact_twitter || '',
+                user.contact_telegram || '',
+                user.contact_phone || '',
+                user.contact_other || ''
+            ];
+
+            fields.forEach((fieldId, index) => {
+                const field = document.getElementById(fieldId);
+                if (field) field.value = values[index];
+            });
+        }
+
+        function enterEditMode() {
+            const elements = [
+                ['username-display', 'username-edit'],
+                ['email-display', 'email-edit'],
+                ['birth-year-display', 'birth-year-edit'],
+                ['user-types-display', 'user-types-edit'],
+                ['contact-display', 'contact-edit']
+            ];
+
+            elements.forEach(([displayId, editId]) => {
+                const displayEl = document.getElementById(displayId);
+                const editEl = document.getElementById(editId);
+
+                if (displayEl) displayEl.style.display = 'none';
+                if (editEl) editEl.style.display = 'block';
+            });
+
             const saveCancelBtns = document.getElementById('saveCancelBtns');
             const actionButtons = document.getElementById('actionButtons');
+            const editBtn = document.getElementById('editBtn');
 
-            displayElements.forEach(el => el.style.display = 'inline');
-            editElements.forEach(el => el.style.display = 'none');
-            userTypesDisplay.style.display = 'block';
-            userTypesEdit.style.display = 'none';
-            contactDisplay.style.display = 'block';
-            contactEdit.style.display = 'none';
-            saveCancelBtns.style.display = 'none';
-            actionButtons.style.display = 'flex';
+            if (saveCancelBtns) saveCancelBtns.style.display = 'flex';
+            if (actionButtons) actionButtons.style.display = 'none';
+            if (editBtn) editBtn.textContent = '❌ ยกเลิกแก้ไข';
+        }
+
+        function cancelEdit() {
+            const elements = [
+                ['username-display', 'username-edit'],
+                ['email-display', 'email-edit'],
+                ['birth-year-display', 'birth-year-edit'],
+                ['user-types-display', 'user-types-edit'],
+                ['contact-display', 'contact-edit']
+            ];
+
+            elements.forEach(([displayId, editId]) => {
+                const displayEl = document.getElementById(displayId);
+                const editEl = document.getElementById(editId);
+
+                if (displayEl) displayEl.style.display = 'inline';
+                if (editEl) editEl.style.display = 'none';
+            });
+
+            const saveCancelBtns = document.getElementById('saveCancelBtns');
+            const actionButtons = document.getElementById('actionButtons');
+            const editBtn = document.getElementById('editBtn');
+
+            if (saveCancelBtns) saveCancelBtns.style.display = 'none';
+            if (actionButtons) actionButtons.style.display = 'flex';
+            if (editBtn) editBtn.textContent = '✏️ แก้ไขโปรไฟล์';
+
+            if (currentUserData) {
+                displayProfile(currentUserData);
+            }
         }
 
         async function saveProfile() {
-            const username = document.getElementById('username-edit').value;
-            const email = document.getElementById('email-edit').value;
-            const birth_year = document.getElementById('birth-year-edit').value;
-            const is_consumer = document.getElementById('is_consumer_edit').checked;
-            const is_grower = document.getElementById('is_grower_edit').checked;
-            const is_budtender = document.getElementById('is_budtender_edit').checked;
+            const usernameEdit = document.getElementById('username-edit');
+            const emailEdit = document.getElementById('email-edit');
+            const birthYearEdit = document.getElementById('birth-year-edit');
+            const consumerCheck = document.getElementById('is_consumer_edit');
+            const growerCheck = document.getElementById('is_grower_edit');
+            const budtenderCheck = document.getElementById('is_budtender_edit');
 
-            const contacts = {
-                facebook: document.getElementById('contact-facebook-edit').value,
-                line: document.getElementById('contact-line-edit').value,
-                instagram: document.getElementById('contact-instagram-edit').value,
-                twitter: document.getElementById('contact-twitter-edit').value,
-                telegram: document.getElementById('contact-telegram-edit').value,
-                phone: document.getElementById('contact-phone-edit').value,
-                other: document.getElementById('contact-other-edit').value
-            };
+            if (!usernameEdit || !emailEdit) {
+                alert('❌ ไม่พบข้อมูลฟอร์ม');
+                return;
+            }
 
-            const profileData = {
-                username,
-                email,
-                birth_year,
-                is_consumer,
-                is_grower,
-                is_budtender,
-                contacts
+            const updatedData = {
+                username: usernameEdit.value,
+                email: emailEdit.value,
+                birth_year: birthYearEdit ? birthYearEdit.value : '',
+                is_consumer: consumerCheck ? consumerCheck.checked : false,
+                is_grower: growerCheck ? growerCheck.checked : false,
+                is_budtender: budtenderCheck ? budtenderCheck.checked : false
             };
 
             try {
-                const response = await fetch('/api/profile', {
+                const response = await fetch('/api/update_profile', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(profileData)
+                    body: JSON.stringify(updatedData)
                 });
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
                 const result = await response.json();
-                console.log('Profile updated:', result);
-                // After successful save, reload profile to reflect changes
-                loadProfile();
-                cancelEdit(); // Exit edit mode
+
+                if (response.ok) {
+                    alert('✅ บันทึกข้อมูลสำเร็จ!');
+                    await loadProfile();
+                    cancelEdit();
+                } else {
+                    alert('❌ เกิดข้อผิดพลาด: ' + (result.error || 'ไม่สามารถบันทึกได้'));
+                }
             } catch (error) {
-                console.error('Error updating profile:', error);
-                showError('ไม่สามารถบันทึกข้อมูลโปรไฟล์ได้ กรุณาลองใหม่อีกครั้ง');
+                console.error('Error saving profile:', error);
+                alert('❌ เกิดข้อผิดพลาดในการบันทึกข้อมูล');
             }
         }
 
-        function setupAvatarUpload() {
-            const avatarInput = document.getElementById('avatarInput');
-            const profileAvatar = document.getElementById('profileAvatar');
-            const avatarImage = document.getElementById('avatarImage');
-            const avatarPlaceholder = document.getElementById('avatarPlaceholder');
+        async function uploadProfileImage(input) {
+            const file = input.files[0];
+            if (!file) return;
 
-            profileAvatar.addEventListener('click', () => {
-                avatarInput.click();
-            });
+            if (!file.type.startsWith('image/')) {
+                alert('กรุณาเลือกไฟล์รูปภาพเท่านั้น');
+                return;
+            }
 
-            avatarInput.addEventListener('change', async (event) => {
-                const file = event.target.files[0];
-                if (!file) return;
+            if (file.size > 5 * 1024 * 1024) {
+                alert('ขนาดไฟล์ต้องไม่เกิน 5MB');
+                return;
+            }
 
-                const formData = new FormData();
-                formData.append('avatar', file);
+            const formData = new FormData();
+            formData.append('profile_image', file);
 
-                try {
-                    const response = await fetch('/api/upload-avatar', {
-                        method: 'POST',
-                        body: formData
-                    });
+            try {
+                const response = await fetch('/api/upload_profile_image', {
+                    method: 'POST',
+                    body: formData
+                });
 
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
+                const result = await response.json();
+
+                if (response.ok) {
+                    const avatarImage = document.getElementById('avatarImage');
+                    const avatarPlaceholder = document.getElementById('avatarPlaceholder');
+
+                    if (avatarImage && avatarPlaceholder) {
+                        avatarImage.src = result.profile_image_url;
+                        avatarImage.style.display = 'block';
+                        avatarPlaceholder.style.display = 'none';
                     }
 
-                    const result = await response.json();
-                    console.log('Avatar uploaded:', result);
-
-                    // Update avatar on the page
-                    avatarImage.src = result.avatar_url;
-                    avatarImage.style.display = 'block';
-                    avatarPlaceholder.style.display = 'none';
-
-                    // Reload profile to update avatar URL in user data
-                    loadProfile();
-
-                } catch (error) {
-                    console.error('Error uploading avatar:', error);
-                    showError('ไม่สามารถอัปโหลดรูปภาพได้ กรุณาลองใหม่อีกครั้ง');
+                    alert('✅ อัปโหลดรูปโปรไฟล์สำเร็จ!');
+                } else {
+                    alert('❌ เกิดข้อผิดพลาด: ' + (result.error || 'ไม่สามารถอัปโหลดได้'));
                 }
-            });
+            } catch (error) {
+                console.error('Error uploading profile image:', error);
+                alert('❌ เกิดข้อผิดพลาดในการอัปโหลดรูปภาพ');
+            }
+
+            input.value = '';
         }
 
+        function setupEventListeners() {
+            const profileAvatar = document.getElementById('profileAvatar');
+            const avatarInput = document.getElementById('avatarInput');
+
+            if (profileAvatar && avatarInput) {
+                profileAvatar.addEventListener('click', function() {
+                    avatarInput.click();
+                });
+
+                avatarInput.addEventListener('change', function() {
+                    uploadProfileImage(this);
+                });
+            }
+        }
+
+        function retryLoadProfile() {
+            // รีเซ็ตสถานะเพื่อให้สามารถโหลดใหม่ได้
+            isProfileLoaded = false;
+            isLoading = false;
+            loadProfile();
+        }
+
+        // ปรับปรุงฟังก์ชัน saveProfile ให้รีโหลดข้อมูลใหม่
+        async function saveProfileImproved() {
+            const usernameEdit = document.getElementById('username-edit');
+            const emailEdit = document.getElementById('email-edit');
+            const birthYearEdit = document.getElementById('birth-year-edit');
+            const consumerCheck = document.getElementById('is_consumer_edit');
+            const growerCheck = document.getElementById('is_grower_edit');
+            const budtenderCheck = document.getElementById('is_budtender_edit');
+
+            // Contact fields
+            const contactFacebookEdit = document.getElementById('contact-facebook-edit');
+            const contactLineEdit = document.getElementById('contact-line-edit');
+            const contactInstagramEdit = document.getElementById('contact-instagram-edit');
+            const contactTwitterEdit = document.getElementById('contact-twitter-edit');
+            const contactTelegramEdit = document.getElementById('contact-telegram-edit');
+            const contactPhoneEdit = document.getElementById('contact-phone-edit');
+            const contactOtherEdit = document.getElementById('contact-other-edit');
+
+            if (!usernameEdit || !emailEdit) {
+                alert('❌ ไม่พบข้อมูลฟอร์ม');
+                return;
+            }
+
+            const updatedData = {
+                username: usernameEdit.value,
+                email: emailEdit.value,
+                birth_year: birthYearEdit ? birthYearEdit.value : '',
+                is_consumer: consumerCheck ? consumerCheck.checked : false,
+                is_grower: growerCheck ? growerCheck.checked : false,
+                is_budtender: budtenderCheck ? budtenderCheck.checked : false,
+                contact_facebook: contactFacebookEdit ? contactFacebookEdit.value : '',
+                contact_line: contactLineEdit ? contactLineEdit.value : '',
+                contact_instagram: contactInstagramEdit ? contactInstagramEdit.value : '',
+                contact_twitter: contactTwitterEdit ? contactTwitterEdit.value : '',
+                contact_telegram: contactTelegramEdit ? contactTelegramEdit.value : '',
+                contact_phone: contactPhoneEdit ? contactPhoneEdit.value : '',
+                contact_other: contactOtherEdit ? contactOtherEdit.value : ''
+            };
+
+            try {
+                const response = await fetch('/api/update_profile', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updatedData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert('✅ บันทึกข้อมูลสำเร็จ!');
+                    // รีเซ็ตสถานะและโหลดข้อมูลใหม่
+                    isProfileLoaded = false;
+                    await loadProfile();
+                    cancelEdit();
+                } else {
+                    alert('❌ เกิดข้อผิดพลาด: ' + (result.error || 'ไม่สามารถบันทึกได้'));
+                }
+            } catch (error) {
+                console.error('Error saving profile:', error);
+                alert('❌ เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+            }
+        }
+
+        // แทนที่ฟังก์ชัน saveProfile เดิม
+        window.saveProfile = saveProfileImproved;
+
+        // Chat functionality
+        let chatHistory = [];
+
         function openChatWithBudtBoy() {
-            const chatModal = document.getElementById('chatModal');
-            chatModal.style.display = 'block';
-            document.body.classList.add('modal-open'); // Prevent body scroll
+            const modal = document.getElementById('chatModal');
+            modal.style.display = 'block';
+
+            // Initialize chat if empty
+            if (chatHistory.length === 0) {
+                addBotMessage("สวัสดีสหายชิง ทั้งชายและหญิง ขอรับ วันนี้มีอะไรให้รับใช้ครับ");
+            }
+
+            // Focus on input
+            document.getElementById('chatInput').focus();
         }
 
         function closeChatModal() {
-            const chatModal = document.getElementById('chatModal');
-            chatModal.style.display = 'none';
-            document.body.classList.remove('modal-open'); // Restore body scroll
-        }
-
-        function sendChatMessage() {
-            const chatInput = document.getElementById('chatInput');
-            const chatMessages = document.getElementById('chatMessages');
-            const messageText = chatInput.value.trim();
-
-            if (messageText === '') return;
-
-            // Create user message
-            const userMessage = document.createElement('div');
-            userMessage.className = 'message user';
-            userMessage.innerHTML = `
-                <div class="message-avatar">👤</div>
-                <div class="message-content">${messageText}</div>
-            `;
-            chatMessages.appendChild(userMessage);
-
-            // Clear input
-            chatInput.value = '';
-
-            // Simulate bot reply (replace with actual AI integration)
-            simulateBotReply(messageText);
-
-            // Scroll to bottom
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        async function simulateBotReply(userMessage) {
-            const chatMessages = document.getElementById('chatMessages');
-
-            // Typing indicator
-            const typingIndicator = document.createElement('div');
-            typingIndicator.className = 'typing-indicator';
-            typingIndicator.innerHTML = `
-                <div class="typing-dots">
-                    <div class="typing-dot"></div>
-                    <div class="typing-dot"></div>
-                    <div class="typing-dot"></div>
-                </div>
-            `;
-            chatMessages.appendChild(typingIndicator);
-            typingIndicator.style.display = 'block';
-
-            // Scroll to bottom to show indicator
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-
-            // Simulate waiting
-            await new Promise(resolve => setTimeout(resolve, 1500));
-
-            typingIndicator.style.display = 'none'; // Hide typing indicator
-
-            const botMessage = document.createElement('div');
-            botMessage.className = 'message bot';
-            botMessage.innerHTML = `
-                <div class="message-avatar"><img src="https://i.imgur.com/KId9Uuu.png" alt="Budt.Boy"></div>
-                <div class="message-content">สวัสดีครับ! ผมได้รับข้อความของคุณว่า "${userMessage}" ขณะนี้กำลังค้นหาข้อมูล...</div>
-            `;
-            chatMessages.appendChild(botMessage);
-
-            // Scroll to bottom
-            chatMessages.scrollTop = chatMessages.scrollHeight;
+            const modal = document.getElementById('chatModal');
+            modal.style.display = 'none';
         }
 
         function handleChatKeyPress(event) {
-            if (event.key === 'Enter') {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
                 sendChatMessage();
             }
         }
 
-        // Initialize when DOM is loaded - single event listener
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initializePage);
-        } else {
-            // DOM already loaded
-            initializePage();
+        async function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+
+            if (!message) return;
+
+            // Add user message to chat
+            addUserMessage(message);
+
+            // Clear input
+            input.value = '';
+
+            // Show typing indicator
+            showTypingIndicator();
+
+            try {
+                // Send message to AI API
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        history: chatHistory.slice(-10) // Send last 10 messages for context
+                    })
+                });
+
+                const result = await response.json();
+                hideTypingIndicator();
+
+                if (result.success) {
+                        // ตรวจสอบว่ามีคำแนะนำดอกหรือไม่
+                        if (result.has_recommendations && result.recommended_buds) {
+                            addBotMessage(result.message, result.recommended_buds);
+                        } else {
+                            addBotMessage(result.message);
+                        }
+                    } else {
+                        addBotMessage(result.message || 'ขออภัย เกิดข้อผิดพลาดในการตอบกลับ');
+                    }
+            } catch (error) {
+                hideTypingIndicator();
+                console.error('Chat error:', error);
+                addBotMessage('ขออภัย ไม่สามารถเชื่อมต่อกับระบบ AI ได้ กรุณาลองใหม่อีกครั้ง');
+            }
         }
 
-        function initializePage() {
-            // Prevent multiple initialization
-            if (pageInitialized) {
-                console.log('Page already initialized');
-                return;
-            }
-            
-            console.log('Initializing page...');
-            pageInitialized = true;
+        function addUserMessage(message) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message user';
 
-            // Load profile data
-            if (!isProfileLoaded) {
+            const currentUser = currentUserData || { username: 'คุณ' };
+            const avatarLetter = currentUser.username ? currentUser.username.charAt(0).toUpperCase() : 'U';
+
+            messageDiv.innerHTML = `
+                <div class="message-avatar">${avatarLetter}</div>
+                <div class="message-content">
+                    ${message}
+                    <div class="message-time">${new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}</div>
+                </div>
+            `;
+
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            chatHistory.push({ role: 'user', message, time: new Date() });
+        }
+
+        function addBotMessage(message, recommendedBuds = null) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message bot';
+
+            let messageContent = message.replace(/\n/g, '<br>');
+
+            // เพิ่มปุ่มลิงก์สำหรับดอกที่แนะนำ
+            if (recommendedBuds && recommendedBuds.length > 0) {
+                messageContent += '<div class="bud-recommendations" style="margin-top: 15px;">';
+                recommendedBuds.forEach((bud, index) => {
+                    messageContent += `
+                        <div class="bud-recommendation-card" style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 10px; margin-bottom: 8px;">
+                            <div style="font-weight: 600; color: #2196F3; margin-bottom: 5px;">
+                                ${bud.strain_name_th || 'ไม่ระบุชื่อไทย'} (${bud.strain_name_en})
+                            </div>
+                            <div style="font-size: 12px; color: #666; margin-bottom: 8px;">
+                                ${bud.strain_type} | THC: ${bud.thc_percentage}% | CBD: ${bud.cbd_percentage}% | เกรด: ${bud.grade}
+                            </div>
+                            <a href="${bud.report_link}" target="_blank" 
+                               style="background: #2196F3; color: white; padding: 5px 12px; border-radius: 15px; text-decoration: none; font-size: 12px; font-weight: 600;">
+                                📊 ดูรายละเอียดเต็ม
+                            </a>
+                        </div>
+                    `;
+                });
+                messageContent += '</div>';
+            }
+
+            // สร้าง unique timestamp เพื่อป้องกัน cache
+            const uniqueTimestamp = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            
+            messageDiv.innerHTML = `
+                <div class="message-avatar">
+                    <img src="/uploads/budtboy_avatar.png?v=${uniqueTimestamp}" alt="Budt.Boy" 
+                         style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;"
+                         onload="console.log('Budt.Boy avatar loaded successfully');"
+                         onerror="console.log('Failed to load Budt.Boy avatar, using fallback'); this.style.display='none'; this.parentElement.style.background='linear-gradient(135deg, #1a237e 0%, #0d47a1 100%)'; this.parentElement.innerHTML='🤖'; this.parentElement.style.fontSize='16px'; this.parentElement.style.display='flex'; this.parentElement.style.alignItems='center'; this.parentElement.style.justifyContent='center';">
+                </div>
+                <div class="message-content">
+                    ${messageContent}
+                    <div class="message-time">${new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}</div>
+                </div>
+            `;
+
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            chatHistory.push({ role: 'assistant', message, time: new Date() });
+        }
+
+        function showTypingIndicator() {
+            const messagesContainer = document.getElementById('chatMessages');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message bot';
+            typingDiv.id = 'typingIndicator';
+
+            // สร้าง unique timestamp เพื่อป้องกัน cache
+            const uniqueTimestamp = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+            typingDiv.innerHTML = `
+                <div class="message-avatar">
+                    <img src="/uploads/budtboy_avatar.png?v=${uniqueTimestamp}" alt="Budt.Boy" 
+                         style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;"
+                         onload="console.log('Typing indicator avatar loaded');"
+                         onerror="console.log('Failed to load typing avatar, using fallback'); this.style.display='none'; this.parentElement.style.background='linear-gradient(135deg, #1a237e 0%, #0d47a1 100%)'; this.parentElement.innerHTML='🤖'; this.parentElement.style.fontSize='16px'; this.parentElement.style.display='flex'; this.parentElement.style.alignItems='center'; this.parentElement.style.justifyContent='center';">
+                </div>
+                <div class="typing-indicator" style="display: block;">
+                    <div class="typing-dots">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+            `;
+
+            messagesContainer.appendChild(typingDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function hideTypingIndicator() {
+            const typingIndicator = document.getElementById('typingIndicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+        }
+
+        function generateBotResponse(userMessage) {
+            const message = userMessage.toLowerCase();
+
+            // Simple keyword-based responses (in real implementation, this would use AI)
+            if (message.includes('สวัสดี') || message.includes('หวัดดี') || message.includes('ดี')) {
+                return "สวัสดีครับ! ยินดีที่ได้รู้จัก มีอะไรเกี่ยวกับกัญชาที่อยากถามไหมครับ? 😊";
+            }
+
+            if (message.includes('สายพันธุ์') || message.includes('strain')) {
+                return "เรามีข้อมูลสายพันธุ์กัญชามากมายครับ! \n\nสายพันธุ์ยอดนิยม:\n• Blue Dream - Hybrid (Sativa โดด)\n• OG Kush - Indica โดด\n• White Widow - Hybrid สมดุล\n• Girl Scout Cookies - Hybrid (Indica โดด)\n\nอยากรู้เพิ่มเติมเกี่ยวกับสายพันธุ์ไหนเป็นพิเศษไหมครับ?";
+            }
+
+            if (message.includes('ปลูก') || message.includes('grow')) {
+                return "การปลูกกัญชานั้นต้องคำนึงถึงหลายปัจจัยครับ:\n\n🌱 ปัจจัยสำคัญ:\n• แสงแดด/แสงไฟ LED\n• ความชื้น 40-60%\n• อุณหภูมิ 20-26°C\n• ปุ่ยและสารอาหาร\n• การระบายอากาศ\n\nต้องการคำแนะนำเฉพาะด้านไหนไหมครับ?";
+            }
+
+            if (message.includes('ผลกระทบ') || message.includes('effect')) {
+                return "ผลกระทบของกัญชาแบ่งได้เป็น:\n\n😊 ผลกระทบเชิงบวก:\n• ผ่อนคลาย\n• สร้างสรรค์\n• บรรเทาปวด\n• ช่วยให้หลับ\n\n⚠️ ผลข้างเคียง:\n• ปากแห้ง\n• ตาแดง\n• วิตกกังวล (ในบางคน)\n• ความจำระยะสั้น\n\nควรใช้อย่างรับผิดชอบครับ!";
+            }
+
+            if (message.includes('ขอบคุณ') || message.includes('thank')) {
+                return "ด้วยความยินดีครับ! หากมีคำถามอื่นๆ เกี่ยวกับกัญชา สามารถถามได้เสมอนะครับ 🌿✨";
+            }
+
+            if (message.includes('thc') || message.includes('cbd')) {
+                return "THC และ CBD เป็นสารสำคัญในกัญชาครับ:\n\n🔥 THC (Tetrahydrocannabinol):\n• ทำให้เมา/เหิม\n• บรรเทาปวด\n• กระตุ้นความอยาก\n\n🌿 CBD (Cannabidiol):\n• ไม่ทำให้เมา\n• ต้านอักเสบ\n• ลดวิตกกังวล\n• ช่วยผ่อนคลาย\n\nอัตราส่วนที่แตกต่างกันจะให้ผลที่แตกต่างกันครับ!";
+            }
+
+            // Default response
+            return "ขออภัยครับ ผมยังไม่เข้าใจคำถามนี้ดี ลองถามเกี่ยวกับ:\n• สายพันธุ์กัญชา\n• การปลูก\n• ผลกระทบ\n• THC/CBD\n\nหรือถามในรูปแบบอื่นได้ครับ 😊";
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('chatModal');
+            if (event.target === modal) {
+                closeChatModal();
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+
+            // ป้องกันการโหลดซ้ำโดยตรวจสอบว่ามีการโหลดแล้วหรือยัง
+            if (!isProfileLoaded && !isLoading) {
                 loadProfile();
             }
-
-            // Setup avatar upload
-            setupAvatarUpload();
-        }
-</script>
+        });
+    </script>
 </body>
 </html>

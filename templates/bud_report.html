@@ -1030,8 +1030,7 @@
                 padding: 15px;
                 border: 3px solid #f39c12;
                 border-radius: 20px;
-                background: linear-gradient(135deg, #fff9e6 0%, #fef5e7 100%);
-            }
+                background: linear-gradient(135deg, #fff9e6 0%, #fef5e7 100%);            }
 
             .bud-image {
                 height: 140px;
@@ -1798,7 +1797,7 @@
                             label: 'ช่องทางติดต่อ',
                             value: (() => {
                                 let contactLinks = [];
-                                
+
                                 if (bud.grower_contact_facebook) {
                                     contactLinks.push(`<a href="${bud.grower_contact_facebook}" target="_blank" class="contact-link facebook">📘 Facebook</a>`);
                                 }
@@ -1822,10 +1821,11 @@
                                 if (bud.grower_contact_other) {
                                     contactLinks.push(`<a href="${bud.grower_contact_other}" target="_blank" class="contact-link other">🔗 อื่นๆ</a>`);
                                 }
-                                
+
                                 return contactLinks.length > 0 ? contactLinks.join(' ') : '<span class="no-contacts">ไม่มีช่องทางติดต่อ</span>';
                             })()
                         },
+```
                         { label: 'ผู้พัฒนาสายพันธ์', value: bud.breeder },
                         { label: 'ประเภท', value: bud.strain_type },
                         { label: 'เกรด', value: bud.grade }
@@ -2026,5 +2026,8 @@
             document.body.classList.remove('modal-open');
         }
     </script>
+    <div class="actions">
+        <a href="#" class="action-btn" id="writeReviewBtn">⭐ เขียนรีวิว</a>
+    </div>
 </body>
 </html>

@@ -129,6 +129,93 @@
             transform: translateY(-1px);
         }
         
+        .print-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-left: 10px;
+        }
+        
+        .print-btn:hover {
+            background: #0056b3;
+            transform: translateY(-1px);
+        }
+        
+        /* Print styles */
+        @media print {
+            body {
+                background: white !important;
+                -webkit-print-color-adjust: exact;
+                color-adjust: exact;
+            }
+            
+            .container {
+                box-shadow: none !important;
+                border-radius: 0 !important;
+                margin: 0 !important;
+                max-width: 100% !important;
+            }
+            
+            .controls {
+                display: none !important;
+            }
+            
+            .back-btn {
+                display: none !important;
+            }
+            
+            .header {
+                background: #2196F3 !important;
+                -webkit-print-color-adjust: exact;
+                color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            
+            .summary-cards {
+                background: white !important;
+                border: 1px solid #ddd;
+                page-break-inside: avoid;
+            }
+            
+            .data-table {
+                font-size: 11px !important;
+                page-break-inside: auto;
+            }
+            
+            .data-table th,
+            .data-table td {
+                padding: 6px 4px !important;
+                border: 1px solid #ddd !important;
+            }
+            
+            .data-table tr {
+                page-break-inside: avoid;
+                page-break-after: auto;
+            }
+            
+            .summary-card {
+                border: 1px solid #ddd !important;
+                page-break-inside: avoid;
+            }
+            
+            .strain-type,
+            .grade-badge {
+                border: 1px solid #333 !important;
+                -webkit-print-color-adjust: exact;
+                color-adjust: exact;
+            }
+            
+            .rating-stars {
+                color: #000 !important;
+            }
+        }
+        
         .table-container {
             padding: 30px;
             overflow-x: auto;
@@ -379,6 +466,10 @@
             <button id="exportBtn" class="export-btn" onclick="exportToCSV()">
                 📥 ส่งออก CSV
             </button>
+            
+            <button id="printBtn" class="print-btn" onclick="printToPDF()">
+                📄 พิมพ์เป็น PDF
+            </button>
         </div>
         
         <div class="table-container">
@@ -576,6 +667,28 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+        }
+        
+        function printToPDF() {
+            // Hide elements that shouldn't be printed
+            const controlsElement = document.querySelector('.controls');
+            const originalDisplay = controlsElement.style.display;
+            
+            // Temporarily hide controls for printing
+            controlsElement.style.display = 'none';
+            
+            // Set page title for PDF
+            const originalTitle = document.title;
+            document.title = `รายงานข้อมูลดอกทั้งหมด_${new Date().toISOString().split('T')[0]}`;
+            
+            // Open print dialog
+            window.print();
+            
+            // Restore original state after printing
+            setTimeout(() => {
+                controlsElement.style.display = originalDisplay;
+                document.title = originalTitle;
+            }, 1000);
         }
     </script>
 </body>

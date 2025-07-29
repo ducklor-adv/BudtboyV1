@@ -1799,27 +1799,27 @@
                                 let contactLinks = [];
 
                                 if (bud.grower_contact_facebook) {
-                                    contactLinks.push(`<a href="${bud.grower_contact_facebook}" target="_blank" class="contact-link facebook">📘 Facebook</a>`);
+                                    contactLinks.push('<a href="' + bud.grower_contact_facebook + '" target="_blank" class="contact-link facebook">📘 Facebook</a>');
                                 }
                                 if (bud.grower_contact_line) {
-                                    const lineUrl = bud.grower_contact_line.startsWith('http') ? bud.grower_contact_line : `https://line.me/ti/p/${bud.grower_contact_line}`;
-                                    contactLinks.push(`<a href="${lineUrl}" target="_blank" class="contact-link line">💚 Line</a>`);
+                                    const lineUrl = bud.grower_contact_line.startsWith('http') ? bud.grower_contact_line : 'https://line.me/ti/p/' + bud.grower_contact_line;
+                                    contactLinks.push('<a href="' + lineUrl + '" target="_blank" class="contact-link line">💚 Line</a>');
                                 }
                                 if (bud.grower_contact_instagram) {
-                                    contactLinks.push(`<a href="${bud.grower_contact_instagram}" target="_blank" class="contact-link instagram">📸 Instagram</a>`);
+                                    contactLinks.push('<a href="' + bud.grower_contact_instagram + '" target="_blank" class="contact-link instagram">📸 Instagram</a>');
                                 }
                                 if (bud.grower_contact_twitter) {
-                                    contactLinks.push(`<a href="${bud.grower_contact_twitter}" target="_blank" class="contact-link twitter">🐦 Twitter</a>`);
+                                    contactLinks.push('<a href="' + bud.grower_contact_twitter + '" target="_blank" class="contact-link twitter">🐦 Twitter</a>');
                                 }
                                 if (bud.grower_contact_telegram) {
-                                    const telegramUrl = bud.grower_contact_telegram.startsWith('http') ? bud.grower_contact_telegram : `https://t.me/${bud.grower_contact_telegram}`;
-                                    contactLinks.push(`<a href="${telegramUrl}" target="_blank" class="contact-link telegram">✈️ Telegram</a>`);
+                                    const telegramUrl = bud.grower_contact_telegram.startsWith('http') ? bud.grower_contact_telegram : 'https://t.me/' + bud.grower_contact_telegram;
+                                    contactLinks.push('<a href="' + telegramUrl + '" target="_blank" class="contact-link telegram">✈️ Telegram</a>');
                                 }
                                 if (bud.grower_contact_phone) {
-                                    contactLinks.push(`<a href="tel:${bud.grower_contact_phone}" class="contact-link phone">📱 ${bud.grower_contact_phone}</a>`);
+                                    contactLinks.push('<a href="tel:' + bud.grower_contact_phone + '" class="contact-link phone">📱 ' + bud.grower_contact_phone + '</a>');
                                 }
                                 if (bud.grower_contact_other) {
-                                    contactLinks.push(`<a href="${bud.grower_contact_other}" target="_blank" class="contact-link other">🔗 อื่นๆ</a>`);
+                                    contactLinks.push('<a href="' + bud.grower_contact_other + '" target="_blank" class="contact-link other">🔗 อื่นๆ</a>');
                                 }
 
                                 return contactLinks.length > 0 ? contactLinks.join(' ') : '<span class="no-contacts">ไม่มีช่องทางติดต่อ</span>';

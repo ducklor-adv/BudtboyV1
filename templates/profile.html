@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Cannabis App - โปรไฟล์ของฉัน</title>
     <style>
         body {
@@ -14,6 +14,10 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            /* Prevent pull-to-refresh on mobile */
+            overscroll-behavior: none;
+            /* Prevent bounce scrolling on iOS */
+            -webkit-overflow-scrolling: touch;
         }
 
         .profile-card {
@@ -818,6 +822,7 @@
         let isProfileLoaded = false;
 
         function showError(message) {
+            console.log('Showing error:', message);
             const errorState = document.getElementById('errorState');
             const errorMessage = document.getElementById('errorMessage');
             const loadingState = document.getElementById('loadingState');
@@ -830,6 +835,9 @@
 
             if (loadingState) loadingState.style.display = 'none';
             if (profileInfo) profileInfo.style.display = 'none';
+            
+            // Reset loading state to allow retry
+            isLoading = false;
         }
 
         function showLoading() {
@@ -860,8 +868,12 @@
 
         async function loadProfile() {
             // ป้องกันการเรียกซ้ำ
-            if (isLoading || isProfileLoaded) return;
+            if (isLoading || isProfileLoaded) {
+                console.log('LoadProfile called but already loading or loaded');
+                return;
+            }
 
+            console.log('Starting to load profile...');
             isLoading = true;
             showLoading();
 
@@ -869,9 +881,11 @@
                 const response = await fetch('/api/profile');
                 if (response.ok) {
                     const user = await response.json();
+                    console.log('Profile loaded successfully');
                     displayProfile(user);
                     showProfile();
                 } else {
+                    console.log('Profile load failed:', response.status);
                     const errorData = await response.json().catch(() => ({}));
                     showError(errorData.error || 'ไม่สามารถโหลดข้อมูลโปรไฟล์ได้');
                 }
@@ -1223,14 +1237,25 @@
             const avatarInput = document.getElementById('avatarInput');
 
             if (profileAvatar && avatarInput) {
-                profileAvatar.addEventListener('click', function() {
-                    avatarInput.click();
-                });
-
-                avatarInput.addEventListener('change', function() {
-                    uploadProfileImage(this);
-                });
+                // Remove existing listeners to prevent duplicates
+                profileAvatar.removeEventListener('click', handleAvatarClick);
+                avatarInput.removeEventListener('change', handleAvatarChange);
+                
+                // Add new listeners
+                profileAvatar.addEventListener('click', handleAvatarClick);
+                avatarInput.addEventListener('change', handleAvatarChange);
             }
+        }
+
+        function handleAvatarClick() {
+            const avatarInput = document.getElementById('avatarInput');
+            if (avatarInput) {
+                avatarInput.click();
+            }
+        }
+
+        function handleAvatarChange() {
+            uploadProfileImage(this);
         }
 
         function retryLoadProfile() {
@@ -1533,8 +1558,20 @@
             }
         }
 
+        // Prevent multiple initialization
+        let isPageInitialized = false;
+
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
+            // Prevent duplicate initialization
+            if (isPageInitialized) {
+                console.log('Page already initialized, skipping...');
+                return;
+            }
+            
+            isPageInitialized = true;
+            console.log('Initializing page...');
+            
             setupEventListeners();
 
             // ป้องกันการโหลดซ้ำโดยตรวจสอบว่ามีการโหลดแล้วหรือยัง

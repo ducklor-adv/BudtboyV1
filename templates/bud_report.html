@@ -1379,6 +1379,7 @@
 
                 <div class="actions">
                     <a href="#" class="action-btn" id="writeReviewBtn">⭐ เขียนรีวิว</a>
+                    <button type="button" class="action-btn secondary" onclick="printToPDF()">📄 Print to PDF</button>
                 </div>
             </div>
         </div>
@@ -2023,6 +2024,64 @@
 
             // ลบ class สำหรับ mobile
             document.body.classList.remove('modal-open');
+        }
+
+        function printToPDF() {
+            // ซ่อนปุ่มต่างๆ ก่อนพิมพ์
+            const actions = document.querySelector('.actions');
+            const backBtn = document.querySelector('.back-btn');
+            
+            if (actions) actions.style.display = 'none';
+            if (backBtn) backBtn.style.display = 'none';
+            
+            // ตั้งค่า CSS สำหรับการพิมพ์
+            const printStyle = document.createElement('style');
+            printStyle.innerHTML = `
+                @media print {
+                    body { 
+                        margin: 0; 
+                        padding: 0; 
+                        font-size: 12px;
+                        background: white !important;
+                    }
+                    .container { 
+                        max-width: none; 
+                        margin: 0; 
+                        box-shadow: none;
+                        border-radius: 0;
+                    }
+                    .header { 
+                        background: #2196F3 !important; 
+                        -webkit-print-color-adjust: exact;
+                        print-color-adjust: exact;
+                    }
+                    .actions, .back-btn { 
+                        display: none !important; 
+                    }
+                    .bud-images-display {
+                        page-break-inside: avoid;
+                    }
+                    .section {
+                        page-break-inside: avoid;
+                        margin-bottom: 15px;
+                    }
+                    .review-card {
+                        page-break-inside: avoid;
+                        margin-bottom: 10px;
+                    }
+                }
+            `;
+            document.head.appendChild(printStyle);
+            
+            // พิมพ์
+            window.print();
+            
+            // แสดงปุ่มกลับมาหลังจากพิมพ์
+            setTimeout(() => {
+                if (actions) actions.style.display = 'flex';
+                if (backBtn) backBtn.style.display = 'inline-block';
+                document.head.removeChild(printStyle);
+            }, 1000);
         }
     </script>
 </body>

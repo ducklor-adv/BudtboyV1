@@ -2,7 +2,11 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="format-detection" content="telephone=no">
     <title>Cannabis App - โปรไฟล์ของฉัน</title>
     <style>
         body {
@@ -18,6 +22,16 @@
             overscroll-behavior: none;
             /* Prevent bounce scrolling on iOS */
             -webkit-overflow-scrolling: touch;
+            /* Prevent zoom and viewport issues on mobile */
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+            /* Prevent touch callouts */
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
 
         .profile-card {
@@ -600,10 +614,22 @@
             font-size: 12px;
         }
 
-        @media (max-width: 400px) {
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+                /* Fix mobile scrolling issues */
+                position: fixed;
+                width: 100%;
+                height: 100%;
+                overflow: auto;
+            }
+
             .profile-card {
-                margin: 10px;
+                margin: 5px;
                 max-width: none;
+                width: calc(100% - 10px);
+                /* Prevent card from causing horizontal scroll */
+                box-sizing: border-box;
             }
 
             .card-header {
@@ -618,6 +644,24 @@
 
             .card-content {
                 padding: 50px 20px 20px 20px;
+            }
+
+            /* Prevent mobile zoom on input focus */
+            input, select, textarea {
+                font-size: 16px !important;
+            }
+
+            /* Fix mobile scrolling for chat */
+            .chat-messages {
+                -webkit-overflow-scrolling: touch;
+                overscroll-behavior: contain;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .profile-card {
+                margin: 2px;
+                width: calc(100% - 4px);
             }
         }
     </style>
@@ -878,7 +922,19 @@
             showLoading();
 
             try {
-                const response = await fetch('/api/profile');
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+                const response = await fetch('/api/profile', {
+                    signal: controller.signal,
+                    headers: {
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
+                    }
+                });
+                
+                clearTimeout(timeoutId);
+                
                 if (response.ok) {
                     const user = await response.json();
                     console.log('Profile loaded successfully');
@@ -890,8 +946,13 @@
                     showError(errorData.error || 'ไม่สามารถโหลดข้อมูลโปรไฟล์ได้');
                 }
             } catch (error) {
-                console.error('Error loading profile:', error);
-                showError('เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต');
+                if (error.name === 'AbortError') {
+                    console.error('Profile loading timeout');
+                    showError('การโหลดข้อมูลใช้เวลานานเกินไป กรุณาลองใหม่');
+                } else {
+                    console.error('Error loading profile:', error);
+                    showError('เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต');
+                }
             } finally {
                 isLoading = false;
             }
@@ -1560,15 +1621,16 @@
 
         // Prevent multiple initialization
         let isPageInitialized = false;
+        let domReadyFired = false;
 
-        // Initialize page
-        document.addEventListener('DOMContentLoaded', function() {
+        function initializePage() {
             // Prevent duplicate initialization
-            if (isPageInitialized) {
+            if (isPageInitialized || domReadyFired) {
                 console.log('Page already initialized, skipping...');
                 return;
             }
             
+            domReadyFired = true;
             isPageInitialized = true;
             console.log('Initializing page...');
             
@@ -1578,7 +1640,22 @@
             if (!isProfileLoaded && !isLoading) {
                 loadProfile();
             }
-        });
+        }
+
+        // Initialize page - use multiple event listeners for compatibility
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializePage, { once: true });
+        } else {
+            // DOM is already ready
+            setTimeout(initializePage, 0);
+        }
+
+        // Fallback for older browsers
+        window.addEventListener('load', function() {
+            if (!domReadyFired) {
+                initializePage();
+            }
+        }, { once: true });
     </script>
 </body>
 </html>

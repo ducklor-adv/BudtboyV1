@@ -860,34 +860,56 @@
         }
 
         async function loadProfile() {
-            // Multiple layers of protection against repeated calls
-            if (isLoading || isProfileLoaded || window.budtBoyProfileLoading) {
-                console.log('LoadProfile blocked: already loading or loaded');
+            const state = window.BudtBoyProfile;
+            
+            // Enhanced protection with state management
+            if (state.loading || state.loaded || isLoading || isProfileLoaded) {
+                console.log('Profile: LoadProfile blocked - already loading or loaded');
                 return;
             }
 
-            // Set global loading flag
-            window.budtBoyProfileLoading = true;
+            // Set all loading flags
+            state.loading = true;
             isLoading = true;
             showLoading();
 
             try {
-                const response = await fetch('/api/profile');
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
+                const response = await fetch('/api/profile', {
+                    signal: controller.signal,
+                    cache: 'no-cache',
+                    headers: {
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
+                    }
+                });
+
+                clearTimeout(timeoutId);
+
                 if (response.ok) {
                     const user = await response.json();
                     displayProfile(user);
                     showProfile();
+                    state.loaded = true;
+                    console.log('Profile: Data loaded successfully');
                 } else {
                     const errorData = await response.json().catch(() => ({}));
                     showError(errorData.error || 'ไม่สามารถโหลดข้อมูลโปรไฟล์ได้');
                 }
             } catch (error) {
-                console.error('Error loading profile:', error);
-                showError('เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต');
+                if (error.name === 'AbortError') {
+                    console.log('Profile: Request timed out');
+                    showError('การโหลดข้อมูลใช้เวลานานเกินไป กรุณาลองใหม่');
+                } else {
+                    console.error('Profile: Loading error:', error);
+                    showError('เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต');
+                }
             } finally {
+                state.loading = false;
                 isLoading = false;
-                window.budtBoyProfileLoading = false;
-                console.log('Profile loading completed, flags reset');
+                console.log('Profile: Loading completed, flags reset');
             }
         }
 
@@ -1253,34 +1275,60 @@
         }
 
         function retryLoadProfile() {
-            // รีเซ็ตสถานะเพื่อให้สามารถโหลดใหม่ได้
-            console.log('Retrying profile load...');
+            console.log('Profile: Retrying load...');
+            
+            // Reset all state flags
+            const state = window.BudtBoyProfile;
+            state.loaded = false;
+            state.loading = false;
+            state.initialized = false;
+            state.initAttempts = 0;
+            
             isProfileLoaded = false;
             isLoading = false;
-            window.budtBoyProfileLoading = false;
-            loadProfile();
+            
+            // Clear any existing event listeners flag
+            window.budtBoyEventListenersSetup = false;
+            
+            // Retry initialization
+            setTimeout(mobileOptimizedInit, 100);
         }
 
-        // Add page visibility handling to prevent unnecessary operations when page is hidden
+        // Enhanced page visibility handling
         document.addEventListener('visibilitychange', function() {
+            const state = window.BudtBoyProfile;
+            
             if (document.hidden) {
-                console.log('Page hidden, pausing operations');
+                console.log('Profile: Page hidden, pausing operations');
             } else {
-                console.log('Page visible again');
-                // Only reload if page wasn't properly loaded before
-                if (!isProfileLoaded && !isLoading && !window.budtBoyProfileLoading) {
-                    console.log('Page visible but profile not loaded, attempting load');
-                    setTimeout(loadProfile, 500); // Small delay for stability
+                console.log('Profile: Page visible again');
+                // Only attempt reload if state indicates it's needed
+                if (!state.loaded && !state.loading && !state.initialized) {
+                    console.log('Profile: Page visible but not loaded, attempting recovery');
+                    setTimeout(() => {
+                        if (!state.loading) { // Double-check before loading
+                            mobileOptimizedInit();
+                        }
+                    }, 1000); // Longer delay for stability
                 }
             }
         }, { passive: true });
 
-        // Prevent navigation-induced reloads on mobile
+        // Handle page restoration events
         window.addEventListener('pageshow', function(event) {
+            const state = window.BudtBoyProfile;
+            
             if (event.persisted) {
-                console.log('Page restored from cache, checking state...');
-                // Page was restored from cache, don't reinitialize
-                return;
+                console.log('Profile: Page restored from cache');
+                // Check if profile data is still visible
+                const profileInfo = document.getElementById('profileInfo');
+                if (profileInfo && profileInfo.style.display !== 'none') {
+                    console.log('Profile: Data still visible, marking as loaded');
+                    state.loaded = true;
+                    state.initialized = true;
+                }
+            } else {
+                console.log('Profile: Fresh page load');
             }
         }, { passive: true });
 
@@ -1577,63 +1625,89 @@
             }
         }
 
-        // Global flag to prevent multiple initializations
-        if (typeof window.budtBoyProfileInitialized === 'undefined') {
-            window.budtBoyProfileInitialized = false;
+        // Enhanced global state management
+        if (typeof window.BudtBoyProfile === 'undefined') {
+            window.BudtBoyProfile = {
+                initialized: false,
+                loading: false,
+                loaded: false,
+                initAttempts: 0,
+                maxAttempts: 3
+            };
         }
 
-        // Comprehensive initialization with multiple safeguards
+        // Comprehensive initialization with mobile-specific handling
         function initializePage() {
-            // Multiple layers of protection against re-initialization
-            if (window.budtBoyProfileInitialized) {
-                console.log('Profile page already initialized, aborting...');
+            const state = window.BudtBoyProfile;
+            
+            // Prevent multiple attempts
+            if (state.initialized || state.initAttempts >= state.maxAttempts) {
+                console.log('Profile: Init blocked - already initialized or max attempts reached');
                 return false;
             }
 
-            // Set flag immediately to prevent race conditions
-            window.budtBoyProfileInitialized = true;
+            state.initAttempts++;
+            state.initialized = true;
             
-            console.log('Initializing profile page...');
+            console.log(`Profile: Initializing (attempt ${state.initAttempts})`);
 
             try {
-                // Initialize components
-                loadProfile();
-                setupEventListeners();
+                // Only load if not already loaded
+                if (!state.loaded) {
+                    loadProfile();
+                }
                 
-                console.log('Profile page initialization completed successfully');
+                // Setup listeners only once
+                if (!window.budtBoyEventListenersSetup) {
+                    setupEventListeners();
+                }
+                
+                console.log('Profile: Initialization completed successfully');
                 return true;
             } catch (error) {
-                console.error('Error during profile page initialization:', error);
-                // Reset flag on error to allow retry
-                window.budtBoyProfileInitialized = false;
+                console.error('Profile: Error during initialization:', error);
+                state.initialized = false; // Allow retry on error
                 return false;
             }
         }
 
-        // Safe initialization with comprehensive checks
-        function safeInitialize() {
-            // Check if already initialized
-            if (window.budtBoyProfileInitialized) {
-                console.log('Safe init: Already initialized');
+        // Mobile-optimized initialization
+        function mobileOptimizedInit() {
+            const state = window.BudtBoyProfile;
+            
+            if (state.initialized) {
+                console.log('Profile: Already initialized, skipping');
                 return;
             }
 
-            // Check document state
-            if (document.readyState === 'loading') {
-                console.log('Safe init: Document still loading, waiting...');
-                document.addEventListener('DOMContentLoaded', function() {
-                    setTimeout(initializePage, 10); // Small delay to ensure stability
-                }, { once: true });
-                return;
+            // Detect if this is a page restoration (mobile back/forward)
+            if (performance.navigation && performance.navigation.type === 2) {
+                console.log('Profile: Page restored from cache, checking state');
+                // If page was restored and data exists, don't reinitialize
+                if (document.getElementById('profileInfo').style.display !== 'none') {
+                    state.initialized = true;
+                    state.loaded = true;
+                    return;
+                }
             }
 
-            // Document is ready, initialize immediately
-            console.log('Safe init: Document ready, initializing now');
-            setTimeout(initializePage, 10); // Small delay for mobile stability
+            // Use requestAnimationFrame for better mobile performance
+            requestAnimationFrame(() => {
+                if (document.readyState === 'complete') {
+                    initializePage();
+                } else {
+                    // Single event listener with immediate removal
+                    const initHandler = () => {
+                        document.removeEventListener('DOMContentLoaded', initHandler);
+                        setTimeout(initializePage, 50); // Slightly longer delay for mobile
+                    };
+                    document.addEventListener('DOMContentLoaded', initHandler, { once: true, passive: true });
+                }
+            });
         }
 
-        // Execute safe initialization immediately
-        safeInitialize();
+        // Execute mobile-optimized initialization
+        mobileOptimizedInit();
     </script>
 </body>
 </html>

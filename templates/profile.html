@@ -1537,13 +1537,13 @@
         // Simple initialization - run once when script loads
         function initializePage() {
             // ป้องกันการเรียกซ้ำอย่างเด็ดขาด
-            if (pageInitialized) {
+            if (window.pageInitialized) {
                 console.log('Page already initialized, skipping...');
                 return;
             }
 
             console.log('Initializing page...');
-            pageInitialized = true;
+            window.pageInitialized = true;
 
             // Load profile data
             loadProfile();
@@ -1552,11 +1552,16 @@
             setupEventListeners();
         }
 
-        // Initialize only once when DOM is ready
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, initializing...');
-            initializePage();
-        });
+        // Use window.onload instead of DOMContentLoaded for better mobile compatibility
+        if (window.pageInitialized !== true) {
+            if (document.readyState === 'complete') {
+                // Page already loaded
+                initializePage();
+            } else {
+                // Wait for window load
+                window.addEventListener('load', initializePage, { once: true });
+            }
+        }
     </script>
 </body>
 </html>

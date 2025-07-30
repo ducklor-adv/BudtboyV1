@@ -816,6 +816,7 @@
         let currentUserData = null;
         let isLoading = false;
         let isProfileLoaded = false;
+        let pageInitialized = false; // Add this line to define pageInitialized
 
         function showError(message) {
             const errorState = document.getElementById('errorState');
@@ -1437,7 +1438,7 @@
 
             // สร้าง unique timestamp เพื่อป้องกัน cache
             const uniqueTimestamp = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-            
+
             messageDiv.innerHTML = `
                 <div class="message-avatar">
                     <img src="/uploads/budtboy_avatar.png?v=${uniqueTimestamp}" alt="Budt.Boy" 
@@ -1533,14 +1534,28 @@
             }
         }
 
-        // Initialize page
-        document.addEventListener('DOMContentLoaded', function() {
-            setupEventListeners();
-
-            // ป้องกันการโหลดซ้ำโดยตรวจสอบว่ามีการโหลดแล้วหรือยัง
-            if (!isProfileLoaded && !isLoading) {
-                loadProfile();
+        // Simple initialization - run once when script loads
+        function initializePage() {
+            // ป้องกันการเรียกซ้ำอย่างเด็ดขาด
+            if (pageInitialized) {
+                console.log('Page already initialized, skipping...');
+                return;
             }
+
+            console.log('Initializing page...');
+            pageInitialized = true;
+
+            // Load profile data
+            loadProfile();
+
+            // Setup avatar upload
+            setupEventListeners();
+        }
+
+        // Initialize only once when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing...');
+            initializePage();
         });
     </script>
 </body>

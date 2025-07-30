@@ -860,9 +860,14 @@
         }
 
         async function loadProfile() {
-            // ป้องกันการเรียกซ้ำ
-            if (isLoading || isProfileLoaded) return;
+            // Multiple layers of protection against repeated calls
+            if (isLoading || isProfileLoaded || window.budtBoyProfileLoading) {
+                console.log('LoadProfile blocked: already loading or loaded');
+                return;
+            }
 
+            // Set global loading flag
+            window.budtBoyProfileLoading = true;
             isLoading = true;
             showLoading();
 
@@ -881,6 +886,8 @@
                 showError('เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต');
             } finally {
                 isLoading = false;
+                window.budtBoyProfileLoading = false;
+                console.log('Profile loading completed, flags reset');
             }
         }
 
@@ -1220,26 +1227,62 @@
         }
 
         function setupEventListeners() {
+            // Prevent multiple setup calls
+            if (window.budtBoyEventListenersSetup) {
+                console.log('Event listeners already setup, skipping...');
+                return;
+            }
+
             const profileAvatar = document.getElementById('profileAvatar');
             const avatarInput = document.getElementById('avatarInput');
 
             if (profileAvatar && avatarInput) {
+                // Use passive event listeners for better mobile performance
                 profileAvatar.addEventListener('click', function() {
                     avatarInput.click();
-                });
+                }, { passive: true });
 
                 avatarInput.addEventListener('change', function() {
                     uploadProfileImage(this);
-                });
+                }, { passive: true });
+
+                // Mark as setup
+                window.budtBoyEventListenersSetup = true;
+                console.log('Event listeners setup completed');
             }
         }
 
         function retryLoadProfile() {
             // รีเซ็ตสถานะเพื่อให้สามารถโหลดใหม่ได้
+            console.log('Retrying profile load...');
             isProfileLoaded = false;
             isLoading = false;
+            window.budtBoyProfileLoading = false;
             loadProfile();
         }
+
+        // Add page visibility handling to prevent unnecessary operations when page is hidden
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                console.log('Page hidden, pausing operations');
+            } else {
+                console.log('Page visible again');
+                // Only reload if page wasn't properly loaded before
+                if (!isProfileLoaded && !isLoading && !window.budtBoyProfileLoading) {
+                    console.log('Page visible but profile not loaded, attempting load');
+                    setTimeout(loadProfile, 500); // Small delay for stability
+                }
+            }
+        }, { passive: true });
+
+        // Prevent navigation-induced reloads on mobile
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                console.log('Page restored from cache, checking state...');
+                // Page was restored from cache, don't reinitialize
+                return;
+            }
+        }, { passive: true });
 
         // ปรับปรุงฟังก์ชัน saveProfile ให้รีโหลดข้อมูลใหม่
         async function saveProfileImproved() {
@@ -1534,34 +1577,63 @@
             }
         }
 
-        // Simple initialization - run once when script loads
+        // Global flag to prevent multiple initializations
+        if (typeof window.budtBoyProfileInitialized === 'undefined') {
+            window.budtBoyProfileInitialized = false;
+        }
+
+        // Comprehensive initialization with multiple safeguards
         function initializePage() {
-            // ป้องกันการเรียกซ้ำอย่างเด็ดขาด
-            if (window.pageInitialized) {
-                console.log('Page already initialized, skipping...');
+            // Multiple layers of protection against re-initialization
+            if (window.budtBoyProfileInitialized) {
+                console.log('Profile page already initialized, aborting...');
+                return false;
+            }
+
+            // Set flag immediately to prevent race conditions
+            window.budtBoyProfileInitialized = true;
+            
+            console.log('Initializing profile page...');
+
+            try {
+                // Initialize components
+                loadProfile();
+                setupEventListeners();
+                
+                console.log('Profile page initialization completed successfully');
+                return true;
+            } catch (error) {
+                console.error('Error during profile page initialization:', error);
+                // Reset flag on error to allow retry
+                window.budtBoyProfileInitialized = false;
+                return false;
+            }
+        }
+
+        // Safe initialization with comprehensive checks
+        function safeInitialize() {
+            // Check if already initialized
+            if (window.budtBoyProfileInitialized) {
+                console.log('Safe init: Already initialized');
                 return;
             }
 
-            console.log('Initializing page...');
-            window.pageInitialized = true;
-
-            // Load profile data
-            loadProfile();
-
-            // Setup avatar upload
-            setupEventListeners();
-        }
-
-        // Use window.onload instead of DOMContentLoaded for better mobile compatibility
-        if (window.pageInitialized !== true) {
-            if (document.readyState === 'complete') {
-                // Page already loaded
-                initializePage();
-            } else {
-                // Wait for window load
-                window.addEventListener('load', initializePage, { once: true });
+            // Check document state
+            if (document.readyState === 'loading') {
+                console.log('Safe init: Document still loading, waiting...');
+                document.addEventListener('DOMContentLoaded', function() {
+                    setTimeout(initializePage, 10); // Small delay to ensure stability
+                }, { once: true });
+                return;
             }
+
+            // Document is ready, initialize immediately
+            console.log('Safe init: Document ready, initializing now');
+            setTimeout(initializePage, 10); // Small delay for mobile stability
         }
+
+        // Execute safe initialization immediately
+        safeInitialize();
     </script>
 </body>
 </html>

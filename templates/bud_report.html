@@ -2188,20 +2188,60 @@
                         if (backBtn) backBtn.style.display = 'inline-block';
                         
                         if (isMobile) {
-                            // สำหรับมือถือ: สร้างลิงก์ดาวน์โหลด
+                            // สำหรับมือถือ: สร้างลิงก์ดาวน์โหลดโดยตรง
                             const imageDataUrl = canvas.toDataURL('image/png');
                             
-                            // สร้างแท็บใหม่
-                            const newWindow = window.open('', '_blank');
-                            if (newWindow) {
+                            // วิธี 1: ลองใช้ window.open ก่อน
+                            let newWindow = null;
+                            try {
+                                newWindow = window.open('', '_blank');
+                            } catch (e) {
+                                console.log('Window.open blocked, using alternative method');
+                            }
+                            
+                            if (newWindow && !newWindow.closed) {
+                                // ถ้าเปิดแท็บใหม่ได้
                                 const htmlContent = '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>' + fileName + '</title><style>body{margin:0;padding:20px;background:#f0f0f0;display:flex;flex-direction:column;align-items:center;font-family:Arial,sans-serif}.header{background:white;padding:15px;border-radius:10px;margin-bottom:20px;box-shadow:0 2px 10px rgba(0,0,0,0.1);text-align:center;width:100%;max-width:400px}.download-btn{background:#4CAF50;color:white;padding:12px 24px;border:none;border-radius:25px;font-size:16px;font-weight:bold;cursor:pointer;margin:10px 5px;text-decoration:none;display:inline-block;box-shadow:0 4px 12px rgba(76,175,80,0.3);transition:all 0.3s ease}.download-btn:hover{background:#45a049;transform:translateY(-2px)}.close-btn{background:#f44336;color:white;padding:8px 16px;border:none;border-radius:20px;font-size:14px;cursor:pointer;margin-top:10px}img{max-width:100%;height:auto;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,0.1);background:white}.instructions{background:#e3f2fd;padding:15px;border-radius:10px;margin-bottom:20px;color:#1976d2;font-size:14px;line-height:1.4;max-width:400px;text-align:center}</style></head><body><div class="header"><h3>📸 รูปภาพรายงานดอก</h3><div class="instructions">📱 <strong>วิธีบันทึกในมือถือ:</strong><br>1. กดปุ่ม "💾 บันทึกรูป" ด้านล่าง<br>2. หรือกดค้างที่รูปภาพแล้วเลือก "บันทึกรูป"<br>3. รูปจะถูกบันทึกในแกลเลอรี่ของคุณ</div><a href="' + imageDataUrl + '" download="' + fileName + '" class="download-btn">💾 บันทึกรูป</a><button onclick="window.close()" class="close-btn">❌ ปิด</button></div><img src="' + imageDataUrl + '" alt="' + fileName + '" /></body></html>';
                                 
                                 newWindow.document.write(htmlContent);
                                 newWindow.document.close();
+                                
+                                showSuccessMessage('✅ สร้างรูปภาพสำเร็จ!\n📱 รูปภาพจะเปิดในแท็บใหม่\nกดปุ่ม "บันทึกรูป" หรือกดค้างที่รูปเพื่อบันทึก', 5000);
+                            } else {
+                                // วิธี 2: ถ้าเปิดแท็บใหม่ไม่ได้ ให้สร้างลิงก์ดาวน์โหลดตรงๆ
+                                const link = document.createElement('a');
+                                link.download = fileName;
+                                link.href = imageDataUrl;
+                                link.style.display = 'none';
+                                
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                                
+                                // แสดงภาพในหน้าปัจจุบัน
+                                const imageModal = document.createElement('div');
+                                imageModal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;';
+                                
+                                const closeBtn = document.createElement('button');
+                                closeBtn.innerHTML = '❌ ปิด';
+                                closeBtn.style.cssText = 'position: absolute; top: 20px; right: 20px; background: #f44336; color: white; border: none; padding: 10px 15px; border-radius: 20px; font-size: 16px; font-weight: bold; cursor: pointer; z-index: 10001;';
+                                closeBtn.onclick = () => document.body.removeChild(imageModal);
+                                
+                                const img = document.createElement('img');
+                                img.src = imageDataUrl;
+                                img.style.cssText = 'max-width: 90%; max-height: 80%; border-radius: 10px; box-shadow: 0 4px 20px rgba(255,255,255,0.3);';
+                                
+                                const instructions = document.createElement('div');
+                                instructions.innerHTML = '📱 กดค้างที่รูปภาพแล้วเลือก "บันทึกรูป" เพื่อบันทึกลงในแกลเลอรี่';
+                                instructions.style.cssText = 'color: white; text-align: center; margin-top: 15px; font-size: 16px; font-weight: bold; background: rgba(0,0,0,0.5); padding: 10px 15px; border-radius: 10px;';
+                                
+                                imageModal.appendChild(closeBtn);
+                                imageModal.appendChild(img);
+                                imageModal.appendChild(instructions);
+                                document.body.appendChild(imageModal);
+                                
+                                showSuccessMessage('✅ สร้างรูปภาพสำเร็จ!\n📱 กดค้างที่รูปเพื่อบันทึก', 5000);
                             }
-                            
-                            // แสดงข้อความสำเร็จ
-                            showSuccessMessage('✅ สร้างรูปภาพสำเร็จ!\n📱 รูปภาพจะเปิดในแท็บใหม่\nกดปุ่ม "บันทึกรูป" หรือกดค้างที่รูปเพื่อบันทึก', 5000);
                             
                         } else {
                             // สำหรับ PC: ใช้วิธีเดิม

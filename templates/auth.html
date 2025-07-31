@@ -216,6 +216,18 @@
 
     <script>
         function showForm(type) {
+            // ตรวจสอบว่าเป็นการเลือก signup และไม่มี referral code
+            if (type === 'signup') {
+                const urlParams = new URLSearchParams(window.location.search);
+                const refCode = urlParams.get('ref');
+                
+                if (!refCode) {
+                    // แสดง popup เตือนเมื่อพยายามเข้าหน้า signup โดยไม่มี referral link
+                    showReferralWarning();
+                    return; // หยุดการทำงานไม่ให้เปลี่ยนไปหน้า signup
+                }
+            }
+
             // Update tabs
             document.querySelectorAll('.auth-tab').forEach(tab => {
                 tab.classList.remove('active');
@@ -286,10 +298,19 @@
         document.getElementById('signupForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
+            // ตรวจสอบว่ามี referral code หรือไม่
+            const urlParams = new URLSearchParams(window.location.search);
+            const refCodeFromUrl = urlParams.get('ref');
+            
+            if (!refCodeFromUrl) {
+                // แสดง popup เตือนเมื่อไม่มี referral link
+                showReferralWarning();
+                return;
+            }
+
             const username = document.getElementById('signupUsername').value;
             const email = document.getElementById('signupEmail').value;
             const password = document.getElementById('signupPassword').value;
-            const referralCode = document.getElementById('referralCode').value;
 
             try {
                 const response = await fetch('/quick_signup', {
@@ -297,7 +318,7 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ username, email, password, referral_code: referralCode })
+                    body: JSON.stringify({ username, email, password, referral_code: refCodeFromUrl })
                 });
 
                 const result = await response.json();
@@ -315,6 +336,93 @@
                 document.getElementById('message').innerHTML = `<div class="message error">❌ เกิดข้อผิดพลาด: ${error.message}</div>`;
             }
         });
+
+        // ฟังก์ชันแสดง popup เตือน
+        function showReferralWarning() {
+            // สร้าง popup overlay
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.6);
+                z-index: 10000;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            `;
+
+            // สร้าง popup content
+            const popup = document.createElement('div');
+            popup.style.cssText = `
+                background: white;
+                padding: 30px;
+                border-radius: 15px;
+                max-width: 400px;
+                width: 90%;
+                text-align: center;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+                animation: slideIn 0.3s ease-out;
+            `;
+
+            popup.innerHTML = `
+                <div style="font-size: 48px; margin-bottom: 15px;">⚠️</div>
+                <h3 style="color: #e74c3c; margin-bottom: 15px; font-size: 20px;">
+                    ไม่สามารถสมัครได้
+                </h3>
+                <p style="color: #666; margin-bottom: 20px; line-height: 1.5;">
+                    ขณะนี้ระบบเปิดให้สมัครผ่าน <strong>Referral Link</strong> แนะนำจากเพื่อนเท่านั้น
+                </p>
+                <p style="color: #888; margin-bottom: 25px; font-size: 14px;">
+                    กรุณาขอลิงก์เชิญจากเพื่อนที่เป็นสมาชิกอยู่แล้ว
+                </p>
+                <button onclick="closeReferralWarning()" style="
+                    background: #4CAF50;
+                    color: white;
+                    border: none;
+                    padding: 12px 24px;
+                    border-radius: 8px;
+                    font-size: 16px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    transition: background 0.3s;
+                " onmouseover="this.style.background='#45a049'" onmouseout="this.style.background='#4CAF50'">
+                    เข้าใจแล้ว
+                </button>
+            `;
+
+            overlay.appendChild(popup);
+            document.body.appendChild(overlay);
+
+            // เพิ่ม animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from {
+                        transform: translateY(-50px);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateY(0);
+                        opacity: 1;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+
+            // เก็บ reference เพื่อใช้ปิด popup
+            window.referralWarningOverlay = overlay;
+        }
+
+        // ฟังก์ชันปิด popup
+        function closeReferralWarning() {
+            if (window.referralWarningOverlay) {
+                document.body.removeChild(window.referralWarningOverlay);
+                window.referralWarningOverlay = null;
+            }
+        }
     </script>
 </body>
 </html>

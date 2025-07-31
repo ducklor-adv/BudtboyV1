@@ -210,6 +210,13 @@
             color: #f57c00;
         }
 
+        .friend-status {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            align-items: flex-end;
+        }
+
         .friend-actions {
             display: flex;
             flex-direction: column;
@@ -385,6 +392,21 @@
                     `<img src="${friend.profile_image_url}" alt="Profile">` :
                     friend.username.charAt(0).toUpperCase();
 
+                // สร้าง status section
+                let statusSection = '';
+                if (friend.is_approved) {
+                    statusSection = `<div class="friend-badge approved">อนุมัติแล้ว</div>`;
+                } else {
+                    statusSection = `
+                        <div class="friend-status">
+                            <div class="friend-badge pending">รออนุมัติ</div>
+                            <button class="approve-btn" onclick="approveFriend(${friend.id}, '${friend.username}')">
+                                ✓ อนุมัติ
+                            </button>
+                        </div>
+                    `;
+                }
+
                 li.innerHTML = `
                     <div class="friend-avatar">
                         ${avatarContent}
@@ -393,7 +415,7 @@
                         <div class="friend-name">${friend.username}</div>
                         <div class="friend-date">สมัครเมื่อ: ${formatDate(friend.created_at)}</div>
                     </div>
-                    <div class="friend-badge">เพื่อน</div>
+                    ${statusSection}
                 `;
 
                 friendsList.appendChild(li);
@@ -451,6 +473,33 @@
                 month: 'short',
                 year: 'numeric'
             });
+        }
+
+        async function approveFriend(userId, username) {
+            try {
+                const response = await fetch('/api/approve_user', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ user_id: userId })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    // แสดงข้อความสำเร็จ
+                    alert(`✅ อนุมัติ ${username} เรียบร้อยแล้ว!`);
+                    
+                    // โหลดรายการเพื่อนใหม่
+                    loadFriends();
+                } else {
+                    alert(`❌ ${result.error || 'เกิดข้อผิดพลาดในการอนุมัติ'}`);
+                }
+            } catch (error) {
+                console.error('Error approving friend:', error);
+                alert('❌ เกิดข้อผิดพลาดในการเชื่อมต่อ');
+            }
         }
 
         // Initialize page

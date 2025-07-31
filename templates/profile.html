@@ -609,6 +609,55 @@
             font-size: 12px;
         }
 
+        .pending-notification {
+            margin-top: 15px;
+            padding: 12px 16px;
+            background: linear-gradient(135deg, #ff9800, #f57c00);
+            color: white;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-weight: 600;
+            animation: pulse 2s infinite;
+        }
+
+        .pending-notification:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4);
+        }
+
+        .notification-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .notification-content i {
+            font-size: 16px;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 152, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0); }
+        }
+
+        .chat-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 350px;
+            height: 500px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: none;
+            flex-direction: column;
+            z-index: 1000;
+        }
+
         @media (max-width: 400px) {
             .profile-card {
                 margin: 10px;
@@ -890,7 +939,7 @@
 
         async function loadProfile() {
             const state = window.BudtBoyProfile;
-            
+
             // Enhanced protection with state management
             if (state.loading || state.loaded || isLoading || isProfileLoaded) {
                 console.log('Profile: LoadProfile blocked - already loading or loaded');
@@ -1308,20 +1357,20 @@
 
         function retryLoadProfile() {
             console.log('Profile: Retrying load...');
-            
+
             // Reset all state flags
             const state = window.BudtBoyProfile;
             state.loaded = false;
             state.loading = false;
             state.initialized = false;
             state.initAttempts = 0;
-            
+
             isProfileLoaded = false;
             isLoading = false;
-            
+
             // Clear any existing event listeners flag
             window.budtBoyEventListenersSetup = false;
-            
+
             // Retry initialization
             setTimeout(mobileOptimizedInit, 100);
         }
@@ -1329,7 +1378,7 @@
         // Enhanced page visibility handling
         document.addEventListener('visibilitychange', function() {
             const state = window.BudtBoyProfile;
-            
+
             if (document.hidden) {
                 console.log('Profile: Page hidden, pausing operations');
             } else {
@@ -1349,7 +1398,7 @@
         // Handle page restoration events
         window.addEventListener('pageshow', function(event) {
             const state = window.BudtBoyProfile;
-            
+
             if (event.persisted) {
                 console.log('Profile: Page restored from cache');
                 // Check if profile data is still visible
@@ -1737,7 +1786,7 @@
         // Comprehensive initialization with mobile-specific handling
         function initializePage() {
             const state = window.BudtBoyProfile;
-            
+
             // Prevent multiple attempts
             if (state.initialized || state.initAttempts >= state.maxAttempts) {
                 console.log('Profile: Init blocked - already initialized or max attempts reached');
@@ -1746,7 +1795,7 @@
 
             state.initAttempts++;
             state.initialized = true;
-            
+
             console.log(`Profile: Initializing (attempt ${state.initAttempts})`);
 
             try {
@@ -1754,12 +1803,12 @@
                 if (!state.loaded) {
                     loadProfile();
                 }
-                
+
                 // Setup listeners only once
                 if (!window.budtBoyEventListenersSetup) {
                     setupEventListeners();
                 }
-                
+
                 console.log('Profile: Initialization completed successfully');
                 return true;
             } catch (error) {
@@ -1772,7 +1821,7 @@
         // Mobile-optimized initialization
         function mobileOptimizedInit() {
             const state = window.BudtBoyProfile;
-            
+
             if (state.initialized) {
                 console.log('Profile: Already initialized, skipping');
                 return;
@@ -1787,6 +1836,8 @@
                     state.loaded = true;
                     return;
                 }
+            } else {
+                console.log('Profile: Fresh page load');
             }
 
             // Use requestAnimationFrame for better mobile performance
@@ -1806,6 +1857,98 @@
 
         // Execute mobile-optimized initialization
         mobileOptimizedInit();
+
+        async function loadProfile() {
+            const state = window.BudtBoyProfile;
+
+            // Enhanced protection with state management
+            if (state.loading || state.loaded || isLoading || isProfileLoaded) {
+                console.log('Profile: LoadProfile blocked - already loading or loaded');
+                return;
+            }
+
+            // Set all loading flags
+            state.loading = true;
+            isLoading = true;
+            showLoading();
+
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
+                const response = await fetch('/api/profile', {
+                    signal: controller.signal,
+                    cache: 'no-cache',
+                    headers: {
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
+                    }
+                });
+
+                clearTimeout(timeoutId);
+
+                if (response.ok) {
+                    const user = await response.json();
+                    displayProfile(user);
+                    showProfile();
+                    state.loaded = true;
+                    console.log('Profile: Data loaded successfully');
+                     // โหลดการแจ้งเตือนเพื่อนรออนุมัติ
+                    checkPendingFriends();
+                } else {
+                    const errorData = await response.json().catch(() => ({}));
+                    showError(errorData.error || 'ไม่สามารถโหลดข้อมูลโปรไฟล์ได้');
+                }
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    console.log('Profile: Request timed out');
+                    showError('การโหลดข้อมูลใช้เวลานานเกินไป กรุณาลองใหม่');
+                } else {
+                    console.error('Profile: Loading error:', error);
+                    showError('เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต');
+                }
+            } finally {
+                state.loading = false;
+                isLoading = false;
+                console.log('Profile: Loading completed, flags reset');
+            }
+        }
+
+        async function checkPendingFriends() {
+            try {
+                const response = await fetch('/api/pending_friends_count');
+                const data = await response.json();
+
+                if (response.ok && data.pending_count > 0) {
+                    const notification = document.getElementById('pendingFriendsNotification');
+                    const text = document.getElementById('pendingFriendsText');
+
+                    text.textContent = `มีเพื่อนใหม่เข้ามา ${data.pending_count} คน โปรดรีวิวและอนุมัติ`;
+                    notification.style.display = 'block';
+
+                    // เพิ่ม event listener สำหรับการคลิก
+                    notification.onclick = function() {
+                        window.location.href = '/friends';
+                    };
+                } else {
+                    document.getElementById('pendingFriendsNotification').style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error checking pending friends:', error);
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing...');
+
+            if (!isInitialized && !isLoading) {
+                initializeProfile();
+            }
+        });
+
+        // Refresh pending friends notification periodically
+        setInterval(checkPendingFriends, 30000); // ตรวจสอบทุก 30 วินาที
     </script>
 </body>
 </html>

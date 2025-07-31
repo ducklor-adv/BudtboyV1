@@ -3545,6 +3545,44 @@ def register_user():
     else:
         return jsonify({'success': False, 'error': 'Database connection failed'}), 500
 
+@app.route('/api/pending_friends_count', methods=['GET'])
+def get_pending_friends_count():
+    """Get count of pending friends for approval notification"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'ไม่ได้เข้าสู่ระบบ'}), 401
+
+    user_id = session['user_id']
+    
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            
+            # Count pending friends
+            cur.execute("""
+                SELECT COUNT(*) FROM users 
+                WHERE referred_by = %s AND is_approved = FALSE
+            """, (user_id,))
+            
+            pending_count = cur.fetchone()[0]
+            
+            cur.close()
+            return_db_connection(conn)
+            
+            return jsonify({
+                'pending_count': pending_count
+            })
+            
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+        finally:
+            if cur:
+                cur.close()
+            if conn:
+                return_db_connection(conn)
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
 @app.route('/api/approve_user', methods=['POST'])
 def approve_user():
     """Approve a pending user"""
@@ -3627,6 +3665,8 @@ def get_friends():
             """, (user_id,))
             
             friends = []
+            pending_count = 0
+            
             for row in cur.fetchall():
                 # Format profile image URL correctly
                 profile_image_url = None
@@ -3638,6 +3678,10 @@ def get_friends():
                     else:
                         profile_image_url = f'/uploads/{row[3].split("/")[-1]}'
                 
+                is_approved = row[6]
+                if not is_approved:
+                    pending_count += 1
+                
                 friends.append({
                     'id': row[0],
                     'username': row[1],
@@ -3645,7 +3689,7 @@ def get_friends():
                     'profile_image_url': profile_image_url,
                     'created_at': row[4].strftime('%Y-%m-%d %H:%M:%S') if row[4] else None,
                     'is_verified': row[5],
-                    'is_approved': row[6],
+                    'is_approved': is_approved,
                     'approved_at': row[7].strftime('%Y-%m-%d %H:%M:%S') if row[7] else None
                 })
             
@@ -3667,7 +3711,8 @@ def get_friends():
             return jsonify({
                 'friends': friends,
                 'referral_code': referral_code,
-                'total_friends': len(friends)
+                'total_friends': len(friends),
+                'pending_friends': pending_count
             })
             
         except Exception as e:

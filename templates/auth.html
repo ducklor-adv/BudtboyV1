@@ -197,6 +197,10 @@
                 <label for="signupPassword">รหัสผ่าน</label>
                 <input type="password" id="signupPassword" name="password" required minlength="6">
             </div>
+            <div class="form-group">
+                <label for="referralCode">รหัส Referral (ไม่บังคับ)</label>
+                <input type="text" id="referralCode" name="referral_code" placeholder="ใส่รหัสเพื่อนที่แนะนำ">
+            </div>
             <button type="submit" class="auth-button">🎯 สมัครสมาชิก</button>
         </form>
 
@@ -271,6 +275,17 @@
             }
         });
 
+        // Check for referral code in URL
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const refCode = urlParams.get('ref');
+            if (refCode) {
+                document.getElementById('referralCode').value = refCode;
+                // Switch to signup tab if referral code is present
+                showForm('signup');
+            }
+        });
+
         // Signup form submission
         document.getElementById('signupForm').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -278,6 +293,7 @@
             const username = document.getElementById('signupUsername').value;
             const email = document.getElementById('signupEmail').value;
             const password = document.getElementById('signupPassword').value;
+            const referralCode = document.getElementById('referralCode').value;
 
             try {
                 const response = await fetch('/quick_signup', {
@@ -285,7 +301,7 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ username, email, password })
+                    body: JSON.stringify({ username, email, password, referral_code: referralCode })
                 });
 
                 const result = await response.json();

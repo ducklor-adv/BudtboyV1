@@ -1,0 +1,431 @@
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cannabis App - เพื่อนในระบบ</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e8f5e8 0%, #f0f8ff 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .back-btn {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            color: #e8f5e9;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .stats-card {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .stats-number {
+            font-size: 36px;
+            font-weight: 700;
+            color: #4CAF50;
+            margin-bottom: 5px;
+        }
+
+        .stats-label {
+            color: #666;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .referral-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .referral-link-card {
+            background: #f8f9fa;
+            border: 2px dashed #4CAF50;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .referral-link {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 12px;
+            font-family: monospace;
+            font-size: 12px;
+            word-break: break-all;
+            margin-bottom: 10px;
+            color: #666;
+        }
+
+        .copy-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #45a049;
+            transform: translateY(-1px);
+        }
+
+        .friends-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .friend-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #f0f0f0;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        .friend-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .friend-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            margin-right: 15px;
+            overflow: hidden;
+        }
+
+        .friend-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .friend-info {
+            flex: 1;
+        }
+
+        .friend-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 3px;
+        }
+
+        .friend-date {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .friend-badge {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #f44336;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .friend-item {
+                padding: 12px;
+            }
+
+            .friend-avatar {
+                width: 40px;
+                height: 40px;
+                margin-right: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="/profile" class="back-btn">← กลับ</a>
+            <h1>👥 เพื่อนในระบบ</h1>
+            <p>คนที่สมัครผ่าน Referral Link ของคุณ</p>
+        </div>
+
+        <div class="content">
+            <div class="stats-card">
+                <div class="stats-number" id="friendsCount">0</div>
+                <div class="stats-label">เพื่อนทั้งหมด</div>
+            </div>
+
+            <div class="referral-section">
+                <div class="section-title">
+                    🔗 Referral Link ของคุณ
+                </div>
+                <div class="referral-link-card">
+                    <div class="referral-link" id="referralLink">กำลังโหลด...</div>
+                    <button class="copy-btn" onclick="copyReferralLink()">📋 คัดลอก</button>
+                </div>
+            </div>
+
+            <div class="section-title">
+                👥 รายชื่อเพื่อน
+            </div>
+
+            <div id="loadingState" class="loading">
+                🔄 กำลังโหลดข้อมูล...
+            </div>
+
+            <div id="errorState" class="error-message" style="display: none;">
+                <div id="errorMessage"></div>
+            </div>
+
+            <div id="emptyState" class="empty-state" style="display: none;">
+                <div class="empty-icon">👫</div>
+                <div>ยังไม่มีเพื่อนในระบบ</div>
+                <div style="font-size: 14px; margin-top: 10px; color: #999;">
+                    แชร์ Referral Link ของคุณให้เพื่อนๆ สมัครสมาชิก
+                </div>
+            </div>
+
+            <ul class="friends-list" id="friendsList" style="display: none;">
+                <!-- Friends will be loaded here -->
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+
+        async function loadFriends() {
+            try {
+                const response = await fetch('/api/friends');
+                const data = await response.json();
+
+                if (response.ok) {
+                    displayFriends(data.friends);
+                    updateStats(data.friends.length);
+                    generateReferralLink(data.referral_code);
+                } else {
+                    showError(data.error || 'ไม่สามารถโหลดข้อมูลเพื่อนได้');
+                }
+            } catch (error) {
+                console.error('Error loading friends:', error);
+                showError('เกิดข้อผิดพลาดในการเชื่อมต่อ');
+            }
+        }
+
+        function displayFriends(friends) {
+            const loadingState = document.getElementById('loadingState');
+            const errorState = document.getElementById('errorState');
+            const emptyState = document.getElementById('emptyState');
+            const friendsList = document.getElementById('friendsList');
+
+            loadingState.style.display = 'none';
+            errorState.style.display = 'none';
+
+            if (friends.length === 0) {
+                emptyState.style.display = 'block';
+                friendsList.style.display = 'none';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            friendsList.style.display = 'block';
+            friendsList.innerHTML = '';
+
+            friends.forEach(friend => {
+                const li = document.createElement('li');
+                li.className = 'friend-item';
+
+                const avatarContent = friend.profile_image_url ? 
+                    `<img src="${friend.profile_image_url}" alt="Profile">` :
+                    friend.username.charAt(0).toUpperCase();
+
+                li.innerHTML = `
+                    <div class="friend-avatar">
+                        ${avatarContent}
+                    </div>
+                    <div class="friend-info">
+                        <div class="friend-name">${friend.username}</div>
+                        <div class="friend-date">สมัครเมื่อ: ${formatDate(friend.created_at)}</div>
+                    </div>
+                    <div class="friend-badge">เพื่อน</div>
+                `;
+
+                friendsList.appendChild(li);
+            });
+        }
+
+        function updateStats(count) {
+            document.getElementById('friendsCount').textContent = count;
+        }
+
+        function generateReferralLink(referralCode) {
+            // Generate referral link based on current user's referral code
+            const baseUrl = window.location.origin;
+            const referralLink = `${baseUrl}/auth?ref=${referralCode}`;
+            document.getElementById('referralLink').textContent = referralLink;
+        }
+
+        function copyReferralLink() {
+            const referralLink = document.getElementById('referralLink').textContent;
+            navigator.clipboard.writeText(referralLink).then(() => {
+                // Show success feedback
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '✅ คัดลอกแล้ว!';
+                btn.style.background = '#28a745';
+                
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '#4CAF50';
+                }, 2000);
+            }).catch(err => {
+                console.error('Error copying to clipboard:', err);
+                alert('ไม่สามารถคัดลอกได้ กรุณาคัดลอกด้วยตนเอง');
+            });
+        }
+
+        function showError(message) {
+            const loadingState = document.getElementById('loadingState');
+            const errorState = document.getElementById('errorState');
+            const errorMessage = document.getElementById('errorMessage');
+            const friendsList = document.getElementById('friendsList');
+            const emptyState = document.getElementById('emptyState');
+
+            loadingState.style.display = 'none';
+            friendsList.style.display = 'none';
+            emptyState.style.display = 'none';
+            errorState.style.display = 'block';
+            errorMessage.textContent = message;
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('th-TH', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+            });
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadFriends();
+        });
+    </script>
+</body>
+</html>

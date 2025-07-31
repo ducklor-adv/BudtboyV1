@@ -986,6 +986,22 @@ def create_tables():
                 ADD COLUMN IF NOT EXISTS video_review_url VARCHAR(500);
             """)
 
+            # Add referral system columns
+            cur.execute("""
+                ALTER TABLE users 
+                ADD COLUMN IF NOT EXISTS referred_by INTEGER REFERENCES users(id),
+                ADD COLUMN IF NOT EXISTS referral_code VARCHAR(50) UNIQUE;
+            """)
+
+            # Generate referral codes for existing users
+            cur.execute("SELECT id FROM users WHERE referral_code IS NULL")
+            users_without_codes = cur.fetchall()
+            
+            for user_row in users_without_codes:
+                import secrets
+                referral_code = secrets.token_urlsafe(8)
+                cur.execute("UPDATE users SET referral_code = %s WHERE id = %s", (referral_code, user_row[0]))
+
             # Create index for better performance
             cur.execute("""
                 CREATE INDEX IF NOT EXISTS idx_strain_names_th ON strain_names(name_th);
@@ -1413,6 +1429,7 @@ def quick_signup():
     username = data.get('username')
     email = data.get('email')
     password = data.get('password')
+    referral_code = data.get('referral_code')  # Get referral code from form
 
     if not username or not email or not password:
         return jsonify({'success': False, 'error': 'กรุณากรอกข้อมูลให้ครบถ้วน'}), 400
@@ -1432,12 +1449,24 @@ def quick_signup():
                     'error': 'ชื่อผู้ใช้หรืออีเมลนี้ถูกใช้แล้ว'
                 }), 400
 
+            # Check referral code if provided
+            referred_by_id = None
+            if referral_code:
+                cur.execute("SELECT id FROM users WHERE referral_code = %s", (referral_code,))
+                referrer = cur.fetchone()
+                if referrer:
+                    referred_by_id = referrer[0]
+
+            # Generate referral code for new user
+            import secrets
+            new_referral_code = secrets.token_urlsafe(8)
+
             # Create user (quick signup - auto verified)
             cur.execute("""
-                INSERT INTO users (username, email, password_hash, is_consumer, is_verified)
-                VALUES (%s, %s, %s, %s, %s)
+                INSERT INTO users (username, email, password_hash, is_consumer, is_verified, referred_by, referral_code)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
                 RETURNING id
-            """, (username, email, password_hash, True, True))
+            """, (username, email, password_hash, True, True, referred_by_id, new_referral_code))
 
             user_id = cur.fetchone()[0]
             conn.commit()
@@ -3132,6 +3161,13 @@ def bud_report_detail(bud_id):
         return redirect('/auth')
     return render_template('bud_report.html', bud_id=bud_id)
 
+@app.route('/friends')
+def friends_page():
+    # Check if user is logged in
+    if 'user_id' not in session:
+        return redirect('/auth')
+    return render_template('friends.html')
+
 @app.route('/api/buds/<int:bud_id>/detail', methods=['GET'])
 def get_bud_detail(bud_id):
     """Get individual bud data for editing (renamed route to avoid conflict)"""
@@ -3467,6 +3503,80 @@ def register_user():
             return_db_connection(conn)
     else:
         return jsonify({'success': False, 'error': 'Database connection failed'}), 500
+
+@app.route('/api/friends', methods=['GET'])
+def get_friends():
+    """Get list of users who signed up through referral link"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'ไม่ได้เข้าสู่ระบบ'}), 401
+
+    user_id = session['user_id']
+    
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            
+            # Get friends (users referred by current user)
+            cur.execute("""
+                SELECT u.id, u.username, u.email, u.profile_image_url, 
+                       u.created_at, u.is_verified
+                FROM users u
+                WHERE u.referred_by = %s
+                ORDER BY u.created_at DESC
+            """, (user_id,))
+            
+            friends = []
+            for row in cur.fetchall():
+                # Format profile image URL correctly
+                profile_image_url = None
+                if row[3]:
+                    if row[3].startswith('/uploads/'):
+                        profile_image_url = row[3]
+                    elif row[3].startswith('uploads/'):
+                        profile_image_url = f'/{row[3]}'
+                    else:
+                        profile_image_url = f'/uploads/{row[3].split("/")[-1]}'
+                
+                friends.append({
+                    'id': row[0],
+                    'username': row[1],
+                    'email': row[2],
+                    'profile_image_url': profile_image_url,
+                    'created_at': row[4].strftime('%Y-%m-%d %H:%M:%S') if row[4] else None,
+                    'is_verified': row[5]
+                })
+            
+            # Get current user's referral code
+            cur.execute("SELECT referral_code FROM users WHERE id = %s", (user_id,))
+            result = cur.fetchone()
+            referral_code = result[0] if result else None
+            
+            # If no referral code exists, generate one
+            if not referral_code:
+                import secrets
+                referral_code = secrets.token_urlsafe(8)
+                cur.execute("UPDATE users SET referral_code = %s WHERE id = %s", (referral_code, user_id))
+                conn.commit()
+            
+            cur.close()
+            return_db_connection(conn)
+            
+            return jsonify({
+                'friends': friends,
+                'referral_code': referral_code,
+                'total_friends': len(friends)
+            })
+            
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+        finally:
+            if cur:
+                cur.close()
+            if conn:
+                return_db_connection(conn)
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
 @app.route('/api/chat', methods=['POST'])
 def chat_with_ai():

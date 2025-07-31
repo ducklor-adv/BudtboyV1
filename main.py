@@ -986,12 +986,18 @@ def create_tables():
                 ADD COLUMN IF NOT EXISTS video_review_url VARCHAR(500);
             """)
 
-            # Add referral system columns
+            # Add referral system and approval columns
             cur.execute("""
                 ALTER TABLE users 
                 ADD COLUMN IF NOT EXISTS referred_by INTEGER REFERENCES users(id),
-                ADD COLUMN IF NOT EXISTS referral_code VARCHAR(50) UNIQUE;
+                ADD COLUMN IF NOT EXISTS referral_code VARCHAR(50) UNIQUE,
+                ADD COLUMN IF NOT EXISTS is_approved BOOLEAN DEFAULT TRUE,
+                ADD COLUMN IF NOT EXISTS approved_at TIMESTAMP,
+                ADD COLUMN IF NOT EXISTS approved_by INTEGER REFERENCES users(id);
             """)
+
+            # Set existing users as approved
+            cur.execute("UPDATE users SET is_approved = TRUE WHERE is_approved IS NULL")
 
             # Generate referral codes for existing users
             cur.execute("SELECT id FROM users WHERE referral_code IS NULL")
@@ -1167,6 +1173,26 @@ def index():
 def is_authenticated():
     return 'user_id' in session
 
+def is_approved():
+    if not is_authenticated():
+        return False
+    
+    user_id = session.get('user_id')
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("SELECT is_approved FROM users WHERE id = %s", (user_id,))
+            result = cur.fetchone()
+            cur.close()
+            return_db_connection(conn)
+            return result and result[0]
+        except:
+            if conn:
+                return_db_connection(conn)
+            return False
+    return False
+
 @app.route('/profile')
 def profile():
     if not is_authenticated():
@@ -1177,6 +1203,8 @@ def profile():
 def activity():
     if not is_authenticated():
         return redirect('/auth')
+    if not is_approved():
+        return redirect('/profile?not_approved=1')
     return render_template('activity.html')
 
 @app.route('/api/user_buds')
@@ -1365,6 +1393,8 @@ def add_buds_page():
     # Check if user is logged in
     if 'user_id' not in session:
         return redirect('/auth')
+    if not is_approved():
+        return redirect('/profile?not_approved=1')
     return render_template('add_buds.html')
 
 @app.route('/edit-bud')
@@ -1461,12 +1491,19 @@ def quick_signup():
             import secrets
             new_referral_code = secrets.token_urlsafe(8)
 
-            # Create user (quick signup - auto verified)
+            # Check if referral code is required (must have referred_by_id)
+            if not referred_by_id:
+                return jsonify({
+                    'success': False,
+                    'error': 'การสมัครสมาชิกต้องผ่าน Referral Link เท่านั้น กรุณาใช้ลิงก์ที่เพื่อนแชร์ให้'
+                }), 400
+
+            # Create user (pending approval)
             cur.execute("""
-                INSERT INTO users (username, email, password_hash, is_consumer, is_verified, referred_by, referral_code)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                INSERT INTO users (username, email, password_hash, is_consumer, is_verified, referred_by, referral_code, is_approved)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                 RETURNING id
-            """, (username, email, password_hash, True, True, referred_by_id, new_referral_code))
+            """, (username, email, password_hash, True, True, referred_by_id, new_referral_code, False))
 
             user_id = cur.fetchone()[0]
             conn.commit()
@@ -1575,7 +1612,7 @@ def get_profile():
                 SELECT id, username, email, is_grower, is_budtender, is_consumer, 
                        birth_year, created_at, is_verified, grow_license_file_url, profile_image_url,
                        contact_facebook, contact_line, contact_instagram, contact_twitter, 
-                       contact_telegram, contact_phone, contact_other
+                       contact_telegram, contact_phone, contact_other, is_approved, referred_by
                 FROM users WHERE id = %s
             """, (user_id,))
             user = cur.fetchone()
@@ -1609,7 +1646,9 @@ def get_profile():
                     'contact_twitter': user[14],
                     'contact_telegram': user[15],
                     'contact_phone': user[16],
-                    'contact_other': user[17]
+                    'contact_other': user[17],
+                    'is_approved': user[18],
+                    'referred_by': user[19]
                 }
 
                 # Cache the result
@@ -3166,6 +3205,8 @@ def friends_page():
     # Check if user is logged in
     if 'user_id' not in session:
         return redirect('/auth')
+    if not is_approved():
+        return redirect('/profile?not_approved=1')
     return render_template('friends.html')
 
 @app.route('/api/buds/<int:bud_id>/detail', methods=['GET'])
@@ -3504,6 +3545,65 @@ def register_user():
     else:
         return jsonify({'success': False, 'error': 'Database connection failed'}), 500
 
+@app.route('/api/approve_user', methods=['POST'])
+def approve_user():
+    """Approve a pending user"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'ไม่ได้เข้าสู่ระบบ'}), 401
+
+    approver_id = session['user_id']
+    data = request.get_json()
+    user_id_to_approve = data.get('user_id')
+
+    if not user_id_to_approve:
+        return jsonify({'error': 'ไม่พบ user_id ที่จะอนุมัติ'}), 400
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            
+            # Check if the user to approve was referred by the approver
+            cur.execute("""
+                SELECT id, username, referred_by, is_approved 
+                FROM users 
+                WHERE id = %s AND referred_by = %s
+            """, (user_id_to_approve, approver_id))
+            
+            user_to_approve = cur.fetchone()
+            if not user_to_approve:
+                return jsonify({'error': 'ไม่พบผู้ใช้ที่ต้องอนุมัติหรือไม่ใช่คนที่คุณชวน'}), 404
+
+            if user_to_approve[3]:  # is_approved
+                return jsonify({'error': 'ผู้ใช้นี้ได้รับการอนุมัติแล้ว'}), 400
+
+            # Approve the user
+            cur.execute("""
+                UPDATE users 
+                SET is_approved = TRUE, approved_at = CURRENT_TIMESTAMP, approved_by = %s
+                WHERE id = %s
+            """, (approver_id, user_id_to_approve))
+
+            conn.commit()
+            cur.close()
+            return_db_connection(conn)
+
+            return jsonify({
+                'success': True,
+                'message': f'อนุมัติผู้ใช้ {user_to_approve[1]} เรียบร้อยแล้ว'
+            })
+
+        except Exception as e:
+            conn.rollback()
+            return jsonify({'error': str(e)}), 500
+        finally:
+            if cur:
+                cur.close()
+            if conn:
+                return_db_connection(conn)
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
 @app.route('/api/friends', methods=['GET'])
 def get_friends():
     """Get list of users who signed up through referral link"""
@@ -3520,10 +3620,10 @@ def get_friends():
             # Get friends (users referred by current user)
             cur.execute("""
                 SELECT u.id, u.username, u.email, u.profile_image_url, 
-                       u.created_at, u.is_verified
+                       u.created_at, u.is_verified, u.is_approved, u.approved_at
                 FROM users u
                 WHERE u.referred_by = %s
-                ORDER BY u.created_at DESC
+                ORDER BY u.is_approved ASC, u.created_at DESC
             """, (user_id,))
             
             friends = []
@@ -3544,7 +3644,9 @@ def get_friends():
                     'email': row[2],
                     'profile_image_url': profile_image_url,
                     'created_at': row[4].strftime('%Y-%m-%d %H:%M:%S') if row[4] else None,
-                    'is_verified': row[5]
+                    'is_verified': row[5],
+                    'is_approved': row[6],
+                    'approved_at': row[7].strftime('%Y-%m-%d %H:%M:%S') if row[7] else None
                 })
             
             # Get current user's referral code

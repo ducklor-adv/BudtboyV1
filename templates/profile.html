@@ -834,6 +834,13 @@
                             <a href="/friends" style="color: #4CAF50; text-decoration: none; font-weight: 500; font-size: 14px;">
                                 ดูเพื่อนที่สมัครผ่าน Referral Link
                             </a>
+                            <!-- Pending friends notification -->
+                            <div id="pendingFriendsNotification" class="pending-notification" style="display: none;">
+                                <div class="notification-content">
+                                    <i>🔔</i>
+                                    <span id="pendingFriendsText">มีเพื่อนใหม่เข้ามา โปรดรีวิวและอนุมัติ</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </li>
@@ -1917,35 +1924,39 @@
         async function checkPendingFriends() {
             try {
                 const response = await fetch('/api/pending_friends_count');
+                
+                if (!response.ok) {
+                    console.log('User not logged in or error fetching pending friends');
+                    return;
+                }
+
                 const data = await response.json();
 
-                if (response.ok && data.pending_count > 0) {
-                    const notification = document.getElementById('pendingFriendsNotification');
-                    const text = document.getElementById('pendingFriendsText');
+                const notification = document.getElementById('pendingFriendsNotification');
+                const text = document.getElementById('pendingFriendsText');
 
-                    text.textContent = `มีเพื่อนใหม่เข้ามา ${data.pending_count} คน โปรดรีวิวและอนุมัติ`;
-                    notification.style.display = 'block';
+                if (data.pending_count > 0) {
+                    if (notification && text) {
+                        text.textContent = `มีเพื่อนใหม่เข้ามา ${data.pending_count} คน โปรดรีวิวและอนุมัติ`;
+                        notification.style.display = 'block';
 
-                    // เพิ่ม event listener สำหรับการคลิก
-                    notification.onclick = function() {
-                        window.location.href = '/friends';
-                    };
+                        // เพิ่ม event listener สำหรับการคลิก
+                        notification.onclick = function() {
+                            window.location.href = '/friends';
+                        };
+                    }
                 } else {
-                    document.getElementById('pendingFriendsNotification').style.display = 'none';
+                    if (notification) {
+                        notification.style.display = 'none';
+                    }
                 }
             } catch (error) {
                 console.error('Error checking pending friends:', error);
             }
         }
 
-        // Initialize page
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, initializing...');
-
-            if (!isInitialized && !isLoading) {
-                initializeProfile();
-            }
-        });
+        // กำหนดตัวแปร global ที่ขาดหาย
+        let isInitialized = false;
 
         // Refresh pending friends notification periodically
         setInterval(checkPendingFriends, 30000); // ตรวจสอบทุก 30 วินาที

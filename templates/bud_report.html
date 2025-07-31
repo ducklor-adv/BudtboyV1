@@ -2273,15 +2273,28 @@
                             // สำหรับมือถือ: สร้างรูปภาพและแสดงแบบ Modal พร้อมลิงก์ดาวน์โหลด
                             const imageDataUrl = canvas.toDataURL('image/png', 0.9);
                             
+                            // ลบ Modal เก่าถ้ามี
+                            const existingModal = document.getElementById('mobileImageModal');
+                            if (existingModal) {
+                                document.body.removeChild(existingModal);
+                            }
+                            
                             // สร้าง Modal แสดงรูปภาพ
                             const imageModal = document.createElement('div');
-                            imageModal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 20px 10px; box-sizing: border-box; overflow-y: auto;';
+                            imageModal.id = 'mobileImageModal';
+                            imageModal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.95); z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 20px 10px; box-sizing: border-box; overflow-y: auto; -webkit-overflow-scrolling: touch;';
                             
                             // ปุ่มปิด
                             const closeBtn = document.createElement('button');
                             closeBtn.innerHTML = '❌ ปิด';
-                            closeBtn.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #f44336; color: white; border: none; padding: 12px 18px; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; z-index: 10001; box-shadow: 0 4px 12px rgba(244,67,54,0.4);';
-                            closeBtn.onclick = () => {
+                            closeBtn.style.cssText = 'position: absolute; top: 20px; right: 20px; background: #f44336; color: white; border: none; padding: 12px 18px; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; z-index: 100000; box-shadow: 0 4px 12px rgba(244,67,54,0.4); user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;';
+                            closeBtn.onclick = (e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                document.body.style.overflow = '';
+                                document.body.style.position = '';
+                                document.body.style.width = '';
+                                document.body.style.height = '';
                                 if (document.body.contains(imageModal)) {
                                     document.body.removeChild(imageModal);
                                 }
@@ -2289,74 +2302,108 @@
                             
                             // Header
                             const header = document.createElement('div');
-                            header.innerHTML = '<h2 style="color: white; text-align: center; margin: 10px 0 20px 0; font-size: 20px;">📸 รูปภาพรายงานดอก</h2>';
+                            header.innerHTML = '<h2 style="color: white; text-align: center; margin: 50px 0 20px 0; font-size: 20px; font-weight: bold;">📸 รูปภาพรายงานดอก</h2>';
                             header.style.cssText = 'width: 100%; max-width: 400px;';
                             
                             // คำแนะนำ
                             const instructions = document.createElement('div');
                             instructions.innerHTML = `
-                                <div style="background: #2196F3; color: white; padding: 15px; border-radius: 15px; margin-bottom: 20px; font-size: 14px; line-height: 1.5; text-align: center;">
-                                    <strong>📱 วิธีบันทึกในมือถือ:</strong><br><br>
-                                    1️⃣ กดปุ่ม "💾 ดาวน์โหลดรูป" ด้านล่าง<br>
-                                    2️⃣ หรือกดค้างที่รูปภาพแล้วเลือก "บันทึกรูป"<br>
-                                    3️⃣ รูปจะถูกบันทึกในแกลเลอรี่ของคุณ
+                                <div style="background: linear-gradient(135deg, #2196F3, #1976D2); color: white; padding: 20px; border-radius: 15px; margin-bottom: 25px; font-size: 15px; line-height: 1.6; text-align: center; box-shadow: 0 6px 20px rgba(33,150,243,0.3);">
+                                    <strong style="font-size: 18px;">📱 วิธีบันทึกในมือถือ</strong><br><br>
+                                    <div style="text-align: left; margin-top: 15px;">
+                                        1️⃣ กดปุ่ม <strong>"💾 ดาวน์โหลดรูป"</strong> ด้านล่าง<br><br>
+                                        2️⃣ หรือ <strong>กดค้างที่รูปภาพ</strong> แล้วเลือก <strong>"บันทึกรูป"</strong><br><br>
+                                        3️⃣ รูปจะถูกบันทึกใน <strong>แกลเลอรี่</strong> ของคุณ<br><br>
+                                        💡 <em>หากไม่สำเร็จ ให้ลองเปิดรูปในแท็บใหม่แล้วบันทึก</em>
+                                    </div>
                                 </div>
                             `;
                             instructions.style.cssText = 'width: 100%; max-width: 400px;';
                             
-                            // ปุ่มดาวน์โหลด
+                            // สร้างปุ่มดาวน์โหลดหลายแบบ
+                            const downloadButtonsContainer = document.createElement('div');
+                            downloadButtonsContainer.style.cssText = 'display: flex; flex-direction: column; gap: 15px; margin-bottom: 25px; width: 100%; max-width: 400px;';
+                            
+                            // ปุ่มดาวน์โหลดหลัก
                             const downloadBtn = document.createElement('a');
                             downloadBtn.innerHTML = '💾 ดาวน์โหลดรูป';
                             downloadBtn.href = imageDataUrl;
                             downloadBtn.download = fileName;
-                            downloadBtn.style.cssText = 'background: #4CAF50; color: white; padding: 15px 30px; border-radius: 30px; font-size: 16px; font-weight: bold; text-decoration: none; margin-bottom: 20px; display: inline-block; box-shadow: 0 6px 15px rgba(76,175,80,0.4); transition: all 0.3s ease;';
+                            downloadBtn.target = '_blank';
+                            downloadBtn.style.cssText = 'background: linear-gradient(135deg, #4CAF50, #45a049); color: white; padding: 18px 30px; border-radius: 30px; font-size: 18px; font-weight: bold; text-decoration: none; display: inline-block; box-shadow: 0 8px 20px rgba(76,175,80,0.4); transition: all 0.3s ease; text-align: center; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;';
                             downloadBtn.onclick = (e) => {
                                 e.stopPropagation();
-                                // เพิ่มการ trigger ดาวน์โหลดสำหรับมือถือ
+                                console.log('Download button clicked');
                                 setTimeout(() => {
-                                    showSuccessMessage('✅ กำลังดาวน์โหลด...\n📱 ตรวจสอบในโฟลเดอร์ดาวน์โหลดของคุณ', 3000);
-                                }, 100);
+                                    showMobileSuccessMessage('✅ เริ่มดาวน์โหลดแล้ว!\n📱 ตรวจสอบในโฟลเดอร์ "ดาวน์โหลด" หรือ "แกลเลอรี่"', 4000);
+                                }, 300);
                             };
+                            
+                            // ปุ่มเปิดในแท็บใหม่
+                            const openNewTabBtn = document.createElement('button');
+                            openNewTabBtn.innerHTML = '🔗 เปิดในแท็บใหม่';
+                            openNewTabBtn.style.cssText = 'background: linear-gradient(135deg, #FF9800, #F57C00); color: white; padding: 15px 25px; border: none; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 6px 15px rgba(255,152,0,0.4); transition: all 0.3s ease; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;';
+                            openNewTabBtn.onclick = (e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                console.log('Open new tab clicked');
+                                window.open(imageDataUrl, '_blank');
+                                showMobileSuccessMessage('✅ เปิดในแท็บใหม่แล้ว!\n📱 กดค้างที่รูปแล้วเลือก "บันทึกรูป"', 3000);
+                            };
+                            
+                            downloadButtonsContainer.appendChild(downloadBtn);
+                            downloadButtonsContainer.appendChild(openNewTabBtn);
                             
                             // รูปภาพ
                             const img = document.createElement('img');
                             img.src = imageDataUrl;
                             img.alt = fileName;
-                            img.style.cssText = 'max-width: 95%; max-height: 60vh; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.5); background: white; margin-bottom: 20px; object-fit: contain;';
+                            img.style.cssText = 'max-width: 95%; max-height: 55vh; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.7); background: white; margin-bottom: 25px; object-fit: contain; user-select: none; -webkit-user-select: none; -webkit-touch-callout: default;';
                             
                             // ข้อความเพิ่มเติม
                             const additionalInfo = document.createElement('div');
-                            additionalInfo.innerHTML = '<div style="color: #FFD700; text-align: center; font-size: 13px; font-weight: 500; margin-top: 10px;">💡 หากไม่สามารถดาวน์โหลดได้ ให้กดค้างที่รูปภาพข้างบนแล้วเลือก "บันทึกรูป"</div>';
+                            additionalInfo.innerHTML = `
+                                <div style="color: #FFD700; text-align: center; font-size: 14px; font-weight: 500; background: rgba(255,215,0,0.1); padding: 15px; border-radius: 12px; border: 2px solid rgba(255,215,0,0.3);">
+                                    <strong>💡 หากดาวน์โหลดไม่สำเร็จ:</strong><br><br>
+                                    • กดปุ่ม "เปิดในแท็บใหม่" ด้านบน<br>
+                                    • หรือกดค้างที่รูปภาพข้างบนแล้วเลือก "บันทึกรูปภาพ"<br>
+                                    • หรือ Screenshot หน้าจอนี้
+                                </div>
+                            `;
+                            additionalInfo.style.cssText = 'width: 100%; max-width: 400px; margin-bottom: 20px;';
                             
                             // รวมทุกอย่างเข้าด้วยกัน
                             imageModal.appendChild(closeBtn);
                             imageModal.appendChild(header);
                             imageModal.appendChild(instructions);
-                            imageModal.appendChild(downloadBtn);
+                            imageModal.appendChild(downloadButtonsContainer);
                             imageModal.appendChild(img);
                             imageModal.appendChild(additionalInfo);
                             
                             // เพิ่มเข้าหน้า
                             document.body.appendChild(imageModal);
                             
-                            // ป้องกันการ scroll
+                            // ป้องกันการ scroll และ zoom
                             document.body.style.overflow = 'hidden';
+                            document.body.style.position = 'fixed';
+                            document.body.style.width = '100%';
+                            document.body.style.height = '100%';
                             
-                            // เมื่อปิด modal
-                            const originalClose = closeBtn.onclick;
-                            closeBtn.onclick = () => {
-                                document.body.style.overflow = '';
-                                if (originalClose) originalClose();
-                            };
-                            
-                            // ปิดเมื่อคลิกพื้นหลัง
-                            imageModal.onclick = (e) => {
+                            // ปิดเมื่อคลิกพื้นหลัง (ยกเว้นรูปภาพ)
+                            imageModal.addEventListener('click', (e) => {
                                 if (e.target === imageModal) {
-                                    closeBtn.onclick();
+                                    closeBtn.onclick(e);
                                 }
-                            };
+                            });
                             
-                            showSuccessMessage('✅ สร้างรูปภาพสำเร็จ!\n📱 กดปุ่มดาวน์โหลดหรือกดค้างที่รูปเพื่อบันทึก', 4000);
+                            // ป้องกันการ zoom บนมือถือ
+                            imageModal.addEventListener('touchstart', (e) => {
+                                if (e.touches.length > 1) {
+                                    e.preventDefault();
+                                }
+                            }, { passive: false });
+                            
+                            showMobileSuccessMessage('✅ สร้างรูปภาพสำเร็จ!\n📱 เลือกวิธีดาวน์โหลดด้านล่าง', 3000);
                             
                         } else {
                             // สำหรับ PC: ใช้วิธีเดิม
@@ -2396,6 +2443,37 @@
                     }
                 } catch (e) {
                     console.warn('Error removing success message:', e);
+                }
+            }, duration || 3000);
+        }
+        
+        function showMobileSuccessMessage(message, duration) {
+            // ลบข้อความเก่าถ้ามี
+            const existingMsg = document.getElementById('mobileSuccessMsg');
+            if (existingMsg) {
+                document.body.removeChild(existingMsg);
+            }
+            
+            const successMsg = document.createElement('div');
+            successMsg.id = 'mobileSuccessMsg';
+            successMsg.innerHTML = message.replace(/\n/g, '<br>');
+            successMsg.style.cssText = 'position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #4CAF50, #45a049); color: white; padding: 20px 25px; border-radius: 20px; z-index: 100001; font-weight: bold; box-shadow: 0 8px 25px rgba(76,175,80,0.4); text-align: center; max-width: 85%; font-size: 16px; line-height: 1.4; border: 3px solid rgba(255,255,255,0.3);';
+            document.body.appendChild(successMsg);
+            
+            setTimeout(() => {
+                try {
+                    if (successMsg && document.body.contains(successMsg)) {
+                        successMsg.style.opacity = '0';
+                        successMsg.style.transform = 'translateX(-50%) translateY(-20px)';
+                        successMsg.style.transition = 'all 0.5s ease';
+                        setTimeout(() => {
+                            if (document.body.contains(successMsg)) {
+                                document.body.removeChild(successMsg);
+                            }
+                        }, 500);
+                    }
+                } catch (e) {
+                    console.warn('Error removing mobile success message:', e);
                 }
             }, duration || 3000);
         }

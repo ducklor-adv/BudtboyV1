@@ -4172,16 +4172,17 @@ def find_matching_buds(search_criteria):
                    ({scoring_expr}) as match_score
             FROM buds_data b
             LEFT JOIN reviews r ON b.id = r.bud_reference_id
-            WHERE {' AND '.join(where_conditions)}
+            WHERE {' AND '.join(where_conditions) if where_conditions else '1=1'}
             GROUP BY b.id, b.strain_name_en, b.strain_name_th, b.breeder, b.strain_type,
                      b.thc_percentage, b.cbd_percentage, b.grade, b.aroma_flavor,
                      b.mental_effects_positive, b.physical_effects_positive,
                      b.recommended_time, b.created_at, b.top_terpenes_1, b.top_terpenes_2, b.top_terpenes_3
-            HAVING ({scoring_expr}) > 0
             ORDER BY match_score DESC, avg_rating DESC, review_count DESC
             LIMIT 3
         """
         
+        print(f"Debug: Executing query with {len(params)} parameters")
+        print(f"Debug: Query: {base_query}")
         cur.execute(base_query, params)
         results = cur.fetchall()
         
@@ -4207,7 +4208,7 @@ def find_matching_buds(search_criteria):
                 'avg_rating': float(row[16]) if row[16] else 0,
                 'review_count': row[17],
                 'match_score': row[18],
-                'report_link': f"/bud-report?id={row[0]}"
+                'report_link': f"/bud_report/{row[0]}"
             }
             buds.append(bud)
         
@@ -4260,7 +4261,7 @@ def generate_recommendation_response(search_criteria, recommended_buds, original
         return response
     
     # หากพบดอกที่ตรงตามเกณฑ์
-    response = f"🎯 พบดอกที่ตรงกับความต้องการของคุณ! ผมแนะนำ:\n\n"
+    response = f"🎯 พบดอกที่ตรงกับความต้องการของคุณจากฐานข้อมูลของเรา! ผมแนะนำ:\n\n"
     
     for i, bud in enumerate(recommended_buds, 1):
         rating_stars = "⭐" * int(round(bud['avg_rating'])) if bud['avg_rating'] > 0 else "ยังไม่มีรีวิว"
@@ -4288,9 +4289,10 @@ def generate_recommendation_response(search_criteria, recommended_buds, original
         if terpenes:
             response += f"   • Terpenes หลัก: {', '.join(terpenes[:2])}\n"
             
-        response += f"   • 📊 **[ดูรายละเอียดเต็ม]({bud['report_link']})**\n\n"
+        # ใช้ format URL ที่ถูกต้องตาม route ที่มีอยู่
+        response += f"   • 📊 **[ดูรายละเอียดเต็ม](/bud_report/{bud['id']})**\n\n"
     
-    response += "🌟 คลิกลิงก์เพื่อดูข้อมูลครบถ้วน รีวิว และการติดต่อผู้ปลูกครับ!"
+    response += "🌟 คลิกลิงก์เพื่อดูข้อมูลครบถ้วน รีวิว และการติดต่อผู้ปลูกจากฐานข้อมูลของเราครับ!"
     
     return response
 
@@ -4364,7 +4366,7 @@ def get_alternative_recommendations(search_criteria):
                 'created_at': row[12].strftime('%Y-%m-%d') if row[12] else None,
                 'avg_rating': float(row[13]) if row[13] else 0,
                 'review_count': row[14],
-                'report_link': f"/bud-report?id={row[0]}",
+                'report_link': f"/bud_report/{row[0]}",
                 'why_recommended': reasons[0] if reasons else "ยอดนิยม"
             }
             alternatives.append(alternative)

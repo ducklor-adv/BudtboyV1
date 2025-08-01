@@ -3757,7 +3757,8 @@ def chat_with_ai():
         bud_request_keywords = [
             'หาดอก', 'แนะนำดอก', 'อยากได้ดอก', 'ช่วยหาดอก', 'ขอดอก', 
             'ดอกไหนดี', 'มีดอกอะไร', 'ดอกแบบไหน', 'แนะนำสายพันธุ์',
-            'strain ไหนดี', 'ดอกสำหรับ', 'หาสายพันธุ์'
+            'strain ไหนดี', 'ดอกสำหรับ', 'หาสายพันธุ์', 'thc', 'cbd',
+            'ต่ำกว่า', 'สูงกว่า', 'น้อยกว่า', 'มากกว่า', '%'
         ]
         
         # ตรวจสอบว่ามีคำขอดอกในข้อความหรือไม่
@@ -3940,7 +3941,40 @@ def generateSimpleBotResponse(user_message):
 def analyze_user_request(user_message):
     """วิเคราะห์ความต้องการของ user และแปลงเป็นเกณฑ์การค้นหาแบบละเอียด"""
     try:
-        # ใช้ OpenAI เพื่อวิเคราะห์ความต้องการอย่างละเอียด
+        # ตรวจสอบข้อความแบบง่าย ๆ ก่อน
+        message_lower = user_message.lower()
+        
+        # ตรวจสอบ THC/CBD requirements
+        thc_preference = None
+        cbd_preference = None
+        
+        # ค้นหาตัวเลข THC
+        import re
+        thc_match = re.search(r'thc.*?(\d+)', message_lower)
+        if thc_match:
+            thc_value = int(thc_match.group(1))
+            if 'น้อยกว่า' in message_lower or 'ต่ำกว่า' in message_lower or '<' in message_lower:
+                thc_preference = "ต่ำ" if thc_value < 15 else "ปกติ"
+            elif 'มากกว่า' in message_lower or 'สูงกว่า' in message_lower or '>' in message_lower:
+                thc_preference = "สูง" if thc_value > 20 else "ปกติ"
+        
+        # สร้างเกณฑ์การค้นหาจากการวิเคราะห์ง่าย ๆ
+        criteria = {
+            'specificity_score': 7,
+            'thc_preference': thc_preference,
+            'cbd_preference': cbd_preference,
+            'strain_type': None,
+            'specific_strain_name': None,
+            'desired_effects': [],
+            'time_preference': None,
+            'aroma_keywords': [],
+            'terpene_keywords': [],
+            'grade_preference': None
+        }
+        
+        return criteria
+        
+        # ใช้ OpenAI เพื่อวิเคราะห์ความต้องการอย่างละเอียด (เป็น fallback)
         analysis_prompt = f"""
 วิเคราะห์ข้อความต่อไปนี้อย่างละเอียดและระบุว่าผู้ใช้กำลังขอคำแนะนำดอกกัญชาหรือไม่:
 
@@ -4088,14 +4122,20 @@ def find_matching_buds(search_criteria):
         # 6. กรองตาม THC preference
         if search_criteria.get('thc_preference'):
             if search_criteria['thc_preference'] == 'สูง':
-                where_conditions.append("thc_percentage > 20")
-                scoring_conditions.append("CASE WHEN thc_percentage > 20 THEN 10 ELSE 0 END")
+                where_conditions.append("thc_percentage > %s")
+                params.append(20)
+                scoring_conditions.append("CASE WHEN thc_percentage > %s THEN 15 ELSE 0 END")
+                params.append(20)
             elif search_criteria['thc_preference'] == 'ปกติ':
-                where_conditions.append("thc_percentage BETWEEN 15 AND 20")
-                scoring_conditions.append("CASE WHEN thc_percentage BETWEEN 15 AND 20 THEN 10 ELSE 0 END")
+                where_conditions.append("thc_percentage BETWEEN %s AND %s")
+                params.extend([15, 20])
+                scoring_conditions.append("CASE WHEN thc_percentage BETWEEN %s AND %s THEN 15 ELSE 0 END")
+                params.extend([15, 20])
             elif search_criteria['thc_preference'] == 'ต่ำ':
-                where_conditions.append("thc_percentage < 15")
-                scoring_conditions.append("CASE WHEN thc_percentage < 15 THEN 10 ELSE 0 END")
+                where_conditions.append("thc_percentage < %s")
+                params.append(20)
+                scoring_conditions.append("CASE WHEN thc_percentage < %s THEN 15 ELSE 0 END")
+                params.append(20)
         
         # 7. กรองตาม CBD preference
         if search_criteria.get('cbd_preference'):
@@ -4115,8 +4155,9 @@ def find_matching_buds(search_criteria):
         
         # สร้าง query พร้อมคะแนนการจับคู่
         if not where_conditions:
-            # หากไม่มีเงื่อนไข ให้ส่งกลับรายการว่าง
-            return []
+            # หากไม่มีเงื่อนไข ให้แสดงดอกยอดนิยม
+            where_conditions.append("1=1")  # แสดงทุกดอก
+            scoring_conditions.append("CASE WHEN grade IN ('A+', 'A') THEN 5 ELSE 0 END")
         
         # สร้าง scoring expression
         scoring_expr = " + ".join(scoring_conditions) if scoring_conditions else "0"

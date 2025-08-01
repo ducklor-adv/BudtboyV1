@@ -440,37 +440,7 @@
             </div>
         </div>
         
-        <div class="controls">
-            <div class="filter-group">
-                <label>กรองตามประเภท:</label>
-                <select id="strainTypeFilter" class="filter-select">
-                    <option value="">ทั้งหมด</option>
-                    <option value="Indica">Indica</option>
-                    <option value="Sativa">Sativa</option>
-                    <option value="Hybrid">Hybrid</option>
-                </select>
-            </div>
-            
-            <div class="filter-group">
-                <label>กรองตามเกรด:</label>
-                <select id="gradeFilter" class="filter-select">
-                    <option value="">ทั้งหมด</option>
-                    <option value="A+">A+</option>
-                    <option value="A">A</option>
-                    <option value="B+">B+</option>
-                    <option value="B">B</option>
-                    <option value="C">C</option>
-                </select>
-            </div>
-            
-            <button id="exportBtn" class="export-btn" onclick="exportToCSV()">
-                📥 ส่งออก CSV
-            </button>
-            
-            <button id="printBtn" class="print-btn" onclick="printToPDF()">
-                📄 พิมพ์เป็น PDF
-            </button>
-        </div>
+        
         
         <div class="table-container">
             <div id="loadingMessage" class="loading">กำลังโหลดข้อมูล...</div>
@@ -500,11 +470,9 @@
 
     <script>
         let allBudsData = [];
-        let filteredData = [];
         
         window.addEventListener('load', async () => {
             await loadAllBudsData();
-            setupFilters();
         });
         
         async function loadAllBudsData() {
@@ -513,7 +481,6 @@
                 if (response.ok) {
                     const data = await response.json();
                     allBudsData = data.buds || [];
-                    filteredData = [...allBudsData];
                     
                     updateSummaryCards();
                     displayTable();
@@ -544,33 +511,17 @@
             document.getElementById('totalGrowers').textContent = uniqueGrowers;
         }
         
-        function setupFilters() {
-            document.getElementById('strainTypeFilter').addEventListener('change', applyFilters);
-            document.getElementById('gradeFilter').addEventListener('change', applyFilters);
-        }
         
-        function applyFilters() {
-            const strainTypeFilter = document.getElementById('strainTypeFilter').value;
-            const gradeFilter = document.getElementById('gradeFilter').value;
-            
-            filteredData = allBudsData.filter(bud => {
-                if (strainTypeFilter && bud.strain_type !== strainTypeFilter) return false;
-                if (gradeFilter && bud.grade !== gradeFilter) return false;
-                return true;
-            });
-            
-            displayTable();
-        }
         
         function displayTable() {
             const tbody = document.getElementById('tableBody');
             
-            if (filteredData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="11" class="empty-state">ไม่พบข้อมูลที่ตรงกับการกรอง</td></tr>';
+            if (allBudsData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="11" class="empty-state">ไม่พบข้อมูล</td></tr>';
                 return;
             }
             
-            tbody.innerHTML = filteredData.map(bud => `
+            tbody.innerHTML = allBudsData.map(bud => `
                 <tr>
                     <td>${bud.id}</td>
                     <td class="strain-name">${bud.strain_name_en || 'ไม่ระบุ'}</td>
@@ -636,60 +587,7 @@
             });
         }
         
-        function exportToCSV() {
-            const headers = ['ID', 'ชื่อดอก (EN)', 'ชื่อดอก (TH)', 'ผู้พัฒนา', 'ประเภท', 'THC%', 'CBD%', 'เกรด', 'คะแนนเฉลี่ย', 'จำนวนรีวิว', 'ผู้ปลูก', 'มีใบอนุญาต', 'วันที่เพิ่ม'];
-            
-            const csvContent = [
-                headers.join(','),
-                ...filteredData.map(bud => [
-                    bud.id,
-                    `"${bud.strain_name_en || ''}"`,
-                    `"${bud.strain_name_th || ''}"`,
-                    `"${bud.breeder || ''}"`,
-                    `"${bud.strain_type || ''}"`,
-                    bud.thc_percentage || '',
-                    bud.cbd_percentage || '',
-                    `"${bud.grade || ''}"`,
-                    (bud.avg_rating || 0).toFixed(1),
-                    bud.review_count || 0,
-                    `"${bud.grower_name || ''}"`,
-                    bud.grower_license_verified ? 'ใช่' : 'ไม่',
-                    formatDate(bud.created_at)
-                ].join(','))
-            ].join('\n');
-            
-            const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            link.setAttribute('href', url);
-            link.setAttribute('download', `cannabis_report_${new Date().toISOString().split('T')[0]}.csv`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
         
-        function printToPDF() {
-            // Hide elements that shouldn't be printed
-            const controlsElement = document.querySelector('.controls');
-            const originalDisplay = controlsElement.style.display;
-            
-            // Temporarily hide controls for printing
-            controlsElement.style.display = 'none';
-            
-            // Set page title for PDF
-            const originalTitle = document.title;
-            document.title = `รายงานข้อมูลดอกทั้งหมด_${new Date().toISOString().split('T')[0]}`;
-            
-            // Open print dialog
-            window.print();
-            
-            // Restore original state after printing
-            setTimeout(() => {
-                controlsElement.style.display = originalDisplay;
-                document.title = originalTitle;
-            }, 1000);
-        }
     </script>
 </body>
 </html>

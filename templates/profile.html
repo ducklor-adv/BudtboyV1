@@ -1943,20 +1943,22 @@
                 const notification = document.getElementById('pendingFriendsNotification');
                 const text = document.getElementById('pendingFriendsText');
 
-                if (data.pending_count > 0) {
-                    if (notification && text) {
-                        text.textContent = `มีเพื่อนใหม่เข้ามา ${data.pending_count} คน โปรดรีวิวและอนุมัติ`;
-                        notification.style.display = 'block';
+                // เพิ่ม null check ให้ชัดเจนขึ้น
+                if (!notification || !text) {
+                    console.log('Pending friends notification elements not found');
+                    return;
+                }
 
-                        // เพิ่ม event listener สำหรับการคลิก
-                        notification.onclick = function() {
-                            window.location.href = '/friends';
-                        };
-                    }
+                if (data.pending_count > 0) {
+                    text.textContent = `มีเพื่อนใหม่เข้ามา ${data.pending_count} คน โปรดรีวิวและอนุมัติ`;
+                    notification.style.display = 'block';
+
+                    // เพิ่ม event listener สำหรับการคลิก
+                    notification.onclick = function() {
+                        window.location.href = '/friends';
+                    };
                 } else {
-                    if (notification) {
-                        notification.style.display = 'none';
-                    }
+                    notification.style.display = 'none';
                 }
             } catch (error) {
                 console.error('Error checking pending friends:', error);

@@ -614,57 +614,6 @@
                     </div>
                 </div>
 
-                <!-- Growing Information -->
-                <div class="form-section">
-                    <div class="section-title">
-                        🌱 ข้อมูลการปลูก
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="grow_method">วิธีการปลูก</label>
-                            <select id="grow_method" name="grow_method">
-                                <option value="">ทุกวิธี</option>
-                                <option value="Indoor">Indoor</option>
-                                <option value="Outdoor">Outdoor</option>
-                                <option value="Greenhouse">Greenhouse</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="fertilizer_type">ประเภทปุ่ย</label>
-                            <select id="fertilizer_type" name="fertilizer_type">
-                                <option value="">ทุกประเภท</option>
-                                <option value="Organic">Organic</option>
-                                <option value="Chemical">Chemical</option>
-                                <option value="Mixed">Mixed</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="flowering_type">ประเภทการออกดอก</label>
-                            <select id="flowering_type" name="flowering_type">
-                                <option value="">ทุกประเภท</option>
-                                <option value="Photoperiod">Photoperiod</option>
-                                <option value="Autoflower">Autoflower</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="harvest_date_from">วันที่เก็บเกี่ยว (จาก)</label>
-                            <input type="date" id="harvest_date_from" name="harvest_date_from">
-                        </div>
-                        <div class="form-group">
-                            <label for="harvest_date_to">วันที่เก็บเกี่ยว (ถึง)</label>
-                            <input type="date" id="harvest_date_to" name="harvest_date_to">
-                        </div>
-                        <div class="form-group">
-                            <label for="batch_number">หมายเลข Batch</label>
-                            <input type="text" id="batch_number" name="batch_number" placeholder="เช่น BD2024-001">
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Terpenes and Sensory -->
                 <div class="form-section">
                     <div class="section-title">
@@ -923,7 +872,58 @@
                     </div>
                 </div>
 
-                <div class="form-actions">
+                <!-- Growing Information -->
+                <div class="form-section">
+                    <div class="section-title">
+                        🌱 ข้อมูลการปลูก
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="grow_method">วิธีการปลูก</label>
+                            <select id="grow_method" name="grow_method">
+                                <option value="">ทุกวิธี</option>
+                                <option value="Indoor">Indoor</option>
+                                <option value="Outdoor">Outdoor</option>
+                                <option value="Greenhouse">Greenhouse</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="fertilizer_type">ประเภทปุ่ย</label>
+                            <select id="fertilizer_type" name="fertilizer_type">
+                                <option value="">ทุกประเภท</option>
+                                <option value="Organic">Organic</option>
+                                <option value="Chemical">Chemical</option>
+                                <option value="Mixed">Mixed</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="flowering_type">ประเภทการออกดอก</label>
+                            <select id="flowering_type" name="flowering_type">
+                                <option value="">ทุกประเภท</option>
+                                <option value="Photoperiod">Photoperiod</option>
+                                <option value="Autoflower">Autoflower</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="harvest_date_from">วันที่เก็บเกี่ยว (จาก)</label>
+                            <input type="date" id="harvest_date_from" name="harvest_date_from">
+                        </div>
+                        <div class="form-group">
+                            <label for="harvest_date_to">วันที่เก็บเกี่ยว (ถึง)</label>
+                            <input type="date" id="harvest_date_to" name="harvest_date_to">
+                        </div>
+                        <div class="form-group">
+                            <label for="batch_number">หมายเลข Batch</label>
+                            <input type="text" id="batch_number" name="batch_number" placeholder="เช่น BD2024-001">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions"></div>
                     <button type="submit" class="btn btn-primary">
                         🔍 ค้นหา
                     </button>

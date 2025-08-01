@@ -3200,6 +3200,15 @@ def bud_report_page(bud_id=None):
     
     return render_template('bud_report.html', bud_id=bud_id)
 
+@app.route('/search-tool')
+def search_tool_page():
+    # Check if user is logged in
+    if 'user_id' not in session:
+        return redirect('/auth')
+    if not is_approved():
+        return redirect('/profile?not_approved=1')
+    return render_template('search_tool.html')
+
 @app.route('/friends')
 def friends_page():
     # Check if user is logged in
@@ -3208,6 +3217,138 @@ def friends_page():
     if not is_approved():
         return redirect('/profile?not_approved=1')
     return render_template('friends.html')
+
+@app.route('/api/search-buds', methods=['POST'])
+def search_buds():
+    """Search buds based on criteria"""
+    if not is_authenticated():
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    data = request.get_json()
+    
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            
+            # Build dynamic query
+            query_parts = []
+            params = []
+            
+            base_query = """
+                SELECT b.id, b.strain_name_en, b.strain_name_th, b.breeder, b.strain_type,
+                       b.thc_percentage, b.cbd_percentage, b.grade, b.aroma_flavor,
+                       b.recommended_time, b.grow_method, b.created_at,
+                       COALESCE(AVG(r.overall_rating), 0) as avg_rating,
+                       COUNT(r.id) as review_count
+                FROM buds_data b
+                LEFT JOIN reviews r ON b.id = r.bud_reference_id
+                WHERE 1=1
+            """
+            
+            # Add search conditions
+            if data.get('strain_name_en'):
+                query_parts.append("AND b.strain_name_en ILIKE %s")
+                params.append(f"%{data['strain_name_en']}%")
+                
+            if data.get('strain_name_th'):
+                query_parts.append("AND b.strain_name_th ILIKE %s")
+                params.append(f"%{data['strain_name_th']}%")
+                
+            if data.get('breeder'):
+                query_parts.append("AND b.breeder ILIKE %s")
+                params.append(f"%{data['breeder']}%")
+                
+            if data.get('strain_type'):
+                query_parts.append("AND b.strain_type = %s")
+                params.append(data['strain_type'])
+                
+            if data.get('grade'):
+                query_parts.append("AND b.grade = %s")
+                params.append(data['grade'])
+                
+            if data.get('recommended_time'):
+                query_parts.append("AND b.recommended_time = %s")
+                params.append(data['recommended_time'])
+                
+            if data.get('grow_method'):
+                query_parts.append("AND b.grow_method = %s")
+                params.append(data['grow_method'])
+                
+            # THC range
+            if data.get('thc_min'):
+                query_parts.append("AND b.thc_percentage >= %s")
+                params.append(float(data['thc_min']))
+                
+            if data.get('thc_max'):
+                query_parts.append("AND b.thc_percentage <= %s")
+                params.append(float(data['thc_max']))
+                
+            # CBD range
+            if data.get('cbd_min'):
+                query_parts.append("AND b.cbd_percentage >= %s")
+                params.append(float(data['cbd_min']))
+                
+            if data.get('cbd_max'):
+                query_parts.append("AND b.cbd_percentage <= %s")
+                params.append(float(data['cbd_max']))
+                
+            # Aroma/flavor search
+            if data.get('aroma_flavor'):
+                flavors = [f.strip() for f in data['aroma_flavor'].split(',')]
+                flavor_conditions = []
+                for flavor in flavors:
+                    if flavor:
+                        flavor_conditions.append("b.aroma_flavor ILIKE %s")
+                        params.append(f"%{flavor}%")
+                if flavor_conditions:
+                    query_parts.append(f"AND ({' OR '.join(flavor_conditions)})")
+            
+            # Complete query
+            full_query = base_query + ' '.join(query_parts) + """
+                GROUP BY b.id, b.strain_name_en, b.strain_name_th, b.breeder, b.strain_type,
+                         b.thc_percentage, b.cbd_percentage, b.grade, b.aroma_flavor,
+                         b.recommended_time, b.grow_method, b.created_at
+                ORDER BY avg_rating DESC, b.created_at DESC
+                LIMIT 50
+            """
+            
+            cur.execute(full_query, params)
+            results = cur.fetchall()
+            
+            buds = []
+            for row in results:
+                buds.append({
+                    'id': row[0],
+                    'strain_name_en': row[1],
+                    'strain_name_th': row[2],
+                    'breeder': row[3],
+                    'strain_type': row[4],
+                    'thc_percentage': float(row[5]) if row[5] else None,
+                    'cbd_percentage': float(row[6]) if row[6] else None,
+                    'grade': row[7],
+                    'aroma_flavor': row[8],
+                    'recommended_time': row[9],
+                    'grow_method': row[10],
+                    'created_at': row[11].strftime('%Y-%m-%d') if row[11] else None,
+                    'avg_rating': float(row[12]) if row[12] else 0,
+                    'review_count': row[13]
+                })
+            
+            cur.close()
+            return_db_connection(conn)
+            
+            return jsonify({'success': True, 'buds': buds})
+            
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+        finally:
+            if cur:
+                cur.close()
+            if conn:
+                return_db_connection(conn)
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
 @app.route('/api/buds/<int:bud_id>/detail', methods=['GET'])
 def get_bud_detail(bud_id):

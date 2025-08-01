@@ -1965,8 +1965,8 @@
 
         async function checkPendingFriends() {
             try {
-                // ตรวจสอบว่า user ยัง login อยู่หรือไม่
-                if (!session || !session.user_id) {
+                // ตรวจสอบว่า currentUserData มีอยู่และ user ยัง login อยู่หรือไม่
+                if (!currentUserData || !currentUserData.id) {
                     console.log('User not logged in, skipping pending friends check');
                     return;
                 }
@@ -2010,6 +2010,11 @@
                 }
             } catch (error) {
                 console.error('Error checking pending friends:', error);
+                // หยุดการเรียกซ้ำเมื่อเกิดข้อผิดพลาดซ้ำๆ
+                if (window.pendingFriendsInterval) {
+                    clearInterval(window.pendingFriendsInterval);
+                    window.pendingFriendsInterval = null;
+                }
             }
         }
 

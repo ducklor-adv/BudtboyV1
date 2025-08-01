@@ -262,6 +262,73 @@
             content: "▼";
         }
         
+        .filter-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .filter-option {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #f8f9fa;
+            font-size: 12px;
+            transition: background-color 0.2s ease;
+        }
+        
+        .filter-option:hover {
+            background: #f8f9fa;
+        }
+        
+        .filter-option:last-child {
+            border-bottom: none;
+        }
+        
+        .filter-option.selected {
+            background: #e3f2fd;
+            color: #1976d2;
+            font-weight: 600;
+        }
+        
+        .filter-clear {
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            font-size: 12px;
+            color: #dc3545;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .filter-clear:hover {
+            background: #e9ecef;
+        }
+        
+        .filter-indicator {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 8px;
+            background: #2196F3;
+            border-radius: 50%;
+            display: none;
+        }
+        
+        .data-table th {
+            position: relative;
+        }
+        
         .data-table td {
             padding: 12px 8px;
             border-bottom: 1px solid #dee2e6;
@@ -495,45 +562,65 @@
             <table id="dataTable" class="data-table" style="display: none;">
                 <thead>
                     <tr>
-                        <th onclick="sortTable('id')" data-column="id">
+                        <th onclick="handleHeaderClick(event, 'id')" data-column="id">
                             ID
                             <span class="sort-indicator" id="sort-id"></span>
+                            <span class="filter-indicator" id="filter-id"></span>
+                            <div class="filter-dropdown" id="dropdown-id"></div>
                         </th>
-                        <th onclick="sortTable('strain_name_en')" data-column="strain_name_en">
+                        <th onclick="handleHeaderClick(event, 'strain_name_en')" data-column="strain_name_en">
                             ชื่อดอก
                             <span class="sort-indicator" id="sort-strain_name_en"></span>
+                            <span class="filter-indicator" id="filter-strain_name_en"></span>
+                            <div class="filter-dropdown" id="dropdown-strain_name_en"></div>
                         </th>
-                        <th onclick="sortTable('strain_name_th')" data-column="strain_name_th">
+                        <th onclick="handleHeaderClick(event, 'strain_name_th')" data-column="strain_name_th">
                             ชื่อไทย
                             <span class="sort-indicator" id="sort-strain_name_th"></span>
+                            <span class="filter-indicator" id="filter-strain_name_th"></span>
+                            <div class="filter-dropdown" id="dropdown-strain_name_th"></div>
                         </th>
-                        <th onclick="sortTable('strain_type')" data-column="strain_type">
+                        <th onclick="handleHeaderClick(event, 'strain_type')" data-column="strain_type">
                             ประเภท
                             <span class="sort-indicator" id="sort-strain_type"></span>
+                            <span class="filter-indicator" id="filter-strain_type"></span>
+                            <div class="filter-dropdown" id="dropdown-strain_type"></div>
                         </th>
-                        <th onclick="sortTable('thc_percentage')" data-column="thc_percentage">
+                        <th onclick="handleHeaderClick(event, 'thc_percentage')" data-column="thc_percentage">
                             THC/CBD
                             <span class="sort-indicator" id="sort-thc_percentage"></span>
+                            <span class="filter-indicator" id="filter-thc_percentage"></span>
+                            <div class="filter-dropdown" id="dropdown-thc_percentage"></div>
                         </th>
-                        <th onclick="sortTable('grade')" data-column="grade">
+                        <th onclick="handleHeaderClick(event, 'grade')" data-column="grade">
                             เกรด
                             <span class="sort-indicator" id="sort-grade"></span>
+                            <span class="filter-indicator" id="filter-grade"></span>
+                            <div class="filter-dropdown" id="dropdown-grade"></div>
                         </th>
-                        <th onclick="sortTable('avg_rating')" data-column="avg_rating">
+                        <th onclick="handleHeaderClick(event, 'avg_rating')" data-column="avg_rating">
                             คะแนนเฉลี่ย
                             <span class="sort-indicator" id="sort-avg_rating"></span>
+                            <span class="filter-indicator" id="filter-avg_rating"></span>
+                            <div class="filter-dropdown" id="dropdown-avg_rating"></div>
                         </th>
-                        <th onclick="sortTable('review_count')" data-column="review_count">
+                        <th onclick="handleHeaderClick(event, 'review_count')" data-column="review_count">
                             จำนวนรีวิว
                             <span class="sort-indicator" id="sort-review_count"></span>
+                            <span class="filter-indicator" id="filter-review_count"></span>
+                            <div class="filter-dropdown" id="dropdown-review_count"></div>
                         </th>
-                        <th onclick="sortTable('grower_name')" data-column="grower_name">
+                        <th onclick="handleHeaderClick(event, 'grower_name')" data-column="grower_name">
                             ผู้ปลูก
                             <span class="sort-indicator" id="sort-grower_name"></span>
+                            <span class="filter-indicator" id="filter-grower_name"></span>
+                            <div class="filter-dropdown" id="dropdown-grower_name"></div>
                         </th>
-                        <th onclick="sortTable('created_at')" data-column="created_at">
+                        <th onclick="handleHeaderClick(event, 'created_at')" data-column="created_at">
                             วันที่เพิ่ม
                             <span class="sort-indicator" id="sort-created_at"></span>
+                            <span class="filter-indicator" id="filter-created_at"></span>
+                            <div class="filter-dropdown" id="dropdown-created_at"></div>
                         </th>
                         <th>รายงาน</th>
                     </tr>
@@ -546,8 +633,10 @@
 
     <script>
         let allBudsData = [];
+        let filteredBudsData = [];
         let currentSortColumn = null;
         let currentSortDirection = 'asc';
+        let activeFilters = {};
         
         window.addEventListener('load', async () => {
             await loadAllBudsData();
@@ -577,11 +666,12 @@
         }
         
         function updateSummaryCards() {
-            const totalBuds = allBudsData.length;
-            const totalReviews = allBudsData.reduce((sum, bud) => sum + (bud.review_count || 0), 0);
-            const ratingsSum = allBudsData.reduce((sum, bud) => sum + ((bud.avg_rating || 0) * (bud.review_count || 0)), 0);
+            const dataToUse = filteredBudsData.length > 0 ? filteredBudsData : allBudsData;
+            const totalBuds = dataToUse.length;
+            const totalReviews = dataToUse.reduce((sum, bud) => sum + (bud.review_count || 0), 0);
+            const ratingsSum = dataToUse.reduce((sum, bud) => sum + ((bud.avg_rating || 0) * (bud.review_count || 0)), 0);
             const avgRating = totalReviews > 0 ? (ratingsSum / totalReviews).toFixed(1) : '0.0';
-            const uniqueGrowers = new Set(allBudsData.map(bud => bud.grower_id)).size;
+            const uniqueGrowers = new Set(dataToUse.map(bud => bud.grower_id)).size;
             
             document.getElementById('totalBuds').textContent = totalBuds;
             document.getElementById('totalReviews').textContent = totalReviews;
@@ -589,10 +679,136 @@
             document.getElementById('totalGrowers').textContent = uniqueGrowers;
         }
         
+        function handleHeaderClick(event, column) {
+            // ตรวจสอบว่าคลิกที่ส่วนไหน
+            const rect = event.currentTarget.getBoundingClientRect();
+            const clickX = event.clientX - rect.left;
+            const headerWidth = rect.width;
+            
+            // ถ้าคลิกในส่วนขวาสุด (30px) ให้แสดง filter
+            if (clickX > headerWidth - 30) {
+                toggleFilterDropdown(column);
+            } else {
+                // ถ้าคลิกในส่วนอื่น ให้ sort
+                sortTable(column);
+            }
+        }
+        
+        function toggleFilterDropdown(column) {
+            // ปิด dropdown อื่น ๆ ก่อน
+            document.querySelectorAll('.filter-dropdown').forEach(dropdown => {
+                if (dropdown.id !== `dropdown-${column}`) {
+                    dropdown.style.display = 'none';
+                }
+            });
+            
+            const dropdown = document.getElementById(`dropdown-${column}`);
+            const isVisible = dropdown.style.display === 'block';
+            
+            if (isVisible) {
+                dropdown.style.display = 'none';
+            } else {
+                populateFilterDropdown(column);
+                dropdown.style.display = 'block';
+            }
+        }
+        
+        function populateFilterDropdown(column) {
+            const dropdown = document.getElementById(`dropdown-${column}`);
+            const uniqueValues = [...new Set(allBudsData.map(bud => {
+                let value = bud[column];
+                if (value == null || value === '') return 'ไม่ระบุ';
+                if (column === 'created_at') {
+                    return formatDate(value);
+                }
+                return String(value);
+            }))].sort();
+            
+            let html = '<div class="filter-clear" onclick="clearFilter(\'' + column + '\')">ล้างตัวกรอง</div>';
+            
+            uniqueValues.forEach(value => {
+                const isSelected = activeFilters[column] === value;
+                html += `<div class="filter-option ${isSelected ? 'selected' : ''}" onclick="applyFilter('${column}', '${value}')">${value}</div>`;
+            });
+            
+            dropdown.innerHTML = html;
+        }
+        
+        function applyFilter(column, value) {
+            if (value === 'ไม่ระบุ') {
+                activeFilters[column] = null;
+            } else {
+                activeFilters[column] = value;
+            }
+            
+            // แสดง filter indicator
+            const indicator = document.getElementById(`filter-${column}`);
+            if (indicator) {
+                indicator.style.display = 'block';
+            }
+            
+            // ปิด dropdown
+            document.getElementById(`dropdown-${column}`).style.display = 'none';
+            
+            // กรองข้อมูล
+            applyAllFilters();
+        }
+        
+        function clearFilter(column) {
+            delete activeFilters[column];
+            
+            // ซ่อน filter indicator
+            const indicator = document.getElementById(`filter-${column}`);
+            if (indicator) {
+                indicator.style.display = 'none';
+            }
+            
+            // ปิด dropdown
+            document.getElementById(`dropdown-${column}`).style.display = 'none';
+            
+            // กรองข้อมูล
+            applyAllFilters();
+        }
+        
+        function applyAllFilters() {
+            filteredBudsData = allBudsData.filter(bud => {
+                return Object.entries(activeFilters).every(([column, filterValue]) => {
+                    let budValue = bud[column];
+                    
+                    if (budValue == null || budValue === '') {
+                        budValue = 'ไม่ระบุ';
+                    } else if (column === 'created_at') {
+                        budValue = formatDate(budValue);
+                    } else {
+                        budValue = String(budValue);
+                    }
+                    
+                    if (filterValue === null) {
+                        return budValue === 'ไม่ระบุ';
+                    }
+                    
+                    return budValue === filterValue;
+                });
+            });
+            
+            updateSummaryCards();
+            displayTable();
+        }
+        
+        // ปิด dropdown เมื่อคลิกนอกตาราง
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.data-table')) {
+                document.querySelectorAll('.filter-dropdown').forEach(dropdown => {
+                    dropdown.style.display = 'none';
+                });
+            }
+        });
+        
         
         
         function displayTable() {
-            displayTableWithData(allBudsData);
+            const dataToDisplay = filteredBudsData.length > 0 || Object.keys(activeFilters).length > 0 ? filteredBudsData : allBudsData;
+            displayTableWithData(dataToDisplay);
         }
         
         function getStrainTypeClass(type) {
@@ -646,7 +862,8 @@
             }
             
             // Sort the data
-            const sortedData = [...allBudsData].sort((a, b) => {
+            const dataToSort = filteredBudsData.length > 0 || Object.keys(activeFilters).length > 0 ? filteredBudsData : allBudsData;
+            const sortedData = [...dataToSort].sort((a, b) => {
                 let aValue = a[column];
                 let bValue = b[column];
                 

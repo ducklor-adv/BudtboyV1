@@ -1942,8 +1942,13 @@
                     showProfile();
                     state.loaded = true;
                     console.log('Profile: Data loaded successfully');
-                     // โหลดการแจ้งเตือนเพื่อนรออนุมัติ
-                    checkPendingFriends();
+                    
+                    // โหลดการแจ้งเตือนเพื่อนรออนุมัติ (เฉพาะเมื่อ DOM พร้อม)
+                    setTimeout(() => {
+                        if (document.getElementById('pendingFriendsNotification')) {
+                            checkPendingFriends();
+                        }
+                    }, 500); // รอให้ DOM ถูก render เสร็จ
                 } else {
                     const errorData = await response.json().catch(() => ({}));
                     showError(errorData.error || 'ไม่สามารถโหลดข้อมูลโปรไฟล์ได้');
@@ -1971,6 +1976,12 @@
                     return;
                 }
 
+                // ตรวจสอบว่าหน้าเว็บยังมีอยู่และไม่ได้ถูก navigate ไปที่อื่น
+                if (document.hidden || !document.body) {
+                    console.log('Page is hidden or body not available, skipping check');
+                    return;
+                }
+
                 const response = await fetch('/api/pending_friends_count');
                 
                 if (!response.ok) {
@@ -1980,12 +1991,13 @@
 
                 const data = await response.json();
 
+                // ตรวจสอบ DOM elements อย่างละเอียด
                 const notification = document.getElementById('pendingFriendsNotification');
                 const text = document.getElementById('pendingFriendsText');
 
                 // เพิ่ม null check ที่แข็งแกร่งขึ้น
-                if (!notification || !text) {
-                    console.log('Pending friends notification elements not found - stopping interval checks');
+                if (!notification || !text || !notification.parentNode || !text.parentNode) {
+                    console.log('Pending friends notification elements not found or removed - stopping interval checks');
                     // หยุดการเรียกซ้ำถ้า element ไม่มี
                     if (window.pendingFriendsInterval) {
                         clearInterval(window.pendingFriendsInterval);
@@ -1994,19 +2006,38 @@
                     return;
                 }
 
-                if (data.pending_count > 0) {
-                    text.textContent = `มีเพื่อนใหม่เข้ามา ${data.pending_count} คน โปรดรีวิวและอนุมัติ`;
-                    notification.style.display = 'block';
+                // ตรวจสอบว่า elements ยังอยู่ใน DOM tree
+                if (!document.contains(notification) || !document.contains(text)) {
+                    console.log('Elements no longer in DOM, stopping checks');
+                    if (window.pendingFriendsInterval) {
+                        clearInterval(window.pendingFriendsInterval);
+                        window.pendingFriendsInterval = null;
+                    }
+                    return;
+                }
 
-                    // เพิ่ม event listener สำหรับการคลิก (ตรวจสอบว่ายังไม่มี listener)
-                    if (!notification.hasAttribute('data-listener-added')) {
-                        notification.onclick = function() {
-                            window.location.href = '/friends';
-                        };
-                        notification.setAttribute('data-listener-added', 'true');
+                if (data.pending_count > 0) {
+                    // ใช้ try-catch สำหรับการแก้ไข DOM
+                    try {
+                        text.textContent = `มีเพื่อนใหม่เข้ามา ${data.pending_count} คน โปรดรีวิวและอนุมัติ`;
+                        notification.style.display = 'block';
+
+                        // เพิ่ม event listener สำหรับการคลิก (ตรวจสอบว่ายังไม่มี listener)
+                        if (!notification.hasAttribute('data-listener-added')) {
+                            notification.onclick = function() {
+                                window.location.href = '/friends';
+                            };
+                            notification.setAttribute('data-listener-added', 'true');
+                        }
+                    } catch (domError) {
+                        console.error('Error updating notification DOM:', domError);
                     }
                 } else {
-                    notification.style.display = 'none';
+                    try {
+                        notification.style.display = 'none';
+                    } catch (domError) {
+                        console.error('Error hiding notification:', domError);
+                    }
                 }
             } catch (error) {
                 console.error('Error checking pending friends:', error);
@@ -2021,19 +2052,56 @@
         // กำหนดตัวแปร global ที่ขาดหาย
         let isInitialized = false;
 
-        // Refresh pending friends notification periodically with better management
-        if (!window.pendingFriendsInterval) {
-            window.pendingFriendsInterval = setInterval(checkPendingFriends, 30000); // ตรวจสอบทุก 30 วินาที
-        }
-
-        // Clear interval when page is hidden
-        document.addEventListener('visibilitychange', function() {
-            if (document.hidden && window.pendingFriendsInterval) {
+        // Enhanced interval management
+        function startPendingFriendsInterval() {
+            // Clear existing interval first
+            if (window.pendingFriendsInterval) {
                 clearInterval(window.pendingFriendsInterval);
                 window.pendingFriendsInterval = null;
-            } else if (!document.hidden && !window.pendingFriendsInterval) {
-                window.pendingFriendsInterval = setInterval(checkPendingFriends, 30000);
             }
+
+            // Only start if page is visible and elements exist
+            if (!document.hidden && document.getElementById('pendingFriendsNotification')) {
+                window.pendingFriendsInterval = setInterval(function() {
+                    // Double-check before each call
+                    if (!document.hidden && document.getElementById('pendingFriendsNotification')) {
+                        checkPendingFriends();
+                    } else {
+                        // Stop interval if conditions not met
+                        if (window.pendingFriendsInterval) {
+                            clearInterval(window.pendingFriendsInterval);
+                            window.pendingFriendsInterval = null;
+                        }
+                    }
+                }, 30000); // ตรวจสอบทุก 30 วินาที
+            }
+        }
+
+        function stopPendingFriendsInterval() {
+            if (window.pendingFriendsInterval) {
+                clearInterval(window.pendingFriendsInterval);
+                window.pendingFriendsInterval = null;
+            }
+        }
+
+        // Start interval only after profile is loaded
+        if (!window.pendingFriendsInterval) {
+            startPendingFriendsInterval();
+        }
+
+        // Improved visibility change handling
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                stopPendingFriendsInterval();
+            } else {
+                // Wait a bit before restarting to ensure page is stable
+                setTimeout(startPendingFriendsInterval, 1000);
+            }
+        });
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', function() {
+            stopPendingFriendsInterval();
         });
     </script>
 </body>

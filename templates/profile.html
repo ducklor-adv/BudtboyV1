@@ -1521,6 +1521,8 @@
             const message = input.value.trim();
 
             if (!message) return;
+            
+            console.log('Sending chat message:', message);
 
             // Add user message to chat
             addUserMessage(message);
@@ -1545,6 +1547,7 @@
                 });
 
                 const result = await response.json();
+                console.log('Chat response received:', result);
                 hideTypingIndicator();
 
                 if (result.success) {
@@ -1552,7 +1555,12 @@
                         if (result.has_recommendations && result.recommended_buds) {
                             addBotMessage(result.message, result.recommended_buds);
                         } else {
-                            addBotMessage(result.message);
+                            let message = result.message;
+                            // เพิ่มการแจ้งเตือนถ้าเป็น fallback mode
+                            if (result.fallback_mode) {
+                                message += "\n\n💡 ตอนนี้ระบบ AI หลักไม่พร้อมใช้งาน กำลังใช้โหมดตอบแบบพื้นฐาน";
+                            }
+                            addBotMessage(message);
                         }
                     } else {
                         addBotMessage(result.message || 'ขออภัย เกิดข้อผิดพลาดในการตอบกลับ');

@@ -32,6 +32,12 @@ ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg'}
 # OpenAI configuration
 openai.api_key = os.environ.get('OPENAI_API_KEY')
 
+# Debug: Check if OpenAI API key is available
+if openai.api_key:
+    print(f"OpenAI API key is configured (length: {len(openai.api_key)})")
+else:
+    print("WARNING: OpenAI API key is not configured!")
+
 mail = Mail(app)
 
 # Create uploads directory if it doesn't exist
@@ -3741,6 +3747,7 @@ def chat_with_ai():
     try:
         # Check if OpenAI API key is available
         if not openai.api_key:
+            print("Chat error: OpenAI API key not configured")
             return jsonify({
                 'success': False,
                 'message': 'ขออภัย ระบบ AI ยังไม่พร้อมใช้งาน กรุณาติดต่อผู้ดูแลระบบ'
@@ -3882,10 +3889,41 @@ def chat_with_ai():
         }), 500
     except Exception as e:
         print(f"Chat AI error: {e}")
+        
+        # Fallback to simple responses if OpenAI fails
+        fallback_response = generateSimpleBotResponse(user_message)
+        if fallback_response:
+            return jsonify({
+                'success': True,
+                'message': fallback_response,
+                'has_recommendations': False,
+                'fallback_mode': True
+            })
+        
         return jsonify({
             'success': False,
             'message': 'ขออภัย เกิดข้อผิดพลาดที่ไม่คาดคิด กรุณาลองใหม่อีกครั้ง'
         }), 500
+
+def generateSimpleBotResponse(user_message):
+    """Generate simple bot responses when OpenAI is not available"""
+    message = user_message.lower()
+    
+    # Simple keyword-based responses
+    if any(keyword in message for keyword in ['สวัสดี', 'หวัดดี', 'ดี', 'hello', 'hi']):
+        return "สวัสดีครับ! ยินดีที่ได้รู้จัก มีอะไรเกี่ยวกับกัญชาที่อยากถามไหมครับ? 😊"
+    
+    if any(keyword in message for keyword in ['สายพันธุ์', 'strain', 'ดอก']):
+        return "เรามีข้อมูลสายพันธุ์กัญชามากมายครับ!\n\nสายพันธุ์ยอดนิยม:\n• Blue Dream - Hybrid\n• OG Kush - Indica\n• White Widow - Hybrid\n• Girl Scout Cookies - Hybrid\n\nลองดูในส่วน Activity เพื่อดูข้อมูลดอกทั้งหมดครับ"
+    
+    if any(keyword in message for keyword in ['ขอบคุณ', 'thank']):
+        return "ด้วยความยินดีครับ! หากมีคำถามอื่นๆ สามารถถามได้เสมอนะครับ 🌿"
+    
+    if any(keyword in message for keyword in ['ผลกระทบ', 'effect']):
+        return "ผลกระทบของกัญชาแบ่งเป็น:\n\n😊 ผลเชิงบวก: ผ่อนคลาย, สร้างสรรค์, บรรเทาปวด\n⚠️ ผลข้างเคียง: ปากแห้ง, ตาแดง\n\nควรใช้อย่างรับผิดชอบครับ!"
+    
+    # Default response
+    return "สวัสดีครับ! ผมคือ Budt.Boy ตัวช่วยดูแลข้อมูลกัญชา\n\nลองถามเกี่ยวกับ:\n• สายพันธุ์กัญชา\n• ผลกระทบ\n• การปลูก\n\nหรือไปดูข้อมูลในส่วน Activity ได้เลยครับ! 🌿"
 
 def analyze_user_request(user_message):
     """วิเคราะห์ความต้องการของ user และแปลงเป็นเกณฑ์การค้นหาแบบละเอียด"""

@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -572,23 +571,28 @@
                     </div>
 
                     <div class="form-row">
-                        <div class="form-group half-width">
-                            <label for="thc_min">THC ต่ำสุด (%)</label>
-                            <input type="number" id="thc_min" name="thc_min" step="0.1" min="0" max="100" placeholder="0">
+                            <div class="form-group">
+                                <label for="thc_min">THC ต่ำสุด (%)</label>
+                                <input type="number" id="thc_min" name="thc_min" min="0" max="100" step="0.1" placeholder="เช่น 15.5">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="thc_max">THC สูงสุด (%)</label>
+                                <input type="number" id="thc_max" name="thc_max" min="0" max="100" step="0.1" placeholder="เช่น 25.0">
+                            </div>
                         </div>
-                        <div class="form-group half-width">
-                            <label for="thc_max">THC สูงสุด (%)</label>
-                            <input type="number" id="thc_max" name="thc_max" step="0.1" min="0" max="100" placeholder="100">
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="cbd_min">CBD ต่ำสุด (%)</label>
+                                <input type="number" id="cbd_min" name="cbd_min" min="0" max="100" step="0.1" placeholder="เช่น 0.5">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="cbd_max">CBD สูงสุด (%)</label>
+                                <input type="number" id="cbd_max" name="cbd_max" min="0" max="100" step="0.1" placeholder="เช่น 5.0">
+                            </div>
                         </div>
-                        <div class="form-group half-width">
-                            <label for="cbd_min">CBD ต่ำสุด (%)</label>
-                            <input type="number" id="cbd_min" name="cbd_min" step="0.1" min="0" max="100" placeholder="0">
-                        </div>
-                        <div class="form-group half-width">
-                            <label for="cbd_max">CBD สูงสุด (%)</label>
-                            <input type="number" id="cbd_max" name="cbd_max" step="0.1" min="0" max="100" placeholder="100">
-                        </div>
-                    </div>
 
                     <div class="form-row">
                         <div class="form-group">
@@ -1192,7 +1196,7 @@
             const selectedDiv = document.getElementById(selectId);
             const categoriesDiv = document.getElementById(categoriesId);
             const hiddenInput = document.getElementById(hiddenId);
-            
+
             if (!selectedDiv || !categoriesDiv || !hiddenInput) {
                 console.warn(`Multi-select elements not found for ${selectId}`);
                 return;
@@ -1298,7 +1302,7 @@
                 new StrainAutocomplete('strain_name_en', 'suggestions_en', 'en');
                 new StrainAutocomplete('strain_name_th', 'suggestions_th', 'th');
                 initializeBreederAutocomplete('breeder', 'breeder-suggestions', '/api/breeders/search');
-                
+
                 // Initialize multi-selects
                 initializeMultiSelect('selected-flavors', 'flavor-categories', 'aroma_flavor');
                 initializeMultiSelect('selected-mental-positive', 'mental-positive-categories', 'mental_effects_positive');
@@ -1312,7 +1316,7 @@
         function clearSearchForm() {
             document.getElementById('searchForm').reset();
             document.getElementById('searchResults').style.display = 'none';
-            
+
             // Clear multi-selects
             document.querySelectorAll('.selected-items').forEach(selected => {
                 const placeholder = selected.querySelector('.placeholder');
@@ -1321,12 +1325,12 @@
                     selected.innerHTML = `<span class="placeholder">${placeholderText}</span>`;
                 }
             });
-            
+
             // Clear hidden inputs
             document.querySelectorAll('textarea[style*="display: none"]').forEach(input => {
                 input.value = '';
             });
-            
+
             // Reset buttons
             document.querySelectorAll('.item-btn').forEach(btn => {
                 btn.classList.remove('selected');
@@ -1366,7 +1370,7 @@
             // Show loading
             const resultsContainer = document.getElementById('resultsContainer');
             const searchResults = document.getElementById('searchResults');
-            
+
             searchResults.style.display = 'block';
             resultsContainer.innerHTML = '<div class="loading">🔍 กำลังค้นหา...</div>';
 

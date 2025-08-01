@@ -375,6 +375,27 @@
             color: #666;
         }
         
+        .full-report-btn {
+            background: linear-gradient(135deg, #ff4757, #ff3742);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-block;
+            text-align: center;
+            white-space: nowrap;
+        }
+        
+        .full-report-btn:hover {
+            background: linear-gradient(135deg, #ff3742, #ff2f3a);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(255, 71, 87, 0.3);
+        }
+        
         @media (max-width: 768px) {
             .container {
                 margin: 10px;
@@ -452,7 +473,6 @@
                         <th>ID</th>
                         <th>ชื่อดอก</th>
                         <th>ชื่อไทย</th>
-                        <th>ผู้พัฒนา</th>
                         <th>ประเภท</th>
                         <th>THC/CBD</th>
                         <th>เกรด</th>
@@ -460,6 +480,7 @@
                         <th>จำนวนรีวิว</th>
                         <th>ผู้ปลูก</th>
                         <th>วันที่เพิ่ม</th>
+                        <th>รายงาน</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
@@ -526,7 +547,6 @@
                     <td>${bud.id}</td>
                     <td class="strain-name">${bud.strain_name_en || 'ไม่ระบุ'}</td>
                     <td>${bud.strain_name_th || 'ไม่ระบุ'}</td>
-                    <td>${bud.breeder || 'ไม่ระบุ'}</td>
                     <td>
                         <span class="strain-type ${getStrainTypeClass(bud.strain_type)}">
                             ${bud.strain_type || 'ไม่ระบุ'}
@@ -553,6 +573,11 @@
                         </div>
                     </td>
                     <td>${formatDate(bud.created_at)}</td>
+                    <td>
+                        <a href="/bud-report?id=${bud.id}" class="full-report-btn" target="_blank">
+                            📊 Full Report
+                        </a>
+                    </td>
                 </tr>
             `).join('');
         }

@@ -3192,15 +3192,9 @@ def report_page():
         return redirect('/auth')
     return render_template('report.html')
 
-@app.route('/bud-report')
-def bud_report_page():
-    # Check if user is logged in
-    if 'user_id' not in session:
-        return redirect('/auth')
-    return render_template('bud_report.html')
-
+@app.route('/bud_report/')
 @app.route('/bud_report/<int:bud_id>')
-def bud_report_detail(bud_id):
+def bud_report_page(bud_id=None):
     # Check if user is logged in
     if 'user_id' not in session:
         return redirect('/auth')

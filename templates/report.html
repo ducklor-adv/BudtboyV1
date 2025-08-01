@@ -236,6 +236,30 @@
             font-weight: 600;
             color: #495057;
             white-space: nowrap;
+            cursor: pointer;
+            position: relative;
+            transition: background-color 0.2s ease;
+        }
+        
+        .data-table th:hover {
+            background: #e9ecef;
+        }
+        
+        .sort-indicator {
+            position: absolute;
+            right: 4px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 12px;
+            color: #6c757d;
+        }
+        
+        .sort-asc::after {
+            content: "▲";
+        }
+        
+        .sort-desc::after {
+            content: "▼";
         }
         
         .data-table td {
@@ -471,16 +495,46 @@
             <table id="dataTable" class="data-table" style="display: none;">
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>ชื่อดอก</th>
-                        <th>ชื่อไทย</th>
-                        <th>ประเภท</th>
-                        <th>THC/CBD</th>
-                        <th>เกรด</th>
-                        <th>คะแนนเฉลี่ย</th>
-                        <th>จำนวนรีวิว</th>
-                        <th>ผู้ปลูก</th>
-                        <th>วันที่เพิ่ม</th>
+                        <th onclick="sortTable('id')" data-column="id">
+                            ID
+                            <span class="sort-indicator" id="sort-id"></span>
+                        </th>
+                        <th onclick="sortTable('strain_name_en')" data-column="strain_name_en">
+                            ชื่อดอก
+                            <span class="sort-indicator" id="sort-strain_name_en"></span>
+                        </th>
+                        <th onclick="sortTable('strain_name_th')" data-column="strain_name_th">
+                            ชื่อไทย
+                            <span class="sort-indicator" id="sort-strain_name_th"></span>
+                        </th>
+                        <th onclick="sortTable('strain_type')" data-column="strain_type">
+                            ประเภท
+                            <span class="sort-indicator" id="sort-strain_type"></span>
+                        </th>
+                        <th onclick="sortTable('thc_percentage')" data-column="thc_percentage">
+                            THC/CBD
+                            <span class="sort-indicator" id="sort-thc_percentage"></span>
+                        </th>
+                        <th onclick="sortTable('grade')" data-column="grade">
+                            เกรด
+                            <span class="sort-indicator" id="sort-grade"></span>
+                        </th>
+                        <th onclick="sortTable('avg_rating')" data-column="avg_rating">
+                            คะแนนเฉลี่ย
+                            <span class="sort-indicator" id="sort-avg_rating"></span>
+                        </th>
+                        <th onclick="sortTable('review_count')" data-column="review_count">
+                            จำนวนรีวิว
+                            <span class="sort-indicator" id="sort-review_count"></span>
+                        </th>
+                        <th onclick="sortTable('grower_name')" data-column="grower_name">
+                            ผู้ปลูก
+                            <span class="sort-indicator" id="sort-grower_name"></span>
+                        </th>
+                        <th onclick="sortTable('created_at')" data-column="created_at">
+                            วันที่เพิ่ม
+                            <span class="sort-indicator" id="sort-created_at"></span>
+                        </th>
                         <th>รายงาน</th>
                     </tr>
                 </thead>
@@ -492,6 +546,8 @@
 
     <script>
         let allBudsData = [];
+        let currentSortColumn = null;
+        let currentSortDirection = 'asc';
         
         window.addEventListener('load', async () => {
             await loadAllBudsData();
@@ -536,14 +592,104 @@
         
         
         function displayTable() {
+            displayTableWithData(allBudsData);
+        }
+        
+        function getStrainTypeClass(type) {
+            switch(type) {
+                case 'Indica': return 'type-indica';
+                case 'Sativa': return 'type-sativa';
+                case 'Hybrid': return 'type-hybrid';
+                default: return '';
+            }
+        }
+        
+        function getGradeClass(grade) {
+            switch(grade) {
+                case 'A+': return 'grade-a-plus';
+                case 'A': return 'grade-a';
+                case 'B+': return 'grade-b-plus';
+                case 'B': return 'grade-b';
+                case 'C': return 'grade-c';
+                default: return '';
+            }
+        }
+        
+        function formatDate(dateString) {
+            if (!dateString) return 'ไม่ระบุ';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('th-TH', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        }
+        
+        function sortTable(column) {
+            // Toggle sort direction if clicking the same column
+            if (currentSortColumn === column) {
+                currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSortDirection = 'asc';
+                currentSortColumn = column;
+            }
+            
+            // Clear all sort indicators
+            document.querySelectorAll('.sort-indicator').forEach(indicator => {
+                indicator.className = 'sort-indicator';
+            });
+            
+            // Set current sort indicator
+            const currentIndicator = document.getElementById(`sort-${column}`);
+            if (currentIndicator) {
+                currentIndicator.className = `sort-indicator sort-${currentSortDirection}`;
+            }
+            
+            // Sort the data
+            const sortedData = [...allBudsData].sort((a, b) => {
+                let aValue = a[column];
+                let bValue = b[column];
+                
+                // Handle null/undefined values
+                if (aValue == null) aValue = '';
+                if (bValue == null) bValue = '';
+                
+                // Handle different data types
+                if (column === 'id' || column === 'thc_percentage' || column === 'cbd_percentage' || 
+                    column === 'avg_rating' || column === 'review_count') {
+                    aValue = parseFloat(aValue) || 0;
+                    bValue = parseFloat(bValue) || 0;
+                } else if (column === 'created_at') {
+                    aValue = new Date(aValue || 0);
+                    bValue = new Date(bValue || 0);
+                } else {
+                    aValue = String(aValue).toLowerCase();
+                    bValue = String(bValue).toLowerCase();
+                }
+                
+                // Compare values
+                if (aValue < bValue) {
+                    return currentSortDirection === 'asc' ? -1 : 1;
+                }
+                if (aValue > bValue) {
+                    return currentSortDirection === 'asc' ? 1 : -1;
+                }
+                return 0;
+            });
+            
+            // Update the display with sorted data
+            displayTableWithData(sortedData);
+        }
+        
+        function displayTableWithData(dataToDisplay) {
             const tbody = document.getElementById('tableBody');
             
-            if (allBudsData.length === 0) {
+            if (dataToDisplay.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="11" class="empty-state">ไม่พบข้อมูล</td></tr>';
                 return;
             }
             
-            tbody.innerHTML = allBudsData.map(bud => `
+            tbody.innerHTML = dataToDisplay.map(bud => `
                 <tr>
                     <td>${bud.id}</td>
                     <td class="strain-name">${bud.strain_name_en || 'ไม่ระบุ'}</td>
@@ -583,36 +729,6 @@
                     </td>
                 </tr>
             `).join('');
-        }
-        
-        function getStrainTypeClass(type) {
-            switch(type) {
-                case 'Indica': return 'type-indica';
-                case 'Sativa': return 'type-sativa';
-                case 'Hybrid': return 'type-hybrid';
-                default: return '';
-            }
-        }
-        
-        function getGradeClass(grade) {
-            switch(grade) {
-                case 'A+': return 'grade-a-plus';
-                case 'A': return 'grade-a';
-                case 'B+': return 'grade-b-plus';
-                case 'B': return 'grade-b';
-                case 'C': return 'grade-c';
-                default: return '';
-            }
-        }
-        
-        function formatDate(dateString) {
-            if (!dateString) return 'ไม่ระบุ';
-            const date = new Date(dateString);
-            return date.toLocaleDateString('th-TH', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric'
-            });
         }
         
         

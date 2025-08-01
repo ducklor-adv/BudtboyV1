@@ -281,6 +281,7 @@
             display: flex;
             align-items: center;
             gap: 5px;
+            justify-content: flex-start;
         }
         
         .rating-stars {
@@ -561,9 +562,11 @@
                             ${bud.grade || 'ไม่ระบุ'}
                         </span>
                     </td>
-                    <td class="rating-display">
-                        <div class="rating-stars">${'⭐'.repeat(Math.round(bud.avg_rating || 0))}</div>
-                        <div class="rating-number">${(bud.avg_rating || 0).toFixed(1)}</div>
+                    <td>
+                        <div class="rating-display">
+                            <div class="rating-stars">${'⭐'.repeat(Math.round(bud.avg_rating || 0))}</div>
+                            <div class="rating-number">${(bud.avg_rating || 0).toFixed(1)}</div>
+                        </div>
                     </td>
                     <td class="review-count">${bud.review_count || 0} รีวิว</td>
                     <td class="grower-info">

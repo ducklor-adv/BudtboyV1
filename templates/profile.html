@@ -1532,10 +1532,23 @@
             const input = document.getElementById('chatInput');
             const sendBtn = document.getElementById('chatSendBtn');
             
-            if (!input || !sendBtn || isTyping) return;
+            if (!input || !sendBtn) {
+                console.error('Chat input or send button not found');
+                return;
+            }
+
+            if (isTyping) {
+                console.log('Chat is already processing, skipping');
+                return;
+            }
 
             const message = input.value.trim();
-            if (!message) return;
+            if (!message) {
+                console.log('Empty message, not sending');
+                return;
+            }
+
+            console.log('Sending chat message:', message);
 
             // Disable input and button
             input.disabled = true;
@@ -1553,6 +1566,8 @@
             const thinkingMessage = addChatMessage('กำลังคิด...', false, true);
 
             try {
+                console.log('Making API request to /api/chat');
+                
                 const response = await fetch('/api/chat', {
                     method: 'POST',
                     headers: {
@@ -1560,9 +1575,11 @@
                     },
                     body: JSON.stringify({
                         message: message,
-                        history: chatHistory
+                        history: chatHistory.slice(-10) // Only send last 10 messages
                     })
                 });
+
+                console.log('API response status:', response.status);
 
                 // Remove thinking message
                 if (thinkingMessage && thinkingMessage.parentNode) {
@@ -1571,24 +1588,50 @@
 
                 if (response.ok) {
                     const data = await response.json();
+                    console.log('Chat response received:', data);
                     
-                    // Add AI response
-                    addChatMessage(data.response);
-                    chatHistory.push({ role: 'assistant', content: data.response });
+                    if (data.success && data.message) {
+                        // Add AI response
+                        addChatMessage(data.message || data.response);
+                        chatHistory.push({ role: 'assistant', content: data.message || data.response });
+                    } else {
+                        console.error('Invalid response format:', data);
+                        addChatMessage('ขออภัยครับ ได้รับข้อมูลตอบกลับที่ไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง');
+                    }
                 } else {
+                    console.error('API error status:', response.status);
                     const errorData = await response.json().catch(() => ({}));
-                    addChatMessage('ขออภัยครับ เกิดข้อผิดพลาดในการตอบกลับ: ' + (errorData.error || 'ไม่สามารถเชื่อมต่อได้'));
+                    console.error('Error data:', errorData);
+                    
+                    let errorMessage = 'ขออภัยครับ เกิดข้อผิดพลาดในการตอบกลับ';
+                    if (errorData.message) {
+                        errorMessage += ': ' + errorData.message;
+                    } else if (response.status === 500) {
+                        errorMessage += ': ระบบ AI ไม่พร้อมใช้งาน';
+                    } else if (response.status === 401) {
+                        errorMessage += ': ไม่ได้เข้าสู่ระบบ';
+                    }
+                    
+                    addChatMessage(errorMessage);
                 }
             } catch (error) {
-                console.error('Chat error:', error);
+                console.error('Chat fetch error:', error);
                 
                 // Remove thinking message
                 if (thinkingMessage && thinkingMessage.parentNode) {
                     thinkingMessage.parentNode.removeChild(thinkingMessage);
                 }
                 
-                addChatMessage('ขออภัยครับ เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง');
+                let errorMessage = 'ขออภัยครับ เกิดข้อผิดพลาดในการเชื่อมต่อ';
+                if (error.name === 'TypeError') {
+                    errorMessage += ' (ปัญหาเครือข่าย)';
+                }
+                errorMessage += ' กรุณาลองใหม่อีกครั้ง';
+                
+                addChatMessage(errorMessage);
             } finally {
+                console.log('Chat message processing completed');
+                
                 // Re-enable input and button
                 input.disabled = false;
                 sendBtn.disabled = false;

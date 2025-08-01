@@ -3864,6 +3864,7 @@ def chat_with_ai():
         return jsonify({
             'success': True,
             'message': ai_response,
+            'response': ai_response,  # Add backup field
             'has_recommendations': False,
             'usage': {
                 'prompt_tokens': response.usage.prompt_tokens,
@@ -3872,37 +3873,48 @@ def chat_with_ai():
             }
         })
 
-    except openai.AuthenticationError:
+    except openai.AuthenticationError as e:
+        print(f"OpenAI Authentication Error: {e}")
         return jsonify({
             'success': False,
-            'message': 'ขออภัย ระบบ AI มีปัญหาการยืนยันตัวตน กรุณาลองใหม่อีกครั้ง'
+            'message': 'ขออภัย ระบบ AI มีปัญหาการยืนยันตัวตน กรุณาติดต่อผู้ดูแลระบบ',
+            'error': 'authentication_error'
         }), 500
-    except openai.RateLimitError:
+    except openai.RateLimitError as e:
+        print(f"OpenAI Rate Limit Error: {e}")
         return jsonify({
             'success': False,
-            'message': 'ขออภัย ระบบ AI ใช้งานหนักเกินไป กรุณารอสักครู่แล้วลองใหม่'
+            'message': 'ขออภัย ระบบ AI ใช้งานหนักเกินไป กรุณารอสักครู่แล้วลองใหม่',
+            'error': 'rate_limit_error'
         }), 429
     except openai.APIError as e:
+        print(f"OpenAI API Error: {e}")
         return jsonify({
             'success': False,
-            'message': f'ขออภัย เกิดข้อผิดพลาดในระบบ AI: {str(e)}'
+            'message': f'ขออภัย เกิดข้อผิดพลาดในระบบ AI กรุณาลองใหม่อีกครั้ง',
+            'error': 'api_error'
         }), 500
     except Exception as e:
-        print(f"Chat AI error: {e}")
+        print(f"Chat AI error: {type(e).__name__}: {e}")
+        import traceback
+        traceback.print_exc()
         
         # Fallback to simple responses if OpenAI fails
         fallback_response = generateSimpleBotResponse(user_message)
         if fallback_response:
+            print("Using fallback response")
             return jsonify({
                 'success': True,
                 'message': fallback_response,
+                'response': fallback_response,
                 'has_recommendations': False,
                 'fallback_mode': True
             })
         
         return jsonify({
             'success': False,
-            'message': 'ขออภัย เกิดข้อผิดพลาดที่ไม่คาดคิด กรุณาลองใหม่อีกครั้ง'
+            'message': 'ขออภัย เกิดข้อผิดพลาดที่ไม่คาดคิด กรุณาลองใหม่อีกครั้ง',
+            'error': 'unexpected_error'
         }), 500
 
 def generateSimpleBotResponse(user_message):

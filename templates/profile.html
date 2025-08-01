@@ -217,16 +217,6 @@
             transform: translateY(-2px);
         }
 
-        .btn-chat {
-            background: linear-gradient(135deg, #1a237e 0%, #0d47a1 100%);
-            color: white;
-        }
-
-        .btn-chat:hover {
-            background: linear-gradient(135deg, #283593 0%, #1565c0 100%);
-            transform: translateY(-2px);
-        }
-
         .btn-disabled {
             background: #ccc !important;
             color: #999 !important;
@@ -238,236 +228,6 @@
         .btn-disabled:hover {
             transform: none !important;
             background: #ccc !important;
-        }
-
-        /* Chat Modal Styles */
-        .chat-modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            backdrop-filter: blur(5px);
-        }
-
-        .chat-container {
-            position: relative;
-            background: white;
-            margin: 2% auto;
-            padding: 0;
-            border-radius: 20px;
-            width: 90%;
-            max-width: 500px;
-            height: 80vh;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-            overflow: hidden;
-        }
-
-        .chat-header {
-            background: linear-gradient(135deg, #1a237e 0%, #0d47a1 100%);
-            color: white;
-            padding: 20px;
-            text-align: center;
-            border-radius: 20px 20px 0 0;
-            position: relative;
-        }
-
-        .chat-close {
-            position: absolute;
-            right: 15px;
-            top: 15px;
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            font-size: 20px;
-            cursor: pointer;
-            border-radius: 50%;
-            width: 35px;
-            height: 35px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-        }
-
-        .chat-close:hover {
-            background: rgba(255,255,255,0.3);
-            transform: scale(1.1);
-        }
-
-        .chat-title {
-            margin: 0;
-            font-size: 18px;
-            font-weight: 600;
-        }
-
-        .chat-subtitle {
-            margin: 5px 0 0 0;
-            font-size: 12px;
-            opacity: 0.9;
-        }
-
-        .chat-messages {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            background: #f8f9fa;
-        }
-
-        .message {
-            margin-bottom: 15px;
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-        }
-
-        .message.user {
-            flex-direction: row-reverse;
-        }
-
-        .message-avatar {
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            font-weight: 600;
-            flex-shrink: 0;
-        }
-
-        .message.bot .message-avatar {
-            background: linear-gradient(135deg, #1a237e 0%, #0d47a1 100%);
-            color: white;
-            overflow: hidden;
-            padding: 0;
-        }
-
-        .message.bot .message-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 50%;
-        }
-
-        .message.user .message-avatar {
-            background: linear-gradient(135deg, #4CAF50, #45a049);
-            color: white;
-        }
-
-        .message-content {
-            background: white;
-            padding: 12px 16px;
-            border-radius: 18px;
-            max-width: 70%;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            word-wrap: break-word;
-        }
-
-        .message.user .message-content {
-            background: linear-gradient(135deg, #4CAF50, #45a049);
-            color: white;
-        }
-
-        .message-time {
-            font-size: 10px;
-            color: #999;
-            margin-top: 5px;
-        }
-
-        .chat-input-container {
-            padding: 20px;
-            background: white;
-            border-top: 1px solid #eee;
-        }
-
-        .chat-input-wrapper {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .chat-input {
-            flex: 1;
-            padding: 12px 16px;
-            border: 2px solid #e9ecef;
-            border-radius: 25px;
-            font-size: 14px;
-            outline: none;
-            transition: all 0.3s ease;
-        }
-
-        .chat-input:focus {
-            border-color: #1a237e;
-            box-shadow: 0 0 0 3px rgba(26, 35, 126, 0.1);
-        }
-
-        .chat-send-btn {
-            background: linear-gradient(135deg, #1a237e 0%, #0d47a1 100%);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .chat-send-btn:hover {
-            background: linear-gradient(135deg, #283593 0%, #1565c0 100%);
-            transform: translateY(-2px);
-        }
-
-        .chat-send-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .typing-indicator {
-            display: none;
-            padding: 10px 16px;
-            background: white;
-            border-radius: 18px;
-            max-width: 70%;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .typing-dots {
-            display: flex;
-            gap: 4px;
-        }
-
-        .typing-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #ccc;
-            animation: typing 1.4s infinite ease-in-out;
-        }
-
-        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
-        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
-
-        @keyframes typing {
-            0%, 80%, 100% {
-                opacity: 0.3;
-                transform: scale(0.8);
-            }
-            40% {
-                opacity: 1;
-                transform: scale(1);
-            }
         }
 
         .logout-btn {
@@ -642,20 +402,6 @@
             0% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.7); }
             70% { box-shadow: 0 0 0 10px rgba(255, 152, 0, 0); }
             100% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0); }
-        }
-
-        .chat-container {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 350px;
-            height: 500px;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            display: none;
-            flex-direction: column;
-            z-index: 1000;
         }
 
         @media (max-width: 400px) {
@@ -861,9 +607,6 @@
         </div>
 
         <div class="action-buttons" id="actionButtons" style="display: none;">
-            <button class="btn btn-chat" onclick="checkApprovalAndExecute(openChatWithBudtBoy)" id="chatBtn">
-                Chat with Budt.Boy
-            </button>
             <button class="btn btn-edit" onclick="toggleEditMode()" id="editBtn">
                 แก้ไขโปรไฟล์
             </button>
@@ -873,35 +616,11 @@
         </div>
     </div>
 
-    <!-- Chat Modal -->
-    <div id="chatModal" class="chat-modal">
-        <div class="chat-container">
-            <div class="chat-header">
-                <button class="chat-close" onclick="closeChatModal()">&times;</button>
-                <div class="chat-title">🤖 Budt.Boy AI Assistant</div>
-                <div class="chat-subtitle">ผู้ช่วยอัจฉริยะด้านกัญชา</div>
-            </div>
-
-            <div class="chat-messages" id="chatMessages">
-                <!-- Messages will be populated here -->
-            </div>
-
-            <div class="chat-input-container">
-                <div class="chat-input-wrapper">
-                    <input type="text" id="chatInput" class="chat-input" placeholder="พิมพ์ข้อความของคุณ..." onkeypress="handleChatKeyPress(event)">
-                    <button id="chatSendBtn" class="chat-send-btn" onclick="sendChatMessage()">
-                        <span>ส่ง</span> 📤
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script>
         let currentUserData = null;
         let isLoading = false;
         let isProfileLoaded = false;
-        let pageInitialized = false; // Add this line to define pageInitialized
+        let pageInitialized = false;
 
         function showError(message) {
             const errorState = document.getElementById('errorState');
@@ -919,7 +638,7 @@
         }
 
         function showLoading() {
-            if (isProfileLoaded) return; // ไม่แสดงการโหลดถ้าข้อมูลถูกโหลดแล้ว
+            if (isProfileLoaded) return;
 
             const errorState = document.getElementById('errorState');
             const loadingState = document.getElementById('loadingState');
@@ -945,22 +664,17 @@
         }
 
         async function loadProfile() {
-            const state = window.BudtBoyProfile;
-
-            // Enhanced protection with state management
-            if (state.loading || state.loaded || isLoading || isProfileLoaded) {
+            if (isLoading || isProfileLoaded) {
                 console.log('Profile: LoadProfile blocked - already loading or loaded');
                 return;
             }
 
-            // Set all loading flags
-            state.loading = true;
             isLoading = true;
             showLoading();
 
             try {
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+                const timeoutId = setTimeout(() => controller.abort(), 10000);
 
                 const response = await fetch('/api/profile', {
                     signal: controller.signal,
@@ -977,8 +691,11 @@
                     const user = await response.json();
                     displayProfile(user);
                     showProfile();
-                    state.loaded = true;
                     console.log('Profile: Data loaded successfully');
+
+                    if (!window.pendingFriendsInterval) {
+                        startPendingFriendsInterval();
+                    }
                 } else {
                     const errorData = await response.json().catch(() => ({}));
                     showError(errorData.error || 'ไม่สามารถโหลดข้อมูลโปรไฟล์ได้');
@@ -992,7 +709,6 @@
                     showError('เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต');
                 }
             } finally {
-                state.loading = false;
                 isLoading = false;
                 console.log('Profile: Loading completed, flags reset');
             }
@@ -1002,8 +718,6 @@
             if (!user) return;
 
             currentUserData = user;
-
-            // Check approval status and update UI
             checkApprovalStatus(user);
 
             const usernameEl = document.getElementById('username-display');
@@ -1012,7 +726,6 @@
             if (usernameEl) usernameEl.textContent = user.username || '-';
             if (emailEl) emailEl.textContent = user.email || '-';
 
-            // Set edit form values safely
             const usernameEdit = document.getElementById('username-edit');
             const emailEdit = document.getElementById('email-edit');
             const birthYearEdit = document.getElementById('birth-year-edit');
@@ -1021,7 +734,6 @@
             if (emailEdit) emailEdit.value = user.email || '';
             if (birthYearEdit) birthYearEdit.value = user.birth_year || '';
 
-            // Verification status
             const verificationStatus = document.getElementById('verification-status');
             const statusLabel = document.getElementById('status-label');
             if (verificationStatus && statusLabel) {
@@ -1034,7 +746,6 @@
                 }
             }
 
-            // Created date
             const createdDateEl = document.getElementById('created-date');
             if (createdDateEl && user.created_at) {
                 const date = new Date(user.created_at);
@@ -1045,14 +756,12 @@
                 });
             }
 
-            // Birth year
             const birthYearDisplay = document.getElementById('birth-year-display');
             if (birthYearDisplay) {
                 birthYearDisplay.textContent = user.birth_year ? 
                     (user.birth_year + 543) + ' พ.ศ.' : 'ไม่ระบุ';
             }
 
-            // User types display
             const userTypesDiv = document.getElementById('user-types-display');
             if (userTypesDiv) {
                 let userTypes = [];
@@ -1068,7 +777,6 @@
                 }
             }
 
-            // Set user type checkboxes safely
             const consumerCheck = document.getElementById('is_consumer_edit');
             const growerCheck = document.getElementById('is_grower_edit');
             const budtenderCheck = document.getElementById('is_budtender_edit');
@@ -1077,13 +785,8 @@
             if (growerCheck) growerCheck.checked = user.is_grower || false;
             if (budtenderCheck) budtenderCheck.checked = user.is_budtender || false;
 
-            // Display contact points
             displayContactPoints(user);
-
-            // Set contact edit fields
             setContactEditFields(user);
-
-            // Update avatar
             updateAvatar(user);
         }
 
@@ -1172,7 +875,7 @@
             ];
 
             const values = [
-                user.contact_facebook || '',
+                user.contact_facebook|| '',
                 user.contact_line || '',
                 user.contact_instagram || '',
                 user.contact_twitter || '',
@@ -1251,6 +954,14 @@
             const growerCheck = document.getElementById('is_grower_edit');
             const budtenderCheck = document.getElementById('is_budtender_edit');
 
+            const contactFacebookEdit = document.getElementById('contact-facebook-edit');
+            const contactLineEdit = document.getElementById('contact-line-edit');
+            const contactInstagramEdit = document.getElementById('contact-instagram-edit');
+            const contactTwitterEdit = document.getElementById('contact-twitter-edit');
+            const contactTelegramEdit = document.getElementById('contact-telegram-edit');
+            const contactPhoneEdit = document.getElementById('contact-phone-edit');
+            const contactOtherEdit = document.getElementById('contact-other-edit');
+
             if (!usernameEdit || !emailEdit) {
                 alert('❌ ไม่พบข้อมูลฟอร์ม');
                 return;
@@ -1262,7 +973,14 @@
                 birth_year: birthYearEdit ? birthYearEdit.value : '',
                 is_consumer: consumerCheck ? consumerCheck.checked : false,
                 is_grower: growerCheck ? growerCheck.checked : false,
-                is_budtender: budtenderCheck ? budtenderCheck.checked : false
+                is_budtender: budtenderCheck ? budtenderCheck.checked : false,
+                contact_facebook: contactFacebookEdit ? contactFacebookEdit.value : '',
+                contact_line: contactLineEdit ? contactLineEdit.value : '',
+                contact_instagram: contactInstagramEdit ? contactInstagramEdit.value : '',
+                contact_twitter: contactTwitterEdit ? contactTwitterEdit.value : '',
+                contact_telegram: contactTelegramEdit ? contactTelegramEdit.value : '',
+                contact_phone: contactPhoneEdit ? contactPhoneEdit.value : '',
+                contact_other: contactOtherEdit ? contactOtherEdit.value : ''
             };
 
             try {
@@ -1278,6 +996,7 @@
 
                 if (response.ok) {
                     alert('✅ บันทึกข้อมูลสำเร็จ!');
+                    isProfileLoaded = false;
                     await loadProfile();
                     cancelEdit();
                 } else {
@@ -1337,7 +1056,6 @@
         }
 
         function setupEventListeners() {
-            // Prevent multiple setup calls
             if (window.budtBoyEventListenersSetup) {
                 console.log('Event listeners already setup, skipping...');
                 return;
@@ -1347,7 +1065,6 @@
             const avatarInput = document.getElementById('avatarInput');
 
             if (profileAvatar && avatarInput) {
-                // Use passive event listeners for better mobile performance
                 profileAvatar.addEventListener('click', function() {
                     avatarInput.click();
                 }, { passive: true });
@@ -1356,7 +1073,6 @@
                     uploadProfileImage(this);
                 }, { passive: true });
 
-                // Mark as setup
                 window.budtBoyEventListenersSetup = true;
                 console.log('Event listeners setup completed');
             }
@@ -1364,423 +1080,34 @@
 
         function retryLoadProfile() {
             console.log('Profile: Retrying load...');
-
-            // Reset all state flags
-            const state = window.BudtBoyProfile;
-            state.loaded = false;
-            state.loading = false;
-            state.initialized = false;
-            state.initAttempts = 0;
-
             isProfileLoaded = false;
             isLoading = false;
-
-            // Clear any existing event listeners flag
             window.budtBoyEventListenersSetup = false;
-
-            // Retry initialization
-            setTimeout(mobileOptimizedInit, 100);
-        }
-
-        // Enhanced page visibility handling
-        document.addEventListener('visibilitychange', function() {
-            const state = window.BudtBoyProfile;
-
-            if (document.hidden) {
-                console.log('Profile: Page hidden, pausing operations');
-            } else {
-                console.log('Profile: Page visible again');
-                // Only attempt reload if state indicates it's needed
-                if (!state.loaded && !state.loading && !state.initialized) {
-                    console.log('Profile: Page visible but not loaded, attempting recovery');
-                    setTimeout(() => {
-                        if (!state.loading) { // Double-check before loading
-                            mobileOptimizedInit();
-                        }
-                    }, 1000); // Longer delay for stability
-                }
-            }
-        }, { passive: true });
-
-        // Handle page restoration events
-        window.addEventListener('pageshow', function(event) {
-            const state = window.BudtBoyProfile;
-
-            if (event.persisted) {
-                console.log('Profile: Page restored from cache');
-                // Check if profile data is still visible
-                const profileInfo = document.getElementById('profileInfo');
-                if (profileInfo && profileInfo.style.display !== 'none') {
-                    console.log('Profile: Data still visible, marking as loaded');
-                    state.loaded = true;
-                    state.initialized = true;
-                }
-            } else {
-                console.log('Profile: Fresh page load');
-            }
-        }, { passive: true });
-
-        // ปรับปรุงฟังก์ชัน saveProfile ให้รีโหลดข้อมูลใหม่
-        async function saveProfileImproved() {
-            const usernameEdit = document.getElementById('username-edit');
-            const emailEdit = document.getElementById('email-edit');
-            const birthYearEdit = document.getElementById('birth-year-edit');
-            const consumerCheck = document.getElementById('is_consumer_edit');
-            const growerCheck = document.getElementById('is_grower_edit');
-            const budtenderCheck = document.getElementById('is_budtender_edit');
-
-            // Contact fields
-            const contactFacebookEdit = document.getElementById('contact-facebook-edit');
-            const contactLineEdit = document.getElementById('contact-line-edit');
-            const contactInstagramEdit = document.getElementById('contact-instagram-edit');
-            const contactTwitterEdit = document.getElementById('contact-twitter-edit');
-            const contactTelegramEdit = document.getElementById('contact-telegram-edit');
-            const contactPhoneEdit = document.getElementById('contact-phone-edit');
-            const contactOtherEdit = document.getElementById('contact-other-edit');
-
-            if (!usernameEdit || !emailEdit) {
-                alert('❌ ไม่พบข้อมูลฟอร์ม');
-                return;
-            }
-
-            const updatedData = {
-                username: usernameEdit.value,
-                email: emailEdit.value,
-                birth_year: birthYearEdit ? birthYearEdit.value : '',
-                is_consumer: consumerCheck ? consumerCheck.checked : false,
-                is_grower: growerCheck ? growerCheck.checked : false,
-                is_budtender: budtenderCheck ? budtenderCheck.checked : false,
-                contact_facebook: contactFacebookEdit ? contactFacebookEdit.value : '',
-                contact_line: contactLineEdit ? contactLineEdit.value : '',
-                contact_instagram: contactInstagramEdit ? contactInstagramEdit.value : '',
-                contact_twitter: contactTwitterEdit ? contactTwitterEdit.value : '',
-                contact_telegram: contactTelegramEdit ? contactTelegramEdit.value : '',
-                contact_phone: contactPhoneEdit ? contactPhoneEdit.value : '',
-                contact_other: contactOtherEdit ? contactOtherEdit.value : ''
-            };
-
-            try {
-                const response = await fetch('/api/update_profile', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(updatedData)
-                });
-
-                const result = await response.json();
-
-                if (response.ok) {
-                    alert('✅ บันทึกข้อมูลสำเร็จ!');
-                    // รีเซ็ตสถานะและโหลดข้อมูลใหม่
-                    isProfileLoaded = false;
-                    await loadProfile();
-                    cancelEdit();
-                } else {
-                    alert('❌ เกิดข้อผิดพลาด: ' + (result.error || 'ไม่สามารถบันทึกได้'));
-                }
-            } catch (error) {
-                console.error('Error saving profile:', error);
-                alert('❌ เกิดข้อผิดพลาดในการบันทึกข้อมูล');
-            }
-        }
-
-        // แทนที่ฟังก์ชัน saveProfile เดิม
-        window.saveProfile = saveProfileImproved;
-
-        // Chat functionality
-        let chatHistory = [];
-
-        function openChatWithBudtBoy() {
-            const modal = document.getElementById('chatModal');
-            if (modal) {
-                modal.style.display = 'block';
-
-                // Initialize chat if empty
-                if (chatHistory.length === 0) {
-                    addBotMessage("สวัสดีสหายชิง ทั้งชายและหญิง ขอรับ วันนี้มีอะไรให้รับใช้ครับ");
-                }
-
-                // Focus on input after a short delay to ensure modal is fully displayed
-                setTimeout(() => {
-                    const chatInput = document.getElementById('chatInput');
-                    if (chatInput) {
-                        chatInput.focus();
-                    }
-                }, 100);
-                
-                // Prevent body scroll when modal is open
-                document.body.style.overflow = 'hidden';
-            }
-        }
-
-        function closeChatModal() {
-            const modal = document.getElementById('chatModal');
-            if (modal) {
-                modal.style.display = 'none';
-                
-                // Clear any typing indicators
-                hideTypingIndicator();
-                
-                // Focus back to main content
-                const chatInput = document.getElementById('chatInput');
-                if (chatInput) {
-                    chatInput.blur();
-                }
-                
-                // Remove any lingering backdrop blur
-                document.body.style.overflow = '';
-            }
-        }
-
-        function handleChatKeyPress(event) {
-            if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault();
-                sendChatMessage();
-            }
-        }
-
-        async function sendChatMessage() {
-            const input = document.getElementById('chatInput');
-            const message = input.value.trim();
-
-            if (!message) return;
-            
-            console.log('Sending chat message:', message);
-
-            // Add user message to chat
-            addUserMessage(message);
-
-            // Clear input
-            input.value = '';
-
-            // Show typing indicator
-            showTypingIndicator();
-
-            try {
-                // Send message to AI API
-                const response = await fetch('/api/chat', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        message: message,
-                        history: chatHistory.slice(-10) // Send last 10 messages for context
-                    })
-                });
-
-                const result = await response.json();
-                console.log('Chat response received:', result);
-                hideTypingIndicator();
-
-                if (result.success) {
-                        // ตรวจสอบว่ามีคำแนะนำดอกหรือไม่
-                        if (result.has_recommendations && result.recommended_buds) {
-                            addBotMessage(result.message, result.recommended_buds);
-                        } else {
-                            let message = result.message;
-                            // เพิ่มการแจ้งเตือนถ้าเป็น fallback mode
-                            if (result.fallback_mode) {
-                                message += "\n\n💡 ตอนนี้ระบบ AI หลักไม่พร้อมใช้งาน กำลังใช้โหมดตอบแบบพื้นฐาน";
-                            }
-                            addBotMessage(message);
-                        }
-                    } else {
-                        addBotMessage(result.message || 'ขออภัย เกิดข้อผิดพลาดในการตอบกลับ');
-                    }
-            } catch (error) {
-                hideTypingIndicator();
-                console.error('Chat error:', error);
-                addBotMessage('ขออภัย ไม่สามารถเชื่อมต่อกับระบบ AI ได้ กรุณาลองใหม่อีกครั้ง');
-            }
-        }
-
-        function addUserMessage(message) {
-            const messagesContainer = document.getElementById('chatMessages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'message user';
-
-            const currentUser = currentUserData || { username: 'คุณ' };
-            const avatarLetter = currentUser.username ? currentUser.username.charAt(0).toUpperCase() : 'U';
-
-            messageDiv.innerHTML = `
-                <div class="message-avatar">${avatarLetter}</div>
-                <div class="message-content">
-                    ${message}
-                    <div class="message-time">${new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}</div>
-                </div>
-            `;
-
-            messagesContainer.appendChild(messageDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-
-            chatHistory.push({ role: 'user', message, time: new Date() });
-        }
-
-        function addBotMessage(message, recommendedBuds = null) {
-            const messagesContainer = document.getElementById('chatMessages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'message bot';
-
-            let messageContent = message.replace(/\n/g, '<br>');
-
-            // เพิ่มปุ่มลิงก์สำหรับดอกที่แนะนำ
-            if (recommendedBuds && recommendedBuds.length > 0) {
-                messageContent += '<div class="bud-recommendations" style="margin-top: 15px;">';
-                recommendedBuds.forEach((bud, index) => {
-                    messageContent += `
-                        <div class="bud-recommendation-card" style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 10px; margin-bottom: 8px;">
-                            <div style="font-weight: 600; color: #2196F3; margin-bottom: 5px;">
-                                ${bud.strain_name_th || 'ไม่ระบุชื่อไทย'} (${bud.strain_name_en})
-                            </div>
-                            <div style="font-size: 12px; color: #666; margin-bottom: 8px;">
-                                ${bud.strain_type} | THC: ${bud.thc_percentage}% | CBD: ${bud.cbd_percentage}% | เกรด: ${bud.grade}
-                            </div>
-                            <a href="${bud.report_link}" target="_blank" 
-                               style="background: #2196F3; color: white; padding: 5px 12px; border-radius: 15px; text-decoration: none; font-size: 12px; font-weight: 600;">
-                                📊 ดูรายละเอียดเต็ม
-                            </a>
-                        </div>
-                    `;
-                });
-                messageContent += '</div>';
-            }
-
-            // สร้าง unique timestamp เพื่อป้องกัน cache
-            const uniqueTimestamp = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-            messageDiv.innerHTML = `
-                <div class="message-avatar">
-                    <img src="/uploads/budtboy_avatar.png?v=${uniqueTimestamp}" alt="Budt.Boy" 
-                         style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;"
-                         onload="console.log('Budt.Boy avatar loaded successfully');"
-                         onerror="console.log('Failed to load Budt.Boy avatar, using fallback'); this.style.display='none'; this.parentElement.style.background='linear-gradient(135deg, #1a237e 0%, #0d47a1 100%)'; this.parentElement.innerHTML='🤖'; this.parentElement.style.fontSize='16px'; this.parentElement.style.display='flex'; this.parentElement.style.alignItems='center'; this.parentElement.style.justifyContent='center';">
-                </div>
-                <div class="message-content">
-                    ${messageContent}
-                    <div class="message-time">${new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}</div>
-                </div>
-            `;
-
-            messagesContainer.appendChild(messageDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-
-            chatHistory.push({ role: 'assistant', message, time: new Date() });
-        }
-
-        function showTypingIndicator() {
-            const messagesContainer = document.getElementById('chatMessages');
-            const typingDiv = document.createElement('div');
-            typingDiv.className = 'message bot';
-            typingDiv.id = 'typingIndicator';
-
-            // สร้าง unique timestamp เพื่อป้องกัน cache
-            const uniqueTimestamp = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-            typingDiv.innerHTML = `
-                <div class="message-avatar">
-                    <img src="/uploads/budtboy_avatar.png?v=${uniqueTimestamp}" alt="Budt.Boy" 
-                         style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;"
-                         onload="console.log('Typing indicator avatar loaded');"
-                         onerror="console.log('Failed to load typing avatar, using fallback'); this.style.display='none'; this.parentElement.style.background='linear-gradient(135deg, #1a237e 0%, #0d47a1 100%)'; this.parentElement.innerHTML='🤖'; this.parentElement.style.fontSize='16px'; this.parentElement.style.display='flex'; this.parentElement.style.alignItems='center'; this.parentElement.style.justifyContent='center';">
-                </div>
-                <div class="typing-indicator" style="display: block;">
-                    <div class="typing-dots">
-                        <div class="typing-dot"></div>
-                        <div class="typing-dot"></div>
-                        <div class="typing-dot"></div>
-                    </div>
-                </div>
-            `;
-
-            messagesContainer.appendChild(typingDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
-
-        function hideTypingIndicator() {
-            const typingIndicator = document.getElementById('typingIndicator');
-            if (typingIndicator) {
-                typingIndicator.remove();
-            }
-        }
-
-        function generateBotResponse(userMessage) {
-            const message = userMessage.toLowerCase();
-
-            // Simple keyword-based responses (in real implementation, this would use AI)
-            if (message.includes('สวัสดี') || message.includes('หวัดดี') || message.includes('ดี')) {
-                return "สวัสดีครับ! ยินดีที่ได้รู้จัก มีอะไรเกี่ยวกับกัญชาที่อยากถามไหมครับ? 😊";
-            }
-
-            if (message.includes('สายพันธุ์') || message.includes('strain')) {
-                return "เรามีข้อมูลสายพันธุ์กัญชามากมายครับ! \n\nสายพันธุ์ยอดนิยม:\n• Blue Dream - Hybrid (Sativa โดด)\n• OG Kush - Indica โดด\n• White Widow - Hybrid สมดุล\n• Girl Scout Cookies - Hybrid (Indica โดด)\n\nอยากรู้เพิ่มเติมเกี่ยวกับสายพันธุ์ไหนเป็นพิเศษไหมครับ?";
-            }
-
-            if (message.includes('ปลูก') || message.includes('grow')) {
-                return "การปลูกกัญชานั้นต้องคำนึงถึงหลายปัจจัยครับ:\n\n🌱 ปัจจัยสำคัญ:\n• แสงแดด/แสงไฟ LED\n• ความชื้น 40-60%\n• อุณหภูมิ 20-26°C\n• ปุ่ยและสารอาหาร\n• การระบายอากาศ\n\nต้องการคำแนะนำเฉพาะด้านไหนไหมครับ?";
-            }
-
-            if (message.includes('ผลกระทบ') || message.includes('effect')) {
-                return "ผลกระทบของกัญชาแบ่งได้เป็น:\n\n😊 ผลกระทบเชิงบวก:\n• ผ่อนคลาย\n• สร้างสรรค์\n• บรรเทาปวด\n• ช่วยให้หลับ\n\n⚠️ ผลข้างเคียง:\n• ปากแห้ง\n• ตาแดง\n• วิตกกังวล (ในบางคน)\n• ความจำระยะสั้น\n\nควรใช้อย่างรับผิดชอบครับ!";
-            }
-
-            if (message.includes('ขอบคุณ') || message.includes('thank')) {
-                return "ด้วยความยินดีครับ! หากมีคำถามอื่นๆ เกี่ยวกับกัญชา สามารถถามได้เสมอนะครับ 🌿✨";
-            }
-
-            if (message.includes('thc') || message.includes('cbd')) {
-                return "THC และ CBD เป็นสารสำคัญในกัญชาครับ:\n\n🔥 THC (Tetrahydrocannabinol):\n• ทำให้เมา/เหิม\n• บรรเทาปวด\n• กระตุ้นความอยาก\n\n🌿 CBD (Cannabidiol):\n• ไม่ทำให้เมา\n• ต้านอักเสบ\n• ลดวิตกกังวล\n• ช่วยผ่อนคลาย\n\nอัตราส่วนที่แตกต่างกันจะให้ผลที่แตกต่างกันครับ!";
-            }
-
-            // Default response
-            return "ขออภัยครับ ผมยังไม่เข้าใจคำถามนี้ดี ลองถามเกี่ยวกับ:\n• สายพันธุ์กัญชา\n• การปลูก\n• ผลกระทบ\n• THC/CBD\n\nหรือถามในรูปแบบอื่นได้ครับ 😊";
+            setTimeout(initializePage, 100);
         }
 
         function checkApprovalStatus(user) {
             const pendingApproval = document.getElementById('pendingApproval');
             const actionButtons = document.getElementById('actionButtons');
-            const chatBtn = document.getElementById('chatBtn');
             const activityBtn = document.getElementById('activityBtn');
 
             if (!user.is_approved) {
-                // Show pending approval message
                 if (pendingApproval) {
                     pendingApproval.style.display = 'block';
                 }
 
-                // Disable buttons
-                if (chatBtn) {
-                    chatBtn.classList.add('btn-disabled');
-                    chatBtn.onclick = null;
-                }
                 if (activityBtn) {
                     activityBtn.classList.add('btn-disabled');
                     activityBtn.onclick = null;
                 }
             } else {
-                // Hide pending approval message
                 if (pendingApproval) {
                     pendingApproval.style.display = 'none';
                 }
 
-                // Enable buttons
-                if (chatBtn) {
-                    chatBtn.classList.remove('btn-disabled');
-                }
                 if (activityBtn) {
                     activityBtn.classList.remove('btn-disabled');
                 }
-            }
-        }
-
-        function checkApprovalAndExecute(callback) {
-            if (!currentUserData || !currentUserData.is_approved) {
-                alert('โปรดรอคนที่ชวนท่านมาอนุมัติ เพื่อเข้าใช้ระบบ');
-                return;
-            }
-            if (typeof callback === 'function') {
-                callback();
             }
         }
 
@@ -1793,7 +1120,6 @@
             return true;
         }
 
-        // Check URL parameters for not approved message
         document.addEventListener('DOMContentLoaded', function() {
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('not_approved') === '1') {
@@ -1803,174 +1129,10 @@
             }
         });
 
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            const modal = document.getElementById('chatModal');
-            if (event.target === modal) {
-                closeChatModal();
-            }
-        }
-
-        // Close modal when pressing Escape key
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                const modal = document.getElementById('chatModal');
-                if (modal && modal.style.display === 'block') {
-                    closeChatModal();
-                }
-            }
-        });
-
-        // Enhanced global state management
-        if (typeof window.BudtBoyProfile === 'undefined') {
-            window.BudtBoyProfile = {
-                initialized: false,
-                loading: false,
-                loaded: false,
-                initAttempts: 0,
-                maxAttempts: 3
-            };
-        }
-
-        // Comprehensive initialization with mobile-specific handling
-        function initializePage() {
-            const state = window.BudtBoyProfile;
-
-            // Prevent multiple attempts
-            if (state.initialized || state.initAttempts >= state.maxAttempts) {
-                console.log('Profile: Init blocked - already initialized or max attempts reached');
-                return false;
-            }
-
-            state.initAttempts++;
-            state.initialized = true;
-
-            console.log(`Profile: Initializing (attempt ${state.initAttempts})`);
-
-            try {
-                // Only load if not already loaded
-                if (!state.loaded) {
-                    loadProfile();
-                }
-
-                // Setup listeners only once
-                if (!window.budtBoyEventListenersSetup) {
-                    setupEventListeners();
-                }
-
-                console.log('Profile: Initialization completed successfully');
-                return true;
-            } catch (error) {
-                console.error('Profile: Error during initialization:', error);
-                state.initialized = false; // Allow retry on error
-                return false;
-            }
-        }
-
-        // Mobile-optimized initialization
-        function mobileOptimizedInit() {
-            const state = window.BudtBoyProfile;
-
-            if (state.initialized) {
-                console.log('Profile: Already initialized, skipping');
-                return;
-            }
-
-            // Detect if this is a page restoration (mobile back/forward)
-            if (performance.navigation && performance.navigation.type === 2) {
-                console.log('Profile: Page restored from cache, checking state');
-                // If page was restored and data exists, don't reinitialize
-                if (document.getElementById('profileInfo').style.display !== 'none') {
-                    state.initialized = true;
-                    state.loaded = true;
-                    return;
-                }
-            } else {
-                console.log('Profile: Fresh page load');
-            }
-
-            // Use requestAnimationFrame for better mobile performance
-            requestAnimationFrame(() => {
-                if (document.readyState === 'complete') {
-                    initializePage();
-                } else {
-                    // Single event listener with immediate removal
-                    const initHandler = () => {
-                        document.removeEventListener('DOMContentLoaded', initHandler);
-                        setTimeout(initializePage, 50); // Slightly longer delay for mobile
-                    };
-                    document.addEventListener('DOMContentLoaded', initHandler, { once: true, passive: true });
-                }
-            });
-        }
-
-        // Execute mobile-optimized initialization
-        mobileOptimizedInit();
-
-        async function loadProfile() {
-            const state = window.BudtBoyProfile;
-
-            // Enhanced protection with state management
-            if (state.loading || state.loaded || isLoading || isProfileLoaded) {
-                console.log('Profile: LoadProfile blocked - already loading or loaded');
-                return;
-            }
-
-            // Set all loading flags
-            state.loading = true;
-            isLoading = true;
-            showLoading();
-
-            try {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
-
-                const response = await fetch('/api/profile', {
-                    signal: controller.signal,
-                    cache: 'no-cache',
-                    headers: {
-                        'Cache-Control': 'no-cache',
-                        'Pragma': 'no-cache'
-                    }
-                });
-
-                clearTimeout(timeoutId);
-
-                if (response.ok) {
-                    const user = await response.json();
-                    displayProfile(user);
-                    showProfile();
-                    state.loaded = true;
-                    console.log('Profile: Data loaded successfully');
-                    
-                    // เริ่ม interval สำหรับการแจ้งเตือนเพื่อนรออนุมัติ
-                    if (!window.pendingFriendsInterval) {
-                        startPendingFriendsInterval();
-                    }
-                } else {
-                    const errorData = await response.json().catch(() => ({}));
-                    showError(errorData.error || 'ไม่สามารถโหลดข้อมูลโปรไฟล์ได้');
-                }
-            } catch (error) {
-                if (error.name === 'AbortError') {
-                    console.log('Profile: Request timed out');
-                    showError('การโหลดข้อมูลใช้เวลานานเกินไป กรุณาลองใหม่');
-                } else {
-                    console.error('Profile: Loading error:', error);
-                    showError('เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต');
-                }
-            } finally {
-                state.loading = false;
-                isLoading = false;
-                console.log('Profile: Loading completed, flags reset');
-            }
-        }
-
-        // สร้างตัวแปร global เพื่อติดตามสถานะ
+        // Pending friends notification system
         window.pendingFriendsCheckRunning = false;
 
         async function checkPendingFriends() {
-            // ป้องกันการเรียกพร้อมกัน
             if (window.pendingFriendsCheckRunning) {
                 console.log('Pending friends check already running, skipping');
                 return;
@@ -1979,24 +1141,21 @@
             window.pendingFriendsCheckRunning = true;
 
             try {
-                // ตรวจสอบ DOM elements ก่อนทำอะไรทั้งหมด
                 const notification = document.getElementById('pendingFriendsNotification');
                 const text = document.getElementById('pendingFriendsText');
-                
+
                 if (!notification || !text) {
                     console.log('Pending friends DOM elements not found, stopping interval');
                     stopPendingFriendsInterval();
                     return;
                 }
 
-                // ตรวจสอบว่า elements ยังอยู่ใน DOM
                 if (!document.contains(notification) || !document.contains(text)) {
                     console.log('Elements removed from DOM, stopping interval');
                     stopPendingFriendsInterval();
                     return;
                 }
 
-                // ตรวจสอบ user data
                 if (!currentUserData || !currentUserData.id) {
                     console.log('User not logged in, hiding notification');
                     if (notification && notification.style) {
@@ -2005,18 +1164,16 @@
                     return;
                 }
 
-                // ตรวจสอบว่าหน้ายังแสดงผลอยู่
                 if (document.hidden) {
                     console.log('Page hidden, skipping check');
                     return;
                 }
 
-                // เรียก API
                 const response = await fetch('/api/pending_friends_count', {
                     cache: 'no-cache',
                     headers: { 'Cache-Control': 'no-cache' }
                 });
-                
+
                 if (!response.ok) {
                     console.log('API error or user not authorized');
                     if (notification && notification.style) {
@@ -2027,19 +1184,16 @@
 
                 const data = await response.json();
 
-                // ตรวจสอบ elements อีกครั้งก่อนแก้ไข (เผื่อมีการเปลี่ยนแปลงระหว่างรอ API)
                 if (!notification || !text || !notification.style || !document.contains(notification)) {
                     console.log('Elements changed during API call, stopping');
                     stopPendingFriendsInterval();
                     return;
                 }
 
-                // อัปเดต UI อย่างปลอดภัย
                 if (data.pending_count > 0) {
                     text.textContent = `มีเพื่อนใหม่เข้ามา ${data.pending_count} คน โปรดรีวิวและอนุมัติ`;
                     notification.style.display = 'block';
 
-                    // เพิ่ม event listener เพียงครั้งเดียว
                     if (!notification.hasAttribute('data-listener-added')) {
                         notification.onclick = function() {
                             window.location.href = '/friends';
@@ -2058,23 +1212,15 @@
             }
         }
 
-        // กำหนดตัวแปร global ที่ขาดหาย
-        let isInitialized = false;
-
-        // Enhanced interval management
         function startPendingFriendsInterval() {
-            // Clear existing interval first
             stopPendingFriendsInterval();
 
-            // รอให้ DOM พร้อมก่อนเริ่ม interval
             setTimeout(() => {
                 if (document.getElementById('pendingFriendsNotification') && !document.hidden) {
                     console.log('Starting pending friends interval');
-                    
-                    // เรียกครั้งแรกทันที
+
                     checkPendingFriends();
-                    
-                    // ตั้ง interval
+
                     window.pendingFriendsInterval = setInterval(() => {
                         if (document.getElementById('pendingFriendsNotification') && !document.hidden) {
                             checkPendingFriends();
@@ -2086,7 +1232,7 @@
                 } else {
                     console.log('Cannot start interval - elements not ready or page hidden');
                 }
-            }, 1000); // รอ 1 วินาทีก่อนเริ่ม
+            }, 1000);
         }
 
         function stopPendingFriendsInterval() {
@@ -2096,25 +1242,56 @@
             }
         }
 
-        // Start interval only after profile is loaded
         if (!window.pendingFriendsInterval) {
             startPendingFriendsInterval();
         }
 
-        // Improved visibility change handling
         document.addEventListener('visibilitychange', function() {
             if (document.hidden) {
                 stopPendingFriendsInterval();
             } else {
-                // Wait a bit before restarting to ensure page is stable
                 setTimeout(startPendingFriendsInterval, 1000);
             }
         });
 
-        // Cleanup on page unload
         window.addEventListener('beforeunload', function() {
             stopPendingFriendsInterval();
         });
+
+        // Initialize page
+        function initializePage() {
+            if (pageInitialized) {
+                console.log('Profile: Init blocked - already initialized');
+                return false;
+            }
+
+            pageInitialized = true;
+            console.log('Profile: Initializing');
+
+            try {
+                if (!isProfileLoaded) {
+                    loadProfile();
+                }
+
+                if (!window.budtBoyEventListenersSetup) {
+                    setupEventListeners();
+                }
+
+                console.log('Profile: Initialization completed successfully');
+                return true;
+            } catch (error) {
+                console.error('Profile: Error during initialization:', error);
+                pageInitialized = false;
+                return false;
+            }
+        }
+
+        // Start initialization
+        if (document.readyState === 'complete') {
+            initializePage();
+        } else {
+            document.addEventListener('DOMContentLoaded', initializePage, { once: true, passive: true });
+        }
     </script>
 </body>
 </html>

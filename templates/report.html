@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -13,7 +12,7 @@
             padding: 20px;
             min-height: 100vh;
         }
-        
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -22,7 +21,7 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             overflow: hidden;
         }
-        
+
         .header {
             background: linear-gradient(135deg, #2196F3, #1976D2);
             padding: 20px 30px;
@@ -31,7 +30,7 @@
             align-items: center;
             justify-content: space-between;
         }
-        
+
         .back-btn {
             background: rgba(255,255,255,0.2);
             color: white;
@@ -43,22 +42,22 @@
             font-size: 14px;
             transition: all 0.3s ease;
         }
-        
+
         .back-btn:hover {
             background: rgba(255,255,255,0.3);
         }
-        
+
         .header-title {
             text-align: center;
             flex: 1;
         }
-        
+
         .header h1 {
             margin: 0;
             font-size: 24px;
             font-weight: 600;
         }
-        
+
         .summary-cards {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -66,7 +65,7 @@
             padding: 30px;
             background: #f8f9fa;
         }
-        
+
         .summary-card {
             background: white;
             padding: 20px;
@@ -75,19 +74,19 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             border-left: 4px solid #2196F3;
         }
-        
+
         .summary-number {
             font-size: 32px;
             font-weight: 600;
             color: #2196F3;
             margin-bottom: 5px;
         }
-        
+
         .summary-label {
             color: #666;
             font-size: 14px;
         }
-        
+
         .controls {
             padding: 20px 30px;
             background: #f8f9fa;
@@ -98,20 +97,20 @@
             flex-wrap: wrap;
             gap: 15px;
         }
-        
+
         .filter-group {
             display: flex;
             gap: 10px;
             align-items: center;
         }
-        
+
         .filter-select {
             padding: 8px 12px;
             border: 1px solid #ddd;
             border-radius: 8px;
             font-size: 14px;
         }
-        
+
         .export-btn {
             background: #28a745;
             color: white;
@@ -123,12 +122,12 @@
             font-weight: 600;
             transition: all 0.3s ease;
         }
-        
+
         .export-btn:hover {
             background: #218838;
             transform: translateY(-1px);
         }
-        
+
         .print-btn {
             background: #007bff;
             color: white;
@@ -141,12 +140,12 @@
             transition: all 0.3s ease;
             margin-left: 10px;
         }
-        
+
         .print-btn:hover {
             background: #0056b3;
             transform: translateY(-1px);
         }
-        
+
         /* Print styles */
         @media print {
             body {
@@ -154,80 +153,80 @@
                 -webkit-print-color-adjust: exact;
                 color-adjust: exact;
             }
-            
+
             .container {
                 box-shadow: none !important;
                 border-radius: 0 !important;
                 margin: 0 !important;
                 max-width: 100% !important;
             }
-            
+
             .controls {
                 display: none !important;
             }
-            
+
             .back-btn {
                 display: none !important;
             }
-            
+
             .header {
                 background: #2196F3 !important;
                 -webkit-print-color-adjust: exact;
                 color-adjust: exact;
                 print-color-adjust: exact;
             }
-            
+
             .summary-cards {
                 background: white !important;
                 border: 1px solid #ddd;
                 page-break-inside: avoid;
             }
-            
+
             .data-table {
                 font-size: 11px !important;
                 page-break-inside: auto;
             }
-            
+
             .data-table th,
             .data-table td {
                 padding: 6px 4px !important;
                 border: 1px solid #ddd !important;
             }
-            
+
             .data-table tr {
                 page-break-inside: avoid;
                 page-break-after: auto;
             }
-            
+
             .summary-card {
                 border: 1px solid #ddd !important;
                 page-break-inside: avoid;
             }
-            
+
             .strain-type,
             .grade-badge {
                 border: 1px solid #333 !important;
                 -webkit-print-color-adjust: exact;
                 color-adjust: exact;
             }
-            
+
             .rating-stars {
                 color: #000 !important;
             }
         }
-        
+
         .table-container {
             padding: 30px;
             overflow-x: auto;
         }
-        
+
         .data-table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
             font-size: 14px;
         }
-        
+
         .data-table th {
             background: #f8f9fa;
             padding: 12px 8px;
@@ -240,11 +239,11 @@
             position: relative;
             transition: background-color 0.2s ease;
         }
-        
+
         .data-table th:hover {
             background: #e9ecef;
         }
-        
+
         .sort-indicator {
             position: absolute;
             right: 4px;
@@ -253,15 +252,15 @@
             font-size: 12px;
             color: #6c757d;
         }
-        
+
         .sort-asc::after {
             content: "▲";
         }
-        
+
         .sort-desc::after {
             content: "▼";
         }
-        
+
         .filter-dropdown {
             position: absolute;
             top: 100%;
@@ -276,7 +275,7 @@
             z-index: 1000;
             display: none;
         }
-        
+
         .filter-option {
             padding: 8px 12px;
             cursor: pointer;
@@ -284,21 +283,21 @@
             font-size: 12px;
             transition: background-color 0.2s ease;
         }
-        
+
         .filter-option:hover {
             background: #f8f9fa;
         }
-        
+
         .filter-option:last-child {
             border-bottom: none;
         }
-        
+
         .filter-option.selected {
             background: #e3f2fd;
             color: #1976d2;
             font-weight: 600;
         }
-        
+
         .filter-clear {
             padding: 8px 12px;
             background: #f8f9fa;
@@ -308,11 +307,11 @@
             cursor: pointer;
             font-weight: 600;
         }
-        
+
         .filter-clear:hover {
             background: #e9ecef;
         }
-        
+
         .filter-indicator {
             position: absolute;
             right: 20px;
@@ -324,26 +323,26 @@
             border-radius: 50%;
             display: none;
         }
-        
+
         .data-table th {
             position: relative;
         }
-        
+
         .data-table td {
             padding: 12px 8px;
             border-bottom: 1px solid #dee2e6;
             vertical-align: top;
         }
-        
+
         .data-table tr:hover {
             background: #f8f9fa;
         }
-        
+
         .strain-name {
             font-weight: 600;
             color: #333;
         }
-        
+
         .strain-type {
             display: inline-block;
             padding: 4px 8px;
@@ -352,59 +351,59 @@
             font-weight: 600;
             text-align: center;
         }
-        
+
         .type-indica {
             background: #e8eaf6;
             color: #3f51b5;
         }
-        
+
         .type-sativa {
             background: #e8f5e9;
             color: #4caf50;
         }
-        
+
         .type-hybrid {
             background: #fff3e0;
             color: #ff9800;
         }
-        
+
         .rating-display {
             display: flex;
             align-items: center;
             gap: 5px;
             justify-content: flex-start;
         }
-        
+
         .rating-stars {
             color: #ffd700;
             font-size: 16px;
         }
-        
+
         .rating-number {
             font-weight: 600;
             color: #333;
         }
-        
+
         .review-count {
             color: #666;
             font-size: 12px;
         }
-        
+
         .thc-cbd-display {
             font-size: 12px;
             line-height: 1.4;
         }
-        
+
         .thc {
             color: #ff6b6b;
             font-weight: 600;
         }
-        
+
         .cbd {
             color: #4ecdc4;
             font-weight: 600;
         }
-        
+
         .grade-badge {
             display: inline-block;
             padding: 4px 8px;
@@ -413,60 +412,60 @@
             font-weight: 600;
             text-align: center;
         }
-        
+
         .grade-a-plus {
             background: #d4edda;
             color: #155724;
         }
-        
+
         .grade-a {
             background: #cce5ff;
             color: #0066cc;
         }
-        
+
         .grade-b-plus {
             background: #fff2cc;
             color: #996600;
         }
-        
+
         .grade-b {
             background: #ffe6cc;
             color: #cc6600;
         }
-        
+
         .grade-c {
             background: #f8d7da;
             color: #721c24;
         }
-        
+
         .grower-info {
             font-size: 12px;
             color: #666;
         }
-        
+
         .verified-grower {
             color: #28a745;
             font-weight: 600;
         }
-        
+
         .loading {
             text-align: center;
             padding: 60px;
             color: #666;
         }
-        
+
         .error {
             text-align: center;
             padding: 60px;
             color: #dc3545;
         }
-        
+
         .empty-state {
             text-align: center;
             padding: 60px;
             color: #666;
         }
-        
+
         .full-report-btn {
             background: linear-gradient(135deg, #ff4757, #ff3742);
             color: white;
@@ -481,42 +480,42 @@
             text-align: center;
             white-space: nowrap;
         }
-        
+
         .full-report-btn:hover {
             background: linear-gradient(135deg, #ff3742, #ff2f3a);
             transform: translateY(-1px);
             box-shadow: 0 2px 8px rgba(255, 71, 87, 0.3);
         }
-        
+
         @media (max-width: 768px) {
             .container {
                 margin: 10px;
                 border-radius: 15px;
             }
-            
+
             .summary-cards {
                 grid-template-columns: repeat(2, 1fr);
                 padding: 20px;
                 gap: 15px;
             }
-            
+
             .controls {
                 flex-direction: column;
                 align-items: stretch;
             }
-            
+
             .filter-group {
                 justify-content: center;
             }
-            
+
             .table-container {
                 padding: 20px;
             }
-            
+
             .data-table {
                 font-size: 12px;
             }
-            
+
             .data-table th,
             .data-table td {
                 padding: 8px 4px;
@@ -533,7 +532,7 @@
             </div>
             <div style="width: 60px;"></div>
         </div>
-        
+
         <div class="summary-cards" id="summaryCards">
             <div class="summary-card">
                 <div class="summary-number" id="totalBuds">-</div>
@@ -552,13 +551,23 @@
                 <div class="summary-label">จำนวนผู้ปลูก</div>
             </div>
         </div>
-        
-        
-        
+
+        <div class="controls">
+            <div class="filter-group">
+                <a href="/search-tool" class="export-btn" style="text-decoration: none; margin-right: 15px;">
+                    🔍 ค้นหาแบบละเอียด
+                </a>
+            </div>
+            <div>
+                <button class="export-btn" onclick="exportData()">📊 ส่งออกข้อมูล</button>
+                <button class="print-btn" onclick="printReport()">🖨️ พิมพ์รายงาน</button>
+            </div>
+        </div>
+
         <div class="table-container">
             <div id="loadingMessage" class="loading">กำลังโหลดข้อมูล...</div>
             <div id="errorMessage" class="error" style="display: none;"></div>
-            
+
             <table id="dataTable" class="data-table" style="display: none;">
                 <thead>
                     <tr>
@@ -637,21 +646,21 @@
         let currentSortColumn = null;
         let currentSortDirection = 'asc';
         let activeFilters = {};
-        
+
         window.addEventListener('load', async () => {
             await loadAllBudsData();
         });
-        
+
         async function loadAllBudsData() {
             try {
                 const response = await fetch('/api/all-buds-report');
                 if (response.ok) {
                     const data = await response.json();
                     allBudsData = data.buds || [];
-                    
+
                     updateSummaryCards();
                     displayTable();
-                    
+
                     document.getElementById('loadingMessage').style.display = 'none';
                     document.getElementById('dataTable').style.display = 'table';
                 } else {
@@ -664,7 +673,7 @@
                 document.getElementById('errorMessage').textContent = 'เกิดข้อผิดพลาดในการโหลดข้อมูล';
             }
         }
-        
+
         function updateSummaryCards() {
             const dataToUse = filteredBudsData.length > 0 ? filteredBudsData : allBudsData;
             const totalBuds = dataToUse.length;
@@ -672,19 +681,19 @@
             const ratingsSum = dataToUse.reduce((sum, bud) => sum + ((bud.avg_rating || 0) * (bud.review_count || 0)), 0);
             const avgRating = totalReviews > 0 ? (ratingsSum / totalReviews).toFixed(1) : '0.0';
             const uniqueGrowers = new Set(dataToUse.map(bud => bud.grower_id)).size;
-            
+
             document.getElementById('totalBuds').textContent = totalBuds;
             document.getElementById('totalReviews').textContent = totalReviews;
             document.getElementById('avgRating').textContent = avgRating;
             document.getElementById('totalGrowers').textContent = uniqueGrowers;
         }
-        
+
         function handleHeaderClick(event, column) {
             // ตรวจสอบว่าคลิกที่ส่วนไหน
             const rect = event.currentTarget.getBoundingClientRect();
             const clickX = event.clientX - rect.left;
             const headerWidth = rect.width;
-            
+
             // ถ้าคลิกในส่วนขวาสุด (30px) ให้แสดง filter
             if (clickX > headerWidth - 30) {
                 toggleFilterDropdown(column);
@@ -693,7 +702,7 @@
                 sortTable(column);
             }
         }
-        
+
         function toggleFilterDropdown(column) {
             // ปิด dropdown อื่น ๆ ก่อน
             document.querySelectorAll('.filter-dropdown').forEach(dropdown => {
@@ -701,10 +710,10 @@
                     dropdown.style.display = 'none';
                 }
             });
-            
+
             const dropdown = document.getElementById(`dropdown-${column}`);
             const isVisible = dropdown.style.display === 'block';
-            
+
             if (isVisible) {
                 dropdown.style.display = 'none';
             } else {
@@ -712,7 +721,7 @@
                 dropdown.style.display = 'block';
             }
         }
-        
+
         function populateFilterDropdown(column) {
             const dropdown = document.getElementById(`dropdown-${column}`);
             const uniqueValues = [...new Set(allBudsData.map(bud => {
@@ -723,58 +732,58 @@
                 }
                 return String(value);
             }))].sort();
-            
+
             let html = '<div class="filter-clear" onclick="clearFilter(\'' + column + '\')">ล้างตัวกรอง</div>';
-            
+
             uniqueValues.forEach(value => {
                 const isSelected = activeFilters[column] === value;
                 html += `<div class="filter-option ${isSelected ? 'selected' : ''}" onclick="applyFilter('${column}', '${value}')">${value}</div>`;
             });
-            
+
             dropdown.innerHTML = html;
         }
-        
+
         function applyFilter(column, value) {
             if (value === 'ไม่ระบุ') {
                 activeFilters[column] = null;
             } else {
                 activeFilters[column] = value;
             }
-            
+
             // แสดง filter indicator
             const indicator = document.getElementById(`filter-${column}`);
             if (indicator) {
                 indicator.style.display = 'block';
             }
-            
+
             // ปิด dropdown
             document.getElementById(`dropdown-${column}`).style.display = 'none';
-            
+
             // กรองข้อมูล
             applyAllFilters();
         }
-        
+
         function clearFilter(column) {
             delete activeFilters[column];
-            
+
             // ซ่อน filter indicator
             const indicator = document.getElementById(`filter-${column}`);
             if (indicator) {
                 indicator.style.display = 'none';
             }
-            
+
             // ปิด dropdown
             document.getElementById(`dropdown-${column}`).style.display = 'none';
-            
+
             // กรองข้อมูล
             applyAllFilters();
         }
-        
+
         function applyAllFilters() {
             filteredBudsData = allBudsData.filter(bud => {
                 return Object.entries(activeFilters).every(([column, filterValue]) => {
                     let budValue = bud[column];
-                    
+
                     if (budValue == null || budValue === '') {
                         budValue = 'ไม่ระบุ';
                     } else if (column === 'created_at') {
@@ -782,19 +791,19 @@
                     } else {
                         budValue = String(budValue);
                     }
-                    
+
                     if (filterValue === null) {
                         return budValue === 'ไม่ระบุ';
                     }
-                    
+
                     return budValue === filterValue;
                 });
             });
-            
+
             updateSummaryCards();
             displayTable();
         }
-        
+
         // ปิด dropdown เมื่อคลิกนอกตาราง
         document.addEventListener('click', function(event) {
             if (!event.target.closest('.data-table')) {
@@ -803,14 +812,14 @@
                 });
             }
         });
-        
-        
-        
+
+
+
         function displayTable() {
             const dataToDisplay = filteredBudsData.length > 0 || Object.keys(activeFilters).length > 0 ? filteredBudsData : allBudsData;
             displayTableWithData(dataToDisplay);
         }
-        
+
         function getStrainTypeClass(type) {
             switch(type) {
                 case 'Indica': return 'type-indica';
@@ -819,7 +828,7 @@
                 default: return '';
             }
         }
-        
+
         function getGradeClass(grade) {
             switch(grade) {
                 case 'A+': return 'grade-a-plus';
@@ -830,7 +839,7 @@
                 default: return '';
             }
         }
-        
+
         function formatDate(dateString) {
             if (!dateString) return 'ไม่ระบุ';
             const date = new Date(dateString);
@@ -840,7 +849,7 @@
                 year: 'numeric'
             });
         }
-        
+
         function sortTable(column) {
             // Toggle sort direction if clicking the same column
             if (currentSortColumn === column) {
@@ -849,28 +858,28 @@
                 currentSortDirection = 'asc';
                 currentSortColumn = column;
             }
-            
+
             // Clear all sort indicators
             document.querySelectorAll('.sort-indicator').forEach(indicator => {
                 indicator.className = 'sort-indicator';
             });
-            
+
             // Set current sort indicator
             const currentIndicator = document.getElementById(`sort-${column}`);
             if (currentIndicator) {
                 currentIndicator.className = `sort-indicator sort-${currentSortDirection}`;
             }
-            
+
             // Sort the data
             const dataToSort = filteredBudsData.length > 0 || Object.keys(activeFilters).length > 0 ? filteredBudsData : allBudsData;
             const sortedData = [...dataToSort].sort((a, b) => {
                 let aValue = a[column];
                 let bValue = b[column];
-                
+
                 // Handle null/undefined values
                 if (aValue == null) aValue = '';
                 if (bValue == null) bValue = '';
-                
+
                 // Handle different data types
                 if (column === 'id' || column === 'thc_percentage' || column === 'cbd_percentage' || 
                     column === 'avg_rating' || column === 'review_count') {
@@ -883,7 +892,7 @@
                     aValue = String(aValue).toLowerCase();
                     bValue = String(bValue).toLowerCase();
                 }
-                
+
                 // Compare values
                 if (aValue < bValue) {
                     return currentSortDirection === 'asc' ? -1 : 1;
@@ -893,19 +902,19 @@
                 }
                 return 0;
             });
-            
+
             // Update the display with sorted data
             displayTableWithData(sortedData);
         }
-        
+
         function displayTableWithData(dataToDisplay) {
             const tbody = document.getElementById('tableBody');
-            
+
             if (dataToDisplay.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="11" class="empty-state">ไม่พบข้อมูล</td></tr>';
                 return;
             }
-            
+
             tbody.innerHTML = dataToDisplay.map(bud => `
                 <tr>
                     <td>${bud.id}</td>
@@ -947,8 +956,8 @@
                 </tr>
             `).join('');
         }
-        
-        
+
+
     </script>
 </body>
 </html>

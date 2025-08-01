@@ -3194,10 +3194,22 @@ def report_page():
 
 @app.route('/bud_report/')
 @app.route('/bud_report/<int:bud_id>')
+@app.route('/bud-report')
+@app.route('/bud-report/<int:bud_id>')
 def bud_report_page(bud_id=None):
     # Check if user is logged in
     if 'user_id' not in session:
         return redirect('/auth')
+    
+    # Handle query parameter for id
+    if bud_id is None:
+        bud_id = request.args.get('id')
+        if bud_id:
+            try:
+                bud_id = int(bud_id)
+            except (ValueError, TypeError):
+                bud_id = None
+    
     return render_template('bud_report.html', bud_id=bud_id)
 
 @app.route('/friends')

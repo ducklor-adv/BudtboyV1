@@ -346,6 +346,134 @@
             font-weight: bold;
         }
 
+        /* Flavor & Effects Selector Styles */
+        .selector-container {
+            width: 100%;
+        }
+
+        .selected-items {
+            min-height: 30px;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 5px;
+            background: white;
+            cursor: pointer;
+            margin-bottom: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 3px;
+            align-items: center;
+        }
+
+        .selected-items:hover {
+            border-color: #2196F3;
+        }
+
+        .selected-items .placeholder {
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        .item-tag {
+            background: #2196F3;
+            color: white;
+            padding: 3px 6px;
+            border-radius: 12px;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .item-tag .remove-btn {
+            background: rgba(255, 255, 255, 0.3);
+            border: none;
+            color: white;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            font-size: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .item-tag .remove-btn:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .items-categories {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 10px;
+            max-height: 250px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .items-categories.active {
+            display: block;
+        }
+
+        .category {
+            margin-bottom: 12px;
+        }
+
+        .category-title {
+            font-weight: 600;
+            color: #1565C0;
+            margin-bottom: 8px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 13px;
+        }
+
+        .item-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .item-btn {
+            background: white;
+            border: 1px solid #e9ecef;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #495057;
+        }
+
+        .item-btn:hover {
+            background: #e8f4f8;
+            border-color: #2196F3;
+            color: #1565C0;
+        }
+
+        .item-btn.selected {
+            background: #2196F3;
+            border-color: #2196F3;
+            color: white;
+        }
+
+        .clear-all-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .clear-all-btn:hover {
+            background: #c82333;
+        }
+
         @media (max-width: 768px) {
             .form-row {
                 flex-direction: column;
@@ -500,7 +628,6 @@
                                 <option value="Indoor">Indoor</option>
                                 <option value="Outdoor">Outdoor</option>
                                 <option value="Greenhouse">Greenhouse</option>
-                                <option value="Hydroponic">Hydroponic</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -521,54 +648,6 @@
                             </select>
                         </div>
                     </div>
-                </div>
-
-                <!-- Terpenes and Effects -->
-                <div class="form-section">
-                    <div class="section-title">
-                        🌿 กลิ่น รส และผลกระทบ
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group full-width">
-                            <label for="aroma_flavor">กลิ่นและรส</label>
-                            <input type="text" id="aroma_flavor" name="aroma_flavor" placeholder="เช่น เลมอน, สตรอว์เบอร์รี่, วนิลา">
-                            <div class="help-text">สามารถพิมพ์คำค้นหาโดยคั่นด้วยเครื่องหมายจุลภาค</div>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="top_terpenes_1">Terpene หลัก 1</label>
-                            <input type="text" id="top_terpenes_1" name="top_terpenes_1" placeholder="เช่น Myrcene">
-                        </div>
-                        <div class="form-group">
-                            <label for="top_terpenes_2">Terpene หลัก 2</label>
-                            <input type="text" id="top_terpenes_2" name="top_terpenes_2" placeholder="เช่น Limonene">
-                        </div>
-                        <div class="form-group">
-                            <label for="top_terpenes_3">Terpene หลัก 3</label>
-                            <input type="text" id="top_terpenes_3" name="top_terpenes_3" placeholder="เช่น Pinene">
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="mental_effects_positive">ผลกระทบเชิงบวก (จิตใจ)</label>
-                            <input type="text" id="mental_effects_positive" name="mental_effects_positive" placeholder="เช่น ผ่อนคลาย, สร้างสรรค์">
-                        </div>
-                        <div class="form-group">
-                            <label for="physical_effects_positive">ผลกระทบเชิงบวก (ร่างกาย)</label>
-                            <input type="text" id="physical_effects_positive" name="physical_effects_positive" placeholder="เช่น บรรเทาปวด, คลายกล้าม">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Harvest Information -->
-                <div class="form-section">
-                    <div class="section-title">
-                        📅 ข้อมูลการเก็บเกี่ยว
-                    </div>
 
                     <div class="form-row">
                         <div class="form-group">
@@ -582,6 +661,264 @@
                         <div class="form-group">
                             <label for="batch_number">หมายเลข Batch</label>
                             <input type="text" id="batch_number" name="batch_number" placeholder="เช่น BD2024-001">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Terpenes and Sensory -->
+                <div class="form-section">
+                    <div class="section-title">
+                        🌿 กลิ่น รส และ Terpenes
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label for="aroma_flavor">กลิ่นและรส (เลือกได้หลายตัว)</label>
+                            <div class="selector-container">
+                                <div id="selected-flavors" class="selected-items">
+                                    <span class="placeholder">คลิกเพื่อเลือกกลิ่นและรส...</span>
+                                </div>
+                                <textarea id="aroma_flavor" name="aroma_flavor" style="display: none;"></textarea>
+                                <div class="items-categories" id="flavor-categories">
+                                    <div class="category">
+                                        <div class="category-title">🍊 ผลไม้</div>
+                                        <div class="item-options">
+                                            <button type="button" class="item-btn" data-item="เลมอน">เลมอน</button>
+                                            <button type="button" class="item-btn" data-item="ส้ม">ส้ม</button>
+                                            <button type="button" class="item-btn" data-item="มะนาว">มะนาว</button>
+                                            <button type="button" class="item-btn" data-item="เกรปฟรุต">เกรปฟรุต</button>
+                                            <button type="button" class="item-btn" data-item="เบอร์รี่">เบอร์รี่</button>
+                                            <button type="button" class="item-btn" data-item="สตรอว์เบอร์รี่">สตรอว์เบอร์รี่</button>
+                                            <button type="button" class="item-btn" data-item="บลูเบอร์รี่">บลูเบอร์รี่</button>
+                                            <button type="button" class="item-btn" data-item="เชอร์รี่">เชอร์รี่</button>
+                                            <button type="button" class="item-btn" data-item="องุ่น">องุ่น</button>
+                                            <button type="button" class="item-btn" data-item="แอปเปิ้ล">แอปเปิ้ล</button>
+                                            <button type="button" class="item-btn" data-item="มะม่วง">มะม่วง</button>
+                                            <button type="button" class="item-btn" data-item="สับปะรด">สับปะรด</button>
+                                            <button type="button" class="item-btn" data-item="กล้วย">กล้วย</button>
+                                            <button type="button" class="item-btn" data-item="พีช">พีช</button>
+                                            <button type="button" class="item-btn" data-item="แตงโม">แตงโม</button>
+                                            <button type="button" class="item-btn" data-item="กีวี">กีวี</button>
+                                            <button type="button" class="item-btn" data-item="มะพร้าว">มะพร้าว</button>
+                                        </div>
+                                    </div>
+
+                                    <div class="category">
+                                        <div class="category-title">🍰 หวาน‑ขนม</div>
+                                        <div class="item-options">
+                                            <button type="button" class="item-btn" data-item="น้ำผึ้ง">น้ำผึ้ง</button>
+                                            <button type="button" class="item-btn" data-item="วนิลา">วนิลา</button>
+                                            <button type="button" class="item-btn" data-item="คาราเมล">คาราเมล</button>
+                                            <button type="button" class="item-btn" data-item="ช็อกโก">ช็อกโก</button>
+                                            <button type="button" class="item-btn" data-item="กาแฟ">กาแฟ</button>
+                                            <button type="button" class="item-btn" data-item="เค้ก">เค้ก</button>
+                                            <button type="button" class="item-btn" data-item="คุกกี้">คุกกี้</button>
+                                        </div>
+                                    </div>
+
+                                    <div class="category">
+                                        <div class="category-title">🥛 ครีม‑นม</div>
+                                        <div class="item-options">
+                                            <button type="button" class="item-btn" data-item="ครีม">ครีม</button>
+                                            <button type="button" class="item-btn" data-item="บัตเตอร์">บัตเตอร์</button>
+                                            <button type="button" class="item-btn" data-item="ชีส">ชีส</button>
+                                        </div>
+                                    </div>
+
+                                    <div class="category">
+                                        <div class="category-title">🥜 ถั่ว‑เมล็ด</div>
+                                        <div class="item-options">
+                                            <button type="button" class="item-btn" data-item="ถั่ว">ถั่ว</button>
+                                            <button type="button" class="item-btn" data-item="อัลมอนด์">อัลมอนด์</button>
+                                            <button type="button" class="item-btn" data-item="วอลนัท">วอลนัท</button>
+                                        </div>
+                                    </div>
+
+                                    <div class="category">
+                                        <div class="category-title">🌿 สมุนไพร‑เครื่องเทศ</div>
+                                        <div class="item-options">
+                                            <button type="button" class="item-btn" data-item="พริกไทย">พริกไทย</button>
+                                            <button type="button" class="item-btn" data-item="อบเชย">อบเชย</button>
+                                            <button type="button" class="item-btn" data-item="จันทน์เทศ">จันทน์เทศ</button>
+                                            <button type="button" class="item-btn" data-item="ขิง">ขิง</button>
+                                            <button type="button" class="item-btn" data-item="กานพลู">กานพลู</button>
+                                            <button type="button" class="item-btn" data-item="ยี่หร่า">ยี่หร่า</button>
+                                            <button type="button" class="item-btn" data-item="ฮ็อปส์">ฮ็อปส์</button>
+                                            <button type="button" class="item-btn" data-item="มิ้นต์">มิ้นต์</button>
+                                            <button type="button" class="item-btn" data-item="โรสแมรี่">โรสแมรี่</button>
+                                            <button type="button" class="item-btn" data-item="ไทม์">ไทม์</button>
+                                            <button type="button" class="item-btn" data-item="เสจ">เสจ</button>
+                                        </div>
+                                    </div>
+
+                                    <div class="category">
+                                        <div class="category-title">🌸 ดอกไม้</div>
+                                        <div class="item-options">
+                                            <button type="button" class="item-btn" data-item="กุหลาบ">กุหลาบ</button>
+                                            <button type="button" class="item-btn" data-item="ลาเวนเดอร์">ลาเวนเดอร์</button>
+                                            <button type="button" class="item-btn" data-item="มะลิ">มะลิ</button>
+                                            <button type="button" class="item-btn" data-item="ดอกส้ม">ดอกส้ม</button>
+                                        </div>
+                                    </div>
+
+                                    <div class="category">
+                                        <div class="category-title">🌲 ไม้‑ดิน</div>
+                                        <div class="item-options">
+                                            <button type="button" class="item-btn" data-item="ไม้สน">ไม้สน</button>
+                                            <button type="button" class="item-btn" data-item="ไม้ซีดาร์">ไม้ซีดาร์</button>
+                                            <button type="button" class="item-btn" data-item="ไม้จันทน์">ไม้จันทน์</button>
+                                            <button type="button" class="item-btn" data-item="เรซิน">เรซิน</button>
+                                            <button type="button" class="item-btn" data-item="ดิน">ดิน</button>
+                                            <button type="button" class="item-btn" data-item="หญ้า">หญ้า</button>
+                                            <button type="button" class="item-btn" data-item="มัสก์">มัสก์</button>
+                                        </div>
+                                    </div>
+
+                                    <div class="category">
+                                        <div class="category-title">⛽ แก๊ส‑เคมี</div>
+                                        <div class="item-options">
+                                            <button type="button" class="item-btn" data-item="ดีเซล">ดีเซล</button>
+                                            <button type="button" class="item-btn" data-item="น้ำมัน">น้ำมัน</button>
+                                            <button type="button" class="item-btn" data-item="แก๊ส">แก๊ส</button>
+                                            <button type="button" class="item-btn" data-item="สกังก์">สกังก์</button>
+                                            <button type="button" class="item-btn" data-item="แอมโมเนีย">แอมโมเนีย</button>
+                                            <button type="button" class="item-btn" data-item="ยาง">ยาง</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="top_terpenes_1">Terpene หลัก 1</label>
+                            <select id="top_terpenes_1" name="top_terpenes_1">
+                                <option value="">เลือก Terpene อันดับ 1</option>
+                                <option value="ไมร์ซีน (Myrcene)">ไมร์ซีน (Myrcene) - มะม่วง/สมุนไพร → ผ่อนคลาย, ง่วง</option>
+                                <option value="ลิโมนีน (Limonene)">ลิโมนีน (Limonene) - ส้ม/เลมอน → อารมณ์ดี, ต้านเครียด</option>
+                                <option value="แอลฟา‑ไพนีน (α‑Pinene)">แอลฟา‑ไพนีน (α‑Pinene) - สน → เปิดปอด, ช่วยโฟกัส</option>
+                                <option value="เบตา‑ไพนีน (β‑Pinene)">เบตา‑ไพนีน (β‑Pinene) - โรสแมรี่ → ต้านอักเสบ</option>
+                                <option value="เบตา‑คาริโอฟีลลีน (β‑Caryophyllene)">เบตา‑คาริโอฟีลลีน (β‑Caryophyllene) - พริกไทย/เผ็ด → บรรเทาปวด, ต้านอักเสบ</option>
+                                <option value="ลินาลูล (Linalool)">ลินาลูล (Linalool) - ลาเวนเดอร์ → คลายกังวล, ช่วยหลับ</option>
+                                <option value="ฮิวมูเลน (Humulene)">ฮิวมูเลน (Humulene) - ฮ็อปส์/ไม้ → ลดอยากอาหาร, ต้านอักเสบ</option>
+                                <option value="เทอร์พินอลีน (Terpinolene)">เทอร์พินอลีน (Terpinolene) - ดอกไม้/สนหวาน → กระตุ้นเบา, ต้านอนุมูลฯ</option>
+                                <option value="โอซิมีน (Ocimene)">โอซิมีน (Ocimene) - ดอกไม้หวาน → ขยายหลอดลม, ต้านไวรัส</option>
+                                <option value="ยูคาลิปตอล / 1,8‑ซิเนออล (Eucalyptol)">ยูคาลิปตอล / 1,8‑ซิเนออล (Eucalyptol) - เมนทอล/ยูคาลิปตัส → สดชื่น,ต้านจุลชีพ</option>
+                                <option value="เนโรลิดอล (Nerolidol)">เนโรลิดอล (Nerolidol) - ชาเขียว/ไม้ → ผ่อนคลายกล้ามเนื้อ</option>
+                                <option value="บิซาโบลอล (Bisabolol)">บิซาโบลอล (Bisabolol) - คาโมมายล์ → ปกป้องผิว, ต้านอักเสบ</option>
+                                <option value="ฟาร์นีซีน (Farnesene)">ฟาร์นีซีน (Farnesene) - แอปเปิ้ลเขียว → ต้านแบคทีเรีย</option>
+                                <option value="แคมฟีน (Camphene)">แคมฟีน (Camphene) - การบูรเบา → ต้านออกซิแดนท์</option>
+                                <option value="เทอร์พิโนล (Terpineol)">เทอร์พิโนล (Terpineol) - ไม้ขาว/ไพน์หวาน → ช่วยสงบใจ</option>
+                                <option value="วาลินซีน (Valencene)">วาลินซีน (Valencene) - ส้มวาเลนเซีย → ยับยั้งยุง, อารมณ์ดี</option>
+                                <option value="เจอราเนียล (Geraniol)">เจอราเนียล (Geraniol) - กุหลาบ → ต้านจุลชีพ</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="top_terpenes_2">Terpene หลัก 2</label>
+                            <select id="top_terpenes_2" name="top_terpenes_2">
+                                <option value="">เลือก Terpene อันดับ 2</option>
+                                <option value="ไมร์ซีน (Myrcene)">ไมร์ซีน (Myrcene) - มะม่วง/สมุนไพร → ผ่อนคลาย, ง่วง</option>
+                                <option value="ลิโมนีน (Limonene)">ลิโมนีน (Limonene) - ส้ม/เลมอน → อารมณ์ดี, ต้านเครียด</option>
+                                <option value="แอลฟา‑ไพนีน (α‑Pinene)">แอลฟา‑ไพนีน (α‑Pinene) - สน → เปิดปอด, ช่วยโฟกัส</option>
+                                <option value="เบตา‑ไพนีน (β‑Pinene)">เบตา‑ไพนีน (β‑Pinene) - โรสแมรี่ → ต้านอักเสบ</option>
+                                <option value="เบตา‑คาริโอฟีลลีน (β‑Caryophyllene)">เบตา‑คาริโอฟีลลีน (β‑Caryophyllene) - พริกไทย/เผ็ด → บรรเทาปวด, ต้านอักเสบ</option>
+                                <option value="ลินาลูล (Linalool)">ลินาลูล (Linalool) - ลาเวนเดอร์ → คลายกังวล, ช่วยหลับ</option>
+                                <option value="ฮิวมูเลน (Humulene)">ฮิวมูเลน (Humulene) - ฮ็อปส์/ไม้ → ลดอยากอาหาร, ต้านอักเสบ</option>
+                                <option value="เทอร์พินอลีน (Terpinolene)">เทอร์พินอลีน (Terpinolene) - ดอกไม้/สนหวาน → กระตุ้นเบา, ต้านอนุมูลฯ</option>
+                                <option value="โอซิมีน (Ocimene)">โอซิมีน (Ocimene) - ดอกไม้หวาน → ขยายหลอดลม, ต้านไวรัส</option>
+                                <option value="ยูคาลิปตอล / 1,8‑ซิเนออล (Eucalyptol)">ยูคาลิปตอล / 1,8‑ซิเนออล (Eucalyptol) - เมนทอล/ยูคาลิปตัส → สดชื่น, ต้านจุลชีพ</option>
+                                <option value="เนโรลิดอล (Nerolidol)">เนโรลิดอล (Nerolidol) - ชาเขียว/ไม้ → ผ่อนคลายกล้ามเนื้อ</option>
+                                <option value="บิซาโบลอล (Bisabolol)">บิซาโบลอล (Bisabolol) - คาโมมายล์ → ปกป้องผิว, ต้านอักเสบ</option>
+                                <option value="ฟาร์นีซีน (Farnesene)">ฟาร์นีซีน (Farnesene) - แอปเปิ้ลเขียว → ต้านแบคทีเรีย</option>
+                                <option value="แคมฟีน (Camphene)">แคมฟีน (Camphene) - การบูรเบา → ต้านออกซิแดนท์</option>
+                                <option value="เทอร์พิโนล (Terpineol)">เทอร์พิโนล (Terpineol) - ไม้ขาว/ไพน์หวาน → ช่วยสงบใจ</option>
+                                <option value="วาลินซีน (Valencene)">วาลินซีน (Valencene) - ส้มวาเลนเซีย → ยับยั้งยุง, อารมณ์ดี</option>
+                                <option value="เจอราเนียล (Geraniol)">เจอราเนียล (Geraniol) - กุหลาบ → ต้านจุลชีพ</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="top_terpenes_3">Terpene หลัก 3</label>
+                            <select id="top_terpenes_3" name="top_terpenes_3">
+                                <option value="">เลือก Terpene อันดับ 3</option>
+                                <option value="ไมร์ซีน (Myrcene)">ไมร์ซีน (Myrcene) - มะม่วง/สมุนไพร → ผ่อนคลาย, ง่วง</option>
+                                <option value="ลิโมนีน (Limonene)">ลิโมนีน (Limonene) - ส้ม/เลมอน → อารมณ์ดี, ต้านเครียด</option>
+                                <option value="แอลฟา‑ไพนีน (α‑Pinene)">แอลฟา‑ไพนีน (α‑Pinene) - สน → เปิดปอด, ช่วยโฟกัส</option>
+                                <option value="เบตา‑ไพนีน (β‑Pinene)">เบตา‑ไพนีน (β‑Pinene) - โรสแมรี่ → ต้านอักเสบ</option>
+                                <option value="เบตา‑คาริโอฟีลลีน (β‑Caryophyllene)">เบตา‑คาริโอฟีลลีน (β‑Caryophyllene) - พริกไทย/เผ็ด → บรรเทาปวด, ต้านอักเสบ</option>
+                                <option value="ลินาลูล (Linalool)">ลินาลูล (Linalool) - ลาเวนเดอร์ → คลายกังวล, ช่วยหลับ</option>
+                                <option value="ฮิวมูเลน (Humulene)">ฮิวมูเลน (Humulene) - ฮ็อปส์/ไม้ → ลดอยากอาหาร, ต้านอักเสบ</option>
+                                <option value="เทอร์พินอลีน (Terpinolene)">เทอร์พินอลีน (Terpinolene) - ดอกไม้/สนหวาน → กระตุ้นเบา, ต้านอนุมูลฯ</option>
+                                <option value="โอซิมีน (Ocimene)">โอซิมีน (Ocimene) - ดอกไม้หวาน → ขยายหลอดลม, ต้านไวรัส</option>
+                                <option value="ยูคาลิปตอล / 1,8‑ซิเนออล (Eucalyptol)">ยูคาลิปตอล / 1,8‑ซิเนออล (Eucalyptol) - เมนทอล/ยูคาลิปตัส → สดชื่น, ต้านจุลชีพ</option>
+                                <option value="เนโรลิดอล (Nerolidol)">เนโรลิดอล (Nerolidol) - ชาเขียว/ไม้ → ผ่อนคลายกล้ามเนื้อ</option>
+                                <option value="บิซาโบลอล (Bisabolol)">บิซาโบลอล (Bisabolol) - คาโมมายล์ → ปกป้องผิว, ต้านอักเสบ</option>
+                                <option value="ฟาร์นีซีน (Farnesene)">ฟาร์นีซีน (Farnesene) - แอปเปิ้ลเขียว → ต้านแบคทีเรีย</option>
+                                <option value="แคมฟีน (Camphene)">แคมฟีน (Camphene) - การบูรเบา → ต้านออกซิแดนท์</option>
+                                <option value="เทอร์พิโนล (Terpineol)">เทอร์พิโนล (Terpineol) - ไม้ขาว/ไพน์หวาน → ช่วยสงบใจ</option>
+                                <option value="วาลินซีน (Valencene)">วาลินซีน (Valencene) - ส้มวาเลนเซีย → ยับยั้งยุง, อารมณ์ดี</option>
+                                <option value="เจอราเนียล (Geraniol)">เจอราเนียล (Geraniol) - กุหลาบ → ต้านจุลชีพ</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Effects -->
+                <div class="form-section">
+                    <div class="section-title">
+                        ✨ ผลกระทบ
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="mental_effects_positive">ผลกระทบเชิงบวก (จิตใจ)</label>
+                            <div class="selector-container">
+                                <div id="selected-mental-positive" class="selected-items">
+                                    <span class="placeholder">คลิกเพื่อเลือกผลกระทบเชิงบวก...</span>
+                                </div>
+                                <textarea id="mental_effects_positive" name="mental_effects_positive" style="display: none;"></textarea>
+                                <div class="items-categories" id="mental-positive-categories">
+                                    <div class="category">
+                                        <div class="item-options">
+                                            <button type="button" class="item-btn" data-item="สุขใจ">😄 สุขใจ</button>
+                                            <button type="button" class="item-btn" data-item="ผ่อนคลาย">😌 ผ่อนคลาย</button>
+                                            <button type="button" class="item-btn" data-item="สร้างสรรค์">🎨 สร้างสรรค์</button>
+                                            <button type="button" class="item-btn" data-item="ร่าเริง">😆 ร่าเริง</button>
+                                            <button type="button" class="item-btn" data-item="เบิกบาน">🤗 เบิกบาน</button>
+                                            <button type="button" class="item-btn" data-item="โฟกัส">🎯 โฟกัส</button>
+                                            <button type="button" class="item-btn" data-item="ตื่นตัว">⚡ ตื่นตัว</button>
+                                            <button type="button" class="item-btn" data-item="คิดลึก">🧠 คิดลึก</button>
+                                            <button type="button" class="item-btn" data-item="หลับง่าย">😴 หลับง่าย</button>
+                                            <button type="button" class="item-btn" data-item="เพลิดเพลิน">🎉 เพลิดเพลิน</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="physical_effects_positive">ผลกระทบเชิงบวก (ร่างกาย)</label>
+                            <div class="selector-container">
+                                <div id="selected-physical-positive" class="selected-items">
+                                    <span class="placeholder">คลิกเพื่อเลือกผลกระทบเชิงบวก...</span>
+                                </div>
+                                <textarea id="physical_effects_positive" name="physical_effects_positive" style="display: none;"></textarea>
+                                <div class="items-categories" id="physical-positive-categories">
+                                    <div class="category">
+                                        <div class="item-options">
+                                            <button type="button" class="item-btn" data-item="บรรเทาปวด">🩹 บรรเทาปวด</button>
+                                            <button type="button" class="item-btn" data-item="คลายกล้าม">💆 คลายกล้าม</button>
+                                            <button type="button" class="item-btn" data-item="ต้านอักเสบ">🛡️ ต้านอักเสบ</button>
+                                            <button type="button" class="item-btn" data-item="หลับง่าย">😴 หลับง่าย</button>
+                                            <button type="button" class="item-btn" data-item="คลายเกร็ง">🧘 คลายเกร็ง</button>
+                                            <button type="button" class="item-btn" data-item="ต้านคลื่นไส้">🤢 ต้านคลื่นไส้</button>
+                                            <button type="button" class="item-btn" data-item="กระตุ้นกิน">🍽️ กระตุ้นกิน</button>
+                                            <button type="button" class="item-btn" data-item="ผ่อนคลาย">😌 ผ่อนคลาย</button>
+                                            <button type="button" class="item-btn" data-item="สดชื่น">✨ สดชื่น</button>
+                                            <button type="button" class="item-btn" data-item="สุขภาพลำไส้">🫁 สุขภาพลำไส้</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -850,12 +1187,122 @@
             input.addEventListener('blur', hideSuggestions);
         }
 
+        // Multi-select functionality for flavors and effects
+        function initializeMultiSelect(selectId, categoriesId, hiddenId) {
+            const selectedDiv = document.getElementById(selectId);
+            const categoriesDiv = document.getElementById(categoriesId);
+            const hiddenInput = document.getElementById(hiddenId);
+            
+            if (!selectedDiv || !categoriesDiv || !hiddenInput) {
+                console.warn(`Multi-select elements not found for ${selectId}`);
+                return;
+            }
+
+            const itemButtons = categoriesDiv.querySelectorAll('.item-btn');
+            let selectedItems = [];
+
+            // Toggle categories visibility
+            selectedDiv.addEventListener('click', function() {
+                // Close other categories
+                document.querySelectorAll('.items-categories').forEach(cat => {
+                    if (cat !== categoriesDiv) {
+                        cat.classList.remove('active');
+                    }
+                });
+                categoriesDiv.classList.toggle('active');
+            });
+
+            // Handle item button clicks
+            itemButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const item = this.getAttribute('data-item');
+
+                    if (selectedItems.includes(item)) {
+                        selectedItems = selectedItems.filter(i => i !== item);
+                        this.classList.remove('selected');
+                    } else {
+                        selectedItems.push(item);
+                        this.classList.add('selected');
+                    }
+
+                    updateDisplay();
+                });
+            });
+
+            function updateDisplay() {
+                hiddenInput.value = selectedItems.join(', ');
+
+                if (selectedItems.length === 0) {
+                    const placeholder = selectedDiv.querySelector('.placeholder');
+                    if (placeholder) {
+                        selectedDiv.innerHTML = `<span class="placeholder">${placeholder.textContent}</span>`;
+                    }
+                } else {
+                    const tagsHtml = selectedItems.map(item => 
+                        `<div class="item-tag">
+                            ${item}
+                            <button type="button" class="remove-btn" onclick="removeItem('${selectId}', '${item}')">×</button>
+                        </div>`
+                    ).join('');
+
+                    selectedDiv.innerHTML = tagsHtml + 
+                        `<button type="button" class="clear-all-btn" onclick="clearAllItems('${selectId}')">ล้างทั้งหมด</button>`;
+                }
+            }
+
+            // Store for global access
+            window[`removeItem_${selectId.replace(/-/g, '_')}`] = function(item) {
+                selectedItems = selectedItems.filter(i => i !== item);
+                itemButtons.forEach(btn => {
+                    if (btn.getAttribute('data-item') === item) {
+                        btn.classList.remove('selected');
+                    }
+                });
+                updateDisplay();
+            };
+
+            window[`clearAllItems_${selectId.replace(/-/g, '_')}`] = function() {
+                selectedItems = [];
+                itemButtons.forEach(btn => btn.classList.remove('selected'));
+                updateDisplay();
+            };
+        }
+
+        // Global functions for removing items
+        window.removeItem = function(selectId, item) {
+            const functionName = `removeItem_${selectId.replace(/-/g, '_')}`;
+            if (window[functionName]) {
+                window[functionName](item);
+            }
+        };
+
+        window.clearAllItems = function(selectId) {
+            const functionName = `clearAllItems_${selectId.replace(/-/g, '_')}`;
+            if (window[functionName]) {
+                window[functionName]();
+            }
+        };
+
+        // Close categories when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.selector-container')) {
+                document.querySelectorAll('.items-categories').forEach(cat => {
+                    cat.classList.remove('active');
+                });
+            }
+        });
+
         // Initialize autocomplete
         document.addEventListener('DOMContentLoaded', function() {
             try {
                 new StrainAutocomplete('strain_name_en', 'suggestions_en', 'en');
                 new StrainAutocomplete('strain_name_th', 'suggestions_th', 'th');
                 initializeBreederAutocomplete('breeder', 'breeder-suggestions', '/api/breeders/search');
+                
+                // Initialize multi-selects
+                initializeMultiSelect('selected-flavors', 'flavor-categories', 'aroma_flavor');
+                initializeMultiSelect('selected-mental-positive', 'mental-positive-categories', 'mental_effects_positive');
+                initializeMultiSelect('selected-physical-positive', 'physical-positive-categories', 'physical_effects_positive');
             } catch (error) {
                 console.error('Error initializing autocomplete:', error);
             }
@@ -865,6 +1312,25 @@
         function clearSearchForm() {
             document.getElementById('searchForm').reset();
             document.getElementById('searchResults').style.display = 'none';
+            
+            // Clear multi-selects
+            document.querySelectorAll('.selected-items').forEach(selected => {
+                const placeholder = selected.querySelector('.placeholder');
+                if (placeholder) {
+                    const placeholderText = placeholder.textContent;
+                    selected.innerHTML = `<span class="placeholder">${placeholderText}</span>`;
+                }
+            });
+            
+            // Clear hidden inputs
+            document.querySelectorAll('textarea[style*="display: none"]').forEach(input => {
+                input.value = '';
+            });
+            
+            // Reset buttons
+            document.querySelectorAll('.item-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
         }
 
         // Show alert function

@@ -1493,20 +1493,44 @@
 
         function openChatWithBudtBoy() {
             const modal = document.getElementById('chatModal');
-            modal.style.display = 'block';
+            if (modal) {
+                modal.style.display = 'block';
 
-            // Initialize chat if empty
-            if (chatHistory.length === 0) {
-                addBotMessage("สวัสดีสหายชิง ทั้งชายและหญิง ขอรับ วันนี้มีอะไรให้รับใช้ครับ");
+                // Initialize chat if empty
+                if (chatHistory.length === 0) {
+                    addBotMessage("สวัสดีสหายชิง ทั้งชายและหญิง ขอรับ วันนี้มีอะไรให้รับใช้ครับ");
+                }
+
+                // Focus on input after a short delay to ensure modal is fully displayed
+                setTimeout(() => {
+                    const chatInput = document.getElementById('chatInput');
+                    if (chatInput) {
+                        chatInput.focus();
+                    }
+                }, 100);
+                
+                // Prevent body scroll when modal is open
+                document.body.style.overflow = 'hidden';
             }
-
-            // Focus on input
-            document.getElementById('chatInput').focus();
         }
 
         function closeChatModal() {
             const modal = document.getElementById('chatModal');
-            modal.style.display = 'none';
+            if (modal) {
+                modal.style.display = 'none';
+                
+                // Clear any typing indicators
+                hideTypingIndicator();
+                
+                // Focus back to main content
+                const chatInput = document.getElementById('chatInput');
+                if (chatInput) {
+                    chatInput.blur();
+                }
+                
+                // Remove any lingering backdrop blur
+                document.body.style.overflow = '';
+            }
         }
 
         function handleChatKeyPress(event) {
@@ -1787,6 +1811,16 @@
             }
         }
 
+        // Close modal when pressing Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const modal = document.getElementById('chatModal');
+                if (modal && modal.style.display === 'block') {
+                    closeChatModal();
+                }
+            }
+        });
+
         // Enhanced global state management
         if (typeof window.BudtBoyProfile === 'undefined') {
             window.BudtBoyProfile = {
@@ -1931,10 +1965,16 @@
 
         async function checkPendingFriends() {
             try {
+                // ตรวจสอบว่า user ยัง login อยู่หรือไม่
+                if (!session || !session.user_id) {
+                    console.log('User not logged in, skipping pending friends check');
+                    return;
+                }
+
                 const response = await fetch('/api/pending_friends_count');
                 
                 if (!response.ok) {
-                    console.log('User not logged in or error fetching pending friends');
+                    console.log('Error fetching pending friends or user not logged in');
                     return;
                 }
 
@@ -1943,9 +1983,14 @@
                 const notification = document.getElementById('pendingFriendsNotification');
                 const text = document.getElementById('pendingFriendsText');
 
-                // เพิ่ม null check ให้ชัดเจนขึ้น
+                // เพิ่ม null check ที่แข็งแกร่งขึ้น
                 if (!notification || !text) {
-                    console.log('Pending friends notification elements not found');
+                    console.log('Pending friends notification elements not found - stopping interval checks');
+                    // หยุดการเรียกซ้ำถ้า element ไม่มี
+                    if (window.pendingFriendsInterval) {
+                        clearInterval(window.pendingFriendsInterval);
+                        window.pendingFriendsInterval = null;
+                    }
                     return;
                 }
 
@@ -1953,10 +1998,13 @@
                     text.textContent = `มีเพื่อนใหม่เข้ามา ${data.pending_count} คน โปรดรีวิวและอนุมัติ`;
                     notification.style.display = 'block';
 
-                    // เพิ่ม event listener สำหรับการคลิก
-                    notification.onclick = function() {
-                        window.location.href = '/friends';
-                    };
+                    // เพิ่ม event listener สำหรับการคลิก (ตรวจสอบว่ายังไม่มี listener)
+                    if (!notification.hasAttribute('data-listener-added')) {
+                        notification.onclick = function() {
+                            window.location.href = '/friends';
+                        };
+                        notification.setAttribute('data-listener-added', 'true');
+                    }
                 } else {
                     notification.style.display = 'none';
                 }
@@ -1968,8 +2016,20 @@
         // กำหนดตัวแปร global ที่ขาดหาย
         let isInitialized = false;
 
-        // Refresh pending friends notification periodically
-        setInterval(checkPendingFriends, 30000); // ตรวจสอบทุก 30 วินาที
+        // Refresh pending friends notification periodically with better management
+        if (!window.pendingFriendsInterval) {
+            window.pendingFriendsInterval = setInterval(checkPendingFriends, 30000); // ตรวจสอบทุก 30 วินาที
+        }
+
+        // Clear interval when page is hidden
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden && window.pendingFriendsInterval) {
+                clearInterval(window.pendingFriendsInterval);
+                window.pendingFriendsInterval = null;
+            } else if (!document.hidden && !window.pendingFriendsInterval) {
+                window.pendingFriendsInterval = setInterval(checkPendingFriends, 30000);
+            }
+        });
     </script>
 </body>
 </html>

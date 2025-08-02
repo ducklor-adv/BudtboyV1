@@ -157,6 +157,42 @@
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
+        
+        .password-input-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        
+        .password-input-container input {
+            width: 100%;
+            padding-right: 45px;
+        }
+        
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #666;
+            padding: 0;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.3s;
+        }
+        
+        .password-toggle:hover {
+            color: #4CAF50;
+        }
+        
+        .password-toggle:focus {
+            outline: none;
+        }
     </style>
 </head>
 <body>
@@ -178,7 +214,12 @@
             </div>
             <div class="form-group">
                 <label for="loginPassword">รหัสผ่าน</label>
-                <input type="password" id="loginPassword" name="password" required>
+                <div class="password-input-container">
+                    <input type="password" id="loginPassword" name="password" required>
+                    <button type="button" class="password-toggle" onclick="togglePassword('loginPassword')">
+                        👁️
+                    </button>
+                </div>
             </div>
             <button type="submit" class="auth-button">🔑 เข้าสู่ระบบ</button>
         </form>
@@ -195,7 +236,12 @@
             </div>
             <div class="form-group">
                 <label for="signupPassword">รหัสผ่าน</label>
-                <input type="password" id="signupPassword" name="password" required minlength="8">
+                <div class="password-input-container">
+                    <input type="password" id="signupPassword" name="password" required minlength="8">
+                    <button type="button" class="password-toggle" onclick="togglePassword('signupPassword')">
+                        👁️
+                    </button>
+                </div>
                 <small style="color: #666; font-size: 12px; margin-top: 5px; display: block;">
                     รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร ประกอบด้วยตัวพิมพ์ใหญ่ พิมพ์เล็ก และตัวเลข
                 </small>
@@ -507,6 +553,22 @@
             if (window.referralWarningOverlay) {
                 document.body.removeChild(window.referralWarningOverlay);
                 window.referralWarningOverlay = null;
+            }
+        }
+
+        // ฟังก์ชันแสดง/ซ่อนรหัสผ่าน
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            const button = input.parentElement.querySelector('.password-toggle');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                button.textContent = '🙈'; // เปลี่ยนเป็นไอคอนซ่อน
+                button.title = 'ซ่อนรหัสผ่าน';
+            } else {
+                input.type = 'password';
+                button.textContent = '👁️'; // เปลี่ยนกลับเป็นไอคอนแสดง
+                button.title = 'แสดงรหัสผ่าน';
             }
         }
     </script>

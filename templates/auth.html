@@ -195,7 +195,11 @@
             </div>
             <div class="form-group">
                 <label for="signupPassword">รหัสผ่าน</label>
-                <input type="password" id="signupPassword" name="password" required minlength="6">
+                <input type="password" id="signupPassword" name="password" required minlength="8">
+                <small style="color: #666; font-size: 12px; margin-top: 5px; display: block;">
+                    รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร ประกอบด้วยตัวพิมพ์ใหญ่ พิมพ์เล็ก และตัวเลข
+                </small>
+                <div id="passwordStrength" style="margin-top: 5px; font-size: 12px;"></div>
             </div>
             <button type="submit" class="auth-button">🎯 สมัครสมาชิก</button>
         </form>
@@ -294,6 +298,77 @@
             }
         });
 
+        // Password strength checker
+        document.getElementById('signupPassword').addEventListener('input', function(e) {
+            const password = e.target.value;
+            const strengthDiv = document.getElementById('passwordStrength');
+            
+            if (password.length === 0) {
+                strengthDiv.innerHTML = '';
+                return;
+            }
+            
+            let score = 0;
+            let feedback = [];
+            
+            // Length check
+            if (password.length >= 8) {
+                score += 1;
+            } else {
+                feedback.push('ต้องมีอย่างน้อย 8 ตัวอักษร');
+            }
+            
+            // Uppercase check
+            if (/[A-Z]/.test(password)) {
+                score += 1;
+            } else {
+                feedback.push('ต้องมีตัวพิมพ์ใหญ่');
+            }
+            
+            // Lowercase check
+            if (/[a-z]/.test(password)) {
+                score += 1;
+            } else {
+                feedback.push('ต้องมีตัวพิมพ์เล็ก');
+            }
+            
+            // Number check
+            if (/[0-9]/.test(password)) {
+                score += 1;
+            } else {
+                feedback.push('ต้องมีตัวเลข');
+            }
+            
+            // Special character (bonus)
+            if (/[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/.test(password)) {
+                score += 1;
+            }
+            
+            // Display strength
+            let strengthText = '';
+            let color = '';
+            
+            if (score < 3) {
+                strengthText = 'อ่อนแอ';
+                color = '#e74c3c';
+            } else if (score === 3) {
+                strengthText = 'ปานกลาง';
+                color = '#f39c12';
+            } else if (score === 4) {
+                strengthText = 'แข็งแกร่ง';
+                color = '#27ae60';
+            } else {
+                strengthText = 'แข็งแกร่งมาก';
+                color = '#2ecc71';
+            }
+            
+            if (feedback.length > 0) {
+                strengthDiv.innerHTML = `<span style="color: ${color};">ความแข็งแกร่ง: ${strengthText}</span><br><span style="color: #e74c3c;">${feedback.join(', ')}</span>`;
+            } else {
+                strengthDiv.innerHTML = `<span style="color: ${color};">ความแข็งแกร่ง: ${strengthText}</span>`;
+            }
+        });
+
         // Signup form submission
         document.getElementById('signupForm').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -311,6 +386,17 @@
             const username = document.getElementById('signupUsername').value;
             const email = document.getElementById('signupEmail').value;
             const password = document.getElementById('signupPassword').value;
+
+            // Validate password strength client-side
+            if (password.length < 8) {
+                document.getElementById('message').innerHTML = `<div class="message error">❌ รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร</div>`;
+                return;
+            }
+            
+            if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
+                document.getElementById('message').innerHTML = `<div class="message error">❌ รหัสผ่านต้องมีตัวพิมพ์ใหญ่ พิมพ์เล็ก และตัวเลข</div>`;
+                return;
+            }
 
             try {
                 const response = await fetch('/quick_signup', {

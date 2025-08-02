@@ -7,6 +7,7 @@ from werkzeug.utils import secure_filename
 from flask_mail import Mail, Message
 import secrets
 import hashlib
+import bcrypt
 import threading
 import time
 app = Flask(__name__)
@@ -1115,6 +1116,47 @@ def create_tables():
 def generate_verification_token():
     return secrets.token_urlsafe(32)
 
+def hash_password(password):
+    """Hash password using bcrypt with salt"""
+    # Convert password to bytes if it's a string
+    if isinstance(password, str):
+        password = password.encode('utf-8')
+    
+    # Generate salt and hash the password
+    salt = bcrypt.gensalt(rounds=12)  # 12 rounds is good balance of security and performance
+    hashed = bcrypt.hashpw(password, salt)
+    
+    # Return as string for database storage
+    return hashed.decode('utf-8')
+
+def verify_password(password, hashed_password):
+    """Verify password against bcrypt hash"""
+    if isinstance(password, str):
+        password = password.encode('utf-8')
+    if isinstance(hashed_password, str):
+        hashed_password = hashed_password.encode('utf-8')
+    
+    return bcrypt.checkpw(password, hashed_password)
+
+def validate_password_strength(password):
+    """Validate password meets security requirements"""
+    if len(password) < 8:
+        return False, "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร"
+    
+    has_upper = any(c.isupper() for c in password)
+    has_lower = any(c.islower() for c in password)
+    has_digit = any(c.isdigit() for c in password)
+    has_special = any(c in "!@#$%^&*()_+-=[]{}|;:,.<>?" for c in password)
+    
+    if not (has_upper and has_lower and has_digit):
+        return False, "รหัสผ่านต้องมีตัวอักษรพิมพ์ใหญ่ พิมพ์เล็ก และตัวเลข"
+    
+    # Optional: require special character
+    # if not has_special:
+    #     return False, "รหัสผ่านต้องมีอักขระพิเศษ"
+    
+    return True, "รหัสผ่านปลอดภัย"
+
 def send_verification_email(email, username, token):
     try:
         # For demo/testing - simulate email sending if no real email config
@@ -1407,21 +1449,19 @@ def login():
     if not email or not password:
         return jsonify({'success': False, 'error': 'กรุณากรอกอีเมลและรหัสผ่าน'}), 400
 
-    password_hash = hashlib.sha256(password.encode()).hexdigest()
-
     conn = get_db_connection()
     if conn:
         try:
             cur = conn.cursor()
             cur.execute("""
-                SELECT id, username, email, is_verified
+                SELECT id, username, email, is_verified, password_hash
                 FROM users 
-                WHERE email = %s AND password_hash = %s
-            """, (email, password_hash))
+                WHERE email = %s
+            """, (email,))
 
             user = cur.fetchone()
-            if user:
-                user_id, username, email, is_verified = user
+            if user and verify_password(password, user[4]):
+                user_id, username, email, is_verified = user[:4]
 
                 # Create session (no email verification required)
                 session['user_id'] = user_id
@@ -1458,7 +1498,13 @@ def quick_signup():
     if not username or not email or not password:
         return jsonify({'success': False, 'error': 'กรุณากรอกข้อมูลให้ครบถ้วน'}), 400
 
-    password_hash = hashlib.sha256(password.encode()).hexdigest()
+    # Validate password strength
+    is_valid, message = validate_password_strength(password)
+    if not is_valid:
+        return jsonify({'success': False, 'error': message}), 400
+
+    # Hash password securely
+    password_hash = hash_password(password)
 
     conn = get_db_connection()
     if conn:
@@ -3618,8 +3664,13 @@ def register_user():
     is_budtender = 'is_budtender' in request.form
     is_consumer = 'is_consumer' in request.form
 
-    # Simple password hashing (use proper hashing in production)
-    password_hash = hashlib.sha256(password.encode()).hexdigest()
+    # Validate password strength
+    is_valid, message = validate_password_strength(password)
+    if not is_valid:
+        return jsonify({'success': False, 'error': message}), 400
+
+    # Secure password hashing
+    password_hash = hash_password(password)
 
     conn = get_db_connection()
     if conn:

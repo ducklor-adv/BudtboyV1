@@ -1492,43 +1492,58 @@ def login():
     if not email or not password:
         return jsonify({'success': False, 'error': 'กรุณากรอกอีเมลและรหัสผ่าน'}), 400
 
-    conn = get_db_connection()
-    if conn:
-        try:
-            cur = conn.cursor()
-            cur.execute("""
-                SELECT id, username, email, is_verified, password_hash
-                FROM users 
-                WHERE email = %s
-            """, (email,))
+    conn = None
+    cur = None
+    try:
+        conn = get_db_connection()
+        if not conn:
+            print("Failed to get database connection for login")
+            return jsonify({'success': False, 'error': 'เชื่อมต่อฐานข้อมูลไม่ได้ กรุณาลองใหม่อีกครั้ง'}), 500
 
-            user = cur.fetchone()
-            if user and verify_password(password, user[4]):
-                user_id, username, email, is_verified = user[:4]
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT id, username, email, is_verified, password_hash
+            FROM users 
+            WHERE email = %s
+        """, (email,))
 
-                # Create session (no email verification required)
-                session['user_id'] = user_id
-                session['username'] = username
-                session['email'] = email
+        user = cur.fetchone()
+        if user and verify_password(password, user[4]):
+            user_id, username, email, is_verified = user[:4]
 
-                return jsonify({
-                    'success': True,
-                    'message': f'เข้าสู่ระบบสำเร็จ ยินดีต้อนรับ {username}!',
-                    'redirect': '/profile'
-                })
-            else:
-                return jsonify({
-                    'success': False,
-                    'error': 'อีเมลหรือรหัสผ่านไม่ถูกต้อง'
-                }), 400
+            # Create session (no email verification required)
+            session['user_id'] = user_id
+            session['username'] = username
+            session['email'] = email
 
-        except Exception as e:
-            return jsonify({'success': False, 'error': str(e)}), 500
-        finally:
-            cur.close()
+            print(f"Login successful for user: {username} (ID: {user_id})")
+
+            return jsonify({
+                'success': True,
+                'message': f'เข้าสู่ระบบสำเร็จ ยินดีต้อนรับ {username}!',
+                'redirect': '/profile'
+            })
+        else:
+            print(f"Login failed for email: {email}")
+            return jsonify({
+                'success': False,
+                'error': 'อีเมลหรือรหัสผ่านไม่ถูกต้อง'
+            }), 400
+
+    except psycopg2.OperationalError as e:
+        print(f"Database operational error in login: {e}")
+        return jsonify({'success': False, 'error': 'เกิดข้อผิดพลาดในการเชื่อมต่อฐานข้อมูล กรุณาลองใหม่อีกครั้ง'}), 500
+    except Exception as e:
+        print(f"General error in login: {e}")
+        return jsonify({'success': False, 'error': 'เกิดข้อผิดพลาดในระบบ กรุณาลองใหม่อีกครั้ง'}), 500
+    finally:
+        if cur:
+            try:
+                cur.close()
+            except:
+                pass
+        if conn:
             return_db_connection(conn)
-    else:
-        return jsonify({'success': False, 'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
 @app.route('/quick_signup', methods=['POST'])
 def quick_signup():

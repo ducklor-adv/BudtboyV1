@@ -1237,107 +1237,80 @@
         // Pending friends notification system
         window.pendingFriendsCheckRunning = false;
 
-        async function checkPendingFriends() {
-            if (window.pendingFriendsCheckRunning) {
+        // Check pending friends periodically - optimized
+        function checkPendingFriends() {
+            // Skip if notification already exists to avoid redundant calls
+            if (document.querySelector('.notification-check-running')) {
+                return;
+            }
+
+            // Mark as running
+            document.body.classList.add('notification-check-running');
+
+            fetch('/api/pending_friends_count', {
+                    cache: 'no-cache',
+                    headers: { 'Cache-Control': 'no-cache' }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.not_logged_in) {
+                        const notification = document.getElementById('pendingFriendsNotification');
+                        if(notification) {
+                            notification.style.display = 'none';
+                        }
+                        return;
+                    }
+
+                    if (data.pending_count > 0) {
+                        const notification = document.getElementById('pendingFriendsNotification');
+                        const text = document.getElementById('pendingFriendsText');
+                        if(notification){
+                            notification.style.display = 'block';
+                        }
+                        if(text){
+                            text.textContent = `มีเพื่อนใหม่เข้ามา ${data.pending_count} คน โปรดรีวิวและอนุมัติ`;
+                        }
+
+                        if (!notification.hasAttribute('data-listener-added')) {
+                            notification.onclick = function() {
+                                window.location.href = '/friends';
+                            };
+                            notification.setAttribute('data-listener-added', 'true');
+                        }
+
+                    } else {
+                         const notification = document.getElementById('pendingFriendsNotification');
+                         if(notification){
+                            notification.style.display = 'none';
+                         }
+                    }
+                })
+                .catch(error => {
+                    console.log('API error or user not authorized');
+                    const notification = document.getElementById('pendingFriendsNotification');
+                    if(notification){
+                        notification.style.display = 'none';
+                    }
+                })
+                .finally(() => {
+                    // Remove running mark
+                    document.body.classList.remove('notification-check-running');
+                });
+        }
+
+
+        let pendingFriendsInterval = null;
+
+        function startPendingFriendsInterval() {
+            // Prevent multiple intervals
+            if (pendingFriendsInterval) {
                 console.log('Pending friends check already running, skipping');
                 return;
             }
 
-            window.pendingFriendsCheckRunning = true;
-
-            try {
-                const notification = document.getElementById('pendingFriendsNotification');
-                const text = document.getElementById('pendingFriendsText');
-
-                if (!notification || !text) {
-                    console.log('Pending friends DOM elements not found, stopping interval');
-                    stopPendingFriendsInterval();
-                    return;
-                }
-
-                if (!document.contains(notification) || !document.contains(text)) {
-                    console.log('Elements removed from DOM, stopping interval');
-                    stopPendingFriendsInterval();
-                    return;
-                }
-
-                if (!currentUserData || !currentUserData.id) {
-                    console.log('User not logged in, hiding notification');
-                    if (notification && notification.style) {
-                        notification.style.display = 'none';
-                    }
-                    return;
-                }
-
-                if (document.hidden) {
-                    console.log('Page hidden, skipping check');
-                    return;
-                }
-
-                const response = await fetch('/api/pending_friends_count', {
-                    cache: 'no-cache',
-                    headers: { 'Cache-Control': 'no-cache' }
-                });
-
-                if (!response.ok) {
-                    console.log('API error or user not authorized');
-                    if (notification && notification.style) {
-                        notification.style.display = 'none';
-                    }
-                    return;
-                }
-
-                const data = await response.json();
-
-                if (!notification || !text || !notification.style || !document.contains(notification)) {
-                    console.log('Elements changed during API call, stopping');
-                    stopPendingFriendsInterval();
-                    return;
-                }
-
-                if (data.pending_count > 0) {
-                    text.textContent = `มีเพื่อนใหม่เข้ามา ${data.pending_count} คน โปรดรีวิวและอนุมัติ`;
-                    notification.style.display = 'block';
-
-                    if (!notification.hasAttribute('data-listener-added')) {
-                        notification.onclick = function() {
-                            window.location.href = '/friends';
-                        };
-                        notification.setAttribute('data-listener-added', 'true');
-                    }
-                } else {
-                    notification.style.display = 'none';
-                }
-
-            } catch (error) {
-                console.error('Error in checkPendingFriends:', error);
-                stopPendingFriendsInterval();
-            } finally {
-                window.pendingFriendsCheckRunning = false;
-            }
-        }
-
-        function startPendingFriendsInterval() {
-            stopPendingFriendsInterval();
-
-            setTimeout(() => {
-                if (document.getElementById('pendingFriendsNotification') && !document.hidden) {
-                    console.log('Starting pending friends interval');
-
-                    checkPendingFriends();
-
-                    window.pendingFriendsInterval = setInterval(() => {
-                        if (document.getElementById('pendingFriendsNotification') && !document.hidden) {
-                            checkPendingFriends();
-                        } else {
-                            console.log('Conditions not met, stopping interval');
-                            stopPendingFriendsInterval();
-                        }
-                    }, 30000);
-                } else {
-                    console.log('Cannot start interval - elements not ready or page hidden');
-                }
-            }, 1000);
+            console.log('Starting pending friends interval');
+            checkPendingFriends(); // Check immediately
+            pendingFriendsInterval = setInterval(checkPendingFriends, 60000); // Check every 60 seconds instead of 30
         }
 
         function stopPendingFriendsInterval() {

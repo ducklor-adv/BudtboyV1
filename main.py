@@ -37,10 +37,12 @@ if not os.path.exists(app.config['UPLOAD_FOLDER']):
 connection_pool = None
 pool_lock = threading.Lock()
 
-# Simple cache system
+# Improved cache system with longer TTL
 cache = {}
 cache_lock = threading.Lock()
-CACHE_TTL = 300  # 5 minutes
+CACHE_TTL = 1800  # 30 minutes instead of 5
+SHORT_CACHE_TTL = 300  # 5 minutes for frequently changing data
+PROFILE_CACHE_TTL = 3600  # 1 hour for profile data
 
 def init_connection_pool():
     global connection_pool
@@ -50,16 +52,18 @@ def init_connection_pool():
                     database_url = os.environ.get('DATABASE_URL')
                     if database_url:
                         connection_pool = psycopg2.pool.ThreadedConnectionPool(
-                            1, 8,  # Reduced connection count for stability
+                            2, 12,  # Increased pool size for better performance
                             database_url,
-                            # Add connection optimization with keepalive
+                            # Optimized connection settings
                             sslmode='prefer',
-                            connect_timeout=15,
+                            connect_timeout=20,
                             application_name='cannabis_app',
                             keepalives=1,
-                            keepalives_idle=30,
-                            keepalives_interval=10,
-                            keepalives_count=5
+                            keepalives_idle=600,  # 10 minutes
+                            keepalives_interval=30,
+                            keepalives_count=3,
+                            # Additional optimization
+                            options='-c default_transaction_isolation=read_committed'
                         )
                         print("Connection pool initialized successfully")
                     else:
@@ -68,19 +72,26 @@ def init_connection_pool():
                     print(f"Error initializing connection pool: {e}")
                     connection_pool = None
 
-def get_cache(key):
+def get_cache(key, ttl=CACHE_TTL):
     with cache_lock:
         if key in cache:
-            data, timestamp = cache[key]
-            if time.time() - timestamp < CACHE_TTL:
+            data, timestamp, cache_ttl = cache[key]
+            if time.time() - timestamp < cache_ttl:
                 return data
             else:
                 del cache[key]
     return None
 
-def set_cache(key, data):
+def set_cache(key, data, ttl=CACHE_TTL):
     with cache_lock:
-        cache[key] = (data, time.time())
+        cache[key] = (data, time.time(), ttl)
+        # Clean old cache entries periodically
+        if len(cache) > 1000:
+            current_time = time.time()
+            keys_to_delete = [k for k, (_, ts, cache_ttl) in cache.items() 
+                            if current_time - ts > cache_ttl]
+            for k in keys_to_delete[:100]:  # Remove max 100 at a time
+                del cache[k]
 
 def clear_cache_pattern(pattern):
     with cache_lock:
@@ -94,48 +105,61 @@ def allowed_file(filename):
 # Database connection function
 def get_db_connection():
     global connection_pool
-    try:
-        if connection_pool is None:
-            init_connection_pool()
-
-        if connection_pool:
-            try:
-                conn = connection_pool.getconn()
-                if conn:
-                    # Test connection
-                    with conn.cursor() as test_cur:
-                        test_cur.execute("SELECT 1")
-                    return conn
-            except (psycopg2.OperationalError, psycopg2.InterfaceError) as e:
-                print(f"Connection pool error: {e}, trying to reinitialize...")
-                # Reset connection pool and try again
-                connection_pool = None
+    max_retries = 2
+    retry_count = 0
+    
+    while retry_count < max_retries:
+        try:
+            if connection_pool is None:
                 init_connection_pool()
-                if connection_pool:
-                    try:
-                        conn = connection_pool.getconn()
-                        if conn:
+
+            if connection_pool:
+                try:
+                    conn = connection_pool.getconn()
+                    if conn and not conn.closed:
+                        # Quick connection test
+                        try:
                             with conn.cursor() as test_cur:
                                 test_cur.execute("SELECT 1")
                             return conn
-                    except Exception:
-                        pass
+                        except:
+                            # Connection is bad, put it back and try again
+                            try:
+                                connection_pool.putconn(conn, close=True)
+                            except:
+                                pass
+                            conn = None
+                except (psycopg2.OperationalError, psycopg2.InterfaceError) as e:
+                    print(f"Connection pool error: {e}, reinitializing...")
+                    connection_pool = None
+                    retry_count += 1
+                    continue
 
-        # Fallback to direct connection
-        database_url = os.environ.get('DATABASE_URL')
-        if not database_url:
-            raise Exception("DATABASE_URL environment variable not set")
+            # Fallback to direct connection only on final retry
+            if retry_count == max_retries - 1:
+                database_url = os.environ.get('DATABASE_URL')
+                if not database_url:
+                    raise Exception("DATABASE_URL environment variable not set")
 
-        conn = psycopg2.connect(
-            database_url,
-            sslmode='prefer',
-            connect_timeout=10,
-            application_name='cannabis_app_direct'
-        )
-        return conn
-    except Exception as e:
-        print(f"Database connection error: {e}")
-        return None
+                conn = psycopg2.connect(
+                    database_url,
+                    sslmode='prefer',
+                    connect_timeout=15,
+                    application_name='cannabis_app_direct'
+                )
+                return conn
+            
+            retry_count += 1
+            time.sleep(0.1)  # Brief pause between retries
+            
+        except Exception as e:
+            retry_count += 1
+            if retry_count >= max_retries:
+                print(f"Database connection error after {max_retries} retries: {e}")
+                return None
+            time.sleep(0.1)
+    
+    return None
 
 def return_db_connection(conn):
     try:
@@ -1251,8 +1275,8 @@ def get_user_buds():
     user_id = session.get('user_id')
     cache_key = f"user_buds_{user_id}"
 
-    # Check cache first
-    cached_data = get_cache(cache_key)
+    # Check cache first with longer TTL
+    cached_data = get_cache(cache_key, CACHE_TTL)
     if cached_data:
         return jsonify({'buds': cached_data})
 
@@ -1298,8 +1322,8 @@ def get_user_buds():
                 'review_count': row[11]
             })
 
-        # Cache for 2 minutes
-        set_cache(cache_key, buds)
+        # Cache for longer time
+        set_cache(cache_key, buds, CACHE_TTL)
 
         return jsonify({'buds': buds})
 
@@ -1639,8 +1663,8 @@ def get_profile():
     user_id = session['user_id']
     cache_key = f"profile_{user_id}"
 
-    # Check cache first
-    cached_data = get_cache(cache_key)
+    # Check cache first with longer TTL for profile data
+    cached_data = get_cache(cache_key, PROFILE_CACHE_TTL)
     if cached_data:
         return jsonify(cached_data)
 
@@ -1691,8 +1715,8 @@ def get_profile():
                     'referred_by': user[19]
                 }
 
-                # Cache the result
-                set_cache(cache_key, user_data)
+                # Cache the result for longer time
+                set_cache(cache_key, user_data, PROFILE_CACHE_TTL)
 
                 return jsonify(user_data)
             else:
@@ -3759,9 +3783,15 @@ def register_user():
 def get_pending_friends_count():
     """Get count of pending friends for approval notification"""
     if 'user_id' not in session:
-        return jsonify({'error': 'ไม่ได้เข้าสู่ระบบ'}), 401
+        return jsonify({'pending_count': 0, 'not_logged_in': True}), 200
 
     user_id = session['user_id']
+    cache_key = f"pending_friends_{user_id}"
+    
+    # Check cache first with short TTL
+    cached_data = get_cache(cache_key, SHORT_CACHE_TTL)
+    if cached_data:
+        return jsonify(cached_data)
     
     conn = get_db_connection()
     if conn:
@@ -3779,9 +3809,12 @@ def get_pending_friends_count():
             cur.close()
             return_db_connection(conn)
             
-            return jsonify({
-                'pending_count': pending_count
-            })
+            result = {'pending_count': pending_count}
+            
+            # Cache the result
+            set_cache(cache_key, result, SHORT_CACHE_TTL)
+            
+            return jsonify(result)
             
         except Exception as e:
             return jsonify({'error': str(e)}), 500

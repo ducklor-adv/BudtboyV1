@@ -895,7 +895,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <a href="/profile" class="back-btn">← กลับ</a>
+            <a href="/activity" class="back-btn">← กลับ</a>
             <h1>เพิ่มข้อมูลดอก</h1>
             <div class="subtitle">กรอกข้อมูลรายละเอียดของดอกที่คุณมี</div>
         </div>
@@ -1423,7 +1423,7 @@
                     <button type="submit" class="btn btn-primary">
                         💾 บันทึกข้อมูล
                     </button>
-                    <a href="/profile" class="btn btn-secondary">
+                    <a href="/activity" class="btn btn-secondary">
                         ❌ ยกเลิก
                     </a>
                 </div>
@@ -2179,9 +2179,9 @@
                 // Reset form
                 document.getElementById('budsForm').reset();
 
-                // Redirect to profile after 3 seconds
+                // Redirect to activity after 3 seconds
                 setTimeout(() => {
-                    window.location.href = '/profile';
+                    window.location.href = '/activity';
                 }, 3000);
 
             } catch (error) {

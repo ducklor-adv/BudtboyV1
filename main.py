@@ -3850,38 +3850,41 @@ def get_pending_friends_count():
     if cached_data:
         return jsonify(cached_data)
     
-    conn = get_db_connection()
-    if conn:
-        try:
-            cur = conn.cursor()
+    conn = None
+    cur = None
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
             
-            # Count pending friends
-            cur.execute("""
-                SELECT COUNT(*) FROM users 
-                WHERE referred_by = %s AND is_approved = FALSE
-            """, (user_id,))
-            
-            pending_count = cur.fetchone()[0]
-            
-            cur.close()
-            return_db_connection(conn)
-            
-            result = {'pending_count': pending_count}
-            
-            # Cache the result
-            set_cache(cache_key, result, SHORT_CACHE_TTL)
-            
-            return jsonify(result)
-            
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
-        finally:
-            if cur:
+        cur = conn.cursor()
+        
+        # Count pending friends
+        cur.execute("""
+            SELECT COUNT(*) FROM users 
+            WHERE referred_by = %s AND is_approved = FALSE
+        """, (user_id,))
+        
+        pending_count = cur.fetchone()[0]
+        
+        result = {'pending_count': pending_count}
+        
+        # Cache the result
+        set_cache(cache_key, result, SHORT_CACHE_TTL)
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        print(f"Error in get_pending_friends_count: {e}")
+        return jsonify({'error': str(e)}), 500
+    finally:
+        if cur:
+            try:
                 cur.close()
-            if conn:
-                return_db_connection(conn)
-    else:
-        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+            except:
+                pass
+        if conn:
+            return_db_connection(conn)
 
 @app.route('/api/approve_user', methods=['POST'])
 def approve_user():

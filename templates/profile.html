@@ -798,9 +798,12 @@
                     showProfile();
                     console.log('Profile: Data loaded successfully');
 
-                    if (!window.pendingFriendsInterval) {
-                        startPendingFriendsInterval();
-                    }
+                    // Start pending friends check only after profile is loaded
+                    setTimeout(() => {
+                        if (!pendingFriendsInterval) {
+                            startPendingFriendsInterval();
+                        }
+                    }, 1000);
                 } else {
                     const errorData = await response.json().catch(() => ({}));
                     showError(errorData.error || 'ไม่สามารถโหลดข้อมูลโปรไฟล์ได้');
@@ -1162,7 +1165,6 @@
 
         function setupEventListeners() {
             if (window.budtBoyEventListenersSetup) {
-                console.log('Event listeners already setup, skipping...');
                 return;
             }
 
@@ -1170,11 +1172,19 @@
             const avatarInput = document.getElementById('avatarInput');
 
             if (profileAvatar && avatarInput) {
-                profileAvatar.addEventListener('click', function() {
-                    avatarInput.click();
+                // Remove any existing listeners first
+                profileAvatar.replaceWith(profileAvatar.cloneNode(true));
+                avatarInput.replaceWith(avatarInput.cloneNode(true));
+                
+                // Re-get elements after replacement
+                const newProfileAvatar = document.getElementById('profileAvatar');
+                const newAvatarInput = document.getElementById('avatarInput');
+                
+                newProfileAvatar.addEventListener('click', function() {
+                    newAvatarInput.click();
                 }, { passive: true });
 
-                avatarInput.addEventListener('change', function() {
+                newAvatarInput.addEventListener('change', function() {
                     uploadProfileImage(this);
                 }, { passive: true });
 
@@ -1234,18 +1244,17 @@
             }
         });
 
-        // Pending friends notification system
-        window.pendingFriendsCheckRunning = false;
+        // Pending friends notification system - optimized
+        let pendingFriendsInterval = null;
+        let isCheckingPendingFriends = false;
 
-        // Check pending friends periodically - optimized
         function checkPendingFriends() {
-            // Skip if notification already exists to avoid redundant calls
-            if (document.querySelector('.notification-check-running')) {
+            // Prevent duplicate calls
+            if (isCheckingPendingFriends) {
                 return;
             }
 
-            // Mark as running
-            document.body.classList.add('notification-check-running');
+            isCheckingPendingFriends = true;
 
             fetch('/api/pending_friends_count', {
                     cache: 'no-cache',
@@ -1261,9 +1270,10 @@
                         return;
                     }
 
+                    const notification = document.getElementById('pendingFriendsNotification');
+                    const text = document.getElementById('pendingFriendsText');
+                    
                     if (data.pending_count > 0) {
-                        const notification = document.getElementById('pendingFriendsNotification');
-                        const text = document.getElementById('pendingFriendsText');
                         if(notification){
                             notification.style.display = 'block';
                         }
@@ -1271,15 +1281,14 @@
                             text.textContent = `มีเพื่อนใหม่เข้ามา ${data.pending_count} คน โปรดรีวิวและอนุมัติ`;
                         }
 
-                        if (!notification.hasAttribute('data-listener-added')) {
+                        // Add click handler only once
+                        if (notification && !notification.hasAttribute('data-listener-added')) {
                             notification.onclick = function() {
                                 window.location.href = '/friends';
                             };
                             notification.setAttribute('data-listener-added', 'true');
                         }
-
                     } else {
-                         const notification = document.getElementById('pendingFriendsNotification');
                          if(notification){
                             notification.style.display = 'none';
                          }
@@ -1293,45 +1302,49 @@
                     }
                 })
                 .finally(() => {
-                    // Remove running mark
-                    document.body.classList.remove('notification-check-running');
+                    isCheckingPendingFriends = false;
                 });
         }
-
-
-        let pendingFriendsInterval = null;
 
         function startPendingFriendsInterval() {
             // Prevent multiple intervals
             if (pendingFriendsInterval) {
-                console.log('Pending friends check already running, skipping');
                 return;
             }
 
             console.log('Starting pending friends interval');
             checkPendingFriends(); // Check immediately
-            pendingFriendsInterval = setInterval(checkPendingFriends, 60000); // Check every 60 seconds instead of 30
+            pendingFriendsInterval = setInterval(checkPendingFriends, 120000); // Check every 2 minutes
         }
 
         function stopPendingFriendsInterval() {
-            if (window.pendingFriendsInterval) {
-                clearInterval(window.pendingFriendsInterval);
-                window.pendingFriendsInterval = null;
+            if (pendingFriendsInterval) {
+                clearInterval(pendingFriendsInterval);
+                pendingFriendsInterval = null;
+                console.log('Stopped pending friends interval');
             }
         }
 
-        if (!window.pendingFriendsInterval) {
+        // Only start if not already running
+        if (!pendingFriendsInterval) {
             startPendingFriendsInterval();
         }
 
+        // Handle page visibility changes
         document.addEventListener('visibilitychange', function() {
             if (document.hidden) {
                 stopPendingFriendsInterval();
             } else {
-                setTimeout(startPendingFriendsInterval, 1000);
+                // Wait a bit before restarting to avoid overlap
+                setTimeout(() => {
+                    if (!pendingFriendsInterval) {
+                        startPendingFriendsInterval();
+                    }
+                }, 2000);
             }
         });
 
+        // Cleanup on page unload
         window.addEventListener('beforeunload', function() {
             stopPendingFriendsInterval();
         });

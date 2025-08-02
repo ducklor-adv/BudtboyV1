@@ -1153,13 +1153,21 @@ def hash_password(password):
     return hashed.decode('utf-8')
 
 def verify_password(password, hashed_password):
-    """Verify password against bcrypt hash"""
-    if isinstance(password, str):
-        password = password.encode('utf-8')
-    if isinstance(hashed_password, str):
-        hashed_password = hashed_password.encode('utf-8')
-    
-    return bcrypt.checkpw(password, hashed_password)
+    """Verify password against bcrypt hash with error handling"""
+    try:
+        if isinstance(password, str):
+            password = password.encode('utf-8')
+        if isinstance(hashed_password, str):
+            hashed_password = hashed_password.encode('utf-8')
+        
+        return bcrypt.checkpw(password, hashed_password)
+    except ValueError as e:
+        print(f"Password verification error: {e}")
+        # Handle legacy passwords or invalid hashes
+        return False
+    except Exception as e:
+        print(f"Unexpected error in password verification: {e}")
+        return False
 
 def validate_password_strength(password):
     """Validate password meets security requirements"""
@@ -1508,23 +1516,38 @@ def login():
         """, (email,))
 
         user = cur.fetchone()
-        if user and verify_password(password, user[4]):
-            user_id, username, email, is_verified = user[:4]
+        if user:
+            try:
+                password_valid = verify_password(password, user[4])
+                if password_valid:
+                    user_id, username, email, is_verified = user[:4]
 
-            # Create session (no email verification required)
-            session['user_id'] = user_id
-            session['username'] = username
-            session['email'] = email
+                    # Create session (no email verification required)
+                    session['user_id'] = user_id
+                    session['username'] = username
+                    session['email'] = email
 
-            print(f"Login successful for user: {username} (ID: {user_id})")
+                    print(f"Login successful for user: {username} (ID: {user_id})")
 
-            return jsonify({
-                'success': True,
-                'message': f'เข้าสู่ระบบสำเร็จ ยินดีต้อนรับ {username}!',
-                'redirect': '/profile'
-            })
+                    return jsonify({
+                        'success': True,
+                        'message': f'เข้าสู่ระบบสำเร็จ ยินดีต้อนรับ {username}!',
+                        'redirect': '/profile'
+                    })
+                else:
+                    print(f"Login failed - invalid password for email: {email}")
+                    return jsonify({
+                        'success': False,
+                        'error': 'อีเมลหรือรหัสผ่านไม่ถูกต้อง'
+                    }), 400
+            except Exception as pwd_error:
+                print(f"Password verification error for email {email}: {pwd_error}")
+                return jsonify({
+                    'success': False,
+                    'error': 'เกิดข้อผิดพลาดในการตรวจสอบรหัสผ่าน กรุณาติดต่อผู้ดูแลระบบ'
+                }), 400
         else:
-            print(f"Login failed for email: {email}")
+            print(f"Login failed - user not found for email: {email}")
             return jsonify({
                 'success': False,
                 'error': 'อีเมลหรือรหัสผ่านไม่ถูกต้อง'

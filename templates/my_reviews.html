@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -869,21 +868,20 @@
                                     ${reviewerAvatar}
                                 </div>
                                 <div class="reviewer-name">${review.reviewer_name || 'ผู้ใช้ไม่ระบุชื่อ'}</div>
-                            </div>
-                            
-                            <div class="rating-section">
-                                <div class="overall-rating">
-                                    <span class="rating-label">คะแนนรวม:</span>
-                                    <span class="rating-stars">${'⭐'.repeat(review.overall_rating)}</span>
-                                    <span>(${review.overall_rating}/5)</span>
+                                <div class="rating-section">
+                                    <div class="overall-rating">
+                                        <span class="rating-label">คะแนนรวม:</span>
+                                        <span class="rating-stars">${'⭐'.repeat(review.overall_rating)}</span>
+                                        <span>(${review.overall_rating}/5)</span>
+                                    </div>
+                                    ${review.aroma_rating ? `
+                                    <div class="aroma-rating">
+                                        <span class="rating-label">คะแนนกลิ่น:</span>
+                                        <span class="rating-stars">${'⭐'.repeat(review.aroma_rating)}</span>
+                                        <span>(${review.aroma_rating}/5)</span>
+                                    </div>
+                                    ` : ''}
                                 </div>
-                                ${review.aroma_rating ? `
-                                <div class="aroma-rating">
-                                    <span class="rating-label">คะแนนกลิ่น:</span>
-                                    <span class="rating-stars">${'⭐'.repeat(review.aroma_rating)}</span>
-                                    <span>(${review.aroma_rating}/5)</span>
-                                </div>
-                                ` : ''}
                             </div>
                         </div>
 

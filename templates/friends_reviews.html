@@ -139,6 +139,7 @@
             align-items: center;
             gap: 12px;
             margin-bottom: 10px;
+            flex-wrap: wrap;
         }
 
         .reviewer-avatar {
@@ -153,6 +154,7 @@
             color: white;
             font-weight: 600;
             overflow: hidden;
+            flex-shrink: 0;
         }
 
         .reviewer-avatar img {
@@ -160,6 +162,14 @@
             height: 100%;
             object-fit: cover;
             border-radius: 50%;
+        }
+
+        .reviewer-details {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            flex: 1;
+            min-width: 100px;
         }
 
         .reviewer-name {
@@ -175,19 +185,22 @@
             border-radius: 10px;
             font-size: 11px;
             font-weight: 600;
+            align-self: flex-start;
         }
 
         .rating-section {
             display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin: 15px 0;
+            align-items: center;
+            gap: 15px;
+            margin: 0;
+            flex-wrap: wrap;
         }
 
         .overall-rating, .aroma-rating {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
+            white-space: nowrap;
         }
 
         .rating-label {
@@ -830,25 +843,24 @@
                                 <div class="reviewer-avatar">
                                     ${reviewerAvatar}
                                 </div>
-                                <div>
+                                <div class="reviewer-details">
                                     <div class="reviewer-name">${review.reviewer_name || 'ผู้ใช้ไม่ระบุชื่อ'}</div>
                                     <div class="reviewer-badge">เพื่อนของคุณ</div>
                                 </div>
-                            </div>
-                            
-                            <div class="rating-section">
-                                <div class="overall-rating">
-                                    <span class="rating-label">คะแนนรวม:</span>
-                                    <span class="rating-stars">${'⭐'.repeat(review.overall_rating)}</span>
-                                    <span>(${review.overall_rating}/5)</span>
+                                <div class="rating-section">
+                                    <div class="overall-rating">
+                                        <span class="rating-label">คะแนนรวม:</span>
+                                        <span class="rating-stars">${'⭐'.repeat(review.overall_rating)}</span>
+                                        <span>(${review.overall_rating}/5)</span>
+                                    </div>
+                                    ${review.aroma_rating ? `
+                                    <div class="aroma-rating">
+                                        <span class="rating-label">คะแนนกลิ่น:</span>
+                                        <span class="rating-stars">${'⭐'.repeat(review.aroma_rating)}</span>
+                                        <span>(${review.aroma_rating}/5)</span>
+                                    </div>
+                                    ` : ''}
                                 </div>
-                                ${review.aroma_rating ? `
-                                <div class="aroma-rating">
-                                    <span class="rating-label">คะแนนกลิ่น:</span>
-                                    <span class="rating-stars">${'⭐'.repeat(review.aroma_rating)}</span>
-                                    <span>(${review.aroma_rating}/5)</span>
-                                </div>
-                                ` : ''}
                             </div>
                         </div>
 

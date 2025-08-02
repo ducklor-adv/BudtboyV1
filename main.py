@@ -3264,6 +3264,24 @@ def friends_page():
         return redirect('/profile?not_approved=1')
     return render_template('friends.html')
 
+@app.route('/my-reviews')
+def my_reviews_page():
+    # Check if user is logged in
+    if 'user_id' not in session:
+        return redirect('/auth')
+    if not is_approved():
+        return redirect('/profile?not_approved=1')
+    return render_template('my_reviews.html')
+
+@app.route('/friends-reviews')
+def friends_reviews_page():
+    # Check if user is logged in
+    if 'user_id' not in session:
+        return redirect('/auth')
+    if not is_approved():
+        return redirect('/profile?not_approved=1')
+    return render_template('friends_reviews.html')
+
 @app.route('/api/search-buds', methods=['POST'])
 def search_buds():
     """Search buds based on criteria"""

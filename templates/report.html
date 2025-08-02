@@ -488,24 +488,49 @@
         }
 
         @media (max-width: 768px) {
+            body {
+                padding: 0;
+                margin: 0;
+            }
+
             .container {
-                margin: 10px;
-                border-radius: 15px;
+                margin: 0;
+                border-radius: 0;
+                max-width: 100%;
+                min-height: 100vh;
+            }
+
+            .header {
+                padding: 15px 20px;
+                border-radius: 0;
             }
 
             .header h1 {
-                font-size: 12px !important;
+                font-size: 18px !important;
             }
 
             .summary-cards {
                 grid-template-columns: repeat(2, 1fr);
-                padding: 20px;
-                gap: 15px;
+                padding: 15px;
+                gap: 10px;
+                margin: 0;
+                border-radius: 0;
+            }
+
+            .summary-card {
+                padding: 15px 10px;
+                border-radius: 8px;
+            }
+
+            .summary-number {
+                font-size: 24px;
             }
 
             .controls {
                 flex-direction: column;
                 align-items: stretch;
+                padding: 15px 20px;
+                border-radius: 0;
             }
 
             .filter-group {
@@ -513,16 +538,84 @@
             }
 
             .table-container {
-                padding: 20px;
+                padding: 15px;
+                overflow-x: auto;
             }
 
             .data-table {
-                font-size: 12px;
+                font-size: 11px;
+                min-width: 800px;
             }
 
             .data-table th,
             .data-table td {
-                padding: 8px 4px;
+                padding: 6px 3px;
+                min-width: 80px;
+            }
+
+            .data-table th {
+                font-size: 10px;
+                position: sticky;
+                top: 0;
+                background: #f8f9fa;
+                z-index: 10;
+            }
+
+            .strain-name {
+                font-size: 12px;
+                max-width: 120px;
+                word-wrap: break-word;
+            }
+
+            .strain-type {
+                font-size: 10px;
+                padding: 2px 4px;
+            }
+
+            .grade-badge {
+                font-size: 10px;
+                padding: 2px 4px;
+            }
+
+            .rating-display {
+                flex-direction: column;
+                gap: 2px;
+            }
+
+            .rating-stars {
+                font-size: 12px;
+            }
+
+            .rating-number {
+                font-size: 11px;
+            }
+
+            .thc-cbd-display {
+                font-size: 10px;
+            }
+
+            .full-report-btn {
+                font-size: 10px;
+                padding: 4px 6px;
+                white-space: nowrap;
+            }
+
+            .grower-info {
+                font-size: 10px;
+                max-width: 100px;
+                word-wrap: break-word;
+            }
+
+            .back-btn {
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+
+            .export-btn {
+                padding: 8px 15px;
+                font-size: 12px;
+                width: 100%;
+                text-align: center;
             }
         }
     </style>

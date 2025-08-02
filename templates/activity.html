@@ -1352,7 +1352,7 @@
         let isLoadingFriendsReviews = false;
         let currentTab = 'myBuds';
 
-        // Load user's buds data
+        // Load user's buds data with improved performance
         async function loadBuds() {
             if (isLoadingBuds) return;
 
@@ -1367,7 +1367,18 @@
                     </div>
                 `;
 
-                const response = await fetch('/api/user_buds');
+                // Use AbortController for better request management
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+                const response = await fetch('/api/user_buds', {
+                    signal: controller.signal,
+                    headers: {
+                        'Cache-Control': 'max-age=300' // 5 minute cache
+                    }
+                });
+
+                clearTimeout(timeoutId);
 
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -1380,7 +1391,7 @@
                 }
 
                 budsData = data.buds || [];
-displayBuds(budsData);
+                displayBuds(budsData);
 
             } catch (error) {
                 console.error('Error loading buds:', error);
@@ -2135,7 +2146,7 @@ displayBuds(budsData);
             friendsReviewsList.innerHTML = reviewsHtml;
         }
 
-        // Initialize when DOM is ready
+        // Initialize when DOM is ready with improved performance
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM loaded, initializing...');
 
@@ -2144,9 +2155,8 @@ displayBuds(budsData);
             const reviewsList = document.getElementById('reviewsList');
 
             if (budsList && reviewsList) {
-                setTimeout(() => {
-                    loadBuds(); // โหลดแท็บแรกที่แสดง
-                }, 100);
+                // โหลดทันทีโดยไม่ delay
+                loadBuds();
             } else {
                 console.error('Required elements not found');
             }

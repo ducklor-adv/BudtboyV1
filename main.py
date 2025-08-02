@@ -40,9 +40,10 @@ pool_lock = threading.Lock()
 # Improved cache system with longer TTL
 cache = {}
 cache_lock = threading.Lock()
-CACHE_TTL = 1800  # 30 minutes instead of 5
-SHORT_CACHE_TTL = 300  # 5 minutes for frequently changing data
-PROFILE_CACHE_TTL = 3600  # 1 hour for profile data
+CACHE_TTL = 900  # 15 minutes for better balance
+SHORT_CACHE_TTL = 180  # 3 minutes for frequently changing data
+PROFILE_CACHE_TTL = 1800  # 30 minutes for profile data
+ACTIVITY_CACHE_TTL = 600  # 10 minutes for activity data
 
 def init_connection_pool():
     global connection_pool
@@ -61,9 +62,7 @@ def init_connection_pool():
                             keepalives=1,
                             keepalives_idle=600,  # 10 minutes
                             keepalives_interval=30,
-                            keepalives_count=3,
-                            # Additional optimization
-                            options='-c default_transaction_isolation=read_committed'
+                            keepalives_count=3
                         )
                         print("Connection pool initialized successfully")
                     else:
@@ -1275,8 +1274,8 @@ def get_user_buds():
     user_id = session.get('user_id')
     cache_key = f"user_buds_{user_id}"
 
-    # Check cache first with longer TTL
-    cached_data = get_cache(cache_key, CACHE_TTL)
+    # Check cache first with activity-specific TTL
+    cached_data = get_cache(cache_key, ACTIVITY_CACHE_TTL)
     if cached_data:
         return jsonify({'buds': cached_data})
 
@@ -1290,25 +1289,45 @@ def get_user_buds():
 
         cur = conn.cursor()
 
-        # Optimized query with better performance
+        # Optimized query with better performance - separate review stats
         cur.execute("""
             SELECT b.id, b.strain_name_en, b.strain_name_th, b.breeder, b.thc_percentage, 
-                   b.cbd_percentage, b.strain_type, b.created_at, b.image_1_url, b.status,
-                   COALESCE(AVG(r.overall_rating), 0) as avg_rating,
-                   COUNT(r.id) as review_count
+                   b.cbd_percentage, b.strain_type, b.created_at, b.image_1_url, b.status
             FROM buds_data b
-            LEFT JOIN reviews r ON b.id = r.bud_reference_id
             WHERE b.created_by = %s 
-            GROUP BY b.id, b.strain_name_en, b.strain_name_th, b.breeder, 
-                     b.thc_percentage, b.cbd_percentage, b.strain_type, b.created_at, b.image_1_url, b.status
             ORDER BY b.created_at DESC
             LIMIT 50
         """, (user_id,))
+        
+        bud_rows = cur.fetchall()
+        
+        # Get review stats in separate query for better performance
+        bud_ids = [row[0] for row in bud_rows]
+        review_stats = {}
+        
+        if bud_ids:
+            cur.execute("""
+                SELECT bud_reference_id, 
+                       COALESCE(AVG(overall_rating), 0) as avg_rating,
+                       COUNT(id) as review_count
+                FROM reviews 
+                WHERE bud_reference_id = ANY(%s)
+                GROUP BY bud_reference_id
+            """, (bud_ids,))
 
+        for stats_row in cur.fetchall():
+                review_stats[stats_row[0]] = {
+                    'avg_rating': float(stats_row[1]),
+                    'review_count': stats_row[2]
+                }
+        
         buds = []
-        for row in cur.fetchall():
+        for row in bud_rows:
+            bud_id = row[0]
+            stats = review_stats.get(bud_id, {'avg_rating': 0, 'review_count': 0})
+            
             buds.append({
-                'id': row[0],
+                'id': bud_id,
                 'strain_name_en': row[1],
                 'strain_name_th': row[2],
                 'breeder': row[3],
@@ -1318,12 +1337,12 @@ def get_user_buds():
                 'created_at': row[7].strftime('%Y-%m-%d %H:%M:%S') if row[7] else None,
                 'image_1_url': f'/uploads/{row[8].split("/")[-1]}' if row[8] else None,
                 'status': row[9] or 'available',
-                'avg_rating': float(row[10]) if row[10] else 0,
-                'review_count': row[11]
+                'avg_rating': stats['avg_rating'],
+                'review_count': stats['review_count']
             })
 
-        # Cache for longer time
-        set_cache(cache_key, buds, CACHE_TTL)
+        # Cache for activity-specific time
+        set_cache(cache_key, buds, ACTIVITY_CACHE_TTL)
 
         return jsonify({'buds': buds})
 

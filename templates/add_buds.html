@@ -688,6 +688,141 @@
             }
         }
 
+        /* Terpene Tabs Styles */
+        .terpenes-tab-container {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .tab-headers {
+            display: flex;
+            border-bottom: 2px solid #e9ecef;
+            margin-bottom: 15px;
+        }
+
+        .tab-header {
+            flex: 1;
+            padding: 12px 20px;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-bottom: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #666;
+            transition: all 0.3s ease;
+        }
+
+        .tab-header:first-child {
+            border-radius: 8px 0 0 0;
+        }
+
+        .tab-header:last-child {
+            border-radius: 0 8px 0 0;
+        }
+
+        .tab-header.active {
+            background: #4CAF50;
+            color: white;
+            border-color: #4CAF50;
+        }
+
+        .tab-header:hover:not(.active) {
+            background: #e8f5e8;
+            color: #4CAF50;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 0 0 10px 10px;
+            border: 1px solid #e9ecef;
+            border-top: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .selected-terpene-display {
+            min-height: 40px;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+        }
+
+        .selected-terpene-display:hover {
+            border-color: #4CAF50;
+        }
+
+        .selected-terpene-display .placeholder {
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        .selected-terpene-display .selected-terpene {
+            background: #4CAF50;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .terpene-options {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            background: white;
+            padding: 10px;
+        }
+
+        .terpene-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            margin-bottom: 5px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            font-size: 13px;
+            line-height: 1.4;
+            border: 1px solid transparent;
+        }
+
+        .terpene-checkbox:hover {
+            background-color: #f0f8f0;
+            border-color: #4CAF50;
+        }
+
+        .terpene-checkbox input[type="checkbox"] {
+            margin: 0;
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: #4CAF50;
+        }
+
+        .terpene-checkbox input[type="checkbox"]:checked + span {
+            font-weight: 600;
+            color: #2c5530;
+        }
+
+        .terpene-checkbox.selected {
+            background-color: #e8f5e8;
+            border-color: #4CAF50;
+        }
+
         @media (max-width: 768px) {
             .form-row {
                 flex-direction: column;
@@ -730,6 +865,20 @@
             .column-title {
                 font-size: 1.1em;
                 margin-bottom: 15px;
+            }
+
+            .tab-header {
+                padding: 10px 12px;
+                font-size: 13px;
+            }
+
+            .terpene-checkbox {
+                font-size: 12px;
+                padding: 6px 10px;
+            }
+
+            .terpene-options {
+                max-height: 250px;
             }
         }
     </style>
@@ -957,75 +1106,91 @@
                         </div>
                     </div>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="top_terpenes_1">Terpene อันดับ 1</label>
-                            <select id="top_terpenes_1" name="top_terpenes_1">
-                                <option value="">เลือก Terpene อันดับ 1</option>
-                                <option value="ไมร์ซีน (Myrcene)">ไมร์ซีน (Myrcene) - มะม่วง/สมุนไพร → ผ่อนคลาย, ง่วง</option>
-                                <option value="ลิโมนีน (Limonene)">ลิโมนีน (Limonene) - ส้ม/เลมอน → อารมณ์ดี, ต้านเครียด</option>
-                                <option value="แอลฟา‑ไพนีน (α‑Pinene)">แอลฟา‑ไพนีน (α‑Pinene) - สน → เปิดปอด, ช่วยโฟกัส</option>
-                                <option value="เบตา‑ไพนีน (β‑Pinene)">เบตา‑ไพนีน (β‑Pinene) - โรสแมรี่ → ต้านอักเสบ</option>
-                                <option value="เบตา‑คาริโอฟีลลีน (β‑Caryophyllene)">เบตา‑คาริโอฟีลลีน (β‑Caryophyllene) - พริกไทย/เผ็ด → บรรเทาปวด, ต้านอักเสบ</option>
-                                <option value="ลินาลูล (Linalool)">ลินาลูล (Linalool) - ลาเวนเดอร์ → คลายกังวล, ช่วยหลับ</option>
-                                <option value="ฮิวมูเลน (Humulene)">ฮิวมูเลน (Humulene) - ฮ็อปส์/ไม้ → ลดอยากอาหาร, ต้านอักเสบ</option>
-                                <option value="เทอร์พินอลีน (Terpinolene)">เทอร์พินอลีน (Terpinolene) - ดอกไม้/สนหวาน → กระตุ้นเบา, ต้านอนุมูลฯ</option>
-                                <option value="โอซิมีน (Ocimene)">โอซิมีน (Ocimene) - ดอกไม้หวาน → ขยายหลอดลม, ต้านไวรัส</option>
-                                <option value="ยูคาลิปตอล / 1,8‑ซิเนออล (Eucalyptol)">ยูคาลิปตอล / 1,8‑ซิเนออล (Eucalyptol) - เมนทอล/ยูคาลิปตัส → สดชื่น,ต้านจุลชีพ</option>
-                                <option value="เนโรลิดอล (Nerolidol)">เนโรลิดอล (Nerolidol) - ชาเขียว/ไม้ → ผ่อนคลายกล้ามเนื้อ</option>
-                                <option value="บิซาโบลอล (Bisabolol)">บิซาโบลอล (Bisabolol) - คาโมมายล์ → ปกป้องผิว, ต้านอักเสบ</option>
-                                <option value="ฟาร์นีซีน (Farnesene)">ฟาร์นีซีน (Farnesene) - แอปเปิ้ลเขียว → ต้านแบคทีเรีย</option>
-                                <option value="แคมฟีน (Camphene)">แคมฟีน (Camphene) - การบูรเบา → ต้านออกซิแดนต์</option>
-                                <option value="เทอร์พิโนล (Terpineol)">เทอร์พิโนล (Terpineol) - ไม้ขาว/ไพน์หวาน → ช่วยสงบใจ</option>
-                                <option value="วาลินซีน (Valencene)">วาลินซีน (Valencene) - ส้มวาเลนเซีย → ยับยั้งยุง, อารมณ์ดี</option>
-                                <option value="เจอราเนียล (Geraniol)">เจอราเนียล (Geraniol) - กุหลาบ → ต้านจุลชีพ</option>
-                            </select>
+                    <!-- Terpenes Tab Container -->
+                    <div class="terpenes-tab-container">
+                        <div class="tab-headers">
+                            <button type="button" class="tab-header active" data-tab="terpene-1">Terpene อันดับ 1</button>
+                            <button type="button" class="tab-header" data-tab="terpene-2">Terpene อันดับ 2</button>
+                            <button type="button" class="tab-header" data-tab="terpene-3">Terpene อันดับ 3</button>
                         </div>
-                        <div class="form-group">
-                            <label for="top_terpenes_2">Terpene อันดับ 2</label>
-                            <select id="top_terpenes_2" name="top_terpenes_2">
-                                <option value="">เลือก Terpene อันดับ 2</option>
-                                <option value="ไมร์ซีน (Myrcene)">ไมร์ซีน (Myrcene) - มะม่วง/สมุนไพร → ผ่อนคลาย, ง่วง</option>
-                                <option value="ลิโมนีน (Limonene)">ลิโมนีน (Limonene) - ส้ม/เลมอน → อารมณ์ดี, ต้านเครียด</option>
-                                <option value="แอลฟา‑ไพนีน (α‑Pinene)">แอลฟา‑ไพนีน (α‑Pinene) - สน → เปิดปอด, ช่วยโฟกัส</option>
-                                <option value="เบตา‑ไพนีน (β‑Pinene)">เบตา‑ไพนีน (β‑Pinene) - โรสแมรี่ → ต้านอักเสบ</option>
-                                <option value="เบตา‑คาริโอฟีลลีน (β‑Caryophyllene)">เบตา‑คาริโอฟีลลีน (β‑Caryophyllene) - พริกไทย/เผ็ด → บรรเทาปวด, ต้านอักเสบ</option>
-                                <option value="ลินาลูล (Linalool)">ลินาลูล (Linalool) - ลาเวนเดอร์ → คลายกังวล, ช่วยหลับ</option>
-                                <option value="ฮิวมูเลน (Humulene)">ฮิวมูเลน (Humulene) - ฮ็อปส์/ไม้ → ลดอยากอาหาร, ต้านอักเสบ</option>
-                                <option value="เทอร์พินอลีน (Terpinolene)">เทอร์พินอลีน (Terpinolene) - ดอกไม้/สนหวาน → กระตุ้นเบา, ต้านอนุมูลฯ</option>
-                                <option value="โอซิมีน (Ocimene)">โอซิมีน (Ocimene) - ดอกไม้หวาน → ขยายหลอดลม, ต้านไวรัส</option>
-                                <option value="ยูคาลิปตอล / 1,8‑ซิเนออล (Eucalyptol)">ยูคาลิปตอล / 1,8‑ซิเนออล (Eucalyptol) - เมนทอล/ยูคาลิปตัส → สดชื่น, ต้านจุลชีพ</option>
-                                <option value="เนโรลิดอล (Nerolidol)">เนโรลิดอล (Nerolidol) - ชาเขียว/ไม้ → ผ่อนคลายกล้ามเนื้อ</option>
-                                <option value="บิซาโบลอล (Bisabolol)">บิซาโบลอล (Bisabolol) - คาโมมายล์ → ปกป้องผิว, ต้านอักเสบ</option>
-                                <option value="ฟาร์นีซีน (Farnesene)">ฟาร์นีซีน (Farnesene) - แอปเปิ้ลเขียว → ต้านแบคทีเรีย</option>
-                                <option value="แคมฟีน (Camphene)">แคมฟีน (Camphene) - การบูรเบา → ต้านออกซิแดนต์</option>
-                                <option value="เทอร์พิโนล (Terpineol)">เทอร์พิโนล (Terpineol) - ไม้ขาว/ไพน์หวาน → ช่วยสงบใจ</option>
-                                <option value="วาลินซีน (Valencene)">วาลินซีน (Valencene) - ส้มวาเลนเซีย → ยับยั้งยุง, อารมณ์ดี</option>
-                                <option value="เจอราเนียล (Geraniol)">เจอราเนียล (Geraniol) - กุหลาบ → ต้านจุลชีพ</option>
-                            </select>
+
+                        <!-- Tab Contents -->
+                        <div class="tab-content active" id="terpene-1">
+                            <div class="selected-terpene-display" id="selected-terpene-1">
+                                <span class="placeholder">คลิกเพื่อเลือก Terpene อันดับ 1...</span>
+                            </div>
+                            <input type="hidden" id="top_terpenes_1" name="top_terpenes_1">
+                            <div class="terpene-options">
+                                <label class="terpene-checkbox"><input type="checkbox" value="ไมร์ซีน (Myrcene)"> มะม่วง/สมุนไพร - ไมร์ซีน (Myrcene) → ผ่อนคลาย, ง่วง</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="ลิโมนีน (Limonene)"> ส้ม/เลมอน - ลิโมนีน (Limonene) → อารมณ์ดี, ต้านเครียด</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="แอลฟา‑ไพนีน (α‑Pinene)"> สน - แอลฟา‑ไพนีน (α‑Pinene) → เปิดปอด, ช่วยโฟกัส</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="เบตา‑ไพนีน (β‑Pinene)"> โรสแมรี่ - เบตา‑ไพนีน (β‑Pinene) → ต้านอักเสบ</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="เบตา‑คาริโอฟีลลีน (β‑Caryophyllene)"> พริกไทย/เผ็ด - เบตา‑คาริโอฟีลลีน (β‑Caryophyllene) → บรรเทาปวด, ต้านอักเสบ</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="ลินาลูล (Linalool)"> ลาเวนเดอร์ - ลินาลูล (Linalool) → คลายกังวล, ช่วยหลับ</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="ฮิวมูเลน (Humulene)"> ฮ็อปส์/ไม้ - ฮิวมูเลน (Humulene) → ลดอยากอาหาร, ต้านอักเสบ</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="เทอร์พินอลีน (Terpinolene)"> ดอกไม้/สนหวาน - เทอร์พินอลีน (Terpinolene) → กระตุ้นเบา, ต้านอนุมูลฯ</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="โอซิมีน (Ocimene)"> ดอกไม้หวาน - โอซิมีน (Ocimene) → ขยายหลอดลม, ต้านไวรัส</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="ยูคาลิปตอล / 1,8‑ซิเนออล (Eucalyptol)"> เมนทอล/ยูคาลิปตัส - ยูคาลิปตอล (Eucalyptol) → สดชื่น, ต้านจุลชีพ</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="เนโรลิดอล (Nerolidol)"> ชาเขียว/ไม้ - เนโรลิดอล (Nerolidol) → ผ่อนคลายกล้ามเนื้อ</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="บิซาโบลอล (Bisabolol)"> คาโมมายล์ - บิซาโบลอล (Bisabolol) → ปกป้องผิว, ต้านอักเสบ</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="ฟาร์นีซีน (Farnesene)"> แอปเปิ้ลเขียว - ฟาร์นีซีน (Farnesene) → ต้านแบคทีเรีย</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="แคมฟีน (Camphene)"> การบูรเบา - แคมฟีน (Camphene) → ต้านออกซิแดนต์</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="เทอร์พิโนล (Terpineol)"> ไม้ขาว/ไพน์หวาน - เทอร์พิโนล (Terpineol) → ช่วยสงบใจ</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="วาลินซีน (Valencene)"> ส้มวาเลนเซีย - วาลินซีน (Valencene) → ยับยั้งยุง, อารมณ์ดี</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="เจอราเนียล (Geraniol)"> กุหลาบ - เจอราเนียล (Geraniol) → ต้านจุลชีพ</label>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="top_terpenes_3">Terpene อันดับ 3</label>
-                            <select id="top_terpenes_3" name="top_terpenes_3">
-                                <option value="">เลือก Terpene อันดับ 3</option>
-                                <option value="ไมร์ซีน (Myrcene)">ไมร์ซีน (Myrcene) - มะม่วง/สมุนไพร → ผ่อนคลาย, ง่วง</option>
-                                <option value="ลิโมนีน (Limonene)">ลิโมนีน (Limonene) - ส้ม/เลมอน → อารมณ์ดี, ต้านเครียด</option>
-                                <option value="แอลฟา‑ไพนีน (α‑Pinene)">แอลฟา‑ไพนีน (α‑Pinene) - สน → เปิดปอด, ช่วยโฟกัส</option>
-                                <option value="เบตา‑ไพนีน (β‑Pinene)">เบตา‑ไพนีน (β‑Pinene) - โรสแมรี่ → ต้านอักเสบ</option>
-                                <option value="เบตา‑คาริโอฟีลลีน (β‑Caryophyllene)">เบตา‑คาริโอฟีลลีน (β‑Caryophyllene) - พริกไทย/เผ็ด → บรรเทาปวด, ต้านอักเสบ</option>
-                                <option value="ลินาลูล (Linalool)">ลินาลูล (Linalool) - ลาเวนเดอร์ → คลายกังวล, ช่วยหลับ</option>
-                                <option value="ฮิวมูเลน (Humulene)">ฮิวมูเลน (Humulene) - ฮ็อปส์/ไม้ → ลดอยากอาหาร, ต้านอักเสบ</option>
-                                <option value="เทอร์พินอลีน (Terpinolene)">เทอร์พินอลีน (Terpinolene) - ดอกไม้/สนหวาน → กระตุ้นเบา, ต้านอนุมูลฯ</option>
-                                <option value="โอซิมีน (Ocimene)">โอซิมีน (Ocimene) - ดอกไม้หวาน → ขยายหลอดลม, ต้านไวรัส</option>
-                                <option value="ยูคาลิปตอล / 1,8‑ซิเนออล (Eucalyptol)">ยูคาลิปตอล / 1,8‑ซิเนออล (Eucalyptol) - เมนทอล/ยูคาลิปตัส → สดชื่น, ต้านจุลชีพ</option>
-                                <option value="เนโรลิดอล (Nerolidol)">เนโรลิดอล (Nerolidol) - ชาเขียว/ไม้ → ผ่อนคลายกล้ามเนื้อ</option>
-                                <option value="บิซาโบลอล (Bisabolol)">บิซาโบลอล (Bisabolol) - คาโมมายล์ → ปกป้องผิว, ต้านอักเสบ</option>
-                                <option value="ฟาร์นีซีน (Farnesene)">ฟาร์นีซีน (Farnesene) - แอปเปิ้ลเขียว → ต้านแบคทีเรีย</option>
-                                <option value="แคมฟีน (Camphene)">แคมฟีน (Camphene) - การบูรเบา → ต้านออกซิแดนต์</option>
-                                <option value="เทอร์พิโนล (Terpineol)">เทอร์พิโนล (Terpineol) - ไม้ขาว/ไพน์หวาน → ช่วยสงบใจ</option>
-                                <option value="วาลินซีน (Valencene)">วาลินซีน (Valencene) - ส้มวาเลนเซีย → ยับยั้งยุง, อารมณ์ดี</option>
-                                <option value="เจอราเนียล (Geraniol)">เจอราเนียล (Geraniol) - กุหลาบ → ต้านจุลชีพ</option>
-                            </select>
+
+                        <div class="tab-content" id="terpene-2">
+                            <div class="selected-terpene-display" id="selected-terpene-2">
+                                <span class="placeholder">คลิกเพื่อเลือก Terpene อันดับ 2...</span>
+                            </div>
+                            <input type="hidden" id="top_terpenes_2" name="top_terpenes_2">
+                            <div class="terpene-options">
+                                <label class="terpene-checkbox"><input type="checkbox" value="ไมร์ซีน (Myrcene)"> มะม่วง/สมุนไพร - ไมร์ซีน (Myrcene) → ผ่อนคลาย, ง่วง</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="ลิโมนีน (Limonene)"> ส้ม/เลมอน - ลิโมนีน (Limonene) → อารมณ์ดี, ต้านเครียด</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="แอลฟา‑ไพนีน (α‑Pinene)"> สน - แอลฟา‑ไพนีน (α‑Pinene) → เปิดปอด, ช่วยโฟกัส</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="เบตา‑ไพนีน (β‑Pinene)"> โรสแมรี่ - เบตา‑ไพนีน (β‑Pinene) → ต้านอักเสบ</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="เบตา‑คาริโอฟีลลีน (β‑Caryophyllene)"> พริกไทย/เผ็ด - เบตา‑คาริโอฟีลลีน (β‑Caryophyllene) → บรรเทาปวด, ต้านอักเสบ</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="ลินาลูล (Linalool)"> ลาเวนเดอร์ - ลินาลูล (Linalool) → คลายกังวล, ช่วยหลับ</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="ฮิวมูเลน (Humulene)"> ฮ็อปส์/ไม้ - ฮิวมูเลน (Humulene) → ลดอยากอาหาร, ต้านอักเสบ</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="เทอร์พินอลีน (Terpinolene)"> ดอกไม้/สนหวาน - เทอร์พินอลีน (Terpinolene) → กระตุ้นเบา, ต้านอนุมูลฯ</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="โอซิมีน (Ocimene)"> ดอกไม้หวาน - โอซิมีน (Ocimene) → ขยายหลอดลม, ต้านไวรัส</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="ยูคาลิปตอล / 1,8‑ซิเนออล (Eucalyptol)"> เมนทอล/ยูคาลิปตัส - ยูคาลิปตอล (Eucalyptol) → สดชื่น, ต้านจุลชีพ</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="เนโรลิดอล (Nerolidol)"> ชาเขียว/ไม้ - เนโรลิดอล (Nerolidol) → ผ่อนคลายกล้ามเนื้อ</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="บิซาโบลอล (Bisabolol)"> คาโมมายล์ - บิซาโบลอล (Bisabolol) → ปกป้องผิว, ต้านอักเสบ</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="ฟาร์นีซีน (Farnesene)"> แอปเปิ้ลเขียว - ฟาร์นีซีน (Farnesene) → ต้านแบคทีเรีย</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="แคมฟีน (Camphene)"> การบูรเบา - แคมฟีน (Camphene) → ต้านออกซิแดนต์</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="เทอร์พิโนล (Terpineol)"> ไม้ขาว/ไพน์หวาน - เทอร์พิโนล (Terpineol) → ช่วยสงบใจ</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="วาลินซีน (Valencene)"> ส้มวาเลนเซีย - วาลินซีน (Valencene) → ยับยั้งยุง, อารมณ์ดี</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="เจอราเนียล (Geraniol)"> กุหลาบ - เจอราเนียล (Geraniol) → ต้านจุลชีพ</label>
+                            </div>
+                        </div>
+
+                        <div class="tab-content" id="terpene-3">
+                            <div class="selected-terpene-display" id="selected-terpene-3">
+                                <span class="placeholder">คลิกเพื่อเลือก Terpene อันดับ 3...</span>
+                            </div>
+                            <input type="hidden" id="top_terpenes_3" name="top_terpenes_3">
+                            <div class="terpene-options">
+                                <label class="terpene-checkbox"><input type="checkbox" value="ไมร์ซีน (Myrcene)"> มะม่วง/สมุนไพร - ไมร์ซีน (Myrcene) → ผ่อนคลาย, ง่วง</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="ลิโมนีน (Limonene)"> ส้ม/เลมอน - ลิโมนีน (Limonene) → อารมณ์ดี, ต้านเครียด</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="แอลฟา‑ไพนีน (α‑Pinene)"> สน - แอลฟา‑ไพนีน (α‑Pinene) → เปิดปอด, ช่วยโฟกัส</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="เบตา‑ไพนีน (β‑Pinene)"> โรสแมรี่ - เบตา‑ไพนีน (β‑Pinene) → ต้านอักเสบ</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="เบตา‑คาริโอฟีลลีน (β‑Caryophyllene)"> พริกไทย/เผ็ด - เบตา‑คาริโอฟีลลีน (β‑Caryophyllene) → บรรเทาปวด, ต้านอักเสบ</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="ลินาลูล (Linalool)"> ลาเวนเดอร์ - ลินาลูล (Linalool) → คลายกังวล, ช่วยหลับ</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="ฮิวมูเลน (Humulene)"> ฮ็อปส์/ไม้ - ฮิวมูเลน (Humulene) → ลดอยากอาหาร, ต้านอักเสบ</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="เทอร์พินอลีน (Terpinolene)"> ดอกไม้/สนหวาน - เทอร์พินอลีน (Terpinolene) → กระตุ้นเบา, ต้านอนุมูลฯ</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="โอซิมีน (Ocimene)"> ดอกไม้หวาน - โอซิมีน (Ocimene) → ขยายหลอดลม, ต้านไวรัส</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="ยูคาลิปตอล / 1,8‑ซิเนออล (Eucalyptol)"> เมนทอล/ยูคาลิปตัส - ยูคาลิปตอล (Eucalyptol) → สดชื่น, ต้านจุลชีพ</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="เนโรลิดอล (Nerolidol)"> ชาเขียว/ไม้ - เนโรลิดอล (Nerolidol) → ผ่อนคลายกล้ามเนื้อ</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="บิซาโบลอล (Bisabolol)"> คาโมมายล์ - บิซาโบลอล (Bisabolol) → ปกป้องผิว, ต้านอักเสบ</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="ฟาร์นีซีน (Farnesene)"> แอปเปิ้ลเขียว - ฟาร์นีซีน (Farnesene) → ต้านแบคทีเรีย</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="แคมฟีน (Camphene)"> การบูรเบา - แคมฟีน (Camphene) → ต้านออกซิแดนต์</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="เทอร์พิโนล (Terpineol)"> ไม้ขาว/ไพน์หวาน - เทอร์พิโนล (Terpineol) → ช่วยสงบใจ</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="วาลินซีน (Valencene)"> ส้มวาเลนเซีย - วาลินซีน (Valencene) → ยับยั้งยุง, อารมณ์ดี</label>
+                                <label class="terpene-checkbox"><input type="checkbox" value="เจอราเนียล (Geraniol)"> กุหลาบ - เจอราเนียล (Geraniol) → ต้านจุลชีพ</label>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1607,10 +1772,99 @@
 
                 // Initialize effects selectors
                 initializeEffectsSelectors();
+
+                // Initialize terpene tabs
+                initializeTerpeneTabs();
             } catch (error) {
                 console.error('Error initializing page:', error);
             }
         });
+
+        // Terpene Tabs functionality
+        function initializeTerpeneTabs() {
+            const tabHeaders = document.querySelectorAll('.tab-header');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            // Tab switching
+            tabHeaders.forEach(header => {
+                header.addEventListener('click', function() {
+                    const targetTab = this.getAttribute('data-tab');
+
+                    // Remove active class from all headers and contents
+                    tabHeaders.forEach(h => h.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+
+                    // Add active class to clicked header and corresponding content
+                    this.classList.add('active');
+                    document.getElementById(targetTab).classList.add('active');
+                });
+            });
+
+            // Initialize each terpene tab
+            for (let i = 1; i <= 3; i++) {
+                initializeTerpeneTab(i);
+            }
+        }
+
+        function initializeTerpeneTab(tabNumber) {
+            const tabContent = document.getElementById(`terpene-${tabNumber}`);
+            const selectedDisplay = document.getElementById(`selected-terpene-${tabNumber}`);
+            const hiddenInput = document.getElementById(`top_terpenes_${tabNumber}`);
+            const checkboxes = tabContent.querySelectorAll('.terpene-checkbox input[type="checkbox"]');
+
+            let selectedTerpene = null;
+
+            // Handle checkbox changes (only allow one selection per tab)
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        // Uncheck all other checkboxes in this tab
+                        checkboxes.forEach(cb => {
+                            if (cb !== this) {
+                                cb.checked = false;
+                                cb.closest('.terpene-checkbox').classList.remove('selected');
+                            }
+                        });
+
+                        // Mark this checkbox as selected
+                        this.closest('.terpene-checkbox').classList.add('selected');
+                        selectedTerpene = this.value;
+                        updateTerpeneDisplay(tabNumber, selectedTerpene);
+                    } else {
+                        // If unchecked, clear selection
+                        this.closest('.terpene-checkbox').classList.remove('selected');
+                        selectedTerpene = null;
+                        updateTerpeneDisplay(tabNumber, null);
+                    }
+                });
+            });
+        }
+
+        function updateTerpeneDisplay(tabNumber, terpene) {
+            const selectedDisplay = document.getElementById(`selected-terpene-${tabNumber}`);
+            const hiddenInput = document.getElementById(`top_terpenes_${tabNumber}`);
+            const tabHeader = document.querySelector(`[data-tab="terpene-${tabNumber}"]`);
+
+            if (terpene) {
+                // Extract the aroma part (everything before the first " - ")
+                const aromaPart = terpene.split(' - ')[0];
+                selectedDisplay.innerHTML = `<span class="selected-terpene">${aromaPart}</span>`;
+                hiddenInput.value = terpene;
+                
+                // Update tab header to show selection
+                tabHeader.style.background = '#4CAF50';
+                tabHeader.style.color = 'white';
+            } else {
+                selectedDisplay.innerHTML = `<span class="placeholder">คลิกเพื่อเลือก Terpene อันดับ ${tabNumber}...</span>`;
+                hiddenInput.value = '';
+                
+                // Reset tab header if not active
+                if (!tabHeader.classList.contains('active')) {
+                    tabHeader.style.background = '#f8f9fa';
+                    tabHeader.style.color = '#666';
+                }
+            }
+        }
 
         // Flavor Selector functionality
         function initializeFlavorSelector() {

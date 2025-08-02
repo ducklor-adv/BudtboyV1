@@ -771,7 +771,7 @@
         async function loadProfile() {
             if (isLoading || isProfileLoaded) {
                 console.log('Profile: LoadProfile blocked - already loading or loaded');
-                return;
+                return Promise.resolve();
             }
 
             isLoading = true;
@@ -779,7 +779,7 @@
 
             try {
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 10000);
+                const timeoutId = setTimeout(() => controller.abort(), 12000); // Longer timeout for mobile
 
                 const response = await fetch('/api/profile', {
                     signal: controller.signal,
@@ -797,16 +797,11 @@
                     displayProfile(user);
                     showProfile();
                     console.log('Profile: Data loaded successfully');
-
-                    // Start pending friends check only after profile is loaded
-                    setTimeout(() => {
-                        if (!pendingFriendsInterval) {
-                            startPendingFriendsInterval();
-                        }
-                    }, 1000);
+                    return Promise.resolve();
                 } else {
                     const errorData = await response.json().catch(() => ({}));
                     showError(errorData.error || 'ไม่สามารถโหลดข้อมูลโปรไฟล์ได้');
+                    return Promise.reject(new Error(errorData.error || 'Profile load failed'));
                 }
             } catch (error) {
                 if (error.name === 'AbortError') {
@@ -816,6 +811,7 @@
                     console.error('Profile: Loading error:', error);
                     showError('เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต');
                 }
+                return Promise.reject(error);
             } finally {
                 isLoading = false;
                 console.log('Profile: Loading completed, flags reset');
@@ -1195,10 +1191,20 @@
 
         function retryLoadProfile() {
             console.log('Profile: Retrying load...');
+            
+            // Reset all flags
             isProfileLoaded = false;
             isLoading = false;
+            pageInitialized = false;
             window.budtBoyEventListenersSetup = false;
-            setTimeout(initializePage, 100);
+            
+            // Stop any existing intervals
+            stopPendingFriendsInterval();
+            
+            // Retry with a longer delay for mobile
+            setTimeout(() => {
+                startInitialization();
+            }, 500);
         }
 
         function checkApprovalStatus(user) {
@@ -1244,29 +1250,40 @@
             }
         });
 
-        // Pending friends notification system - optimized
+        // Pending friends notification system - mobile optimized
         let pendingFriendsInterval = null;
         let isCheckingPendingFriends = false;
+        let pendingFriendsInitialized = false;
 
         function checkPendingFriends() {
-            // Prevent duplicate calls
-            if (isCheckingPendingFriends) {
+            // Prevent duplicate calls and check if user is still logged in
+            if (isCheckingPendingFriends || !isProfileLoaded) {
                 return;
             }
 
             isCheckingPendingFriends = true;
 
+            // Add timeout for mobile networks
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 8000);
+
             fetch('/api/pending_friends_count', {
+                    signal: controller.signal,
                     cache: 'no-cache',
                     headers: { 'Cache-Control': 'no-cache' }
                 })
-                .then(response => response.json())
+                .then(response => {
+                    clearTimeout(timeoutId);
+                    return response.json();
+                })
                 .then(data => {
                     if (data.not_logged_in) {
+                        console.log('User not logged in, hiding notification');
                         const notification = document.getElementById('pendingFriendsNotification');
                         if(notification) {
                             notification.style.display = 'none';
                         }
+                        stopPendingFriendsInterval();
                         return;
                     }
 
@@ -1295,7 +1312,10 @@
                     }
                 })
                 .catch(error => {
-                    console.log('API error or user not authorized');
+                    clearTimeout(timeoutId);
+                    if (error.name !== 'AbortError') {
+                        console.log('API error or user not authorized');
+                    }
                     const notification = document.getElementById('pendingFriendsNotification');
                     if(notification){
                         notification.style.display = 'none';
@@ -1307,14 +1327,22 @@
         }
 
         function startPendingFriendsInterval() {
-            // Prevent multiple intervals
-            if (pendingFriendsInterval) {
+            // Prevent multiple intervals and ensure profile is loaded
+            if (pendingFriendsInterval || pendingFriendsInitialized || !isProfileLoaded) {
+                console.log('Pending friends check already running, skipping');
                 return;
             }
 
+            pendingFriendsInitialized = true;
             console.log('Starting pending friends interval');
-            checkPendingFriends(); // Check immediately
-            pendingFriendsInterval = setInterval(checkPendingFriends, 120000); // Check every 2 minutes
+            
+            // Check immediately, then set interval
+            setTimeout(() => {
+                if (isProfileLoaded) {
+                    checkPendingFriends();
+                    pendingFriendsInterval = setInterval(checkPendingFriends, 180000); // Check every 3 minutes (less frequent for mobile)
+                }
+            }, 2000); // Wait 2 seconds after profile loads
         }
 
         function stopPendingFriendsInterval() {
@@ -1323,35 +1351,41 @@
                 pendingFriendsInterval = null;
                 console.log('Stopped pending friends interval');
             }
+            pendingFriendsInitialized = false;
         }
 
-        // Only start if not already running
-        if (!pendingFriendsInterval) {
-            startPendingFriendsInterval();
-        }
-
-        // Handle page visibility changes
+        // Mobile-friendly page visibility handling
+        let visibilityTimeout = null;
         document.addEventListener('visibilitychange', function() {
             if (document.hidden) {
                 stopPendingFriendsInterval();
+                if (visibilityTimeout) {
+                    clearTimeout(visibilityTimeout);
+                }
             } else {
-                // Wait a bit before restarting to avoid overlap
-                setTimeout(() => {
-                    if (!pendingFriendsInterval) {
+                // Wait longer before restarting on mobile to avoid rapid switching
+                if (visibilityTimeout) {
+                    clearTimeout(visibilityTimeout);
+                }
+                visibilityTimeout = setTimeout(() => {
+                    if (!document.hidden && isProfileLoaded && !pendingFriendsInterval) {
                         startPendingFriendsInterval();
                     }
-                }, 2000);
+                }, 3000);
             }
         });
 
         // Cleanup on page unload
         window.addEventListener('beforeunload', function() {
             stopPendingFriendsInterval();
+            if (visibilityTimeout) {
+                clearTimeout(visibilityTimeout);
+            }
         });
 
 
 
-        // Initialize page
+        // Initialize page - mobile optimized
         function initializePage() {
             if (pageInitialized) {
                 console.log('Profile: Init blocked - already initialized');
@@ -1363,7 +1397,14 @@
 
             try {
                 if (!isProfileLoaded) {
-                    loadProfile();
+                    loadProfile().then(() => {
+                        // Start pending friends check only after profile is successfully loaded
+                        if (isProfileLoaded && !pendingFriendsInitialized) {
+                            startPendingFriendsInterval();
+                        }
+                    }).catch(() => {
+                        pageInitialized = false;
+                    });
                 }
 
                 if (!window.budtBoyEventListenersSetup) {
@@ -1379,12 +1420,19 @@
             }
         }
 
-        // Start initialization
-        if (document.readyState === 'complete') {
-            initializePage();
-        } else {
-            document.addEventListener('DOMContentLoaded', initializePage, { once: true, passive: true });
+        // Start initialization - mobile friendly
+        function startInitialization() {
+            if (document.readyState === 'complete' || document.readyState === 'interactive') {
+                // Small delay for mobile rendering
+                setTimeout(initializePage, 100);
+            } else {
+                document.addEventListener('DOMContentLoaded', function() {
+                    setTimeout(initializePage, 100);
+                }, { once: true, passive: true });
+            }
         }
+
+        startInitialization();
     </script>
 </body>
 </html>

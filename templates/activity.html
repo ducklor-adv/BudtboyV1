@@ -481,6 +481,13 @@
             transform: none;
         }
 
+        .bud-subtitle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 4px;
+        }
+
         .bud-date {
             font-size: 12px;
             color: #666;
@@ -1473,9 +1480,11 @@ displayBuds(budsData);
                         <div class="bud-title">
                             <div class="strain-name">
                                 ${bud.strain_name_en || 'ไม่ระบุชื่อ'} ${bud.strain_name_th ? `(${bud.strain_name_th})` : ''}
+                            </div>
+                            <div class="bud-subtitle">
+                                <span class="bud-date">${formatDate(bud.created_at)}</span>
                                 <span class="status-badge ${statusClass}">${statusText}</span>
                             </div>
-                            <div class="bud-date">${formatDate(bud.created_at)}</div>
                         </div>
                     </div>
 

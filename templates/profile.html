@@ -726,8 +726,14 @@
         let profileData = null;
         let isLoading = false;
 
-        // Global interval management
-        window.pendingFriendsInterval = pendingFriendsInterval;
+        // Global interval management with better tracking
+        if (!window.globalIntervalManager) {
+            window.globalIntervalManager = {
+                pendingFriendsInterval: null,
+                isRunning: false
+            };
+        }
+        
         let currentUserData = null;
         let isProfileLoaded = false;
         let pageInitialized = false;
@@ -1268,9 +1274,9 @@
 
             isCheckingPendingFriends = true;
 
-            // Add timeout for mobile networks
+            // Add longer timeout for mobile networks
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 8000);
+            const timeoutId = setTimeout(() => controller.abort(), 12000);
 
             fetch('/api/pending_friends_count', {
                     signal: controller.signal,
@@ -1332,51 +1338,68 @@
         }
 
         function startPendingFriendsInterval() {
-            // Prevent multiple intervals and ensure profile is loaded
-            if (pendingFriendsInterval || pendingFriendsInitialized || !isProfileLoaded) {
-                console.log('Pending friends check already running, skipping');
+            // Prevent multiple intervals with global tracking
+            if (window.globalIntervalManager.isRunning || !isProfileLoaded) {
+                console.log('Pending friends check already running or profile not loaded, skipping');
                 return;
             }
 
-            pendingFriendsInitialized = true;
+            window.globalIntervalManager.isRunning = true;
             console.log('Starting pending friends interval');
 
-            // Check immediately, then set interval
+            // Stop any existing interval first
+            if (window.globalIntervalManager.pendingFriendsInterval) {
+                clearInterval(window.globalIntervalManager.pendingFriendsInterval);
+                window.globalIntervalManager.pendingFriendsInterval = null;
+            }
+
+            // Check immediately, then set interval with longer delay for mobile
             setTimeout(() => {
-                if (isProfileLoaded) {
+                if (isProfileLoaded && window.globalIntervalManager.isRunning) {
                     checkPendingFriends();
-                    pendingFriendsInterval = setInterval(checkPendingFriends, 180000); // Check every 3 minutes (less frequent for mobile)
+                    window.globalIntervalManager.pendingFriendsInterval = setInterval(checkPendingFriends, 300000); // Check every 5 minutes for mobile
                 }
-            }, 2000); // Wait 2 seconds after profile loads
+            }, 3000); // Wait 3 seconds after profile loads
         }
 
         function stopPendingFriendsInterval() {
-            if (pendingFriendsInterval) {
-                clearInterval(pendingFriendsInterval);
-                pendingFriendsInterval = null;
+            if (window.globalIntervalManager.pendingFriendsInterval) {
+                clearInterval(window.globalIntervalManager.pendingFriendsInterval);
+                window.globalIntervalManager.pendingFriendsInterval = null;
                 console.log('Stopped pending friends interval');
             }
+            window.globalIntervalManager.isRunning = false;
             pendingFriendsInitialized = false;
         }
 
-        // Mobile-friendly page visibility handling
+        // Mobile-friendly page visibility handling with better throttling
         let visibilityTimeout = null;
+        let lastVisibilityChange = 0;
+        
         document.addEventListener('visibilitychange', function() {
+            const now = Date.now();
+            
+            // Throttle visibility changes to prevent rapid switching
+            if (now - lastVisibilityChange < 1000) {
+                return;
+            }
+            lastVisibilityChange = now;
+            
             if (document.hidden) {
                 stopPendingFriendsInterval();
                 if (visibilityTimeout) {
                     clearTimeout(visibilityTimeout);
                 }
             } else {
-                // Wait longer before restarting on mobile to avoid rapid switching
+                // Wait longer before restarting on mobile
                 if (visibilityTimeout) {
                     clearTimeout(visibilityTimeout);
                 }
                 visibilityTimeout = setTimeout(() => {
-                    if (!document.hidden && isProfileLoaded && !pendingFriendsInterval) {
+                    if (!document.hidden && isProfileLoaded && !window.globalIntervalManager.isRunning) {
                         startPendingFriendsInterval();
                     }
-                }, 3000);
+                }, 5000); // Increased delay for mobile
             }
         });
 
@@ -1390,11 +1413,17 @@
 
 
 
-        // Initialize page - mobile optimized
+        // Initialize page - mobile optimized with debouncing
+        let initializationTimeout = null;
         function initializePage() {
             if (pageInitialized) {
                 console.log('Profile: Init blocked - already initialized');
                 return false;
+            }
+
+            // Clear any pending initialization
+            if (initializationTimeout) {
+                clearTimeout(initializationTimeout);
             }
 
             pageInitialized = true;
@@ -1404,8 +1433,10 @@
                 if (!isProfileLoaded) {
                     loadProfile().then(() => {
                         // Start pending friends check only after profile is successfully loaded
-                        if (isProfileLoaded && !pendingFriendsInitialized) {
-                            startPendingFriendsInterval();
+                        if (isProfileLoaded && !window.globalIntervalManager.isRunning) {
+                            initializationTimeout = setTimeout(() => {
+                                startPendingFriendsInterval();
+                            }, 1000); // Delay to prevent multiple starts
                         }
                     }).catch(() => {
                         pageInitialized = false;
@@ -1425,19 +1456,30 @@
             }
         }
 
-        // Start initialization - mobile friendly
+        // Start initialization - mobile friendly with better timing
         function startInitialization() {
+            // Clear any existing global intervals first
+            if (window.globalIntervalManager && window.globalIntervalManager.pendingFriendsInterval) {
+                clearInterval(window.globalIntervalManager.pendingFriendsInterval);
+                window.globalIntervalManager.pendingFriendsInterval = null;
+                window.globalIntervalManager.isRunning = false;
+            }
+            
             if (document.readyState === 'complete' || document.readyState === 'interactive') {
-                // Small delay for mobile rendering
-                setTimeout(initializePage, 100);
+                // Longer delay for mobile rendering and network
+                setTimeout(initializePage, 500);
             } else {
                 document.addEventListener('DOMContentLoaded', function() {
-                    setTimeout(initializePage, 100);
+                    setTimeout(initializePage, 500);
                 }, { once: true, passive: true });
             }
         }
 
-        startInitialization();
+        // Only start if not already started
+        if (!window.profileInitStarted) {
+            window.profileInitStarted = true;
+            startInitialization();
+        }
     </script>
 </body>
 </html>

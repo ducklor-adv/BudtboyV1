@@ -706,7 +706,7 @@
         .tab-header {
             flex: 1;
             padding: 10px 16px;
-            background: #4CAF50;
+            background: #9e9e9e;
             color: white;
             border: none;
             cursor: pointer;
@@ -732,7 +732,16 @@
             color: white;
         }
 
-        .tab-header:hover {
+        .tab-header.has-selection {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .tab-header:hover:not(.active) {
+            background: #757575;
+        }
+
+        .tab-header.active:hover {
             background: #45a049;
         }
 
@@ -1743,6 +1752,22 @@
             const checkboxes = document.querySelectorAll('.terpene-checkbox input[type="checkbox"]');
             let currentTab = 1;
 
+            // Function to update tab colors based on selection status
+            function updateTabColors() {
+                for (let i = 1; i <= 3; i++) {
+                    const hiddenInput = document.getElementById(`top_terpenes_${i}`);
+                    const tabHeader = document.querySelector(`[data-tab="terpene-${i}"]`);
+                    
+                    if (hiddenInput && tabHeader) {
+                        if (hiddenInput.value && hiddenInput.value.trim() !== '') {
+                            tabHeader.classList.add('has-selection');
+                        } else {
+                            tabHeader.classList.remove('has-selection');
+                        }
+                    }
+                }
+            }
+
             // Tab switching - just visual, all use same checkbox list
             tabHeaders.forEach((header, index) => {
                 header.addEventListener('click', function() {
@@ -1790,8 +1815,14 @@
                         // Remove selected class
                         this.closest('.terpene-checkbox').classList.remove('selected');
                     }
+
+                    // Update tab colors after any change
+                    updateTabColors();
                 });
             });
+
+            // Initialize tab colors on page load
+            updateTabColors();
         }
 
         // Flavor Selector functionality

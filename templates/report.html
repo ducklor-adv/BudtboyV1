@@ -225,6 +225,7 @@
             border-collapse: collapse;
             margin-top: 20px;
             font-size: 14px;
+            position: relative;
         }
 
         .data-table th {
@@ -242,6 +243,38 @@
 
         .data-table th:hover {
             background: #e9ecef;
+        }
+
+        /* Sticky column for strain name (2nd column) */
+        .data-table th:nth-child(2),
+        .data-table td:nth-child(2) {
+            position: sticky;
+            left: 0;
+            background: #f8f9fa;
+            z-index: 5;
+            border-right: 2px solid #dee2e6;
+            box-shadow: 2px 0 4px rgba(0,0,0,0.1);
+        }
+
+        .data-table td:nth-child(2) {
+            background: inherit;
+        }
+
+        /* Alternating row colors with light green theme */
+        .data-table tr:nth-child(even) {
+            background: #f0f8f0;
+        }
+
+        .data-table tr:nth-child(odd) {
+            background: #ffffff;
+        }
+
+        .data-table tr:nth-child(even) td:nth-child(2) {
+            background: #e8f5e8;
+        }
+
+        .data-table tr:nth-child(odd) td:nth-child(2) {
+            background: #f8f9fa;
         }
 
         .sort-indicator {
@@ -335,7 +368,11 @@
         }
 
         .data-table tr:hover {
-            background: #f8f9fa;
+            background: #e8f5e8;
+        }
+
+        .data-table tr:hover td:nth-child(2) {
+            background: #d4edda;
         }
 
         .strain-name {
@@ -559,6 +596,15 @@
                 top: 0;
                 background: #f8f9fa;
                 z-index: 10;
+            }
+
+            .data-table th:nth-child(2),
+            .data-table td:nth-child(2) {
+                position: sticky;
+                left: 0;
+                z-index: 15;
+                border-right: 1px solid #dee2e6;
+                box-shadow: 1px 0 2px rgba(0,0,0,0.1);
             }
 
             .strain-name {

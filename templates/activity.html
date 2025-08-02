@@ -1499,7 +1499,7 @@ displayBuds(budsData);
                             <button class="status-toggle-btn" onclick="toggleBudStatus(${bud.id}, '${newStatus}', this)">
                                 🔄 ${toggleText}
                             </button>
-                            
+
                             <a href="/bud-report?id=${bud.id}" class="action-btn primary">
                                 📊 Full Report & all Review
                             </a>
@@ -1909,12 +1909,12 @@ displayBuds(budsData);
             // Update active tab
             document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
             event.target.closest('.nav-tab').classList.add('active');
-            
+
             // Hide all sections
             document.getElementById('myBudsSection').style.display = 'none';
             document.getElementById('myReviewsSection').style.display = 'none';
             document.getElementById('friendsReviewsSection').style.display = 'none';
-            
+
             // Show selected section
             currentTab = tabName;
             switch(tabName) {

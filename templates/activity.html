@@ -1120,6 +1120,7 @@
             padding: 15px;
             margin: 20px 0;
         }```text
+        ```text
         .success-message {
             text-align: center;
             color: #155724;
@@ -1578,13 +1579,10 @@ displayBuds(budsData);
                                                 ${reviewerAvatar}
                                             </div>
                                             <div class="reviewer-name-display">${review.reviewer_name || 'ผู้ใช้ไม่ระบุชื่อ'}</div>
-                                            <div style="margin-left: 8px; font-size: 12px; color: #FF9800; font-weight: 600;">
-                                                คะแนนรวม: ${'⭐'.repeat(review.overall_rating)} (${review.overall_rating}/5)${review.aroma_rating ? ` | คะแนนกลิ่น: ${'⭐'.repeat(review.aroma_rating)} (${review.aroma_rating}/5)` : ''}
-                                            </div>
                                         </div>
-                                        <div class="review-actions">
-                                            <button class="action-btn primary" onclick="editReview(${review.id})">✏️ แก้ไข</button>
-                                            <button class="action-btn danger" onclick="deleteReview(${review.id})">🗑️ ลบ</button>
+                                        <div style="margin-top: 4px; font-size: 12px; color: #FF9800; font-weight: 600;">
+                                            <div>คะแนนรวม: ${'⭐'.repeat(review.overall_rating)} (${review.overall_rating}/5)</div>
+                                            ${review.aroma_rating ? `<div>คะแนนกลิ่น: ${'⭐'.repeat(review.aroma_rating)} (${review.aroma_rating}/5)</div>` : ''}
                                         </div>
                                     </div>
                                 </div>
@@ -2057,9 +2055,10 @@ displayBuds(budsData);
                                                 ${reviewerAvatar}
                                             </div>
                                             <div class="reviewer-name-display">${review.reviewer_name || 'ผู้ใช้ไม่ระบุชื่อ'}</div>
-                                            <div style="margin-left: 8px; font-size: 12px; color: #FF9800; font-weight: 600;">
-                                                คะแนนรวม: ${'⭐'.repeat(review.overall_rating)} (${review.overall_rating}/5)${review.aroma_rating ? ` | คะแนนกลิ่น: ${'⭐'.repeat(review.aroma_rating)} (${review.aroma_rating}/5)` : ''}
-                                            </div>
+                                        </div>
+                                        <div style="margin-top: 4px; font-size: 12px; color: #FF9800; font-weight: 600;">
+                                            <div>คะแนนรวม: ${'⭐'.repeat(review.overall_rating)} (${review.overall_rating}/5)</div>
+                                            ${review.aroma_rating ? `<div>คะแนนกลิ่น: ${'⭐'.repeat(review.aroma_rating)} (${review.aroma_rating}/5)</div>` : ''}
                                         </div>
                                     </div>
                                 </div>

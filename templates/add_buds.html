@@ -688,6 +688,93 @@
             }
         }
 
+        /* Selected Terpenes Summary Styles */
+        .selected-terpenes-summary {
+            width: 100%;
+            margin-bottom: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            border: 2px solid #e9ecef;
+        }
+
+        .terpene-display-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .terpene-rank-display {
+            flex: 1;
+            min-width: 250px;
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            text-align: center;
+        }
+
+        .terpene-rank-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2c5530;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .terpene-rank-value {
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .terpene-rank-value .placeholder {
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        .terpene-rank-value .selected-terpene-text {
+            color: #2c5530;
+            font-weight: 500;
+            background: #e8f5e8;
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid #4CAF50;
+            text-align: center;
+            word-break: break-word;
+        }
+
+        @media (max-width: 768px) {
+            .terpene-display-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .terpene-rank-display {
+                min-width: auto;
+                padding: 12px;
+            }
+
+            .terpene-rank-title {
+                font-size: 13px;
+                margin-bottom: 8px;
+            }
+
+            .terpene-rank-value {
+                min-height: 35px;
+                font-size: 12px;
+                padding: 6px 10px;
+            }
+        }
+
         /* Terpene Tabs Styles */
         .terpenes-tab-container {
             width: 100%;
@@ -1101,6 +1188,30 @@
                                             <button type="button" class="flavor-btn" data-flavor="ยาง">ยาง</button>
                                         </div>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- แสดงผล Terpene ที่เลือกทั้ง 3 อันดับ -->
+                    <div class="selected-terpenes-summary">
+                        <div class="terpene-display-row">
+                            <div class="terpene-rank-display">
+                                <div class="terpene-rank-title">Terpene อันดับ 1</div>
+                                <div class="terpene-rank-value" id="display-terpene-1">
+                                    <span class="placeholder">ยังไม่ได้เลือก</span>
+                                </div>
+                            </div>
+                            <div class="terpene-rank-display">
+                                <div class="terpene-rank-title">Terpene อันดับ 2</div>
+                                <div class="terpene-rank-value" id="display-terpene-2">
+                                    <span class="placeholder">ยังไม่ได้เลือก</span>
+                                </div>
+                            </div>
+                            <div class="terpene-rank-display">
+                                <div class="terpene-rank-title">Terpene อันดับ 3</div>
+                                <div class="terpene-rank-value" id="display-terpene-3">
+                                    <span class="placeholder">ยังไม่ได้เลือก</span>
                                 </div>
                             </div>
                         </div>
@@ -1844,6 +1955,7 @@
             const selectedDisplay = document.getElementById(`selected-terpene-${tabNumber}`);
             const hiddenInput = document.getElementById(`top_terpenes_${tabNumber}`);
             const tabHeader = document.querySelector(`[data-tab="terpene-${tabNumber}"]`);
+            const displaySummary = document.getElementById(`display-terpene-${tabNumber}`);
 
             if (terpene) {
                 // Extract the aroma part (everything before the first " - ")
@@ -1854,6 +1966,11 @@
                 // Update tab header to show selection
                 tabHeader.style.background = '#4CAF50';
                 tabHeader.style.color = 'white';
+
+                // Update summary display
+                if (displaySummary) {
+                    displaySummary.innerHTML = `<span class="selected-terpene-text">${aromaPart}</span>`;
+                }
             } else {
                 selectedDisplay.innerHTML = `<span class="placeholder">คลิกเพื่อเลือก Terpene อันดับ ${tabNumber}...</span>`;
                 hiddenInput.value = '';
@@ -1862,6 +1979,11 @@
                 if (!tabHeader.classList.contains('active')) {
                     tabHeader.style.background = '#f8f9fa';
                     tabHeader.style.color = '#666';
+                }
+
+                // Reset summary display
+                if (displaySummary) {
+                    displaySummary.innerHTML = `<span class="placeholder">ยังไม่ได้เลือก</span>`;
                 }
             }
         }

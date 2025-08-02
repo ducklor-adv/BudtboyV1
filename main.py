@@ -3783,6 +3783,102 @@ def approve_user():
     else:
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
+@app.route('/api/friends_reviews')
+def get_friends_reviews():
+    """Get reviews related to user's buds (excluding user's own reviews)"""
+    if not is_authenticated():
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    user_id = session.get('user_id')
+    cache_key = f"friends_reviews_{user_id}"
+
+    # Check cache first
+    cached_data = get_cache(cache_key)
+    if cached_data:
+        return jsonify({'reviews': cached_data})
+
+    conn = None
+    cur = None
+    try:
+        conn = get_db_connection()
+        if not conn:
+            print("Failed to get database connection")
+            return jsonify({'error': 'Database connection failed', 'reviews': []}), 500
+
+        cur = conn.cursor()
+
+        # Get reviews for buds created by the current user, but not reviews written by the current user
+        cur.execute("""
+            SELECT r.id, r.overall_rating, r.short_summary, r.full_review_content, 
+                   r.aroma_rating, r.selected_effects, r.aroma_flavors, r.review_images,
+                   r.created_at, r.updated_at, r.video_review_url,
+                   b.strain_name_en, b.strain_name_th, b.breeder,
+                   u.username as reviewer_name, u.profile_image_url as reviewer_profile_image,
+                   r.bud_reference_id
+            FROM reviews r
+            JOIN buds_data b ON r.bud_reference_id = b.id
+            JOIN users u ON r.reviewer_id = u.id
+            WHERE b.created_by = %s AND r.reviewer_id != %s
+            ORDER BY r.created_at DESC
+            LIMIT 50
+        """, (user_id, user_id))
+
+        print(f"Debug: Query executed for user_id {user_id} (friends reviews)")
+
+        reviews = []
+        for row in cur.fetchall():
+            # Format profile image URL correctly
+            reviewer_profile_image = None
+            if row[15]:  # reviewer_profile_image
+                if row[15].startswith('/uploads/'):
+                    reviewer_profile_image = row[15]
+                elif row[15].startswith('uploads/'):
+                    reviewer_profile_image = f'/{row[15]}'
+                else:
+                    reviewer_profile_image = f'/uploads/{row[15].split("/")[-1]}'
+
+            review_data = {
+                'id': row[0],
+                'overall_rating': row[1],
+                'short_summary': row[2],
+                'full_review_content': row[3],
+                'aroma_rating': row[4],
+                'selected_effects': row[5] if row[5] else [],
+                'aroma_flavors': row[6] if row[6] else [],
+                'review_images': row[7] if row[7] else [],
+                'created_at': row[8].strftime('%Y-%m-%d %H:%M:%S') if row[8] else None,
+                'updated_at': row[9].strftime('%Y-%m-%d %H:%M:%S') if row[9] else None,
+                'video_review_url': row[10],
+                'strain_name_en': row[11],
+                'strain_name_th': row[12],
+                'breeder': row[13],
+                'reviewer_name': row[14],
+                'reviewer_profile_image': reviewer_profile_image,
+                'bud_reference_id': row[16]  # Add bud reference ID from reviews table
+            }
+
+            reviews.append(review_data)
+
+        # Cache for 2 minutes
+        set_cache(cache_key, reviews)
+
+        return jsonify({'reviews': reviews})
+
+    except psycopg2.OperationalError as e:
+        print(f"Database operational error in get_friends_reviews: {e}")
+        return jsonify({'error': 'Database connection lost', 'reviews': []}), 500
+    except Exception as e:
+        print(f"Error in get_friends_reviews: {e}")
+        return jsonify({'error': 'Internal server error', 'reviews': []}), 500
+    finally:
+        if cur:
+            try:
+                cur.close()
+            except:
+                pass
+        if conn:
+            return_db_connection(conn)
+
 @app.route('/api/friends', methods=['GET'])
 def get_friends():
     """Get list of users who signed up through referral link"""

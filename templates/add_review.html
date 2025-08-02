@@ -657,6 +657,111 @@
         .flavor-categories.active {
             display: block;
         }
+
+        /* Effects Table Styles */
+        .effects-table-container {
+            width: 100%;
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+
+        .effects-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 2px solid #ddd;
+            font-size: 14px;
+        }
+
+        .effects-table th {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 12px 8px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .table-header-mental {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .table-header-physical {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .positive-header {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .negative-header {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .effect-cell {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .effect-cell.positive {
+            background: #f1f8e9;
+        }
+
+        .effect-cell.negative {
+            background: #fce4ec;
+        }
+
+        .effect-cell label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0;
+            padding: 4px 0;
+            cursor: pointer;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .effect-cell input[type="checkbox"] {
+            margin: 0;
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .effect-cell input[type="checkbox"]:checked + span {
+            font-weight: 600;
+        }
+
+        @media (max-width: 600px) {
+            .effects-table {
+                font-size: 12px;
+            }
+
+            .effects-table th {
+                padding: 8px 4px;
+                font-size: 14px;
+            }
+
+            .effect-cell {
+                padding: 6px 4px;
+            }
+
+            .effect-cell label {
+                font-size: 12px;
+                gap: 6px;
+            }
+
+            .effect-cell input[type="checkbox"] {
+                width: 14px;
+                height: 14px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -855,192 +960,166 @@
                 <div class="form-group">
                     <label class="form-label">🧠 ผลกระทบที่รู้สึก (เลือกได้หลายตัว)</label>
 
-                    <!-- ผลกระทบต่อจิตใจ (เชิงบวก) -->
-                    <div class="effects-category">
-                        <h4 class="effects-category-title">🌟 ผลกระทบต่อจิตใจ (เชิงบวก)</h4>
-                        <div class="effects-grid" id="mentalPositiveEffects">
-                            <div class="effect-item">
-                                <input type="checkbox" value="สุขใจ" id="mental_pos_happy">
-                                <label for="mental_pos_happy">😊 สุขใจ</label>
-                            </div>
-                            <div class="effect-item">
-                                <input type="checkbox" value="ผ่อนคลาย" id="mental_pos_relaxed">
-                                <label for="mental_pos_relaxed">😌 ผ่อนคลาย</label>
-                            </div>
-                            <div class="effect-item">
-                                <input type="checkbox" value="สร้างสรรค์" id="mental_pos_creative">
-                                <label for="mental_pos_creative">🎨 สร้างสรรค์</label>
-                            </div>
-                            <div class="effect-item">
-                                <input type="checkbox" value="ร่าเริง" id="mental_pos_cheerful">
-                                <label for="mental_pos_cheerful">🎉 ร่าเริง</label>
-                            </div>
-                            <div class="effect-item">
-                                <input type="checkbox" value="เบิกบาน" id="mental_pos_euphoric">
-                                <label for="mental_pos_euphoric">✨ เบิกบาน</label>
-                            </div>
-                            <div class="effect-item">
-                                <input type="checkbox" value="โฟกัส" id="mental_pos_focused">
-                                <label for="mental_pos_focused">🎯 โฟกัส</label>
-                            </div>
-                            <div class="effect-item">
-                                <input type="checkbox" value="ตื่นตัว" id="mental_pos_alert">
-                                <label for="mental_pos_alert">⚡ ตื่นตัว</label>
-                            </div>
-                            <div class="effect-item">
-                                <input type="checkbox" value="คิดลึก" id="mental_pos_thoughtful">
-                                <label for="mental_pos_thoughtful">🤔 คิดลึก</label>
-                            </div>
-                            <div class="effect-item">
-                                <input type="checkbox" value="หลับง่าย" id="mental_pos_sleepy">
-                                <label for="mental_pos_sleepy">😴 หลับง่าย</label>
-                            </div>
-                            <div class="effect-item">
-                                <input type="checkbox" value="เพลิดเพลิน" id="mental_pos_enjoyable">
-                                <label for="mental_pos_enjoyable">🎈 เพลิดเพลิน</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ผลกระทบต่อจิตใจ (เชิงลบ) -->
-                    <div class="effects-category">
-                        <h4 class="effects-category-title">⚠️ ผลกระทบต่อจิตใจ (เชิงลบ)</h4>
-                        <div class="effects-grid" id="mentalNegativeEffects">
-                            <div class="effect-item">
-                                <input type="checkbox" value="วิตก" id="mental_neg_anxious">
-                                <label for="mental_neg_anxious">😰 วิตก</label>
-                            </div>
-                            <div class="effect-item">
-                                <input type="checkbox" value="พารานอยด์" id="mental_neg_paranoid">
-                                <label for="mental_neg_paranoid">👁️ พารานอยด์</label>
-                            </div>
-                            <div class="effect-item">
-                                <input type="checkbox" value="แพนิค" id="mental_neg_panic">
-                                <label for="mental_neg_panic">😱 แพนิค</label>
-                            </div>
-                            <div class="effect-item">
-                                <input type="checkbox" value="สับสน" id="mental_neg_confused">
-                                <label for="mental_neg_confused">🤯 สับสน</label>
-                            </div>
-                            <div class="effect-item">
-                                <input type="checkbox" value="ความจำสั้น" id="mental_neg_memory">
-                                <label for="mental_neg_memory">🧠 ความจำสั้น</label>
-                            </div>
-                            <div class="effect-item">
-                                <input type="checkbox" value="สมาธิหาย" id="mental_neg_unfocused">
-                                <label for="mental_neg_unfocused">💭 สมาธิหาย</label>
-                            </div>
-                            <div class="effect-item">
-                                <input type="checkbox" value="หลอน" id="mental_neg_hallucination">
-                                <label for="mental_neg_hallucination">👻 หลอน</label>
-                            </div>
-                            <div class="effect-item">
-                                <input type="checkbox" value="ง่วงหนัก" id="mental_neg_drowsy">
-                                <label for="mental_neg_drowsy">🥱 ง่วงหนัก</label>
-                            </div>
-                            <div class="effect-item">
-                                <input type="checkbox" value="ซึมเศร้า" id="mental_neg_depressed">
-                                <label for="mental_neg_depressed">😔 ซึมเศร้า</label>
-                            </div>
-                            <div class="effect-item">
-                                <input type="checkbox" value="หงุดหงิด" id="mental_neg_irritated">
-                                <label for="mental_neg_irritated">😤 หงุดหงิด</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ผลกระทบทางร่างกาย (เชิงบวก) -->
-                    <div class="effects-category">
-                        <h4 class="effects-category-title">💪 ผลกระทบทางร่างกาย (เชิงบวก)</h4>
-                        <div class="effects-grid" id="physicalPositiveEffects">
-                            <div class="effect-item">
-                                <input type="checkbox" value="บรรเทาปวด" id="physical_pos_pain_relief">
-                                <label for="physical_pos_pain_relief">🩹 บรรเทาปวด</label>
-                            </div>
-                            <div class="effect-item">
-                                <input type="checkbox" value="คลายกล้าม" id="physical_pos_muscle_relax">
-                                <label for="physical_pos_muscle_relax">💆 คลายกล้าม</label>
-                            </div>
-                            <div class="effect-item">
-                                <input type="checkbox" value="ต้านอักเสบ" id="physical_pos_anti_inflammatory">
-                                <label for="physical_pos_anti_inflammatory">🛡️ ต้านอักเสบ</label>
-                            </div>
-                            <div class="effect-item">
-                                <input type="checkbox" value="หลับง่าย" id="physical_pos_sleep">
-                                <label for="physical_pos_sleep">🛌 หลับง่าย</label>
-                            </div>
-                            <div class="effect-item">
-                                <input type="checkbox" value="คลายเกร็ง" id="physical_pos_tension_relief">
-                                <label for="physical_pos_tension_relief">🤲 คลายเกร็ง</label>
-                            </div>
-                            <div class="effect-item">
-                                <input type="checkbox" value="ต้านคลื่นไส้" id="physical_pos_anti_nausea">
-                                <label for="physical_pos_anti_nausea">🤢 ต้านคลื่นไส้</label>
-                            </div>
-                            <div class="effect-item">
-                                <input type="checkbox" value="กระตุ้นกิน" id="physical_pos_appetite">
-                                <label for="physical_pos_appetite">🍽️ กระตุ้นกิน</label>
-                            </div>
-                            <div class="effect-item">
-                                <input type="checkbox" value="ผ่อนคลาย" id="physical_pos_relaxation">
-                                <label for="physical_pos_relaxation">🧘 ผ่อนคลาย</label>
-                            </div>
-                            <div class="effect-item">
-                                <input type="checkbox" value="สดชื่น" id="physical_pos_refreshed">
-                                <label for="physical_pos_refreshed">🌿 สดชื่น</label>
-                            </div>
-                            <div class="effect-item">
-                                <input type="checkbox" value="สุขภาพลำไส้" id="physical_pos_digestive">
-                                <label for="physical_pos_digestive">🦠 สุขภาพลำไส้</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ผลกระทบทางร่างกาย (เชิงลบ) -->
-                    <div class="effects-category">
-                        <h4 class="effects-category-title">⛔ ผลกระทบทางร่างกาย (เชิงลบ)</h4>
-                        <div class="effects-grid" id="physicalNegativeEffects">
-                            <div class="effect-item">
-                                <input type="checkbox" value="ปากแห้ง" id="physical_neg_dry_mouth">
-                                <label for="physical_neg_dry_mouth">👄 ปากแห้ง</label>
-                            </div>
-                            <div class="effect-item">
-                                <input type="checkbox" value="ตาแดง" id="physical_neg_red_eyes">
-                                <label for="physical_neg_red_eyes">👁️ ตาแดง</label>
-                            </div>
-                            <div class="effect-item">
-                                <input type="checkbox" value="ตาแห้ง" id="physical_neg_dry_eyes">
-                                <label for="physical_neg_dry_eyes">👀 ตาแห้ง</label>
-                            </div>
-                            <div class="effect-item">
-                                <input type="checkbox" value="เวียนหัว" id="physical_neg_dizzy">
-                                <label for="physical_neg_dizzy">💫 เวียนหัว</label>
-                            </div>
-                            <div class="effect-item">
-                                <input type="checkbox" value="ใจเต้นเร็ว" id="physical_neg_heart_rate">
-                                <label for="physical_neg_heart_rate">💓 ใจเต้นเร็ว</label>
-                            </div>
-                            <div class="effect-item">
-                                <input type="checkbox" value="ความดันตก"id="physical_neg_blood_pressure">
-                                <label for="physical_neg_blood_pressure">📉 ความดันตก</label>
-                            </div>
-                            <div class="effect-item">
-                                <input type="checkbox" value="มือสั่น" id="physical_neg_tremor">
-                                <label for="physical_neg_tremor">🤝 มือสั่น</label>
-                            </div>
-                            <div class="effect-item">
-                                <input type="checkbox" value="เหงื่อออก" id="physical_neg_sweating">
-                                <label for="physical_neg_sweating">💦 เหงื่อออก</label>
-                            </div>
-                            <div class="effect-item">
-                                <input type="checkbox" value="คลื่นไส้" id="physical_neg_nausea">
-                                <label for="physical_neg_nausea">🤮 คลื่นไส้</label>
-                            </div>
-                            <div class="effect-item">
-                                <input type="checkbox" value="ไอ/เจ็บคอ" id="physical_neg_cough">
-                                <label for="physical_neg_cough">🤧 ไอ/เจ็บคอ</label>
-                            </div>
-                        </div>
+                    <!-- Effects Table Layout -->
+                    <div class="effects-table-container">
+                        <table class="effects-table">
+                            <thead>
+                                <tr>
+                                    <th colspan="2" class="table-header-mental">🧠 จิตใจ</th>
+                                    <th colspan="2" class="table-header-physical">💪 ร่างกาย</th>
+                                </tr>
+                                <tr>
+                                    <th class="positive-header">ด้าน +</th>
+                                    <th class="negative-header">ด้าน -</th>
+                                    <th class="positive-header">ด้าน +</th>
+                                    <th class="negative-header">ด้าน -</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <!-- Mental Positive -->
+                                    <td class="effect-cell positive">
+                                        <label><input type="checkbox" value="สุขใจ"> สุขใจ</label>
+                                    </td>
+                                    <!-- Mental Negative -->
+                                    <td class="effect-cell negative">
+                                        <label><input type="checkbox" value="วิตก"> วิตก</label>
+                                    </td>
+                                    <!-- Physical Positive -->
+                                    <td class="effect-cell positive">
+                                        <label><input type="checkbox" value="บรรเทาปวด"> บรรเทาปวด</label>
+                                    </td>
+                                    <!-- Physical Negative -->
+                                    <td class="effect-cell negative">
+                                        <label><input type="checkbox" value="ปากแห้ง"> ปากแห้ง</label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="effect-cell positive">
+                                        <label><input type="checkbox" value="ผ่อนคลาย"> ผ่อนคลาย</label>
+                                    </td>
+                                    <td class="effect-cell negative">
+                                        <label><input type="checkbox" value="พารานอยด์"> พารานอยด์</label>
+                                    </td>
+                                    <td class="effect-cell positive">
+                                        <label><input type="checkbox" value="คลายกล้าม"> คลายกล้าม</label>
+                                    </td>
+                                    <td class="effect-cell negative">
+                                        <label><input type="checkbox" value="ตาแดง"> ตาแดง</label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="effect-cell positive">
+                                        <label><input type="checkbox" value="สร้างสรรค์"> สร้างสรรค์</label>
+                                    </td>
+                                    <td class="effect-cell negative">
+                                        <label><input type="checkbox" value="แพนิค"> แพนิค</label>
+                                    </td>
+                                    <td class="effect-cell positive">
+                                        <label><input type="checkbox" value="ต้านอักเสบ"> ต้านอักเสบ</label>
+                                    </td>
+                                    <td class="effect-cell negative">
+                                        <label><input type="checkbox" value="ตาแห้ง"> ตาแห้ง</label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="effect-cell positive">
+                                        <label><input type="checkbox" value="ร่าเริง"> ร่าเริง</label>
+                                    </td>
+                                    <td class="effect-cell negative">
+                                        <label><input type="checkbox" value="สับสน"> สับสน</label>
+                                    </td>
+                                    <td class="effect-cell positive">
+                                        <label><input type="checkbox" value="หลับง่าย"> หลับง่าย</label>
+                                    </td>
+                                    <td class="effect-cell negative">
+                                        <label><input type="checkbox" value="เวียนหัว"> เวียนหัว</label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="effect-cell positive">
+                                        <label><input type="checkbox" value="เบิกบาน"> เบิกบาน</label>
+                                    </td>
+                                    <td class="effect-cell negative">
+                                        <label><input type="checkbox" value="ความจำสั้น"> ความจำสั้น</label>
+                                    </td>
+                                    <td class="effect-cell positive">
+                                        <label><input type="checkbox" value="คลายเกร็ง"> คลายเกร็ง</label>
+                                    </td>
+                                    <td class="effect-cell negative">
+                                        <label><input type="checkbox" value="ใจเต้นเร็ว"> ใจเต้นเร็ว</label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="effect-cell positive">
+                                        <label><input type="checkbox" value="โฟกัส"> โฟกัส</label>
+                                    </td>
+                                    <td class="effect-cell negative">
+                                        <label><input type="checkbox" value="สมาธิหาย"> สมาธิหาย</label>
+                                    </td>
+                                    <td class="effect-cell positive">
+                                        <label><input type="checkbox" value="ต้านคลื่นไส้"> ต้านคลื่นไส้</label>
+                                    </td>
+                                    <td class="effect-cell negative">
+                                        <label><input type="checkbox" value="ความดันตก"> ความดันตก</label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="effect-cell positive">
+                                        <label><input type="checkbox" value="ตื่นตัว"> ตื่นตัว</label>
+                                    </td>
+                                    <td class="effect-cell negative">
+                                        <label><input type="checkbox" value="หลอน"> หลอน</label>
+                                    </td>
+                                    <td class="effect-cell positive">
+                                        <label><input type="checkbox" value="กระตุ้นกิน"> กระตุ้นกิน</label>
+                                    </td>
+                                    <td class="effect-cell negative">
+                                        <label><input type="checkbox" value="มือสั่น"> มือสั่น</label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="effect-cell positive">
+                                        <label><input type="checkbox" value="คิดลึก"> คิดลึก</label>
+                                    </td>
+                                    <td class="effect-cell negative">
+                                        <label><input type="checkbox" value="ง่วงหนัก"> ง่วงหนัก</label>
+                                    </td>
+                                    <td class="effect-cell positive">
+                                        <label><input type="checkbox" value="สดชื่น"> สดชื่น</label>
+                                    </td>
+                                    <td class="effect-cell negative">
+                                        <label><input type="checkbox" value="เหงื่อออก"> เหงื่อออก</label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="effect-cell positive">
+                                        <label><input type="checkbox" value="เพลิดเพลิน"> เพลิดเพลิน</label>
+                                    </td>
+                                    <td class="effect-cell negative">
+                                        <label><input type="checkbox" value="ซึมเศร้า"> ซึมเศร้า</label>
+                                    </td>
+                                    <td class="effect-cell positive">
+                                        <label><input type="checkbox" value="สุขภาพลำไส้"> สุขภาพลำไส้</label>
+                                    </td>
+                                    <td class="effect-cell negative">
+                                        <label><input type="checkbox" value="คลื่นไส้"> คลื่นไส้</label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="effect-cell positive">
+                                        <label><input type="checkbox" value="หลับง่าย"> หลับง่าย</label>
+                                    </td>
+                                    <td class="effect-cell negative">
+                                        <label><input type="checkbox" value="หงุดหงิด"> หงุดหงิด</label>
+                                    </td>
+                                    <td class="effect-cell positive"></td>
+                                    <td class="effect-cell negative">
+                                        <label><input type="checkbox" value="ไอ/เจ็บคอ"> ไอ/เจ็บคอ</label>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 

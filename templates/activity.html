@@ -1145,6 +1145,89 @@
         .retry-btn:hover {
             background: #45a049;
         }
+
+        /* Bottom Navigation Styles */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 2px solid #e0e0e0;
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .nav-tab {
+            background: none;
+            border: none;
+            padding: 8px 12px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            flex: 1;
+            max-width: 120px;
+        }
+
+        .nav-tab:hover {
+            background: #f0f0f0;
+        }
+
+        .nav-tab.active {
+            background: #e8f5e9;
+            color: #4CAF50;
+        }
+
+        .nav-tab.active .nav-icon {
+            transform: scale(1.1);
+        }
+
+        .nav-icon {
+            font-size: 24px;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-label {
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        /* Add bottom padding to content to avoid overlap with bottom nav */
+        .content {
+            padding-bottom: 80px;
+        }
+
+        @media (max-width: 600px) {
+            .bottom-nav {
+                padding: 6px 0;
+            }
+
+            .nav-tab {
+                padding: 6px 8px;
+                gap: 2px;
+            }
+
+            .nav-icon {
+                font-size: 20px;
+            }
+
+            .nav-label {
+                font-size: 10px;
+            }
+
+            .content {
+                padding-bottom: 70px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1159,7 +1242,7 @@
 
         <div class="content">
             <!-- ส่วนรายการดอกที่มี -->
-            <div class="activity-section">
+            <div class="activity-section" id="myBudsSection">
                 <div class="section-header">
                     <div class="section-title">
                         🌸 รายการดอกที่คุณมี
@@ -1177,8 +1260,8 @@
                 </div>
             </div>
 
-            <!-- ส่วนรายการรีวิว -->
-            <div class="activity-section">
+            <!-- ส่วนรายการรีวิวของคุณ -->
+            <div class="activity-section" id="myReviewsSection" style="display: none;">
                 <div class="section-header">
                     <div class="section-title">
                         ⭐ รายการรีวิวของคุณ
@@ -1195,6 +1278,38 @@
                     </div>
                 </div>
             </div>
+
+            <!-- ส่วนรีวิวจากเพื่อนๆ -->
+            <div class="activity-section" id="friendsReviewsSection" style="display: none;">
+                <div class="section-header">
+                    <div class="section-title">
+                        👥 รีวิวจากเพื่อนๆ
+                    </div>
+                </div>
+
+                <div class="item-list reviews-list" id="friendsReviewsList">
+                    <div class="empty-state">
+                        <div class="loading-spinner"></div>
+                        <p>กำลังโหลดรีวิวจากเพื่อน...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation Bar -->
+        <div class="bottom-nav">
+            <button class="nav-tab active" onclick="switchTab('myBuds')">
+                <div class="nav-icon">🌿</div>
+                <div class="nav-label">ดอกของคุณ</div>
+            </button>
+            <button class="nav-tab" onclick="switchTab('myReviews')">
+                <div class="nav-icon">⭐</div>
+                <div class="nav-label">รีวิวโดยคุณ</div>
+            </button>
+            <button class="nav-tab" onclick="switchTab('friendsReviews')">
+                <div class="nav-icon">👥</div>
+                <div class="nav-label">รีวิวจากเพื่อนๆ</div>
+            </button>
         </div>
     </div>
 
@@ -1216,8 +1331,11 @@
         // Global variables
         let reviewsData = [];
         let budsData = [];
+        let friendsReviewsData = [];
         let isLoadingBuds = false;
         let isLoadingReviews = false;
+        let isLoadingFriendsReviews = false;
+        let currentTab = 'myBuds';
 
         // Load user's buds data
         async function loadBuds() {
@@ -1786,6 +1904,208 @@ displayBuds(budsData);
             }
         });
 
+        // Tab switching function
+        function switchTab(tabName) {
+            // Update active tab
+            document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+            event.target.closest('.nav-tab').classList.add('active');
+            
+            // Hide all sections
+            document.getElementById('myBudsSection').style.display = 'none';
+            document.getElementById('myReviewsSection').style.display = 'none';
+            document.getElementById('friendsReviewsSection').style.display = 'none';
+            
+            // Show selected section
+            currentTab = tabName;
+            switch(tabName) {
+                case 'myBuds':
+                    document.getElementById('myBudsSection').style.display = 'block';
+                    if (budsData.length === 0) loadBuds();
+                    break;
+                case 'myReviews':
+                    document.getElementById('myReviewsSection').style.display = 'block';
+                    if (reviewsData.length === 0) loadReviews();
+                    break;
+                case 'friendsReviews':
+                    document.getElementById('friendsReviewsSection').style.display = 'block';
+                    if (friendsReviewsData.length === 0) loadFriendsReviews();
+                    break;
+            }
+        }
+
+        // Load friends reviews data
+        async function loadFriendsReviews() {
+            if (isLoadingFriendsReviews) return;
+
+            isLoadingFriendsReviews = true;
+            const friendsReviewsList = document.getElementById('friendsReviewsList');
+
+            try {
+                friendsReviewsList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="loading-spinner"></div>
+                        <p>กำลังโหลดรีวิวจากเพื่อน...</p>
+                    </div>
+                `;
+
+                const response = await fetch('/api/friends_reviews');
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                friendsReviewsData = data.reviews || [];
+                displayFriendsReviews(friendsReviewsData);
+
+            } catch (error) {
+                console.error('Error loading friends reviews:', error);
+                showFriendsReviewsError(error.message || 'ไม่สามารถโหลดรีวิวจากเพื่อนได้');
+            } finally {
+                isLoadingFriendsReviews = false;
+            }
+        }
+
+        function showFriendsReviewsError(message) {
+            const friendsReviewsList = document.getElementById('friendsReviewsList');
+            if (friendsReviewsList) {
+                friendsReviewsList.innerHTML = `
+                    <div class="error-message">
+                        <div style="font-size: 48px; margin-bottom: 15px;">❌</div>
+                        <p>${message}</p>
+                        <button class="retry-btn" onclick="loadFriendsReviews()">🔄 ลองใหม่</button>
+                    </div>
+                `;
+            }
+        }
+
+        function displayFriendsReviews(reviews) {
+            const friendsReviewsList = document.getElementById('friendsReviewsList');
+
+            if (reviews.length === 0) {
+                friendsReviewsList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">👥</div>
+                        <p>ยังไม่มีรีวิวจากเพื่อนในระบบ</p>
+                        <p style="font-size: 14px; color: #999;">เชิญเพื่อนมาร่วมแชร์ประสบการณ์กัน</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // ใช้ displayReviews function เดียวกัน แต่แสดงใน element ที่ต่างกัน
+            const reviewsHtml = reviews.map(review => {
+                const createdDate = formatDate(review.created_at);
+                const updatedDate = review.updated_at && review.updated_at !== review.created_at ? 
+                    ` (แก้ไขล่าสุด: ${formatDate(review.updated_at)})` : '';
+
+                // สร้าง avatar สำหรับคนรีวิว
+                const reviewerAvatar = review.reviewer_profile_image ? 
+                    `<img src="${review.reviewer_profile_image}" alt="Profile" class="reviewer-avatar-img">` :
+                    (review.reviewer_name ? review.reviewer_name.charAt(0).toUpperCase() : '👤');
+
+                // สร้าง effects tags
+                const effectsTags = review.selected_effects && review.selected_effects.length > 0 ? 
+                    review.selected_effects.slice(0, 4).map(effect => 
+                        `<span class="effect-tag">${effect}</span>`
+                    ).join('') + (review.selected_effects.length > 4 ? `<span class="more-tag">+${review.selected_effects.length - 4}</span>` : '') : '';
+
+                // สร้าง aroma tags
+                const aromaTags = review.aroma_flavors && review.aroma_flavors.length > 0 ? 
+                    review.aroma_flavors.slice(0, 3).map(aroma => 
+                        `<span class="aroma-tag">${aroma}</span>`
+                    ).join('') + (review.aroma_flavors.length > 3 ? `<span class="more-tag">+${review.aroma_flavors.length - 3}</span>` : '') : '';
+
+                // สร้าง review images
+                const reviewImages = review.review_images && review.review_images.length > 0 ? 
+                    `<div class="review-images-section">
+                        <div class="review-images-grid">
+                            ${review.review_images.slice(0, 4).map((img, index) => 
+                                `<img src="${img}" alt="Review image ${index + 1}" class="review-image-thumb" onclick="viewImage('${img}')">`
+                            ).join('')}
+                            ${review.review_images.length > 4 ? `<div class="more-images">+${review.review_images.length - 4}</div>` : ''}
+                        </div>
+                    </div>` : '';
+
+                return `
+                    <div class="item-card" data-review-id="${review.id}">
+                        <div class="review-content">
+                            <div class="review-main-info">
+                                <div class="item-header">
+                                    <div class="item-name">
+                                        ${review.strain_name_th || 'ไม่ระบุชื่อไทย'} (${review.strain_name_en || 'ไม่ระบุชื่ออังกฤษ'}) - Bud ID: ${review.bud_reference_id}
+                                    </div>
+                                    <div class="item-date">${createdDate}${updatedDate}</div>
+                                </div>
+
+                                <div class="reviewer-info-section">
+                                    <div class="reviewer-header">
+                                        <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
+                                            <div class="reviewer-by-text">Review by :</div>
+                                            <div class="reviewer-avatar-small">
+                                                ${reviewerAvatar}
+                                            </div>
+                                            <div class="reviewer-name-display">${review.reviewer_name || 'ผู้ใช้ไม่ระบุชื่อ'}</div>
+                                            <div style="margin-left: 8px; font-size: 12px; color: #FF9800; font-weight: 600;">
+                                                คะแนนรวม: ${'⭐'.repeat(review.overall_rating)} (${review.overall_rating}/5)${review.aroma_rating ? ` | คะแนนกลิ่น: ${'⭐'.repeat(review.aroma_rating)} (${review.aroma_rating}/5)` : ''}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- สรุปรีวิว -->
+                                <div class="review-ratings-section">
+                                    <div class="review-summary-text">${review.short_summary || 'ไม่มีสรุป'}</div>
+                                </div>
+
+                                <!-- Effects และ Aromas -->
+                                ${effectsTags ? `<div class="tags-section">
+                                    <div class="tags-row">
+                                        <span class="tags-label">🧠 ผลกระทบ:</span>
+                                        <div class="tags-container">${effectsTags}</div>
+                                    </div>
+                                </div>` : ''}
+
+                                ${aromaTags ? `<div class="tags-section">
+                                    <div class="tags-row">
+                                        <span class="tags-label">👃 กลิ่น/รส:</span>
+                                        <div class="tags-container">${aromaTags}</div>
+                                    </div>
+                                </div>` : ''}
+
+                                <!-- เนื้อหารีวิวเต็ม (ย่อ) -->
+                                ${review.full_review_content ? `<div class="review-full-content">
+                                    <div class="content-preview">${review.full_review_content.length > 100 ? 
+                                        review.full_review_content.substring(0, 100) + '...' : 
+                                        review.full_review_content}</div>
+                                    ${review.full_review_content.length > 100 ? 
+                                        `<button class="expand-btn" onclick="expandContent(${review.id})">อ่านเพิ่มเติม</button>` : ''}
+                                </div>` : ''}
+
+                                <!-- รูปภาพประกอบการรีวิว และปุ่มวิดีโอรีวิว -->
+                                <div class="review-media-section">
+                                    ${reviewImages}
+                                    ${review.video_review_url ? `
+                                        <button class="video-review-btn" onclick="playVideoReview('${review.video_review_url}'); return false;" type="button">
+                                            🎥 ดูรีวิว
+                                        </button>
+                                    ` : ''}
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            friendsReviewsList.innerHTML = reviewsHtml;
+        }
+
         // Initialize when DOM is ready
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM loaded, initializing...');
@@ -1796,8 +2116,7 @@ displayBuds(budsData);
 
             if (budsList && reviewsList) {
                 setTimeout(() => {
-                    loadBuds();
-                    loadReviews();
+                    loadBuds(); // โหลดแท็บแรกที่แสดง
                 }, 100);
             } else {
                 console.error('Required elements not found');

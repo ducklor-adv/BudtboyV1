@@ -1577,7 +1577,7 @@
             }
 
             // Check if at least one effect is selected
-            const selectedEffects = document.querySelectorAll('.effect-item input[type="checkbox"]:checked');
+            const selectedEffects = document.querySelectorAll('.effect-cell input[type="checkbox"]:checked');
             if (selectedEffects.length === 0) {
                 showError('กรุณาเลือกผลกระทบที่รู้สึกอย่างน้อย 1 ตัว');
                 return;
@@ -1596,7 +1596,7 @@
                 const aromaFlavors = aromaFlavorsInput.value ? aromaFlavorsInput.value.split(', ').filter(f => f.trim()) : [];
 
                 // Collect selected effects
-                const effectCheckboxes = document.querySelectorAll('.effect-item input[type="checkbox"]:checked');
+                const effectCheckboxes = document.querySelectorAll('.effect-cell input[type="checkbox"]:checked');
                 const selectedEffects = Array.from(effectCheckboxes).map(cb => cb.value);
 
                 // Collect selected terpenes

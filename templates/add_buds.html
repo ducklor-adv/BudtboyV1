@@ -1053,7 +1053,8 @@
                             <label for="grade">เกรด</label>
                             <select id="grade" name="grade">
                                 <option value="">เลือกเกรด</option>
-                                <option value="A+">A+</option>
+                                <option value```python
+="A+">A+</option>
                                 <option value="A">A</option>
                                 <option value="B+">B+</option>
                                 <option value="B">B</option>
@@ -1194,33 +1195,36 @@
                     </div>
 
                     <!-- Terpenes Tab Container -->
-                    <div class="terpenes-tab-container">
-                        <div class="tab-headers">
-                            <button type="button" class="tab-header active" data-tab="terpene-1">Terpene อันดับ 1</button>
-                            <button type="button" class="tab-header" data-tab="terpene-2">Terpene อันดับ 2</button>
-                            <button type="button" class="tab-header" data-tab="terpene-3">Terpene อันดับ 3</button>
+        <div class="terpenes-tab-container">
+            <!-- แสดงผล Terpene ที่เลือกทั้ง 3 อันดับ -->
+            <div class="selected-terpenes-summary">
+                <div class="terpene-display-row">
+                    <div class="terpene-rank-display">
+                        <div class="terpene-rank-title">Terpene อันดับ 1</div>
+                        <div class="terpene-rank-value" id="display-terpene-1">
+                            <span class="placeholder">ยังไม่ได้เลือก</span>
                         </div>
+                    </div>
+                    <div class="terpene-rank-display">
+                        <div class="terpene-rank-title">Terpene อันดับ 2</div>
+                        <div class="terpene-rank-value" id="display-terpene-2">
+                            <span class="placeholder">ยังไม่ได้เลือก</span>
+                        </div>
+                    </div>
+                    <div class="terpene-rank-display">
+                        <div class="terpene-rank-title">Terpene อันดับ 3</div>
+                        <div class="terpene-rank-value" id="display-terpene-3">
+                            <span class="placeholder">ยังไม่ได้เลือก</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                        <!-- แสดงผล Terpene ที่เลือกทั้ง 3 อันดับ -->
-                        <div class="selected-terpenes-summary">
-                            <div class="terpene-display-row">
-                                <div class="terpene-rank-display">
-                                    <div class="terpene-rank-value" id="display-terpene-1">
-                                        <span class="placeholder">ยังไม่ได้เลือก</span>
-                                    </div>
-                                </div>
-                                <div class="terpene-rank-display">
-                                    <div class="terpene-rank-value" id="display-terpene-2">
-                                        <span class="placeholder">ยังไม่ได้เลือก</span>
-                                    </div>
-                                </div>
-                                <div class="terpene-rank-display">
-                                    <div class="terpene-rank-value" id="display-terpene-3">
-                                        <span class="placeholder">ยังไม่ได้เลือก</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+            <div class="tab-headers">
+                <button type="button" class="tab-header active" data-tab="terpene-1">เลือก Terpene อันดับ 1</button>
+                <button type="button" class="tab-header" data-tab="terpene-2">เลือก Terpene อันดับ 2</button>
+                <button type="button" class="tab-header" data-tab="terpene-3">เลือก Terpene อันดับ 3</button>
+            </div>
 
                         <!-- Tab Contents -->
                         <div class="tab-content active" id="terpene-1">
@@ -1958,10 +1962,10 @@
                 // Extract just the Terpene name (text inside parentheses)
                 const terpeneNameMatch = terpene.match(/\(([^)]+)\)/);
                 const terpeneName = terpeneNameMatch ? terpeneNameMatch[1] : terpene.split(' - ')[0];
-                
+
                 selectedDisplay.innerHTML = `<span class="selected-terpene">${terpeneName}</span>`;
                 hiddenInput.value = terpene;
-                
+
                 // Update tab header to show selection
                 tabHeader.style.background = '#4CAF50';
                 tabHeader.style.color = 'white';
@@ -1973,7 +1977,7 @@
             } else {
                 selectedDisplay.innerHTML = `<span class="placeholder">คลิกเพื่อเลือก Terpene อันดับ ${tabNumber}...</span>`;
                 hiddenInput.value = '';
-                
+
                 // Reset tab header if not active
                 if (!tabHeader.classList.contains('active')) {
                     tabHeader.style.background = '#f8f9fa';
@@ -2101,7 +2105,7 @@
                 // Check if elements exist before initializing
                 const selectedDiv = document.getElementById(selector.selectedId);
                 const hiddenInput = document.getElementById(selector.hiddenId);
-                
+
                 if (selectedDiv && hiddenInput) {
                     initializeEffectSelector(selector);
                 }
@@ -2111,7 +2115,7 @@
         function initializeEffectSelector(config) {
             const selectedDiv = document.getElementById(config.selectedId);
             const hiddenInput = document.getElementById(config.hiddenId);
-            
+
             // Check if elements exist
             if (!selectedDiv || !hiddenInput) {
                 console.warn(`Effects selector elements not found for ${config.selectedId}`);
@@ -2119,7 +2123,7 @@
             }
 
             const categoriesDiv = selectedDiv.nextElementSibling.nextElementSibling; // Skip hidden textarea
-            
+
             // Check if categories div exists
             if (!categoriesDiv) {
                 console.warn(`Categories div not found for ${config.selectedId}`);

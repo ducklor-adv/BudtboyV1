@@ -722,8 +722,13 @@
 
 
     <script>
-        let currentUserData = null;
+        let pendingFriendsInterval;
+        let profileData = null;
         let isLoading = false;
+
+        // Global interval management
+        window.pendingFriendsInterval = pendingFriendsInterval;
+        let currentUserData = null;
         let isProfileLoaded = false;
         let pageInitialized = false;
 
@@ -1171,11 +1176,11 @@
                 // Remove any existing listeners first
                 profileAvatar.replaceWith(profileAvatar.cloneNode(true));
                 avatarInput.replaceWith(avatarInput.cloneNode(true));
-                
+
                 // Re-get elements after replacement
                 const newProfileAvatar = document.getElementById('profileAvatar');
                 const newAvatarInput = document.getElementById('avatarInput');
-                
+
                 newProfileAvatar.addEventListener('click', function() {
                     newAvatarInput.click();
                 }, { passive: true });
@@ -1191,16 +1196,16 @@
 
         function retryLoadProfile() {
             console.log('Profile: Retrying load...');
-            
+
             // Reset all flags
             isProfileLoaded = false;
             isLoading = false;
             pageInitialized = false;
             window.budtBoyEventListenersSetup = false;
-            
+
             // Stop any existing intervals
             stopPendingFriendsInterval();
-            
+
             // Retry with a longer delay for mobile
             setTimeout(() => {
                 startInitialization();
@@ -1289,7 +1294,7 @@
 
                     const notification = document.getElementById('pendingFriendsNotification');
                     const text = document.getElementById('pendingFriendsText');
-                    
+
                     if (data.pending_count > 0) {
                         if(notification){
                             notification.style.display = 'block';
@@ -1335,7 +1340,7 @@
 
             pendingFriendsInitialized = true;
             console.log('Starting pending friends interval');
-            
+
             // Check immediately, then set interval
             setTimeout(() => {
                 if (isProfileLoaded) {

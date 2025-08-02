@@ -1114,6 +1114,12 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log('My Reviews page loaded');
             loadReviews();
+
+            // Clear any existing intervals to prevent duplicates
+            if (window.pendingFriendsInterval) {
+                clearInterval(window.pendingFriendsInterval);
+                window.pendingFriendsInterval = null;
+            }
         });
     </script>
 </body>

@@ -465,39 +465,6 @@
                         <!-- Pending users will be loaded here -->
                     </div>
                 </div>
-
-                <!-- Management Actions Section -->
-                <div class="admin-section">
-                    <div class="section-title">
-                        🛠️ การจัดการระบบ
-                    </div>
-                    <div class="management-actions">
-                        <a href="/admin/users" class="action-btn">
-                            <div class="action-icon">👥</div>
-                            <div>จัดการผู้ใช้</div>
-                        </a>
-                        <a href="/admin/buds" class="action-btn">
-                            <div class="action-icon">🌿</div>
-                            <div>จัดการข้อมูลดอก</div>
-                        </a>
-                        <a href="/admin/reviews" class="action-btn">
-                            <div class="action-icon">⭐</div>
-                            <div>จัดการรีวิว</div>
-                        </a>
-                        <a href="/admin/strains" class="action-btn">
-                            <div class="action-icon">🏷️</div>
-                            <div>จัดการสายพันธุ์</div>
-                        </a>
-                        <a href="/admin/breeders" class="action-btn">
-                            <div class="action-icon">🏭</div>
-                            <div>จัดการ Breeder</div>
-                        </a>
-                        <a href="/admin/reports" class="action-btn">
-                            <div class="action-icon">📊</div>
-                            <div>รายงานระบบ</div>
-                        </a>
-                    </div>
-                </div>
             </div>
 
             <!-- Dashboard content stays here for main overview -->
@@ -749,13 +716,10 @@
                         tab.classList.add('active');
 
                         const targetUrl = tab.getAttribute('href');
-                        // For demonstration, we're just changing the active class.
-                        // In a real app, you would load content based on targetUrl
                         console.log(`Navigating to: ${targetUrl}`);
 
-                        // Example of how you might navigate or load content:
-                        // window.location.href = targetUrl;
-                        // or loadContent(targetUrl);
+                        // Navigate to the target URL
+                        window.location.href = targetUrl;
                     });
                 });
             }

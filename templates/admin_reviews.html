@@ -75,41 +75,41 @@
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
             margin-bottom: 30px;
         }
 
         .stat-card {
             background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            padding: 20px;
-            border-radius: 15px;
+            padding: 15px;
+            border-radius: 12px;
             text-align: center;
             border: 2px solid transparent;
             transition: all 0.3s ease;
         }
 
         .stat-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-3px);
             border-color: #4CAF50;
-            box-shadow: 0 10px 25px rgba(76,175,80,0.15);
+            box-shadow: 0 8px 20px rgba(76,175,80,0.15);
         }
 
         .stat-icon {
-            font-size: 32px;
-            margin-bottom: 10px;
+            font-size: 24px;
+            margin-bottom: 8px;
             display: block;
         }
 
         .stat-number {
-            font-size: 24px;
+            font-size: 20px;
             font-weight: 700;
             color: #2c3e50;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
         }
 
         .stat-label {
-            font-size: 12px;
+            font-size: 11px;
             color: #6c757d;
             font-weight: 600;
         }
@@ -418,8 +418,28 @@
             }
 
             .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 15px;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 8px;
+                margin-bottom: 20px;
+            }
+
+            .stat-card {
+                padding: 10px 5px;
+            }
+
+            .stat-icon {
+                font-size: 18px;
+                margin-bottom: 4px;
+            }
+
+            .stat-number {
+                font-size: 16px;
+                margin-bottom: 2px;
+            }
+
+            .stat-label {
+                font-size: 9px;
+                line-height: 1.2;
             }
 
             .controls-section .controls-grid {

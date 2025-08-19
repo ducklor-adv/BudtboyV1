@@ -675,6 +675,18 @@
                         </div>
                     </div>
                 </li>
+
+                <li class="info-item" id="adminPanelItem" style="display: none;">
+                    <div class="info-icon">🛠️</div>
+                    <div class="info-content">
+                        <div class="info-label">จัดการระบบ</div>
+                        <div class="info-value">
+                            <a href="/admin" style="color: #ff6b6b; text-decoration: none; font-weight: 600; font-size: 14px;">
+                                🛠️ Admin Dashboard
+                            </a>
+                        </div>
+                    </div>
+                </li>
             </ul>
         </div>
 
@@ -797,6 +809,7 @@
                 if (!user) return;
 
                 this.checkApprovalStatus(user);
+                this.checkAdminStatus(user);
 
                 // Basic info
                 this.updateElement('username-display', user.username || '-');
@@ -937,6 +950,14 @@
                     pendingApproval.style.display = 'block';
                 } else if (pendingApproval) {
                     pendingApproval.style.display = 'none';
+                }
+            },
+
+            checkAdminStatus(user) {
+                // Show admin panel for user ID 1 (or add admin field to check)
+                const adminPanelItem = document.getElementById('adminPanelItem');
+                if (adminPanelItem && user.id === 1) {
+                    adminPanelItem.style.display = 'block';
                 }
             },
 

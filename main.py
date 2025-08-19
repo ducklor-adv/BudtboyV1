@@ -3363,6 +3363,233 @@ def friends_reviews_page():
         return redirect('/profile?not_approved=1')
     return render_template('friends_reviews.html')
 
+def is_admin():
+    """Check if current user is admin"""
+    if not is_authenticated():
+        return False
+    
+    user_id = session.get('user_id')
+    # Admin check - you can modify this logic as needed
+    # For now, user_id = 1 is admin, or you can add admin field to users table
+    return user_id == 1
+
+@app.route('/admin')
+def admin_dashboard():
+    """Admin dashboard page"""
+    if not is_authenticated():
+        return redirect('/auth')
+    if not is_admin():
+        return redirect('/profile?no_admin=1')
+    return render_template('admin.html')
+
+@app.route('/api/admin/stats')
+def get_admin_stats():
+    """Get admin dashboard statistics"""
+    if not is_authenticated() or not is_admin():
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            
+            # Get total users
+            cur.execute("SELECT COUNT(*) FROM users")
+            total_users = cur.fetchone()[0]
+            
+            # Get pending users
+            cur.execute("SELECT COUNT(*) FROM users WHERE is_approved = FALSE")
+            pending_users = cur.fetchone()[0]
+            
+            # Get total buds
+            cur.execute("SELECT COUNT(*) FROM buds_data")
+            total_buds = cur.fetchone()[0]
+            
+            # Get total reviews
+            cur.execute("SELECT COUNT(*) FROM reviews")
+            total_reviews = cur.fetchone()[0]
+            
+            cur.close()
+            return_db_connection(conn)
+            
+            return jsonify({
+                'total_users': total_users,
+                'pending_users': pending_users,
+                'total_buds': total_buds,
+                'total_reviews': total_reviews
+            })
+            
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+        finally:
+            if cur:
+                cur.close()
+            if conn:
+                return_db_connection(conn)
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+@app.route('/api/admin/pending_users')
+def get_pending_users():
+    """Get list of users pending approval"""
+    if not is_authenticated() or not is_admin():
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            
+            cur.execute("""
+                SELECT u.id, u.username, u.email, u.profile_image_url, u.created_at,
+                       u.referred_by, ref.username as referred_by_username
+                FROM users u
+                LEFT JOIN users ref ON u.referred_by = ref.id
+                WHERE u.is_approved = FALSE
+                ORDER BY u.created_at DESC
+            """)
+            
+            pending_users = []
+            for row in cur.fetchall():
+                user_data = {
+                    'id': row[0],
+                    'username': row[1],
+                    'email': row[2],
+                    'profile_image_url': row[3],
+                    'created_at': row[4].strftime('%Y-%m-%d %H:%M:%S') if row[4] else None,
+                    'referred_by': row[5],
+                    'referred_by_username': row[6]
+                }
+                pending_users.append(user_data)
+            
+            cur.close()
+            return_db_connection(conn)
+            
+            return jsonify({'users': pending_users})
+            
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+        finally:
+            if cur:
+                cur.close()
+            if conn:
+                return_db_connection(conn)
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+@app.route('/api/admin/approve_user', methods=['POST'])
+def admin_approve_user():
+    """Admin approve a pending user"""
+    if not is_authenticated() or not is_admin():
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    data = request.get_json()
+    user_id_to_approve = data.get('user_id')
+
+    if not user_id_to_approve:
+        return jsonify({'error': 'ไม่พบ user_id ที่จะอนุมัติ'}), 400
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            
+            # Check if user exists and is pending
+            cur.execute("""
+                SELECT id, username, is_approved 
+                FROM users 
+                WHERE id = %s
+            """, (user_id_to_approve,))
+            
+            user_to_approve = cur.fetchone()
+            if not user_to_approve:
+                return jsonify({'error': 'ไม่พบผู้ใช้ที่ต้องอนุมัติ'}), 404
+
+            if user_to_approve[2]:  # is_approved
+                return jsonify({'error': 'ผู้ใช้นี้ได้รับการอนุมัติแล้ว'}), 400
+
+            # Approve the user
+            admin_id = session['user_id']
+            cur.execute("""
+                UPDATE users 
+                SET is_approved = TRUE, approved_at = CURRENT_TIMESTAMP, approved_by = %s
+                WHERE id = %s
+            """, (admin_id, user_id_to_approve))
+
+            conn.commit()
+            cur.close()
+            return_db_connection(conn)
+
+            return jsonify({
+                'success': True,
+                'message': f'อนุมัติผู้ใช้ {user_to_approve[1]} เรียบร้อยแล้ว'
+            })
+
+        except Exception as e:
+            conn.rollback()
+            return jsonify({'error': str(e)}), 500
+        finally:
+            if cur:
+                cur.close()
+            if conn:
+                return_db_connection(conn)
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+@app.route('/api/admin/reject_user', methods=['POST'])
+def admin_reject_user():
+    """Admin reject a pending user (delete from system)"""
+    if not is_authenticated() or not is_admin():
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    data = request.get_json()
+    user_id_to_reject = data.get('user_id')
+
+    if not user_id_to_reject:
+        return jsonify({'error': 'ไม่พบ user_id ที่จะปฏิเสธ'}), 400
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            
+            # Check if user exists and is pending
+            cur.execute("""
+                SELECT id, username, is_approved 
+                FROM users 
+                WHERE id = %s
+            """, (user_id_to_reject,))
+            
+            user_to_reject = cur.fetchone()
+            if not user_to_reject:
+                return jsonify({'error': 'ไม่พบผู้ใช้ที่ต้องปฏิเสธ'}), 404
+
+            if user_to_reject[2]:  # is_approved
+                return jsonify({'error': 'ไม่สามารถปฏิเสธผู้ใช้ที่อนุมัติแล้วได้'}), 400
+
+            # Delete the user (CASCADE will handle related records)
+            cur.execute("DELETE FROM users WHERE id = %s", (user_id_to_reject,))
+
+            conn.commit()
+            cur.close()
+            return_db_connection(conn)
+
+            return jsonify({
+                'success': True,
+                'message': f'ปฏิเสธและลบผู้ใช้ {user_to_reject[1]} เรียบร้อยแล้ว'
+            })
+
+        except Exception as e:
+            conn.rollback()
+            return jsonify({'error': str(e)}), 500
+        finally:
+            if cur:
+                cur.close()
+            if conn:
+                return_db_connection(conn)
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
 @app.route('/api/search-buds', methods=['POST'])
 def search_buds():
     """Search buds based on criteria"""

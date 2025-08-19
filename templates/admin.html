@@ -1,0 +1,642 @@
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cannabis App - Admin Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .admin-header {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .admin-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .admin-subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .back-btn {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .admin-content {
+            padding: 40px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: #007bff;
+            box-shadow: 0 10px 25px rgba(0,123,255,0.15);
+        }
+
+        .stat-icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #6c757d;
+            font-weight: 600;
+        }
+
+        .admin-sections {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+        }
+
+        .admin-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            border: 2px solid #e9ecef;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .pending-users {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .user-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .user-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .user-details h4 {
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .user-details p {
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-approve {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-approve:hover {
+            background: #218838;
+        }
+
+        .btn-reject {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-reject:hover {
+            background: #c82333;
+        }
+
+        .btn-view {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-view:hover {
+            background: #0056b3;
+        }
+
+        .management-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            text-decoration: none;
+            text-align: center;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .action-icon {
+            font-size: 24px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #dc3545;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #28a745;
+        }
+
+        .no-data {
+            text-align: center;
+            color: #6c757d;
+            padding: 20px;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .admin-content {
+                padding: 20px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 15px;
+            }
+
+            .admin-sections {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .management-actions {
+                grid-template-columns: 1fr;
+            }
+
+            .back-btn {
+                position: static;
+                transform: none;
+                margin-bottom: 20px;
+                width: fit-content;
+            }
+
+            .admin-header {
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <a href="/profile" class="back-btn">
+                ← กลับ
+            </a>
+            <div class="admin-title">🛠️ Admin Dashboard</div>
+            <div class="admin-subtitle">จัดการระบบ Cannabis App</div>
+        </div>
+
+        <div class="admin-content">
+            <!-- Statistics Section -->
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-number" id="totalUsers">-</div>
+                    <div class="stat-label">ผู้ใช้ทั้งหมด</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⏳</div>
+                    <div class="stat-number" id="pendingUsers">-</div>
+                    <div class="stat-label">รออนุมัติ</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🌿</div>
+                    <div class="stat-number" id="totalBuds">-</div>
+                    <div class="stat-label">ข้อมูลดอก</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⭐</div>
+                    <div class="stat-number" id="totalReviews">-</div>
+                    <div class="stat-label">รีวิวทั้งหมด</div>
+                </div>
+            </div>
+
+            <div id="loadingState" class="loading">
+                🔄 กำลังโหลดข้อมูล...
+            </div>
+
+            <div id="errorState" class="error-message" style="display: none;">
+                <div id="errorMessage"></div>
+                <button onclick="retryLoad()" style="margin-top: 10px; padding: 5px 10px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                    🔄 ลองใหม่
+                </button>
+            </div>
+
+            <div id="adminContent" class="admin-sections" style="display: none;">
+                <!-- Pending Users Section -->
+                <div class="admin-section">
+                    <div class="section-title">
+                        ⏳ ผู้ใช้รออนุมัติ
+                    </div>
+                    <div id="pendingUsersList" class="pending-users">
+                        <!-- Pending users will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Management Actions Section -->
+                <div class="admin-section">
+                    <div class="section-title">
+                        🛠️ การจัดการระบบ
+                    </div>
+                    <div class="management-actions">
+                        <a href="/admin/users" class="action-btn">
+                            <div class="action-icon">👥</div>
+                            <div>จัดการผู้ใช้</div>
+                        </a>
+                        <a href="/admin/buds" class="action-btn">
+                            <div class="action-icon">🌿</div>
+                            <div>จัดการข้อมูลดอก</div>
+                        </a>
+                        <a href="/admin/reviews" class="action-btn">
+                            <div class="action-icon">⭐</div>
+                            <div>จัดการรีวิว</div>
+                        </a>
+                        <a href="/admin/strains" class="action-btn">
+                            <div class="action-icon">🏷️</div>
+                            <div>จัดการสายพันธุ์</div>
+                        </a>
+                        <a href="/admin/breeders" class="action-btn">
+                            <div class="action-icon">🏭</div>
+                            <div>จัดการ Breeder</div>
+                        </a>
+                        <a href="/admin/reports" class="action-btn">
+                            <div class="action-icon">📊</div>
+                            <div>รายงานระบบ</div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Admin Dashboard Manager
+        const AdminDashboard = {
+            state: {
+                isLoading: false,
+                stats: {},
+                pendingUsers: []
+            },
+
+            async init() {
+                console.log('Admin Dashboard: Starting initialization');
+                await this.loadDashboardData();
+            },
+
+            async loadDashboardData() {
+                if (this.state.isLoading) return;
+
+                this.state.isLoading = true;
+                this.showLoading();
+
+                try {
+                    // Load statistics
+                    await this.loadStats();
+                    
+                    // Load pending users
+                    await this.loadPendingUsers();
+
+                    this.showContent();
+                    console.log('Admin Dashboard: Data loaded successfully');
+                } catch (error) {
+                    console.error('Error loading dashboard data:', error);
+                    this.showError('เกิดข้อผิดพลาดในการโหลดข้อมูล: ' + error.message);
+                } finally {
+                    this.state.isLoading = false;
+                }
+            },
+
+            async loadStats() {
+                try {
+                    const response = await fetch('/api/admin/stats');
+                    if (response.ok) {
+                        const stats = await response.json();
+                        this.state.stats = stats;
+                        this.displayStats(stats);
+                    } else {
+                        throw new Error('ไม่สามารถโหลดสถิติได้');
+                    }
+                } catch (error) {
+                    console.error('Error loading stats:', error);
+                    // Show default values
+                    this.displayStats({
+                        total_users: 0,
+                        pending_users: 0,
+                        total_buds: 0,
+                        total_reviews: 0
+                    });
+                }
+            },
+
+            async loadPendingUsers() {
+                try {
+                    const response = await fetch('/api/admin/pending_users');
+                    if (response.ok) {
+                        const data = await response.json();
+                        this.state.pendingUsers = data.users || [];
+                        this.displayPendingUsers(this.state.pendingUsers);
+                    } else {
+                        throw new Error('ไม่สามารถโหลดรายการผู้ใช้รออนุมัติได้');
+                    }
+                } catch (error) {
+                    console.error('Error loading pending users:', error);
+                    this.displayPendingUsers([]);
+                }
+            },
+
+            displayStats(stats) {
+                document.getElementById('totalUsers').textContent = stats.total_users || 0;
+                document.getElementById('pendingUsers').textContent = stats.pending_users || 0;
+                document.getElementById('totalBuds').textContent = stats.total_buds || 0;
+                document.getElementById('totalReviews').textContent = stats.total_reviews || 0;
+            },
+
+            displayPendingUsers(users) {
+                const container = document.getElementById('pendingUsersList');
+                
+                if (users.length === 0) {
+                    container.innerHTML = '<div class="no-data">ไม่มีผู้ใช้รออนุมัติ</div>';
+                    return;
+                }
+
+                container.innerHTML = users.map(user => `
+                    <div class="user-card">
+                        <div class="user-info">
+                            <div class="user-avatar">
+                                ${user.profile_image_url ? 
+                                    `<img src="${user.profile_image_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="Profile">` :
+                                    user.username.charAt(0).toUpperCase()
+                                }
+                            </div>
+                            <div class="user-details">
+                                <h4>${user.username}</h4>
+                                <p>${user.email}</p>
+                                <p>สมัครเมื่อ: ${new Date(user.created_at).toLocaleDateString('th-TH')}</p>
+                                ${user.referred_by_username ? `<p>ชวนโดย: ${user.referred_by_username}</p>` : ''}
+                            </div>
+                        </div>
+                        <div class="user-actions">
+                            <button class="btn btn-approve" onclick="AdminDashboard.approveUser(${user.id})">
+                                ✅ อนุมัติ
+                            </button>
+                            <button class="btn btn-reject" onclick="AdminDashboard.rejectUser(${user.id})">
+                                ❌ ปฏิเสธ
+                            </button>
+                            <button class="btn btn-view" onclick="AdminDashboard.viewUser(${user.id})">
+                                👁️ ดูข้อมูล
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            },
+
+            async approveUser(userId) {
+                if (!confirm('คุณต้องการอนุมัติผู้ใช้นี้หรือไม่?')) return;
+
+                try {
+                    const response = await fetch('/api/admin/approve_user', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ user_id: userId })
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        this.showMessage(result.message, 'success');
+                        await this.loadDashboardData(); // Reload data
+                    } else {
+                        this.showMessage(result.error || 'เกิดข้อผิดพลาด', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error approving user:', error);
+                    this.showMessage('เกิดข้อผิดพลาดในการอนุมัติผู้ใช้', 'error');
+                }
+            },
+
+            async rejectUser(userId) {
+                if (!confirm('คุณต้องการปฏิเสธผู้ใช้นี้หรือไม่? การกระทำนี้จะลบผู้ใช้ออกจากระบบ')) return;
+
+                try {
+                    const response = await fetch('/api/admin/reject_user', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ user_id: userId })
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        this.showMessage(result.message, 'success');
+                        await this.loadDashboardData(); // Reload data
+                    } else {
+                        this.showMessage(result.error || 'เกิดข้อผิดพลาด', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error rejecting user:', error);
+                    this.showMessage('เกิดข้อผิดพลาดในการปฏิเสธผู้ใช้', 'error');
+                }
+            },
+
+            viewUser(userId) {
+                // Redirect to user management page with specific user
+                window.location.href = `/admin/users?user_id=${userId}`;
+            },
+
+            showLoading() {
+                document.getElementById('loadingState').style.display = 'block';
+                document.getElementById('errorState').style.display = 'none';
+                document.getElementById('adminContent').style.display = 'none';
+            },
+
+            showError(message) {
+                document.getElementById('errorMessage').textContent = message;
+                document.getElementById('errorState').style.display = 'block';
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('adminContent').style.display = 'none';
+            },
+
+            showContent() {
+                document.getElementById('adminContent').style.display = 'grid';
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('errorState').style.display = 'none';
+            },
+
+            showMessage(message, type) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = type === 'success' ? 'success-message' : 'error-message';
+                messageDiv.textContent = message;
+                
+                const container = document.querySelector('.admin-content');
+                container.insertBefore(messageDiv, container.firstChild);
+                
+                setTimeout(() => {
+                    messageDiv.remove();
+                }, 5000);
+            }
+        };
+
+        // Global functions
+        function retryLoad() {
+            AdminDashboard.loadDashboardData();
+        }
+
+        // Initialize when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => AdminDashboard.init());
+        } else {
+            AdminDashboard.init();
+        }
+    </script>
+</body>
+</html>

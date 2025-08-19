@@ -3400,6 +3400,15 @@ def admin_buds():
         return redirect('/profile?no_admin=1')
     return render_template('admin_buds.html')
 
+@app.route('/admin/reviews')
+def admin_reviews():
+    """Admin reviews management page"""
+    if not is_authenticated():
+        return redirect('/auth')
+    if not is_admin():
+        return redirect('/profile?no_admin=1')
+    return render_template('admin_reviews.html')
+
 @app.route('/api/admin/stats')
 def get_admin_stats():
     """Get admin dashboard statistics"""

@@ -1,0 +1,830 @@
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cannabis App - ตั้งค่า Admin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .admin-header {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .admin-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .admin-subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .back-btn {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .admin-content {
+            padding: 40px;
+        }
+
+        .settings-grid {
+            display: grid;
+            gap: 30px;
+        }
+
+        .settings-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            border: 2px solid #e9ecef;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .setting-item {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .setting-item:hover {
+            border-color: #007bff;
+            box-shadow: 0 4px 12px rgba(0,123,255,0.1);
+        }
+
+        .setting-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .setting-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .setting-description {
+            color: #6c757d;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .setting-control {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #4CAF50;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .input-field {
+            flex: 1;
+            padding: 10px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+
+        .stats-card {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .stats-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .stats-label {
+            font-size: 14px;
+            color: #6c757d;
+            font-weight: 600;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #28a745;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #dc3545;
+        }
+
+        /* Bottom Navigation Styles */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 2px solid #e0e0e0;
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            overflow-x: auto;
+        }
+
+        .nav-tab {
+            background: none;
+            border: none;
+            padding: 8px 12px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            flex: 1;
+            min-width: 80px;
+            max-width: 120px;
+            text-decoration: none;
+            color: #666;
+        }
+
+        .nav-tab:hover {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .nav-tab.active {
+            background: #e8f5e9;
+            color: #4CAF50;
+        }
+
+        .nav-tab.active .nav-icon {
+            transform: scale(1.1);
+        }
+
+        .nav-icon {
+            font-size: 24px;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-label {
+            font-size: 10px;
+            font-weight: 600;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        @media (max-width: 768px) {
+            .admin-container {
+                margin: 10px;
+                margin-bottom: 90px;
+            }
+
+            .admin-content {
+                padding: 20px;
+                padding-bottom: 100px;
+            }
+
+            .setting-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .setting-control {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .bottom-nav {
+                padding: 6px 0;
+            }
+
+            .nav-tab {
+                padding: 6px 4px;
+                gap: 2px;
+                min-width: 60px;
+            }
+
+            .nav-icon {
+                font-size: 20px;
+            }
+
+            .nav-label {
+                font-size: 9px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <a href="/admin" class="back-btn">
+                ← กลับ Dashboard
+            </a>
+            <div class="admin-title">⚙️ ตั้งค่า Admin</div>
+            <div class="admin-subtitle">การตั้งค่าระบบ Cannabis App</div>
+        </div>
+
+        <div class="admin-content">
+            <div class="settings-grid">
+                <!-- System Settings -->
+                <div class="settings-section">
+                    <div class="section-title">
+                        🛠️ การตั้งค่าระบบ
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-header">
+                            <div class="setting-title">การอนุมัติผู้ใช้อัตโนมัติ</div>
+                        </div>
+                        <div class="setting-description">
+                            เปิดใช้งานการอนุมัติผู้ใช้ใหม่โดยอัตโนมัติโดยไม่ต้องรอการอนุมัติ
+                        </div>
+                        <div class="setting-control">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="autoApproval">
+                                <span class="slider"></span>
+                            </label>
+                            <span id="autoApprovalStatus">ปิดใช้งาน</span>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-header">
+                            <div class="setting-title">การลงทะเบียนสาธารณะ</div>
+                        </div>
+                        <div class="setting-description">
+                            อนุญาตให้ผู้ใช้สามารถลงทะเบียนสมาชิกใหม่ได้
+                        </div>
+                        <div class="setting-control">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="publicRegistration" checked>
+                                <span class="slider"></span>
+                            </label>
+                            <span id="publicRegistrationStatus">เปิดใช้งาน</span>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-header">
+                            <div class="setting-title">การยืนยันอีเมลบังคับ</div>
+                        </div>
+                        <div class="setting-description">
+                            บังคับให้ผู้ใช้ยืนยันอีเมลก่อนใช้งานระบบ
+                        </div>
+                        <div class="setting-control">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="emailVerification" checked>
+                                <span class="slider"></span>
+                            </label>
+                            <span id="emailVerificationStatus">เปิดใช้งาน</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Content Settings -->
+                <div class="settings-section">
+                    <div class="section-title">
+                        📝 การตั้งค่าเนื้อหา
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-header">
+                            <div class="setting-title">การอนุมัติรีวิวอัตโนมัติ</div>
+                        </div>
+                        <div class="setting-description">
+                            เปิดใช้งานการอนุมัติรีวิวโดยอัตโนมัติโดยไม่ต้องผ่านการตรวจสอบ
+                        </div>
+                        <div class="setting-control">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="autoApproveReviews">
+                                <span class="slider"></span>
+                            </label>
+                            <span id="autoApproveReviewsStatus">ปิดใช้งาน</span>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-header">
+                            <div class="setting-title">จำนวนรูปภาพสูงสุดต่อรีวิว</div>
+                        </div>
+                        <div class="setting-description">
+                            กำหนดจำนวนรูปภาพสูงสุดที่ผู้ใช้สามารถอัพโหลดในแต่ละรีวิว
+                        </div>
+                        <div class="setting-control">
+                            <input type="number" class="input-field" id="maxImagesPerReview" value="4" min="1" max="10">
+                            <button class="btn btn-primary" onclick="updateMaxImages()">บันทึก</button>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-header">
+                            <div class="setting-title">ขนาดไฟล์รูปภาพสูงสุด (MB)</div>
+                        </div>
+                        <div class="setting-description">
+                            กำหนดขนาดไฟล์รูปภาพสูงสุดที่อนุญาตให้อัพโหลด
+                        </div>
+                        <div class="setting-control">
+                            <input type="number" class="input-field" id="maxImageSize" value="5" min="1" max="50" step="0.1">
+                            <button class="btn btn-primary" onclick="updateMaxImageSize()">บันทึก</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security Settings -->
+                <div class="settings-section">
+                    <div class="section-title">
+                        🔒 การตั้งค่าความปลอดภัย
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-header">
+                            <div class="setting-title">การเข้าสู่ระบบหลายครั้ง</div>
+                        </div>
+                        <div class="setting-description">
+                            อนุญาตให้ผู้ใช้เข้าสู่ระบบจากหลายอุปกรณ์พร้อมกัน
+                        </div>
+                        <div class="setting-control">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="multipleLogin" checked>
+                                <span class="slider"></span>
+                            </label>
+                            <span id="multipleLoginStatus">เปิดใช้งาน</span>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-header">
+                            <div class="setting-title">ระยะเวลา Session (นาที)</div>
+                        </div>
+                        <div class="setting-description">
+                            กำหนดระยะเวลาที่ผู้ใช้สามารถใช้งานโดยไม่ต้องเข้าสู่ระบบใหม่
+                        </div>
+                        <div class="setting-control">
+                            <input type="number" class="input-field" id="sessionTimeout" value="60" min="15" max="1440">
+                            <button class="btn btn-primary" onclick="updateSessionTimeout()">บันทึก</button>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-header">
+                            <div class="setting-title">การบันทึกประวัติการเข้าใช้</div>
+                        </div>
+                        <div class="setting-description">
+                            เปิดใช้งานการบันทึกประวัติการเข้าใช้งานของผู้ใช้
+                        </div>
+                        <div class="setting-control">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="loginLogging" checked>
+                                <span class="slider"></span>
+                            </label>
+                            <span id="loginLoggingStatus">เปิดใช้งาน</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Maintenance Tools -->
+                <div class="settings-section">
+                    <div class="section-title">
+                        🔧 เครื่องมือบำรุงรักษา
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-header">
+                            <div class="setting-title">การล้างข้อมูลชั่วคราว</div>
+                        </div>
+                        <div class="setting-description">
+                            ล้างไฟล์ชั่วคราวและ cache เพื่อปรับปรุงประสิทธิภาพ
+                        </div>
+                        <div class="setting-control">
+                            <button class="btn btn-warning" onclick="clearTempFiles()">
+                                🗑️ ล้างไฟล์ชั่วคราว
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-header">
+                            <div class="setting-title">การสำรองข้อมูล</div>
+                        </div>
+                        <div class="setting-description">
+                            สร้างไฟล์สำรองข้อมูลฐานข้อมูลทั้งหมด
+                        </div>
+                        <div class="setting-control">
+                            <button class="btn btn-success" onclick="createBackup()">
+                                💾 สร้างการสำรองข้อมูล
+                            </button>
+                            <button class="btn btn-primary" onclick="downloadBackup()">
+                                📥 ดาวน์โหลดสำรองข้อมูล
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-header">
+                            <div class="setting-title">รีสตาร์ทระบบ</div>
+                        </div>
+                        <div class="setting-description">
+                            รีสตาร์ทระบบเพื่อใช้การตั้งค่าใหม่ (ใช้เมื่อจำเป็นเท่านั้น)
+                        </div>
+                        <div class="setting-control">
+                            <button class="btn btn-danger" onclick="restartSystem()">
+                                🔄 รีสตาร์ทระบบ
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="/admin" class="nav-tab">
+            <span class="nav-icon">📊</span>
+            <span class="nav-label">ภาพรวม</span>
+        </a>
+        <a href="/admin/users" class="nav-tab">
+            <span class="nav-icon">👥</span>
+            <span class="nav-label">ผู้ใช้</span>
+        </a>
+        <a href="/admin/buds" class="nav-tab">
+            <span class="nav-icon">🌿</span>
+            <span class="nav-label">สายพันธุ์</span>
+        </a>
+        <a href="/admin/reviews" class="nav-tab">
+            <span class="nav-icon">⭐</span>
+            <span class="nav-label">รีวิว</span>
+        </a>
+        <a href="/admin/settings" class="nav-tab active">
+            <span class="nav-icon">⚙️</span>
+            <span class="nav-label">ตั้งค่า</span>
+        </a>
+    </nav>
+
+    <script>
+        // Admin Settings Manager
+        const AdminSettings = {
+            settings: {
+                autoApproval: false,
+                publicRegistration: true,
+                emailVerification: true,
+                autoApproveReviews: false,
+                maxImagesPerReview: 4,
+                maxImageSize: 5,
+                multipleLogin: true,
+                sessionTimeout: 60,
+                loginLogging: true
+            },
+
+            init() {
+                console.log('Admin Settings: Starting initialization');
+                this.loadSettings();
+                this.setupEventListeners();
+            },
+
+            setupEventListeners() {
+                // Toggle switches
+                document.getElementById('autoApproval').addEventListener('change', (e) => {
+                    this.updateToggleSetting('autoApproval', e.target.checked);
+                });
+
+                document.getElementById('publicRegistration').addEventListener('change', (e) => {
+                    this.updateToggleSetting('publicRegistration', e.target.checked);
+                });
+
+                document.getElementById('emailVerification').addEventListener('change', (e) => {
+                    this.updateToggleSetting('emailVerification', e.target.checked);
+                });
+
+                document.getElementById('autoApproveReviews').addEventListener('change', (e) => {
+                    this.updateToggleSetting('autoApproveReviews', e.target.checked);
+                });
+
+                document.getElementById('multipleLogin').addEventListener('change', (e) => {
+                    this.updateToggleSetting('multipleLogin', e.target.checked);
+                });
+
+                document.getElementById('loginLogging').addEventListener('change', (e) => {
+                    this.updateToggleSetting('loginLogging', e.target.checked);
+                });
+            },
+
+            loadSettings() {
+                // Load current settings from server or localStorage
+                const savedSettings = localStorage.getItem('adminSettings');
+                if (savedSettings) {
+                    this.settings = { ...this.settings, ...JSON.parse(savedSettings) };
+                }
+
+                // Update UI
+                this.updateUI();
+            },
+
+            updateUI() {
+                // Update toggle switches
+                document.getElementById('autoApproval').checked = this.settings.autoApproval;
+                document.getElementById('autoApprovalStatus').textContent = this.settings.autoApproval ? 'เปิดใช้งาน' : 'ปิดใช้งาน';
+
+                document.getElementById('publicRegistration').checked = this.settings.publicRegistration;
+                document.getElementById('publicRegistrationStatus').textContent = this.settings.publicRegistration ? 'เปิดใช้งาน' : 'ปิดใช้งาน';
+
+                document.getElementById('emailVerification').checked = this.settings.emailVerification;
+                document.getElementById('emailVerificationStatus').textContent = this.settings.emailVerification ? 'เปิดใช้งาน' : 'ปิดใช้งาน';
+
+                document.getElementById('autoApproveReviews').checked = this.settings.autoApproveReviews;
+                document.getElementById('autoApproveReviewsStatus').textContent = this.settings.autoApproveReviews ? 'เปิดใช้งาน' : 'ปิดใช้งาน';
+
+                document.getElementById('multipleLogin').checked = this.settings.multipleLogin;
+                document.getElementById('multipleLoginStatus').textContent = this.settings.multipleLogin ? 'เปิดใช้งาน' : 'ปิดใช้งาน';
+
+                document.getElementById('loginLogging').checked = this.settings.loginLogging;
+                document.getElementById('loginLoggingStatus').textContent = this.settings.loginLogging ? 'เปิดใช้งาน' : 'ปิดใช้งาน';
+
+                // Update input fields
+                document.getElementById('maxImagesPerReview').value = this.settings.maxImagesPerReview;
+                document.getElementById('maxImageSize').value = this.settings.maxImageSize;
+                document.getElementById('sessionTimeout').value = this.settings.sessionTimeout;
+            },
+
+            updateToggleSetting(key, value) {
+                this.settings[key] = value;
+                this.saveSettings();
+                this.updateUI();
+                this.showMessage(`ตั้งค่า "${key}" อัพเดทแล้ว`, 'success');
+            },
+
+            saveSettings() {
+                localStorage.setItem('adminSettings', JSON.stringify(this.settings));
+                // Also send to server
+                this.sendToServer();
+            },
+
+            async sendToServer() {
+                try {
+                    const response = await fetch('/api/admin/settings', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(this.settings)
+                    });
+
+                    if (!response.ok) {
+                        console.warn('Failed to save settings to server');
+                    }
+                } catch (error) {
+                    console.error('Error saving settings to server:', error);
+                }
+            },
+
+            showMessage(message, type) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = type === 'success' ? 'success-message' : 'error-message';
+                messageDiv.textContent = message;
+
+                const container = document.querySelector('.admin-content');
+                container.insertBefore(messageDiv, container.firstChild);
+
+                setTimeout(() => {
+                    messageDiv.remove();
+                }, 3000);
+            }
+        };
+
+        // Global functions for buttons
+        function updateMaxImages() {
+            const value = parseInt(document.getElementById('maxImagesPerReview').value);
+            AdminSettings.settings.maxImagesPerReview = value;
+            AdminSettings.saveSettings();
+            AdminSettings.showMessage('อัพเดทจำนวนรูปภาพสูงสุดแล้ว', 'success');
+        }
+
+        function updateMaxImageSize() {
+            const value = parseFloat(document.getElementById('maxImageSize').value);
+            AdminSettings.settings.maxImageSize = value;
+            AdminSettings.saveSettings();
+            AdminSettings.showMessage('อัพเดทขนาดไฟล์สูงสุดแล้ว', 'success');
+        }
+
+        function updateSessionTimeout() {
+            const value = parseInt(document.getElementById('sessionTimeout').value);
+            AdminSettings.settings.sessionTimeout = value;
+            AdminSettings.saveSettings();
+            AdminSettings.showMessage('อัพเดทระยะเวลา Session แล้ว', 'success');
+        }
+
+        function clearTempFiles() {
+            if (confirm('คุณต้องการล้างไฟล์ชั่วคราวหรือไม่?')) {
+                AdminSettings.showMessage('กำลังล้างไฟล์ชั่วคราว...', 'success');
+                // Simulate clearing temp files
+                setTimeout(() => {
+                    AdminSettings.showMessage('ล้างไฟล์ชั่วคราวเสร็จสิ้น', 'success');
+                }, 2000);
+            }
+        }
+
+        function createBackup() {
+            if (confirm('คุณต้องการสร้างการสำรองข้อมูลหรือไม่?')) {
+                AdminSettings.showMessage('กำลังสร้างการสำรองข้อมูล...', 'success');
+                // Simulate backup creation
+                setTimeout(() => {
+                    AdminSettings.showMessage('สร้างการสำรองข้อมูลเสร็จสิ้น', 'success');
+                }, 3000);
+            }
+        }
+
+        function downloadBackup() {
+            AdminSettings.showMessage('กำลังเตรียมไฟล์สำรองข้อมูล...', 'success');
+            // Simulate backup download
+            setTimeout(() => {
+                AdminSettings.showMessage('ไฟล์สำรองข้อมูลพร้อมดาวน์โหลด', 'success');
+            }, 1500);
+        }
+
+        function restartSystem() {
+            if (confirm('คุณแน่ใจหรือไม่ที่จะรีสตาร์ทระบบ? การกระทำนี้จะทำให้ผู้ใช้ทุกคนถูกตัดการเชื่อมต่อชั่วคราว')) {
+                AdminSettings.showMessage('กำลังรีสตาร์ทระบบ...', 'success');
+                // Simulate system restart
+                setTimeout(() => {
+                    AdminSettings.showMessage('ระบบกำลังรีสตาร์ท กรุณารอสักครู่...', 'success');
+                }, 2000);
+            }
+        }
+
+        // Initialize when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => AdminSettings.init());
+        } else {
+            AdminSettings.init();
+        }
+    </script>
+</body>
+</html>

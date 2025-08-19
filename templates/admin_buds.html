@@ -1,0 +1,884 @@
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cannabis App - จัดการข้อมูลดอก</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .admin-header {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .admin-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .admin-subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .back-btn {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .admin-content {
+            padding: 40px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: #4CAF50;
+            box-shadow: 0 10px 25px rgba(76,175,80,0.15);
+        }
+
+        .stat-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #6c757d;
+            font-weight: 600;
+        }
+
+        .controls-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 2px solid #e9ecef;
+        }
+
+        .controls-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-group label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            padding: 8px 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #45a049;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .buds-table-container {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .buds-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .buds-table th {
+            background: #4CAF50;
+            color: white;
+            padding: 15px 10px;
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .buds-table td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #e9ecef;
+            vertical-align: middle;
+        }
+
+        .buds-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .strain-name {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .strain-type-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+            display: inline-block;
+            min-width: 60px;
+        }
+
+        .type-indica {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .type-sativa {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .type-hybrid {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+
+        .grade-badge {
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+            display: inline-block;
+            min-width: 40px;
+        }
+
+        .grade-a-plus {
+            background: #c8e6c9;
+            color: #1b5e20;
+        }
+
+        .grade-a {
+            background: #dcedc8;
+            color: #33691e;
+        }
+
+        .grade-b-plus {
+            background: #f0f4c3;
+            color: #827717;
+        }
+
+        .grade-b {
+            background: #fff9c4;
+            color: #f57f17;
+        }
+
+        .grade-c {
+            background: #ffcdd2;
+            color: #c62828;
+        }
+
+        .rating-display {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .stars {
+            color: #ffc107;
+        }
+
+        .rating-text {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .action-cell {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .btn-sm {
+            padding: 6px 10px;
+            font-size: 12px;
+            border-radius: 6px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #dc3545;
+            text-align: center;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #28a745;
+            text-align: center;
+        }
+
+        .no-data {
+            text-align: center;
+            color: #6c757d;
+            padding: 40px;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .admin-content {
+                padding: 20px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 15px;
+            }
+
+            .search-filters {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .buds-table {
+                font-size: 12px;
+            }
+
+            .buds-table th,
+            .buds-table td {
+                padding: 8px 6px;
+            }
+
+            .back-btn {
+                position: static;
+                transform: none;
+                margin-bottom: 20px;
+                width: fit-content;
+            }
+
+            .admin-header {
+                text-align: left;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <a href="/admin" class="back-btn">
+                ← กลับ
+            </a>
+            <div class="admin-title">🌿 จัดการข้อมูลดอก</div>
+            <div class="admin-subtitle">จัดการและตรวจสอบข้อมูลดอกทั้งหมดในระบบ</div>
+        </div>
+
+        <div class="admin-content">
+            <!-- Statistics Section -->
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card">
+                    <div class="stat-icon">🌿</div>
+                    <div class="stat-number" id="totalBuds">-</div>
+                    <div class="stat-label">ดอกทั้งหมด</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⭐</div>
+                    <div class="stat-number" id="averageRating">-</div>
+                    <div class="stat-label">คะแนนเฉลี่ย</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">💬</div>
+                    <div class="stat-number" id="totalReviews">-</div>
+                    <div class="stat-label">รีวิวทั้งหมด</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">👨‍🌾</div>
+                    <div class="stat-number" id="activeGrowers">-</div>
+                    <div class="stat-label">ผู้ปลูกที่ใช้งาน</div>
+                </div>
+            </div>
+
+            <!-- Controls Section -->
+            <div class="controls-section">
+                <div class="controls-title">
+                    🔍 ค้นหาและกรองข้อมูล
+                </div>
+                
+                <div class="search-filters">
+                    <div class="filter-group">
+                        <label for="searchName">ชื่อสายพันธุ์</label>
+                        <input type="text" id="searchName" placeholder="ค้นหาชื่อสายพันธุ์...">
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterType">ประเภท</label>
+                        <select id="filterType">
+                            <option value="">ทั้งหมด</option>
+                            <option value="Indica">Indica</option>
+                            <option value="Sativa">Sativa</option>
+                            <option value="Hybrid">Hybrid</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterGrade">เกรด</label>
+                        <select id="filterGrade">
+                            <option value="">ทั้งหมด</option>
+                            <option value="A+">A+</option>
+                            <option value="A">A</option>
+                            <option value="B+">B+</option>
+                            <option value="B">B</option>
+                            <option value="C">C</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterGrower">ผู้ปลูก</label>
+                        <input type="text" id="filterGrower" placeholder="ค้นหาผู้ปลูก...">
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="searchBuds()">
+                        🔍 ค้นหา
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearFilters()">
+                        🗑️ ล้างตัวกรอง
+                    </button>
+                    <button class="btn btn-primary" onclick="exportData()">
+                        📊 ส่งออกข้อมูล
+                    </button>
+                </div>
+            </div>
+
+            <div id="loadingState" class="loading">
+                🔄 กำลังโหลดข้อมูล...
+            </div>
+
+            <div id="errorState" class="error-message" style="display: none;">
+                <div id="errorMessage"></div>
+                <button onclick="retryLoad()" style="margin-top: 10px; padding: 5px 10px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                    🔄 ลองใหม่
+                </button>
+            </div>
+
+            <!-- Buds Table -->
+            <div id="budsTableContainer" class="buds-table-container" style="display: none;">
+                <table class="buds-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>ชื่อสายพันธุ์</th>
+                            <th>ประเภท</th>
+                            <th>เกรด</th>
+                            <th>THC%</th>
+                            <th>CBD%</th>
+                            <th>ผู้ปลูก</th>
+                            <th>คะแนน</th>
+                            <th>รีวิว</th>
+                            <th>วันที่สร้าง</th>
+                            <th>การดำเนินการ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="budsTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Admin Buds Manager
+        const AdminBuds = {
+            state: {
+                isLoading: false,
+                budsData: [],
+                filteredData: [],
+                stats: {}
+            },
+
+            async init() {
+                console.log('Admin Buds: Starting initialization');
+                await this.loadBudsData();
+            },
+
+            async loadBudsData() {
+                if (this.state.isLoading) return;
+
+                this.state.isLoading = true;
+                this.showLoading();
+
+                try {
+                    const response = await fetch('/api/all-buds-report');
+                    if (response.ok) {
+                        const data = await response.json();
+                        this.state.budsData = data.buds || [];
+                        this.state.filteredData = [...this.state.budsData];
+                        
+                        this.calculateStats();
+                        this.displayStats();
+                        this.displayBudsTable();
+                        this.showContent();
+                        
+                        console.log('Admin Buds: Data loaded successfully');
+                    } else {
+                        throw new Error('ไม่สามารถโหลดข้อมูลได้');
+                    }
+                } catch (error) {
+                    console.error('Error loading buds data:', error);
+                    this.showError('เกิดข้อผิดพลาดในการโหลดข้อมูล: ' + error.message);
+                } finally {
+                    this.state.isLoading = false;
+                }
+            },
+
+            calculateStats() {
+                const data = this.state.budsData;
+                const totalBuds = data.length;
+                const totalReviews = data.reduce((sum, bud) => sum + (bud.review_count || 0), 0);
+                const averageRating = data.length > 0 ? 
+                    (data.reduce((sum, bud) => sum + (bud.avg_rating || 0), 0) / data.length).toFixed(1) : 0;
+                const activeGrowers = new Set(data.map(bud => bud.grower_id).filter(id => id)).size;
+
+                this.state.stats = {
+                    totalBuds,
+                    totalReviews,
+                    averageRating,
+                    activeGrowers
+                };
+            },
+
+            displayStats() {
+                const stats = this.state.stats;
+                document.getElementById('totalBuds').textContent = stats.totalBuds;
+                document.getElementById('totalReviews').textContent = stats.totalReviews;
+                document.getElementById('averageRating').textContent = stats.averageRating;
+                document.getElementById('activeGrowers').textContent = stats.activeGrowers;
+            },
+
+            displayBudsTable() {
+                const tbody = document.getElementById('budsTableBody');
+                const data = this.state.filteredData;
+
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="11" class="no-data">ไม่พบข้อมูลดอก</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = data.map(bud => {
+                    const strainTypeClass = this.getStrainTypeClass(bud.strain_type);
+                    const gradeClass = this.getGradeClass(bud.grade);
+                    const ratingStars = this.generateStars(bud.avg_rating);
+
+                    return `
+                        <tr>
+                            <td>${bud.id}</td>
+                            <td>
+                                <div class="strain-name">${bud.strain_name_en || 'ไม่ระบุ'}</div>
+                                ${bud.strain_name_th ? `<div style="font-size: 12px; color: #6c757d;">${bud.strain_name_th}</div>` : ''}
+                                ${bud.breeder ? `<div style="font-size: 11px; color: #999;">${bud.breeder}</div>` : ''}
+                            </td>
+                            <td>
+                                <span class="strain-type-badge ${strainTypeClass}">
+                                    ${bud.strain_type || 'ไม่ระบุ'}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="grade-badge ${gradeClass}">
+                                    ${bud.grade || 'ไม่ระบุ'}
+                                </span>
+                            </td>
+                            <td>${bud.thc_percentage ? bud.thc_percentage.toFixed(1) + '%' : '-'}</td>
+                            <td>${bud.cbd_percentage ? bud.cbd_percentage.toFixed(1) + '%' : '-'}</td>
+                            <td>${bud.grower_name || 'ไม่ระบุ'}</td>
+                            <td>
+                                <div class="rating-display">
+                                    <span class="stars">${ratingStars}</span>
+                                    <span class="rating-text">(${bud.avg_rating ? bud.avg_rating.toFixed(1) : '0'})</span>
+                                </div>
+                            </td>
+                            <td>${bud.review_count || 0}</td>
+                            <td>${new Date(bud.created_at).toLocaleDateString('th-TH')}</td>
+                            <td>
+                                <div class="action-cell">
+                                    <button class="btn btn-primary btn-sm" onclick="AdminBuds.viewBud(${bud.id})">
+                                        👁️ ดู
+                                    </button>
+                                    <button class="btn btn-danger btn-sm" onclick="AdminBuds.deleteBud(${bud.id})">
+                                        🗑️ ลบ
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            },
+
+            getStrainTypeClass(type) {
+                switch(type) {
+                    case 'Indica': return 'type-indica';
+                    case 'Sativa': return 'type-sativa';
+                    case 'Hybrid': return 'type-hybrid';
+                    default: return '';
+                }
+            },
+
+            getGradeClass(grade) {
+                switch(grade) {
+                    case 'A+': return 'grade-a-plus';
+                    case 'A': return 'grade-a';
+                    case 'B+': return 'grade-b-plus';
+                    case 'B': return 'grade-b';
+                    case 'C': return 'grade-c';
+                    default: return '';
+                }
+            },
+
+            generateStars(rating) {
+                const fullStars = Math.floor(rating);
+                const hasHalfStar = rating % 1 >= 0.5;
+                let stars = '';
+                
+                for (let i = 0; i < fullStars; i++) {
+                    stars += '★';
+                }
+                if (hasHalfStar) {
+                    stars += '☆';
+                }
+                
+                return stars || '☆☆☆☆☆';
+            },
+
+            searchBuds() {
+                const searchName = document.getElementById('searchName').value.toLowerCase();
+                const filterType = document.getElementById('filterType').value;
+                const filterGrade = document.getElementById('filterGrade').value;
+                const filterGrower = document.getElementById('filterGrower').value.toLowerCase();
+
+                this.state.filteredData = this.state.budsData.filter(bud => {
+                    const matchesName = !searchName || 
+                        (bud.strain_name_en && bud.strain_name_en.toLowerCase().includes(searchName)) ||
+                        (bud.strain_name_th && bud.strain_name_th.toLowerCase().includes(searchName));
+                    
+                    const matchesType = !filterType || bud.strain_type === filterType;
+                    const matchesGrade = !filterGrade || bud.grade === filterGrade;
+                    const matchesGrower = !filterGrower || 
+                        (bud.grower_name && bud.grower_name.toLowerCase().includes(filterGrower));
+
+                    return matchesName && matchesType && matchesGrade && matchesGrower;
+                });
+
+                this.displayBudsTable();
+            },
+
+            clearFilters() {
+                document.getElementById('searchName').value = '';
+                document.getElementById('filterType').value = '';
+                document.getElementById('filterGrade').value = '';
+                document.getElementById('filterGrower').value = '';
+                
+                this.state.filteredData = [...this.state.budsData];
+                this.displayBudsTable();
+            },
+
+            viewBud(budId) {
+                window.open(`/bud-report/${budId}`, '_blank');
+            },
+
+            async deleteBud(budId) {
+                if (!confirm('คุณต้องการลบข้อมูลดอกนี้หรือไม่? การกระทำนี้ไม่สามารถย้อนกลับได้')) return;
+
+                try {
+                    const response = await fetch(`/api/buds/${budId}`, {
+                        method: 'DELETE'
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        this.showMessage(result.message, 'success');
+                        await this.loadBudsData(); // Reload data
+                    } else {
+                        this.showMessage(result.error || 'เกิดข้อผิดพลาด', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error deleting bud:', error);
+                    this.showMessage('เกิดข้อผิดพลาดในการลบข้อมูล', 'error');
+                }
+            },
+
+            exportData() {
+                const data = this.state.filteredData;
+                const csv = this.generateCSV(data);
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                
+                if (link.download !== undefined) {
+                    const url = URL.createObjectURL(blob);
+                    link.setAttribute('href', url);
+                    link.setAttribute('download', 'buds_data.csv');
+                    link.style.visibility = 'hidden';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
+            },
+
+            generateCSV(data) {
+                const headers = ['ID', 'ชื่อ (EN)', 'ชื่อ (TH)', 'Breeder', 'ประเภท', 'เกรด', 'THC%', 'CBD%', 'ผู้ปลูก', 'คะแนน', 'จำนวนรีวิว', 'วันที่สร้าง'];
+                const rows = data.map(bud => [
+                    bud.id,
+                    bud.strain_name_en || '',
+                    bud.strain_name_th || '',
+                    bud.breeder || '',
+                    bud.strain_type || '',
+                    bud.grade || '',
+                    bud.thc_percentage || '',
+                    bud.cbd_percentage || '',
+                    bud.grower_name || '',
+                    bud.avg_rating || 0,
+                    bud.review_count || 0,
+                    bud.created_at || ''
+                ]);
+
+                return [headers, ...rows].map(row => 
+                    row.map(field => `"${field}"`).join(',')
+                ).join('\n');
+            },
+
+            showLoading() {
+                document.getElementById('loadingState').style.display = 'block';
+                document.getElementById('errorState').style.display = 'none';
+                document.getElementById('budsTableContainer').style.display = 'none';
+            },
+
+            showError(message) {
+                document.getElementById('errorMessage').textContent = message;
+                document.getElementById('errorState').style.display = 'block';
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('budsTableContainer').style.display = 'none';
+            },
+
+            showContent() {
+                document.getElementById('budsTableContainer').style.display = 'block';
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('errorState').style.display = 'none';
+            },
+
+            showMessage(message, type) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = type === 'success' ? 'success-message' : 'error-message';
+                messageDiv.textContent = message;
+                
+                const container = document.querySelector('.admin-content');
+                container.insertBefore(messageDiv, container.firstChild);
+                
+                setTimeout(() => {
+                    messageDiv.remove();
+                }, 5000);
+            }
+        };
+
+        // Global functions
+        function retryLoad() {
+            AdminBuds.loadBudsData();
+        }
+
+        function searchBuds() {
+            AdminBuds.searchBuds();
+        }
+
+        function clearFilters() {
+            AdminBuds.clearFilters();
+        }
+
+        function exportData() {
+            AdminBuds.exportData();
+        }
+
+        // Initialize when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => AdminBuds.init());
+        } else {
+            AdminBuds.init();
+        }
+
+        // Add search on Enter key
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInputs = ['searchName', 'filterGrower'];
+            searchInputs.forEach(inputId => {
+                const input = document.getElementById(inputId);
+                if (input) {
+                    input.addEventListener('keypress', function(e) {
+                        if (e.key === 'Enter') {
+                            searchBuds();
+                        }
+                    });
+                }
+            });
+
+            // Auto-search on filter change
+            const filterSelects = ['filterType', 'filterGrade'];
+            filterSelects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                if (select) {
+                    select.addEventListener('change', searchBuds);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

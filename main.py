@@ -3382,6 +3382,15 @@ def admin_dashboard():
         return redirect('/profile?no_admin=1')
     return render_template('admin.html')
 
+@app.route('/admin/users')
+def admin_users():
+    """Admin users management page"""
+    if not is_authenticated():
+        return redirect('/auth')
+    if not is_admin():
+        return redirect('/profile?no_admin=1')
+    return render_template('admin_users.html')
+
 @app.route('/api/admin/stats')
 def get_admin_stats():
     """Get admin dashboard statistics"""
@@ -3581,6 +3590,62 @@ def admin_reject_user():
 
         except Exception as e:
             conn.rollback()
+            return jsonify({'error': str(e)}), 500
+        finally:
+            if cur:
+                cur.close()
+            if conn:
+                return_db_connection(conn)
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+@app.route('/api/admin/users')
+def get_admin_users():
+    """Get all users for admin management"""
+    if not is_authenticated() or not is_admin():
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            
+            cur.execute("""
+                SELECT u.id, u.username, u.email, u.is_grower, u.is_budtender, u.is_consumer,
+                       u.birth_year, u.profile_image_url, u.is_verified, u.is_approved,
+                       u.created_at, u.approved_at, u.referred_by,
+                       ref.username as referred_by_username
+                FROM users u
+                LEFT JOIN users ref ON u.referred_by = ref.id
+                ORDER BY u.is_approved ASC, u.created_at DESC
+            """)
+            
+            users = []
+            for row in cur.fetchall():
+                user_data = {
+                    'id': row[0],
+                    'username': row[1],
+                    'email': row[2],
+                    'is_grower': row[3],
+                    'is_budtender': row[4],
+                    'is_consumer': row[5],
+                    'birth_year': row[6],
+                    'profile_image_url': row[7],
+                    'is_verified': row[8],
+                    'is_approved': row[9],
+                    'created_at': row[10].strftime('%Y-%m-%d %H:%M:%S') if row[10] else None,
+                    'approved_at': row[11].strftime('%Y-%m-%d %H:%M:%S') if row[11] else None,
+                    'referred_by': row[12],
+                    'referred_by_username': row[13]
+                }
+                users.append(user_data)
+            
+            cur.close()
+            return_db_connection(conn)
+            
+            return jsonify({'users': users})
+            
+        except Exception as e:
             return jsonify({'error': str(e)}), 500
         finally:
             if cur:

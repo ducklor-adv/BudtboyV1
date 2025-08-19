@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -342,36 +341,111 @@
             flex-wrap: wrap;
         }
 
+        /* Bottom Navigation Styles */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 2px solid #e0e0e0;
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            overflow-x: auto;
+        }
+
+        .nav-tab {
+            background: none;
+            border: none;
+            padding: 8px 12px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            flex: 1;
+            min-width: 80px;
+            max-width: 120px;
+            text-decoration: none;
+            color: #666;
+        }
+
+        .nav-tab:hover {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .nav-tab.active {
+            background: #e8f5e9;
+            color: #4CAF50;
+        }
+
+        .nav-tab.active .nav-icon {
+            transform: scale(1.1);
+        }
+
+        .nav-icon {
+            font-size: 24px;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-label {
+            font-size: 10px;
+            font-weight: 600;
+            text-align: center;
+            line-height: 1.2;
+        }
+
         @media (max-width: 768px) {
+            .admin-container {
+                margin: 10px;
+                margin-bottom: 90px; /* Space for bottom nav */
+            }
+
             .admin-content {
                 padding: 20px;
+                padding-bottom: 100px; /* Extra space for bottom nav */
             }
 
-            .users-table-container {
-                overflow-x: auto;
-            }
-
-            .users-table {
-                min-width: 800px;
-            }
-
-            .back-btn {
-                position: static;
-                transform: none;
-                margin-bottom: 20px;
-                width: fit-content;
-            }
-
-            .admin-header {
-                text-align: left;
+            .stats-row {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 15px;
             }
 
             .filter-row {
                 grid-template-columns: 1fr;
             }
 
-            .stats-row {
-                grid-template-columns: 1fr;
+            .users-table {
+                font-size: 12px;
+            }
+
+            .users-table th,
+            .users-table td {
+                padding: 8px 4px;
+            }
+
+            .bottom-nav {
+                padding: 6px 0;
+            }
+
+            .nav-tab {
+                padding: 6px 4px;
+                gap: 2px;
+                min-width: 60px;
+            }
+
+            .nav-icon {
+                font-size: 20px;
+            }
+
+            .nav-label {
+                font-size: 9px;
             }
         }
     </style>
@@ -479,6 +553,29 @@
         </div>
     </div>
 
+    <nav class="bottom-nav">
+        <a href="/admin" class="nav-tab active">
+            <span class="nav-icon">🏠</span>
+            <span class="nav-label">หน้าหลัก</span>
+        </a>
+        <a href="/admin/users" class="nav-tab">
+            <span class="nav-icon">👥</span>
+            <span class="nav-label">ผู้ใช้</span>
+        </a>
+        <a href="/admin/products" class="nav-tab">
+            <span class="nav-icon">📦</span>
+            <span class="nav-label">สินค้า</span>
+        </a>
+        <a href="/admin/orders" class="nav-tab">
+            <span class="nav-icon">🛒</span>
+            <span class="nav-label">คำสั่งซื้อ</span>
+        </a>
+        <a href="/admin/settings" class="nav-tab">
+            <span class="nav-icon">⚙️</span>
+            <span class="nav-label">ตั้งค่า</span>
+        </a>
+    </nav>
+
     <script>
         // Admin Users Manager
         const AdminUsers = {
@@ -534,7 +631,7 @@
 
             displayUsers() {
                 const tbody = document.getElementById('usersTableBody');
-                
+
                 if (this.state.filteredUsers.length === 0) {
                     tbody.innerHTML = `
                         <tr>
@@ -724,10 +821,10 @@
                 const messageDiv = document.createElement('div');
                 messageDiv.className = type === 'success' ? 'success-message' : 'error-message';
                 messageDiv.textContent = message;
-                
+
                 const container = document.querySelector('.admin-content');
                 container.insertBefore(messageDiv, container.firstChild);
-                
+
                 setTimeout(() => {
                     messageDiv.remove();
                 }, 5000);

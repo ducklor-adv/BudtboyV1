@@ -134,6 +134,28 @@ def get_db_connection():
 
     return None
 
+def init_connection_pool():
+    """Initialize connection pool"""
+    global connection_pool
+    try:
+        with pool_lock:
+            if connection_pool is None:
+                database_url = os.environ.get('DATABASE_URL')
+                if database_url:
+                    connection_pool = psycopg2.pool.ThreadedConnectionPool(
+                        1, 20,  # min and max connections
+                        database_url,
+                        sslmode='prefer',
+                        connect_timeout=15,
+                        application_name='cannabis_app_pool'
+                    )
+                    print("Connection pool initialized successfully")
+                else:
+                    print("DATABASE_URL not found, connection pool not initialized")
+    except Exception as e:
+        print(f"Failed to initialize connection pool: {e}")
+        connection_pool = None
+
 def return_db_connection(conn):
     try:
         if connection_pool and conn:

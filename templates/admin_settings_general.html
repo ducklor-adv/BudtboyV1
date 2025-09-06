@@ -280,6 +280,17 @@
                     </div>
                     
                     <div class="form-group">
+                        <label for="registrationMode">โหมดการสมัครสมาชิก:</label>
+                        <select id="registrationMode" name="registrationMode">
+                            <option value="public">เปิดให้สมัครทั่วไป (ไม่ต้องใช้ Referral Link)</option>
+                            <option value="referral_only">สมัครผ่าน Referral Link เท่านั้น</option>
+                        </select>
+                        <small style="color: #666; font-size: 12px; margin-top: 5px; display: block;">
+                            โหมดทั่วไปเหมาะสำหรับช่วงเริ่มต้น, โหมด Referral ป้องกัน Spam
+                        </small>
+                    </div>
+                    
+                    <div class="form-group">
                         <label>เปิดใช้งานโหมดบำรุงรักษา:</label>
                         <div class="toggle-group">
                             <label class="toggle-switch">
@@ -356,6 +367,9 @@
                 document.getElementById('displayMode').value = settings.displayMode || 'auto';
                 document.getElementById('itemsPerPage').value = settings.itemsPerPage || 20;
                 
+                // Registration mode
+                document.getElementById('registrationMode').value = settings.registrationMode || 'public';
+                
                 // Toggles
                 const enableNotifications = settings.enableNotifications === 'true' || settings.enableNotifications === true;
                 const maintenanceMode = settings.maintenanceMode === 'true' || settings.maintenanceMode === true;
@@ -381,6 +395,7 @@
                     defaultLanguage: formData.get('defaultLanguage'),
                     displayMode: formData.get('displayMode'),
                     itemsPerPage: parseInt(formData.get('itemsPerPage')),
+                    registrationMode: formData.get('registrationMode'),
                     enableNotifications: document.getElementById('enableNotifications').checked,
                     maintenanceMode: document.getElementById('maintenanceMode').checked
                 };

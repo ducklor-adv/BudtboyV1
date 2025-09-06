@@ -265,16 +265,32 @@
     </div>
 
     <script>
-        function showForm(type) {
-            // ตรวจสอบว่าเป็นการเลือก signup และไม่มี referral code
+        async function showForm(type) {
+            // ตรวจสอบว่าเป็นการเลือก signup และตรวจสอบโหมดการสมัครสมาชิก
             if (type === 'signup') {
                 const urlParams = new URLSearchParams(window.location.search);
                 const refCode = urlParams.get('ref');
                 
-                if (!refCode) {
-                    // แสดง popup เตือนเมื่อพยายามเข้าหน้า signup โดยไม่มี referral link
-                    showReferralWarning();
-                    return; // หยุดการทำงานไม่ให้เปลี่ยนไปหน้า signup
+                // ตรวจสอบโหมดการสมัครสมาชิกจากเซิร์ฟเวอร์
+                try {
+                    const response = await fetch('/api/registration_mode');
+                    const result = await response.json();
+                    
+                    if (result.success && result.is_referral_only) {
+                        // โหมด referral only: ต้องมี referral code
+                        if (!refCode) {
+                            showReferralWarning();
+                            return;
+                        }
+                    }
+                    // โหมด public: สามารถสมัครได้โดยไม่ต้องมี referral code
+                } catch (error) {
+                    console.error('Error checking registration mode:', error);
+                    // หากเกิดข้อผิดพลาด ให้ใช้โหมดเดิม (referral only)
+                    if (!refCode) {
+                        showReferralWarning();
+                        return;
+                    }
                 }
             }
 
@@ -419,12 +435,24 @@
         document.getElementById('signupForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
+            // ตรวจสอบโหมดการสมัครสมาชิกจากเซิร์ฟเวอร์
+            let registrationMode = 'referral_only'; // default
+            try {
+                const modeResponse = await fetch('/api/registration_mode');
+                const modeResult = await modeResponse.json();
+                if (modeResult.success) {
+                    registrationMode = modeResult.mode;
+                }
+            } catch (error) {
+                console.error('Error getting registration mode:', error);
+            }
+
             // ตรวจสอบว่ามี referral code หรือไม่
             const urlParams = new URLSearchParams(window.location.search);
             const refCodeFromUrl = urlParams.get('ref');
             
-            if (!refCodeFromUrl) {
-                // แสดง popup เตือนเมื่อไม่มี referral link
+            // ตรวจสอบความต้องการ referral code ตามโหมด
+            if (registrationMode === 'referral_only' && !refCodeFromUrl) {
                 showReferralWarning();
                 return;
             }
@@ -450,7 +478,12 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ username, email, password, referral_code: refCodeFromUrl })
+                    body: JSON.stringify({ 
+                        username, 
+                        email, 
+                        password, 
+                        referral_code: refCodeFromUrl || null
+                    })
                 });
 
                 const result = await response.json();

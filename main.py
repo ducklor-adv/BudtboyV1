@@ -1115,7 +1115,8 @@ def create_tables():
                     ('displayMode', 'auto'),
                     ('itemsPerPage', '20'),
                     ('enableNotifications', 'true'),
-                    ('maintenanceMode', 'false')
+                    ('maintenanceMode', 'false'),
+                    ('registrationMode', 'public')
                 ]
 
                 cur.executemany("""
@@ -1682,6 +1683,9 @@ def quick_signup():
     if not is_valid:
         return jsonify({'success': False, 'error': message}), 400
 
+    # Check registration mode from admin settings
+    registration_mode = get_registration_mode()
+
     # Hash password securely
     password_hash = hash_password(password)
 
@@ -1710,19 +1714,27 @@ def quick_signup():
             import secrets
             new_referral_code = secrets.token_urlsafe(8)
 
-            # Check if referral code is required (must have referred_by_id)
-            if not referred_by_id:
-                return jsonify({
-                    'success': False,
-                    'error': 'การสมัครสมาชิกต้องผ่าน Referral Link เท่านั้น กรุณาใช้ลิงก์ที่เพื่อนแชร์ให้'
-                }), 400
+            # Check registration mode requirements
+            if registration_mode == 'referral_only':
+                # Referral mode: must have valid referral code
+                if not referred_by_id:
+                    return jsonify({
+                        'success': False,
+                        'error': 'การสมัครสมาชิกต้องผ่าน Referral Link เท่านั้น กรุณาใช้ลิงก์ที่เพื่อนแชร์ให้'
+                    }), 400
+                # User needs approval from referrer
+                is_approved = False
+            else:
+                # Public mode: can signup without referral code
+                # Auto-approve if no referral, or needs approval if has referral
+                is_approved = True if not referred_by_id else False
 
-            # Create user (pending approval)
+            # Create user
             cur.execute("""
                 INSERT INTO users (username, email, password_hash, is_consumer, is_verified, referred_by, referral_code, is_approved)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                 RETURNING id
-            """, (username, email, password_hash, True, True, referred_by_id, new_referral_code, False))
+            """, (username, email, password_hash, True, True, referred_by_id, new_referral_code, is_approved))
 
             user_id = cur.fetchone()[0]
             conn.commit()
@@ -1732,9 +1744,14 @@ def quick_signup():
             session['username'] = username
             session['email'] = email
 
+            if is_approved:
+                message = f'สมัครสมาชิกสำเร็จ! ยินดีต้อนรับ {username}'
+            else:
+                message = f'สมัครสมาชิกสำเร็จ! รอการอนุมัติจากผู้แนะนำ ยินดีต้อนรับ {username}'
+
             return jsonify({
                 'success': True,
-                'message': f'สมัครสมาชิกสำเร็จ! ยินดีต้อนรับ {username}',
+                'message': message,
                 'redirect': '/profile'
             })
 
@@ -3470,6 +3487,31 @@ def friends_reviews_page():
         return redirect('/profile?not_approved=1')
     return render_template('friends_reviews.html')
 
+def get_registration_mode():
+    """Get current registration mode from admin settings"""
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("""
+                SELECT setting_value FROM admin_settings 
+                WHERE setting_key = 'registrationMode'
+            """)
+            result = cur.fetchone()
+            cur.close()
+            return_db_connection(conn)
+            
+            if result:
+                return result[0]
+            else:
+                # Default to public registration
+                return 'public'
+        except:
+            if conn:
+                return_db_connection(conn)
+            return 'public'
+    return 'public'
+
 def is_admin():
     """Check if current user is admin"""
     if not is_authenticated():
@@ -4596,6 +4638,24 @@ def register_user():
             return_db_connection(conn)
     else:
         return jsonify({'success': False, 'error': 'Database connection failed'}), 500
+
+@app.route('/api/registration_mode', methods=['GET'])
+def get_registration_mode_api():
+    """Get current registration mode setting"""
+    try:
+        mode = get_registration_mode()
+        return jsonify({
+            'success': True,
+            'mode': mode,
+            'is_public': mode == 'public',
+            'is_referral_only': mode == 'referral_only'
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'mode': 'public'  # Default fallback
+        }), 500
 
 @app.route('/api/pending_friends_count', methods=['GET'])
 def get_pending_friends_count():

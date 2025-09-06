@@ -243,6 +243,17 @@
 
         .data-table th:hover {
             background: #e9ecef;
+            cursor: pointer;
+        }
+
+        .data-table th:hover::after {
+            content: "🔽";
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 10px;
+            color: #007bff;
         }
 
         /* Sticky column for strain name (2nd column) */
@@ -300,25 +311,44 @@
             left: 0;
             right: 0;
             background: white;
-            border: 1px solid #dee2e6;
-            border-radius: 4px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            max-height: 200px;
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+            max-height: 250px;
             overflow-y: auto;
             z-index: 1000;
             display: none;
+            font-size: 13px;
+        }
+
+        .filter-dropdown::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .filter-dropdown::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .filter-dropdown::-webkit-scrollbar-thumb {
+            background: #007bff;
+            border-radius: 3px;
         }
 
         .filter-option {
-            padding: 8px 12px;
+            padding: 10px 14px;
             cursor: pointer;
-            border-bottom: 1px solid #f8f9fa;
-            font-size: 12px;
-            transition: background-color 0.2s ease;
+            border-bottom: 1px solid #f1f3f4;
+            font-size: 13px;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .filter-option:hover {
-            background: #f8f9fa;
+            background: #f8f9ff;
+            color: #007bff;
+            transform: translateX(2px);
         }
 
         .filter-option:last-child {
@@ -331,18 +361,32 @@
             font-weight: 600;
         }
 
+        .filter-option.selected::after {
+            content: "✓";
+            color: #1976d2;
+            font-weight: bold;
+        }
+
         .filter-clear {
-            padding: 8px 12px;
-            background: #f8f9fa;
-            border-bottom: 1px solid #dee2e6;
-            font-size: 12px;
-            color: #dc3545;
+            padding: 12px 14px;
+            background: linear-gradient(135deg, #ff4757, #ff3742);
+            border-bottom: 2px solid #dee2e6;
+            font-size: 13px;
+            color: white;
             cursor: pointer;
             font-weight: 600;
+            text-align: center;
+            transition: all 0.2s ease;
         }
 
         .filter-clear:hover {
-            background: #e9ecef;
+            background: linear-gradient(135deg, #ff3742, #ff2f3a);
+            transform: scale(1.02);
+        }
+
+        .filter-clear::before {
+            content: "🗑️ ";
+            margin-right: 5px;
         }
 
         .filter-indicator {
@@ -920,8 +964,10 @@
             const clickX = event.clientX - rect.left;
             const headerWidth = rect.width;
 
-            // ถ้าคลิกในส่วนขวาสุด (30px) ให้แสดง filter
-            if (clickX > headerWidth - 30) {
+            // ถ้าคลิกในส่วนขวาสุด (40px) ให้แสดง filter
+            if (clickX > headerWidth - 40) {
+                event.preventDefault();
+                event.stopPropagation();
                 toggleFilterDropdown(column);
             } else {
                 // ถ้าคลิกในส่วนอื่น ให้ sort
@@ -945,6 +991,12 @@
             } else {
                 populateFilterDropdown(column);
                 dropdown.style.display = 'block';
+                
+                // Position dropdown correctly
+                const header = dropdown.parentElement;
+                const rect = header.getBoundingClientRect();
+                dropdown.style.minWidth = Math.max(rect.width, 150) + 'px';
+                dropdown.style.maxWidth = '300px';
             }
         }
 
@@ -987,6 +1039,9 @@
 
             // กรองข้อมูล
             applyAllFilters();
+
+            // แสดงจำนวน filter ที่ใช้งาน
+            updateFilterCount();
         }
 
         function clearFilter(column) {
@@ -1003,6 +1058,57 @@
 
             // กรองข้อมูล
             applyAllFilters();
+
+            // อัพเดทจำนวน filter ที่ใช้งาน
+            updateFilterCount();
+        }
+
+        function updateFilterCount() {
+            const filterCount = Object.keys(activeFilters).length;
+            const summaryCards = document.getElementById('summaryCards');
+            
+            // ลบการแสดงจำนวน filter เก่า (ถ้ามี)
+            const existingFilterInfo = document.getElementById('filterInfo');
+            if (existingFilterInfo) {
+                existingFilterInfo.remove();
+            }
+
+            // แสดงจำนวน filter ปัจจุบัน
+            if (filterCount > 0) {
+                const filterInfo = document.createElement('div');
+                filterInfo.id = 'filterInfo';
+                filterInfo.className = 'summary-card';
+                filterInfo.style.backgroundColor = '#fff3cd';
+                filterInfo.style.borderLeft = '4px solid #ffc107';
+                filterInfo.innerHTML = `
+                    <div class="summary-number" style="color: #856404;">${filterCount}</div>
+                    <div class="summary-label">ตัวกรองที่ใช้งาน</div>
+                    <button onclick="clearAllFilters()" style="margin-top: 5px; padding: 3px 8px; font-size: 10px; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer;">
+                        ล้างทั้งหมด
+                    </button>
+                `;
+                summaryCards.appendChild(filterInfo);
+            }
+        }
+
+        function clearAllFilters() {
+            // ลบ filter ทั้งหมด
+            activeFilters = {};
+            
+            // ซ่อน indicator ทั้งหมด
+            document.querySelectorAll('.filter-indicator').forEach(indicator => {
+                indicator.style.display = 'none';
+            });
+
+            // ปิด dropdown ทั้งหมด
+            document.querySelectorAll('.filter-dropdown').forEach(dropdown => {
+                dropdown.style.display = 'none';
+            });
+
+            // รีเซ็ตข้อมูล
+            filteredBudsData = [];
+            applyAllFilters();
+            updateFilterCount();
         }
 
         function applyAllFilters() {

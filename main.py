@@ -2326,20 +2326,27 @@ def upload_bud_images(bud_id):
 
             # Update database with image URLs
             if image_urls:
+                # Define allowed field names to prevent SQL injection
+                allowed_fields = {'image_1_url', 'image_2_url', 'image_3_url', 'image_4_url'}
+                
                 update_fields = []
                 update_values = []
                 for field, url in image_urls.items():
+                    # Validate field name against whitelist
+                    if field not in allowed_fields:
+                        continue  # Skip invalid field names
                     update_fields.append(f"{field} = %s")
                     update_values.append(url)
 
-                update_values.append(bud_id)
-                update_query = f"""
-                    UPDATE buds_data SET {', '.join(update_fields)}, updated_at = CURRENT_TIMESTAMP
-                    WHERE id = %s
-                """
+                if update_fields:  # Only proceed if we have valid fields to update
+                    update_values.append(bud_id)
+                    update_query = f"""
+                        UPDATE buds_data SET {', '.join(update_fields)}, updated_at = CURRENT_TIMESTAMP
+                        WHERE id = %s
+                    """
 
-                cur.execute(update_query, update_values)
-                conn.commit()
+                    cur.execute(update_query, update_values)
+                    conn.commit()
 
                 return jsonify({
                     'success': True,

@@ -61,7 +61,7 @@ def reset_user_password(email, new_password):
 if __name__ == "__main__":
     # Reset password for the problematic user
     email = "johunna@gmail.com"
-    new_password = "BudtBoy2024@!"  # You can change this to whatever password you want
+    new_password = "004912"
     
     print(f"Resetting password for {email}...")
     success = reset_user_password(email, new_password)

@@ -1032,6 +1032,47 @@ def create_tables():
                 referral_code = secrets.token_urlsafe(8)
                 cur.execute("UPDATE users SET referral_code = %s WHERE id = %s", (referral_code, user_row[0]))
 
+            # Create admin_settings table
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS admin_settings (
+                    id SERIAL PRIMARY KEY,
+                    setting_key VARCHAR(255) UNIQUE NOT NULL,
+                    setting_value TEXT,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_by INTEGER REFERENCES users(id)
+                );
+            """)
+
+            # Insert default admin settings if table is empty
+            cur.execute("SELECT COUNT(*) FROM admin_settings")
+            settings_count = cur.fetchone()[0]
+
+            if settings_count == 0:
+                default_settings = [
+                    ('autoApproval', 'false'),
+                    ('publicRegistration', 'true'),
+                    ('emailVerification', 'true'),
+                    ('autoApproveReviews', 'false'),
+                    ('maxImagesPerReview', '4'),
+                    ('maxImageSize', '5'),
+                    ('multipleLogin', 'true'),
+                    ('sessionTimeout', '60'),
+                    ('loginLogging', 'true'),
+                    ('siteName', 'Cannabis App'),
+                    ('siteDescription', 'แพลตฟอร์มสำหรับแชร์ข้อมูลและรีวิวกัญชา'),
+                    ('adminEmail', 'admin@budtboy.app'),
+                    ('defaultLanguage', 'th'),
+                    ('displayMode', 'auto'),
+                    ('itemsPerPage', '20'),
+                    ('enableNotifications', 'true'),
+                    ('maintenanceMode', 'false')
+                ]
+
+                cur.executemany("""
+                    INSERT INTO admin_settings (setting_key, setting_value)
+                    VALUES (%s, %s)
+                """, default_settings)
+
             # Create index for better performance
             cur.execute("""
                 CREATE INDEX IF NOT EXISTS idx_strain_names_th ON strain_names(name_th);
@@ -1051,6 +1092,7 @@ def create_tables():
                 CREATE INDEX IF NOT EXISTS idx_reviews_created_at ON reviews(created_at);
                 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
                 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+                CREATE INDEX IF NOT EXISTS idx_admin_settings_key ON admin_settings(setting_key);
             """)
 
             conn.commit()
@@ -4488,50 +4530,78 @@ def save_admin_settings():
     if conn:
         try:
             data = request.get_json()
+            if not data:
+                return jsonify({'error': 'ไม่มีข้อมูลที่จะบันทึก'}), 400
+                
             cur = conn.cursor()
             
-            # สร้างตารางสำหรับเก็บการตั้งค่าถ้ายังไม่มี
+            # ตรวจสอบว่าตาราง admin_settings มีอยู่หรือไม่
             cur.execute("""
-                CREATE TABLE IF NOT EXISTS admin_settings (
-                    id SERIAL PRIMARY KEY,
-                    setting_key VARCHAR(255) UNIQUE NOT NULL,
-                    setting_value TEXT,
-                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    updated_by INTEGER REFERENCES users(id)
-                );
+                SELECT EXISTS (
+                    SELECT FROM information_schema.tables 
+                    WHERE table_name = 'admin_settings'
+                )
             """)
+            table_exists = cur.fetchone()[0]
+            
+            if not table_exists:
+                # สร้างตารางถ้ายังไม่มี
+                cur.execute("""
+                    CREATE TABLE admin_settings (
+                        id SERIAL PRIMARY KEY,
+                        setting_key VARCHAR(255) UNIQUE NOT NULL,
+                        setting_value TEXT,
+                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        updated_by INTEGER REFERENCES users(id)
+                    );
+                """)
+                print("Created admin_settings table")
             
             admin_id = session['user_id']
+            saved_count = 0
             
             # บันทึกการตั้งค่าแต่ละรายการ
             for key, value in data.items():
                 if value is not None:
-                    cur.execute("""
-                        INSERT INTO admin_settings (setting_key, setting_value, updated_by)
-                        VALUES (%s, %s, %s)
-                        ON CONFLICT (setting_key)
-                        DO UPDATE SET 
-                            setting_value = EXCLUDED.setting_value,
-                            updated_at = CURRENT_TIMESTAMP,
-                            updated_by = EXCLUDED.updated_by
-                    """, (key, str(value), admin_id))
+                    try:
+                        cur.execute("""
+                            INSERT INTO admin_settings (setting_key, setting_value, updated_by)
+                            VALUES (%s, %s, %s)
+                            ON CONFLICT (setting_key)
+                            DO UPDATE SET 
+                                setting_value = EXCLUDED.setting_value,
+                                updated_at = CURRENT_TIMESTAMP,
+                                updated_by = EXCLUDED.updated_by
+                        """, (key, str(value), admin_id))
+                        saved_count += 1
+                        print(f"Saved setting: {key} = {value}")
+                    except Exception as e:
+                        print(f"Error saving setting {key}: {e}")
+                        continue
             
             conn.commit()
+            print(f"Total settings saved: {saved_count}")
+            
             cur.close()
             return_db_connection(conn)
             
             return jsonify({
                 'success': True,
-                'message': 'บันทึกการตั้งค่าระบบทั่วไปสำเร็จ'
+                'message': f'บันทึกการตั้งค่าสำเร็จ ({saved_count} รายการ)',
+                'saved_count': saved_count
             })
             
         except Exception as e:
             print(f"Error saving admin settings: {e}")
-            conn.rollback()
+            if conn:
+                conn.rollback()
             return jsonify({'error': f'เกิดข้อผิดพลาดในการบันทึก: {str(e)}'}), 500
         finally:
             if cur:
-                cur.close()
+                try:
+                    cur.close()
+                except:
+                    pass
             if conn:
                 return_db_connection(conn)
     else:
@@ -4548,6 +4618,47 @@ def get_admin_settings():
         try:
             cur = conn.cursor()
             
+            # ตรวจสอบว่าตาราง admin_settings มีอยู่หรือไม่
+            cur.execute("""
+                SELECT EXISTS (
+                    SELECT FROM information_schema.tables 
+                    WHERE table_name = 'admin_settings'
+                )
+            """)
+            table_exists = cur.fetchone()[0]
+            
+            if not table_exists:
+                # สร้างตารางถ้ายังไม่มี
+                cur.execute("""
+                    CREATE TABLE admin_settings (
+                        id SERIAL PRIMARY KEY,
+                        setting_key VARCHAR(255) UNIQUE NOT NULL,
+                        setting_value TEXT,
+                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        updated_by INTEGER REFERENCES users(id)
+                    );
+                """)
+                
+                # เพิ่มการตั้งค่าเริ่มต้น
+                default_settings = [
+                    ('autoApproval', 'false'),
+                    ('publicRegistration', 'true'),
+                    ('emailVerification', 'true'),
+                    ('autoApproveReviews', 'false'),
+                    ('maxImagesPerReview', '4'),
+                    ('maxImageSize', '5'),
+                    ('multipleLogin', 'true'),
+                    ('sessionTimeout', '60'),
+                    ('loginLogging', 'true')
+                ]
+                
+                cur.executemany("""
+                    INSERT INTO admin_settings (setting_key, setting_value)
+                    VALUES (%s, %s)
+                """, default_settings)
+                
+                conn.commit()
+            
             # ดึงการตั้งค่าปัจจุบัน
             cur.execute("""
                 SELECT setting_key, setting_value FROM admin_settings
@@ -4557,9 +4668,9 @@ def get_admin_settings():
             for row in cur.fetchall():
                 key, value = row
                 # แปลงค่าตามประเภท
-                if value.lower() in ['true', 'false']:
+                if value and value.lower() in ['true', 'false']:
                     settings[key] = value.lower() == 'true'
-                elif value.isdigit():
+                elif value and value.isdigit():
                     settings[key] = int(value)
                 else:
                     settings[key] = value
@@ -4574,6 +4685,8 @@ def get_admin_settings():
             
         except Exception as e:
             print(f"Error getting admin settings: {e}")
+            if conn:
+                conn.rollback()
             return jsonify({'error': f'เกิดข้อผิดพลาด: {str(e)}'}), 500
         finally:
             if cur:

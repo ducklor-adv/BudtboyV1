@@ -147,7 +147,7 @@ def init_connection_pool():
             if connection_pool is None:
                 database_url = os.environ.get('DATABASE_URL')
                 if database_url:
-                    connection_pool = psycopg2.pool.ThreadedConnectionPool(
+                    connection_pool = pool.ThreadedConnectionPool(
                         1, 20,  # min and max connections
                         database_url,
                         sslmode='prefer',
@@ -2231,10 +2231,12 @@ def update_bud(bud_id):
             flowering_type
         ]
 
-        # Add image deletion updates
+        # Add image deletion updates with whitelist validation
+        allowed_image_columns = {'image_1_url', 'image_2_url', 'image_3_url', 'image_4_url'}
         for field, value in image_updates.items():
-            update_fields.append(f'{field} = %s')
-            update_values.append(value)
+            if field in allowed_image_columns:  # Whitelist validation
+                update_fields.append(f'{field} = %s')
+                update_values.append(value)
 
         # Add bud_id for WHERE clause
         update_values.append(bud_id)

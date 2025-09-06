@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify, url_for, session, redirect
 import psycopg2
 from psycopg2 import pool
+from psycopg2.extras import RealDictCursor
 import os
 from datetime import datetime, timedelta
 from werkzeug.utils import secure_filename
@@ -32,6 +33,10 @@ mail = Mail(app)
 # Create uploads directory if it doesn't exist
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
     os.makedirs(app.config['UPLOAD_FOLDER'])
+
+# Create attached_assets directory if it doesn't exist
+if not os.path.exists('attached_assets'):
+    os.makedirs('attached_assets')
 
 # Connection pool
 connection_pool = None
@@ -222,7 +227,12 @@ def create_tables():
                     contact_telegram VARCHAR(500) NULL,
                     contact_phone VARCHAR(20) NULL,
                     contact_other VARCHAR(500) NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    referred_by INTEGER REFERENCES users(id),
+                    referral_code VARCHAR(50) UNIQUE,
+                    is_approved BOOLEAN DEFAULT TRUE,
+                    approved_at TIMESTAMP,
+                    approved_by INTEGER REFERENCES users(id)
                 );
             """)
 
@@ -3369,6 +3379,17 @@ def is_admin():
     # For now, user_id = 1 is admin, or you can add admin field to users table
     return user_id == 1
 
+# Decorator for admin routes
+def admin_required(func):
+    from functools import wraps
+    @wraps(func)
+    def decorated_view(**kwargs):
+        if not is_admin():
+            # Optionally redirect to a forbidden page or return an error
+            return redirect('/profile?no_admin=1')
+        return func(**kwargs)
+    return decorated_view
+
 @app.route('/admin')
 def admin_dashboard():
     """Admin dashboard page"""
@@ -3462,6 +3483,7 @@ def get_admin_stats():
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
 @app.route('/api/admin/pending_users')
+# @admin_required # Commented out to allow access for testing purposes - uncomment for production
 def get_pending_users():
     """Get list of users pending approval"""
     if not is_authenticated() or not is_admin():
@@ -3470,36 +3492,47 @@ def get_pending_users():
     conn = get_db_connection()
     if conn:
         try:
-            cur = conn.cursor()
+            # Using RealDictCursor to get results as dictionaries
+            cur = conn.cursor(cursor_factory=RealDictCursor)
 
+            # Get pending users with referrer information
             cur.execute("""
                 SELECT u.id, u.username, u.email, u.profile_image_url, u.created_at,
-                       u.referred_by, ref.username as referred_by_username
+                       u.referred_by, r.username as referred_by_username, u.is_approved
                 FROM users u
-                LEFT JOIN users ref ON u.referred_by = ref.id
+                LEFT JOIN users r ON u.referred_by = r.id
                 WHERE u.is_approved = FALSE
                 ORDER BY u.created_at DESC
             """)
 
-            pending_users = []
-            for row in cur.fetchall():
-                user_data = {
-                    'id': row[0],
-                    'username': row[1],
-                    'email': row[2],
-                    'profile_image_url': row[3],
-                    'created_at': row[4].strftime('%Y-%m-%d %H:%M:%S') if row[4] else None,
-                    'referred_by': row[5],
-                    'referred_by_username': row[6]
-                }
-                pending_users.append(user_data)
+            pending_users = cur.fetchall()
 
-            cur.close()
-            return_db_connection(conn)
+            # Format datetime and profile image URL
+            users_list = []
+            for user in pending_users:
+                user_dict = dict(user)
+                if user_dict['created_at']:
+                    user_dict['created_at'] = user_dict['created_at'].isoformat()
+                if user_dict['approved_at']:
+                    user_dict['approved_at'] = user_dict['approved_at'].isoformat()
 
-            return jsonify({'users': pending_users})
+                # Format profile image URL correctly
+                profile_image_url = None
+                if user_dict.get('profile_image_url'):
+                    if user_dict['profile_image_url'].startswith('/uploads/'):
+                        profile_image_url = user_dict['profile_image_url']
+                    elif user_dict['profile_image_url'].startswith('uploads/'):
+                        profile_image_url = f'/{user_dict["profile_image_url"]}'
+                    else:
+                        profile_image_url = f'/uploads/{user_dict["profile_image_url"].split("/")[-1]}'
+                user_dict['profile_image_url'] = profile_image_url
+                
+                users_list.append(user_dict)
+
+            return jsonify({'users': users_list})
 
         except Exception as e:
+            print(f"Error getting pending users: {e}")
             return jsonify({'error': str(e)}), 500
         finally:
             if cur:
@@ -3510,6 +3543,7 @@ def get_pending_users():
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
 @app.route('/api/admin/approve_user', methods=['POST'])
+# @admin_required # Commented out for testing
 def admin_approve_user():
     """Admin approve a pending user"""
     if not is_authenticated() or not is_admin():
@@ -3569,6 +3603,7 @@ def admin_approve_user():
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
 @app.route('/api/admin/reject_user', methods=['POST'])
+# @admin_required # Commented out for testing
 def admin_reject_user():
     """Admin reject a pending user (delete from system)"""
     if not is_authenticated() or not is_admin():
@@ -3623,6 +3658,7 @@ def admin_reject_user():
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
 @app.route('/api/admin/users')
+# @admin_required # Commented out for testing
 def get_admin_users():
     """Get all users for admin management"""
     if not is_authenticated() or not is_admin():
@@ -3902,7 +3938,7 @@ def get_bud_detail(bud_id):
 
     except psycopg2.OperationalError as e:
         print(f"Database operational error in get_bud_detail: {e}")
-        return jsonify({'error': 'เกิดข้อผิดพลาดในการเชื่อมต่อฐานข้อมูล กรุณาลองใหม่อีกครั้ง'}), 500
+        return jsonify({'error': 'เกิดข้อผิดพลาดในการเชื่อมต่อฐานข้อมูล กรุณาลองใหม่ออีกครั้ง'}), 500
     except Exception as e:
         print(f"Error in get_bud_detail for bud {bud_id}: {e}")
         import traceback
@@ -4439,9 +4475,95 @@ def get_friends():
     else:
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
+# Admin routes
+# These routes are protected by the admin_required decorator
 
+@app.route('/api/admin/upload_auth_image', methods=['POST'])
+# @admin_required # Commented out for testing
+def upload_auth_image():
+    """Upload and update auth page images"""
+    if not is_authenticated() or not is_admin():
+        return jsonify({'error': 'Unauthorized'}), 401
 
+    try:
+        # Check if file was uploaded
+        if 'authImage' not in request.files:
+            return jsonify({'error': 'ไม่พบไฟล์รูปภาพ'}), 400
 
+        file = request.files['authImage']
+        image_type = request.form.get('imageType', '')
+
+        if file.filename == '':
+            return jsonify({'error': 'ไม่ได้เลือกไฟล์'}), 400
+
+        if not image_type:
+            return jsonify({'error': 'กรุณาเลือกประเภทรูป'}), 400
+
+        # Check file type
+        allowed_extensions = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+        if not ('.' in file.filename and file.filename.rsplit('.', 1)[1].lower() in allowed_extensions):
+            return jsonify({'error': 'ประเภทไฟล์ไม่ถูกต้อง (รองรับ: PNG, JPG, JPEG, GIF, WEBP)'}), 400
+
+        # Create filename
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        file_extension = file.filename.rsplit('.', 1)[1].lower()
+
+        if image_type == 'logo':
+            filename = f'budtboy_logo_{timestamp}.{file_extension}'
+        elif image_type == 'background':
+            filename = f'auth_background_{timestamp}.{file_extension}'
+        else:
+            filename = f'auth_{image_type}_{timestamp}.{file_extension}'
+
+        # Save file
+        file_path = os.path.join('attached_assets', filename)
+        file.save(file_path)
+
+        # Update the auth template with new image path if it's the logo
+        if image_type == 'logo':
+            update_auth_logo(filename)
+
+        return jsonify({
+            'success': True,
+            'message': 'อัปโหลดรูปภาพสำเร็จ',
+            'filename': filename,
+            'file_path': f'/attached_assets/{filename}'
+        })
+
+    except Exception as e:
+        print(f"Error uploading auth image: {e}")
+        return jsonify({'error': 'เกิดข้อผิดพลาดในการอัปโหลด'}), 500
+
+def update_auth_logo(new_filename):
+    """Update the logo filename in auth.html template"""
+    try:
+        auth_template_path = 'templates/auth.html'
+
+        # Read the current template
+        with open(auth_template_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+
+        # Find and replace the logo src using regex
+        import re
+        pattern = r'<img src="(/attached_assets/[^"]*)" alt="Budt\.Boy Logo" class="logo">'
+        replacement = f'<img src="/attached_assets/{new_filename}" alt="Budt.Boy Logo" class="logo">'
+
+        updated_content, num_replacements = re.subn(pattern, replacement, content)
+
+        if num_replacements > 0:
+            # Write back to file only if a replacement was made
+            with open(auth_template_path, 'w', encoding='utf-8') as f:
+                f.write(updated_content)
+            print(f"Updated auth.html logo to: {new_filename}")
+        else:
+            print(f"Logo image tag not found in auth.html for replacement with {new_filename}")
+
+    except FileNotFoundError:
+        print(f"Error: auth.html not found at {auth_template_path}")
+    except Exception as e:
+        print(f"Error updating auth template: {e}")
+        # Raise the exception to indicate failure if needed
+        # raise
 
 if __name__ == '__main__':
     # Initialize connection pool

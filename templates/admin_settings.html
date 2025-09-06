@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -343,6 +342,134 @@
             line-height: 1.2;
         }
 
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80%;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.3s;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .image-preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .image-item {
+            text-align: center;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            transition: border-color 0.3s;
+        }
+
+        .image-item:hover {
+            border-color: #667eea;
+        }
+
+        .preview-img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .upload-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+
         @media (max-width: 768px) {
             .admin-container {
                 margin: 10px;
@@ -363,6 +490,26 @@
             .setting-control {
                 flex-direction: column;
                 align-items: stretch;
+            }
+
+            .modal-content {
+                width: 95%;
+                max-height: 90%;
+            }
+
+            .modal-header,
+            .modal-body {
+                padding: 15px;
+            }
+
+            .image-preview-grid {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                gap: 10px;
+            }
+
+            .preview-img {
+                width: 80px;
+                height: 80px;
             }
 
             .bottom-nav {
@@ -397,6 +544,62 @@
 
         <div class="admin-content">
             <div class="settings-grid">
+                <!-- Auth Image Settings -->
+                <div class="settings-section">
+                    <div class="section-title">
+                        🖼️ จัดการรูปภาพหน้า Auth
+                    </div>
+                    <div class="setting-group">
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <h4>🔧 ระบบทั่วไป</h4>
+                                <p>ตั้งค่าพื้นฐานของระบบ</p>
+                            </div>
+                            <div class="setting-actions">
+                                <button class="btn btn-primary" onclick="editGeneralSettings()">
+                                    แก้ไข
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <h4>👥 ผู้ใช้งาน</h4>
+                                <p>จัดการการอนุมัติและสิทธิ์ผู้ใช้</p>
+                            </div>
+                            <div class="setting-actions">
+                                <button class="btn btn-primary" onclick="editUserSettings()">
+                                    แก้ไข
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <h4>🌿 ข้อมูลสายพันธุ์</h4>
+                                <p>ตั้งค่าการจัดการข้อมูลสายพันธุ์</p>
+                            </div>
+                            <div class="setting-actions">
+                                <button class="btn btn-primary" onclick="editStrainSettings()">
+                                    แก้ไข
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <h4>⭐ รีวิว</h4>
+                                <p>ตั้งค่าการจัดการรีวิวและการแสดงผล</p>
+                            </div>
+                            <div class="setting-actions">
+                                <button class="btn btn-primary" onclick="editReviewSettings()">
+                                    แก้ไข
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- System Settings -->
                 <div class="settings-section">
                     <div class="section-title">
@@ -758,6 +961,160 @@
                 }, 3000);
             }
         };
+
+        // Settings functions
+        function editAuthImages() {
+            showAuthImageModal();
+        }
+
+        function editGeneralSettings() {
+            alert('การตั้งค่าระบบทั่วไป - ฟีเจอร์นี้กำลังพัฒนา');
+        }
+
+        function editUserSettings() {
+            alert('การตั้งค่าผู้ใช้งาน - ฟีเจอร์นี้กำลังพัฒนา');
+        }
+
+        function editStrainSettings() {
+            alert('การตั้งค่าสายพันธุ์ - ฟีเจอร์นี้กำลังพัฒนา');
+        }
+
+        function editReviewSettings() {
+            alert('การตั้งค่ารีวิว - ฟีเจอร์นี้กำลังพัฒนา');
+        }
+
+        // Auth Image Management
+        function showAuthImageModal() {
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>🖼️ จัดการรูปภาพหน้า Auth</h3>
+                        <button class="close-btn" onclick="closeModal()">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="current-images">
+                            <h4>รูปภาพปัจจุบัน</h4>
+                            <div class="image-preview-grid">
+                                <div class="image-item">
+                                    <img src="/attached_assets/budtboy_1753713990613.png" alt="Logo" class="preview-img">
+                                    <p>Logo หลัก</p>
+                                    <button class="btn btn-sm btn-primary" onclick="changeImage('logo')">เปลี่ยนรูป</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="upload-section">
+                            <h4>อัปโหลดรูปใหม่</h4>
+                            <form id="authImageForm" enctype="multipart/form-data">
+                                <div class="form-group">
+                                    <label for="imageType">ประเภทรูป:</label>
+                                    <select id="imageType" name="imageType" required>
+                                        <option value="">เลือกประเภทรูป</option>
+                                        <option value="logo">Logo หลัก</option>
+                                        <option value="background">รูปพื้นหลัง</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="authImage">เลือกไฟล์รูป:</label>
+                                    <input type="file" id="authImage" name="authImage" accept="image/*" required>
+                                </div>
+                                <div class="form-actions">
+                                    <button type="submit" class="btn btn-success">อัปโหลด</button>
+                                    <button type="button" class="btn btn-secondary" onclick="closeModal()">ยกเลิก</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+
+            // Handle form submission
+            document.getElementById('authImageForm').addEventListener('submit', handleAuthImageUpload);
+        }
+
+        async function handleAuthImageUpload(e) {
+            e.preventDefault();
+
+            const formData = new FormData(e.target);
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+
+            try {
+                submitBtn.textContent = 'กำลังอัปโหลด...';
+                submitBtn.disabled = true;
+
+                const response = await fetch('/api/admin/upload_auth_image', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    AdminSettings.showMessage('อัปโหลดรูปภาพสำเร็จ!', 'success');
+                    closeModal();
+                    // Reload current images
+                    loadCurrentAuthImages();
+                } else {
+                    AdminSettings.showMessage(result.error || 'เกิดข้อผิดพลาดในการอัปโหลด', 'error');
+                }
+            } catch (error) {
+                console.error('Error uploading auth image:', error);
+                AdminSettings.showMessage('เกิดข้อผิดพลาดในการอัปโหลด', 'error');
+            } finally {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+
+        function changeImage(type) {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = async function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const formData = new FormData();
+                    formData.append('authImage', file);
+                    formData.append('imageType', type);
+
+                    try {
+                        const response = await fetch('/api/admin/upload_auth_image', {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        const result = await response.json();
+
+                        if (response.ok) {
+                            AdminSettings.showMessage('เปลี่ยนรูปภาพสำเร็จ!', 'success');
+                            closeModal();
+                        } else {
+                            AdminSettings.showMessage(result.error || 'เกิดข้อผิดพลาด', 'error');
+                        }
+                    } catch (error) {
+                        AdminSettings.showMessage('เกิดข้อผิดพลาดในการอัปโหลด', 'error');
+                    }
+                }
+            };
+            input.click();
+        }
+
+        function closeModal() {
+            const modal = document.querySelector('.modal-overlay');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        function loadCurrentAuthImages() {
+            // This function can be expanded to load current images from server
+            console.log('Loading current auth images...');
+        }
 
         // Global functions for buttons
         function updateMaxImages() {

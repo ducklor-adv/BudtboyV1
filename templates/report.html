@@ -470,19 +470,16 @@
             font-size: 12px;
         }
 
-        .thc-cbd-display {
-            font-size: 12px;
-            line-height: 1.4;
-        }
-
         .thc {
             color: #ff6b6b;
             font-weight: 600;
+            font-size: 13px;
         }
 
         .cbd {
             color: #4ecdc4;
             font-weight: 600;
+            font-size: 13px;
         }
 
         .grade-badge {
@@ -686,7 +683,7 @@
 
             .data-table {
                 font-size: 11px;
-                min-width: 800px;
+                min-width: 900px;
             }
 
             .data-table th,
@@ -741,8 +738,9 @@
                 font-size: 11px;
             }
 
-            .thc-cbd-display {
-                font-size: 10px;
+            .thc,
+            .cbd {
+                font-size: 11px;
             }
 
             .full-report-btn {
@@ -840,10 +838,16 @@
                             <div class="filter-dropdown" id="dropdown-strain_type"></div>
                         </th>
                         <th onclick="handleHeaderClick(event, 'thc_percentage')" data-column="thc_percentage">
-                            THC/CBD
+                            THC (%)
                             <span class="sort-indicator" id="sort-thc_percentage"></span>
                             <span class="filter-indicator" id="filter-thc_percentage"></span>
                             <div class="filter-dropdown" id="dropdown-thc_percentage"></div>
+                        </th>
+                        <th onclick="handleHeaderClick(event, 'cbd_percentage')" data-column="cbd_percentage">
+                            CBD (%)
+                            <span class="sort-indicator" id="sort-cbd_percentage"></span>
+                            <span class="filter-indicator" id="filter-cbd_percentage"></span>
+                            <div class="filter-dropdown" id="dropdown-cbd_percentage"></div>
                         </th>
                         <th onclick="handleHeaderClick(event, 'grade')" data-column="grade">
                             เกรด
@@ -1259,7 +1263,7 @@
             const tbody = document.getElementById('tableBody');
 
             if (dataToDisplay.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="12" class="empty-state">ไม่พบข้อมูล</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="13" class="empty-state">ไม่พบข้อมูล</td></tr>';
                 return;
             }
 
@@ -1273,9 +1277,11 @@
                             ${bud.strain_type || 'ไม่ระบุ'}
                         </span>
                     </td>
-                    <td class="thc-cbd-display">
-                        <div class="thc">THC: ${bud.thc_percentage || 'N/A'}%</div>
-                        <div class="cbd">CBD: ${bud.cbd_percentage || 'N/A'}%</div>
+                    <td>
+                        <span class="thc">${bud.thc_percentage || 'N/A'}%</span>
+                    </td>
+                    <td>
+                        <span class="cbd">${bud.cbd_percentage || 'N/A'}%</span>
                     </td>
                     <td>
                         <span class="grade-badge ${getGradeClass(bud.grade)}">

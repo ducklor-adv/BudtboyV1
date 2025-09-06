@@ -4484,19 +4484,149 @@ def save_admin_settings():
     if not is_authenticated() or not is_admin():
         return jsonify({'error': 'Unauthorized'}), 401
 
+    conn = get_db_connection()
+    if conn:
+        try:
+            data = request.get_json()
+            cur = conn.cursor()
+            
+            # สร้างตารางสำหรับเก็บการตั้งค่าถ้ายังไม่มี
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS admin_settings (
+                    id SERIAL PRIMARY KEY,
+                    setting_key VARCHAR(255) UNIQUE NOT NULL,
+                    setting_value TEXT,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_by INTEGER REFERENCES users(id)
+                );
+            """)
+            
+            admin_id = session['user_id']
+            
+            # บันทึกการตั้งค่าแต่ละรายการ
+            for key, value in data.items():
+                if value is not None:
+                    cur.execute("""
+                        INSERT INTO admin_settings (setting_key, setting_value, updated_by)
+                        VALUES (%s, %s, %s)
+                        ON CONFLICT (setting_key)
+                        DO UPDATE SET 
+                            setting_value = EXCLUDED.setting_value,
+                            updated_at = CURRENT_TIMESTAMP,
+                            updated_by = EXCLUDED.updated_by
+                    """, (key, str(value), admin_id))
+            
+            conn.commit()
+            cur.close()
+            return_db_connection(conn)
+            
+            return jsonify({
+                'success': True,
+                'message': 'บันทึกการตั้งค่าระบบทั่วไปสำเร็จ'
+            })
+            
+        except Exception as e:
+            print(f"Error saving admin settings: {e}")
+            conn.rollback()
+            return jsonify({'error': f'เกิดข้อผิดพลาดในการบันทึก: {str(e)}'}), 500
+        finally:
+            if cur:
+                cur.close()
+            if conn:
+                return_db_connection(conn)
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+@app.route('/api/admin/get_settings', methods=['GET'])
+def get_admin_settings():
+    """Get current admin settings"""
+    if not is_authenticated() or not is_admin():
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            
+            # ดึงการตั้งค่าปัจจุบัน
+            cur.execute("""
+                SELECT setting_key, setting_value FROM admin_settings
+            """)
+            
+            settings = {}
+            for row in cur.fetchall():
+                key, value = row
+                # แปลงค่าตามประเภท
+                if value.lower() in ['true', 'false']:
+                    settings[key] = value.lower() == 'true'
+                elif value.isdigit():
+                    settings[key] = int(value)
+                else:
+                    settings[key] = value
+            
+            cur.close()
+            return_db_connection(conn)
+            
+            return jsonify({
+                'success': True,
+                'settings': settings
+            })
+            
+        except Exception as e:
+            print(f"Error getting admin settings: {e}")
+            return jsonify({'error': f'เกิดข้อผิดพลาด: {str(e)}'}), 500
+        finally:
+            if cur:
+                cur.close()
+            if conn:
+                return_db_connection(conn)
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+@app.route('/api/admin/get_auth_images', methods=['GET'])
+def get_current_auth_images():
+    """Get current auth page images"""
+    if not is_authenticated() or not is_admin():
+        return jsonify({'error': 'Unauthorized'}), 401
+
     try:
-        data = request.get_json()
+        import os
+        images = {
+            'logo': None,
+            'background': None
+        }
         
-        # บันทึกการตั้งค่าลง localStorage (จำลอง)
-        # ในการใช้งานจริงควรบันทึกลงฐานข้อมูล
+        # ค้นหารูป logo ปัจจุบัน
+        if os.path.exists('attached_assets'):
+            files = os.listdir('attached_assets')
+            
+            # หา logo file ใหม่ล่าสุด
+            logo_files = [f for f in files if f.startswith('budtboy_logo_')]
+            if logo_files:
+                # เรียงตามวันที่และเวลา (จากชื่อไฟล์)
+                logo_files.sort(reverse=True)
+                images['logo'] = f'/attached_assets/{logo_files[0]}'
+            else:
+                # ใช้ logo เดิม
+                for f in files:
+                    if 'budtboy' in f.lower() and any(ext in f.lower() for ext in ['.png', '.jpg', '.jpeg']):
+                        images['logo'] = f'/attached_assets/{f}'
+                        break
+            
+            # หา background files
+            bg_files = [f for f in files if f.startswith('auth_background_')]
+            if bg_files:
+                bg_files.sort(reverse=True)
+                images['background'] = f'/attached_assets/{bg_files[0]}'
         
         return jsonify({
             'success': True,
-            'message': 'บันทึกการตั้งค่าสำเร็จ'
+            'images': images
         })
+        
     except Exception as e:
-        print(f"Error saving admin settings: {e}")
-        return jsonify({'error': 'เกิดข้อผิดพลาดในการบันทึก'}), 500
+        print(f"Error getting auth images: {e}")
+        return jsonify({'error': f'เกิดข้อผิดพลาด: {str(e)}'}), 500
 
 @app.route('/api/admin/upload_auth_image', methods=['POST'])
 # @admin_required # Commented out for testing

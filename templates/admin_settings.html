@@ -894,11 +894,23 @@
                 });
             },
 
-            loadSettings() {
-                // Load current settings from server or localStorage
-                const savedSettings = localStorage.getItem('adminSettings');
-                if (savedSettings) {
-                    this.settings = { ...this.settings, ...JSON.parse(savedSettings) };
+            async loadSettings() {
+                try {
+                    // Load current settings from server
+                    const response = await fetch('/api/admin/get_settings');
+                    if (response.ok) {
+                        const result = await response.json();
+                        if (result.success && result.settings) {
+                            this.settings = { ...this.settings, ...result.settings };
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error loading settings:', error);
+                    // Fallback to localStorage
+                    const savedSettings = localStorage.getItem('adminSettings');
+                    if (savedSettings) {
+                        this.settings = { ...this.settings, ...JSON.parse(savedSettings) };
+                    }
                 }
 
                 // Update UI
@@ -952,11 +964,18 @@
                         body: JSON.stringify(this.settings)
                     });
 
-                    if (!response.ok) {
-                        console.warn('Failed to save settings to server');
+                    const result = await response.json();
+                    
+                    if (response.ok && result.success) {
+                        console.log('Settings saved to server successfully');
+                        this.showMessage('บันทึกการตั้งค่าลงเซิร์ฟเวอร์สำเร็จ', 'success');
+                    } else {
+                        console.warn('Failed to save settings to server:', result.error);
+                        this.showMessage('เกิดข้อผิดพลาดในการบันทึก: ' + (result.error || 'ไม่ทราบสาเหตุ'), 'error');
                     }
                 } catch (error) {
                     console.error('Error saving settings to server:', error);
+                    this.showMessage('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์', 'error');
                 }
             },
 
@@ -1111,7 +1130,21 @@
         }
 
         // Auth Image Management
-        function showAuthImageModal() {
+        async function showAuthImageModal() {
+            // โหลดรูปปัจจุบันก่อน
+            let currentImages = {};
+            try {
+                const response = await fetch('/api/admin/get_auth_images');
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.success) {
+                        currentImages = result.images;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading current images:', error);
+            }
+
             const modal = document.createElement('div');
             modal.className = 'modal-overlay';
             modal.innerHTML = `
@@ -1125,10 +1158,17 @@
                             <h4>รูปภาพปัจจุบัน</h4>
                             <div class="image-preview-grid">
                                 <div class="image-item">
-                                    <img src="/attached_assets/budtboy_1753713990613.png" alt="Logo" class="preview-img">
+                                    <img src="${currentImages.logo || '/attached_assets/budtboy_1753713990613.png'}" alt="Logo" class="preview-img" style="max-width: 100px; max-height: 100px;">
                                     <p>Logo หลัก</p>
                                     <button class="btn btn-sm btn-primary" onclick="changeImage('logo')">เปลี่ยนรูป</button>
                                 </div>
+                                ${currentImages.background ? `
+                                <div class="image-item">
+                                    <img src="${currentImages.background}" alt="Background" class="preview-img" style="max-width: 100px; max-height: 100px;">
+                                    <p>พื้นหลัง</p>
+                                    <button class="btn btn-sm btn-primary" onclick="changeImage('background')">เปลี่ยนรูป</button>
+                                </div>
+                                ` : ''}
                             </div>
                         </div>
 
@@ -1238,9 +1278,20 @@
             }
         }
 
-        function loadCurrentAuthImages() {
-            // This function can be expanded to load current images from server
-            console.log('Loading current auth images...');
+        async function loadCurrentAuthImages() {
+            try {
+                const response = await fetch('/api/admin/get_auth_images');
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.success) {
+                        console.log('Current auth images loaded:', result.images);
+                        return result.images;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading current auth images:', error);
+            }
+            return null;
         }
 
         // Global functions for buttons

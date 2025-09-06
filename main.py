@@ -1074,6 +1074,25 @@ def create_tables():
                 );
             """)
 
+            # Create user_activity_logs table for user actions tracking
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS user_activity_logs (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+                    username VARCHAR(100),
+                    action VARCHAR(255) NOT NULL,
+                    resource_type VARCHAR(50),
+                    resource_id INTEGER,
+                    ip_address VARCHAR(45),
+                    user_agent TEXT,
+                    old_data JSONB,
+                    new_data JSONB,
+                    success BOOLEAN DEFAULT TRUE,
+                    details TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                );
+            """)
+
             # Insert default admin settings if table is empty
             cur.execute("SELECT COUNT(*) FROM admin_settings")
             settings_count = cur.fetchone()[0]
@@ -3630,6 +3649,40 @@ def log_admin_activity(admin_name, action, success=True, ip_address=None, user_a
             cur.close()
             return_db_connection(conn)
         except:
+            if conn:
+                return_db_connection(conn)
+
+def log_user_activity(user_id, username, action, resource_type=None, resource_id=None, 
+                     old_data=None, new_data=None, success=True, details=None, request_obj=None):
+    """Log user activity for tracking data changes"""
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            
+            # Get IP and User Agent from request if provided
+            ip_address = None
+            user_agent = None
+            if request_obj:
+                ip_address = request_obj.environ.get('HTTP_X_FORWARDED_FOR', request_obj.environ.get('REMOTE_ADDR'))
+                user_agent = request_obj.headers.get('User-Agent')
+            
+            # Convert data to JSON if provided
+            import json
+            old_data_json = json.dumps(old_data) if old_data else None
+            new_data_json = json.dumps(new_data) if new_data else None
+            
+            cur.execute("""
+                INSERT INTO user_activity_logs (user_id, username, action, resource_type, resource_id,
+                                               ip_address, user_agent, old_data, new_data, success, details)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (user_id, username, action, resource_type, resource_id, 
+                  ip_address, user_agent, old_data_json, new_data_json, success, details))
+            conn.commit()
+            cur.close()
+            return_db_connection(conn)
+        except Exception as e:
+            print(f"Error logging user activity: {e}")
             if conn:
                 return_db_connection(conn)
 

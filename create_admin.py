@@ -1,39 +1,132 @@
 
 #!/usr/bin/env python3
 """
-Script to create initial admin account
+Script to create additional admin accounts
 """
 import os
 import sys
 sys.path.append('.')
-from main import create_admin_account, init_connection_pool, create_tables
+from main import create_admin_account, init_connection_pool, create_tables, get_db_connection, hash_password, validate_password_strength
 
-def setup_initial_admin():
-    """Setup initial admin account"""
-    print("🔧 Setting up initial admin account...")
+def create_additional_admin():
+    """Create additional admin account"""
+    print("🔧 Creating additional admin account...")
     
     # Initialize database connection
     init_connection_pool()
     create_tables()
     
-    # Create first admin
-    admin_name = input("Enter admin name: ").strip()
+    # Get admin details
+    admin_name = input("Enter new admin name: ").strip()
+    
+    if not admin_name:
+        print("❌ Admin name cannot be empty")
+        return
+    
+    # Check if admin already exists
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("SELECT id FROM admin_accounts WHERE admin_name = %s", (admin_name,))
+            if cur.fetchone():
+                print(f"❌ Admin '{admin_name}' already exists")
+                cur.close()
+                return
+            cur.close()
+        except Exception as e:
+            print(f"❌ Error checking admin: {e}")
+            return
+        finally:
+            if conn:
+                from main import return_db_connection
+                return_db_connection(conn)
     
     while True:
         password = input("Enter admin password (min 8 chars, mix of upper/lower/numbers): ").strip()
-        if len(password) >= 8:
+        is_valid, message = validate_password_strength(password)
+        if is_valid:
             break
-        print("❌ Password must be at least 8 characters long")
+        print(f"❌ {message}")
     
-    success, message = create_admin_account(admin_name, password)
+    # Confirm password
+    confirm_password = input("Confirm password: ").strip()
+    if password != confirm_password:
+        print("❌ Passwords do not match")
+        return
     
-    if success:
-        print(f"✅ {message}")
-        print(f"🔑 Admin login URL: /admin_login")
-        print(f"👤 Admin name: {admin_name}")
-        print("🛡️  Please keep your credentials secure!")
+    # Create admin account
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            password_hash = hash_password(password)
+            
+            cur.execute("""
+                INSERT INTO admin_accounts (admin_name, password_hash, is_active, created_at)
+                VALUES (%s, %s, TRUE, NOW())
+                RETURNING id
+            """, (admin_name, password_hash))
+            
+            admin_id = cur.fetchone()[0]
+            conn.commit()
+            
+            print(f"✅ Created admin account: {admin_name}")
+            print(f"🔑 Admin login URL: /admin_login")
+            print(f"👤 Admin name: {admin_name}")
+            print("🛡️  Please keep your credentials secure!")
+            
+            cur.close()
+        except Exception as e:
+            print(f"❌ Error creating admin: {e}")
+            conn.rollback()
+        finally:
+            from main import return_db_connection
+            return_db_connection(conn)
     else:
-        print(f"❌ Failed to create admin: {message}")
+        print("❌ Database connection failed")
+
+def list_admins():
+    """List all admin accounts"""
+    print("📋 Current admin accounts:")
+    
+    init_connection_pool()
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("""
+                SELECT admin_name, is_active, created_at, last_login 
+                FROM admin_accounts 
+                ORDER BY created_at
+            """)
+            
+            admins = cur.fetchall()
+            if not admins:
+                print("   No admin accounts found")
+            else:
+                for admin in admins:
+                    status = "🟢 Active" if admin[1] else "🔴 Inactive"
+                    last_login = admin[3].strftime('%Y-%m-%d %H:%M') if admin[3] else "Never"
+                    print(f"   👤 {admin[0]} - {status} - Created: {admin[2].strftime('%Y-%m-%d')} - Last login: {last_login}")
+            
+            cur.close()
+        except Exception as e:
+            print(f"❌ Error listing admins: {e}")
+        finally:
+            from main import return_db_connection
+            return_db_connection(conn)
 
 if __name__ == "__main__":
-    setup_initial_admin()
+    print("🛡️  Admin Management Tool")
+    print("1. Create new admin account")
+    print("2. List all admin accounts")
+    
+    choice = input("Select option (1 or 2): ").strip()
+    
+    if choice == "1":
+        create_additional_admin()
+    elif choice == "2":
+        list_admins()
+    else:
+        print("❌ Invalid option")

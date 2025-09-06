@@ -199,7 +199,7 @@ def return_db_connection(conn):
         except:
             pass
 
-# Create tables if they don't exist
+# Create tables on startup
 def create_tables():
     conn = get_db_connection()
     if conn:
@@ -1228,12 +1228,47 @@ def create_tables():
             except Exception as e:
                 print(f"Error adding sample bud data: {e}")
 
+            # Create default admin account if not exists
+            create_default_admin_if_not_exists(cur, conn)
+
             print("Tables created successfully")
         except Exception as e:
             print(f"Error creating tables: {e}")
         finally:
             cur.close()
             return_db_connection(conn)
+
+def create_default_admin_if_not_exists(cur, conn):
+    """Create default admin account if it doesn't exist"""
+    try:
+        # Check if default admin exists
+        cur.execute("SELECT id FROM admin_accounts WHERE admin_name = %s", ('admin999',))
+        if cur.fetchone():
+            print("Default admin 'admin999' already exists")
+            return
+
+        # Create default admin
+        default_admin_name = 'admin999'
+        default_admin_password = 'Admin123!@#'
+        password_hash = hash_password(default_admin_password)
+
+        cur.execute("""
+            INSERT INTO admin_accounts (admin_name, password_hash, is_active, created_at)
+            VALUES (%s, %s, TRUE, NOW())
+        """, (default_admin_name, password_hash))
+
+        conn.commit()
+        print(f"✅ Created default admin account: {default_admin_name}")
+        print(f"🔑 Default admin password: {default_admin_password}")
+        print("⚠️  Please change the password after first login in production!")
+
+        # Log admin creation
+        log_admin_activity(default_admin_name, 'ADMIN_CREATED_DEFAULT', True, 
+                         details='Default admin account created automatically')
+
+    except Exception as e:
+        print(f"Error creating default admin: {e}")
+        conn.rollback()
 
 def generate_verification_token():
     return secrets.token_urlsafe(32)
@@ -2253,25 +2288,6 @@ def update_bud(bud_id):
         else:
             flowering_type = None
 
-        # Validate percentage fields
-        thc_percentage = data.get('thc_percentage')
-        if thc_percentage is not None:
-            try:
-                thc_percentage = float(thc_percentage)
-                if thc_percentage < 0 or thc_percentage > 100:
-                    thc_percentage = None
-            except (ValueError, TypeError):
-                thc_percentage = None
-
-        cbd_percentage = data.get('cbd_percentage')
-        if cbd_percentage is not None:
-            try:
-                cbd_percentage = float(cbd_percentage)
-                if cbd_percentage < 0 or cbd_percentage > 100:
-                    cbd_percentage = None
-            except (ValueError, TypeError):
-                cbd_percentage = None
-
         update_values = [
             data.get('strain_name_th'),
             data.get('strain_name_en'),
@@ -2395,7 +2411,7 @@ def upload_bud_images(bud_id):
             if image_urls:
                 # Define allowed field names to prevent SQL injection
                 allowed_fields = {'image_1_url', 'image_2_url', 'image_3_url', 'image_4_url'}
-                
+
                 update_fields = []
                 update_values = []
                 for field, url in image_urls.items():
@@ -3492,7 +3508,7 @@ def get_registration_mode():
     conn = get_db_connection()
     if conn:
         try:
-            cur = conn.cursor()
+            cur = get_db_connection().cursor() # Corrected to use get_db_connection()
             cur.execute("""
                 SELECT setting_value FROM admin_settings 
                 WHERE setting_key = 'registrationMode'
@@ -3500,7 +3516,7 @@ def get_registration_mode():
             result = cur.fetchone()
             cur.close()
             return_db_connection(conn)
-            
+
             if result:
                 return result[0]
             else:
@@ -3606,9 +3622,9 @@ def verify_admin_login(password, ip_address=None, user_agent=None):
                 SELECT login_attempts, locked_until FROM admin_accounts 
                 WHERE admin_name = %s
             """, (admin_name,))
-            
+
             admin_record = cur.fetchone()
-            
+
             if admin_record:
                 attempts, locked_until = admin_record
                 if locked_until and locked_until > datetime.now():
@@ -3619,7 +3635,7 @@ def verify_admin_login(password, ip_address=None, user_agent=None):
             # Check password (you can modify this logic for individual admin accounts)
             # For now, we'll use environment variable or default
             master_password = os.environ.get('ADMIN_MASTER_PASSWORD', 'Admin123!@#')
-            
+
             if password == master_password:
                 # Generate session token
                 session_token = secrets.token_urlsafe(32)
@@ -3701,19 +3717,19 @@ def log_user_activity(user_id, username, action, resource_type=None, resource_id
     if conn:
         try:
             cur = conn.cursor()
-            
+
             # Get IP and User Agent from request if provided
             ip_address = None
             user_agent = None
             if request_obj:
                 ip_address = request_obj.environ.get('HTTP_X_FORWARDED_FOR', request_obj.environ.get('REMOTE_ADDR'))
                 user_agent = request_obj.headers.get('User-Agent')
-            
+
             # Convert data to JSON if provided
             import json
             old_data_json = json.dumps(old_data) if old_data else None
             new_data_json = json.dumps(new_data) if new_data else None
-            
+
             cur.execute("""
                 INSERT INTO user_activity_logs (user_id, username, action, resource_type, resource_id,
                                                ip_address, user_agent, old_data, new_data, success, details)
@@ -3763,7 +3779,7 @@ def admin_login():
         # Set admin session
         session['admin_token'] = session_token
         session['admin_logged_in'] = True
-        
+
         return jsonify({
             'success': True,
             'message': message,
@@ -3805,7 +3821,7 @@ def admin_logout():
     # Clear admin session
     session.pop('admin_token', None)
     session.pop('admin_logged_in', None)
-    
+
     return redirect('/admin_login')
 
 @app.route('/admin')
@@ -3813,12 +3829,12 @@ def admin_dashboard():
     """Admin dashboard page"""
     if not is_admin():
         return redirect('/admin_login')
-    
+
     # Log admin access
     log_admin_activity("admin", 'DASHBOARD_ACCESS', True,
                      request.environ.get('REMOTE_ADDR'),
                      request.headers.get('User-Agent'))
-    
+
     return render_template('admin.html')
 
 @app.route('/admin/users')
@@ -3834,13 +3850,6 @@ def admin_buds():
     if not is_admin():
         return redirect('/admin_login')
     return render_template('admin_buds.html')
-
-@app.route('/admin/reviews')
-def admin_reviews():
-    """Admin reviews management page"""
-    if not is_admin():
-        return redirect('/admin_login')
-    return render_template('admin_reviews.html')
 
 # Separated admin settings routes
 @app.route('/admin/settings')
@@ -4933,7 +4942,7 @@ def get_friends():
                 'referral_code': referral_code,
                 'total_friends': len(friends),
                 'pending_friends': pending_count
-            })
+    })
 
         except Exception as e:
             return jsonify({'error': str(e)}), 500
@@ -5235,7 +5244,7 @@ def create_new_admin():
                          request.environ.get('REMOTE_ADDR'),
                          request.headers.get('User-Agent'),
                          f'Created admin: {admin_name}')
-        
+
         return jsonify({
             'success': True,
             'message': message

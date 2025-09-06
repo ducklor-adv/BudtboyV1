@@ -155,9 +155,14 @@
 
         <form id="adminLoginForm">
             <div class="form-group">
+                <label for="adminName">Admin Name</label>
+                <input type="text" id="adminName" name="admin_name" required placeholder="ชื่อ Admin">
+            </div>
+            
+            <div class="form-group">
                 <label for="adminPassword">Admin Password</label>
                 <div class="password-input-container">
-                    <input type="password" id="adminPassword" name="password" required>
+                    <input type="password" id="adminPassword" name="password" required placeholder="รหัสผ่าน Admin">
                     <button type="button" class="password-toggle" onclick="togglePassword('adminPassword')">
                         👁️
                     </button>
@@ -196,6 +201,7 @@
         document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
+            const adminName = document.getElementById('adminName').value;
             const password = document.getElementById('adminPassword').value;
 
             try {
@@ -204,7 +210,10 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ password })
+                    body: JSON.stringify({ 
+                        admin_name: adminName,
+                        password: password 
+                    })
                 });
 
                 const result = await response.json();

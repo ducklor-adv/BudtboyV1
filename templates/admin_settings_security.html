@@ -1,0 +1,352 @@
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ตั้งค่าความปลอดภัย - Admin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .admin-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .admin-header {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .back-btn {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            padding: 8px 15px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-50%) translateX(-2px);
+        }
+
+        .admin-title {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .admin-subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .admin-content {
+            padding: 40px;
+        }
+
+        .security-section {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border-left: 5px solid #4CAF50;
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .activity-log {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #e1e5e9;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .log-entry {
+            padding: 10px;
+            border-bottom: 1px solid #f1f3f4;
+            margin-bottom: 10px;
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+
+        .log-success {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+
+        .log-error {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .message {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .password-requirements {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .password-requirements ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        .password-requirements li {
+            margin: 5px 0;
+            color: #1976d2;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <a href="/admin/settings" class="back-btn">← กลับ</a>
+            <div class="admin-title">🔒 ความปลอดภัย</div>
+            <div class="admin-subtitle">จัดการ Admin accounts และความปลอดภัย</div>
+        </div>
+
+        <div class="admin-content">
+            <!-- Create New Admin Section -->
+            <div class="security-section">
+                <div class="section-title">
+                    👨‍💼 สร้าง Admin Account ใหม่
+                </div>
+
+                <form id="createAdminForm">
+                    <div class="form-group">
+                        <label for="adminName">ชื่อ Admin:</label>
+                        <input type="text" id="adminName" name="admin_name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="adminPassword">รหัสผ่าน Admin:</label>
+                        <input type="password" id="adminPassword" name="password" required>
+                        
+                        <div class="password-requirements">
+                            <strong>ข้อกำหนดรหัสผ่าน:</strong>
+                            <ul>
+                                <li>อย่างน้อย 8 ตัวอักษร</li>
+                                <li>มีตัวอักษรพิมพ์ใหญ่</li>
+                                <li>มีตัวอักษรพิมพ์เล็ก</li>
+                                <li>มีตัวเลข</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn" id="createAdminBtn">
+                        🔐 สร้าง Admin Account
+                    </button>
+                </form>
+
+                <div id="createAdminMessage"></div>
+            </div>
+
+            <!-- Admin Activity Logs Section -->
+            <div class="security-section">
+                <div class="section-title">
+                    📊 บันทึกกิจกรรม Admin
+                </div>
+                
+                <button type="button" class="btn" id="loadLogsBtn" style="margin-bottom: 15px;">
+                    🔄 โหลดบันทึก
+                </button>
+
+                <div class="activity-log" id="activityLog">
+                    <p style="text-align: center; color: #666;">กดปุ่ม "โหลดบันทึก" เพื่อดูกิจกรรม</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Create Admin Form Handler
+        document.getElementById('createAdminForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const btn = document.getElementById('createAdminBtn');
+            const messageDiv = document.getElementById('createAdminMessage');
+            const formData = new FormData(e.target);
+            
+            btn.disabled = true;
+            btn.textContent = '⏳ กำลังสร้าง...';
+            
+            try {
+                const response = await fetch('/api/admin/create_admin', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        admin_name: formData.get('admin_name'),
+                        password: formData.get('password')
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    messageDiv.innerHTML = `<div class="message success">✅ ${data.message}</div>`;
+                    e.target.reset();
+                } else {
+                    messageDiv.innerHTML = `<div class="message error">❌ ${data.error}</div>`;
+                }
+            } catch (error) {
+                console.error('Error creating admin:', error);
+                messageDiv.innerHTML = '<div class="message error">❌ เกิดข้อผิดพลาดในการสร้าง Admin</div>';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🔐 สร้าง Admin Account';
+            }
+        });
+
+        // Load Activity Logs
+        document.getElementById('loadLogsBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('loadLogsBtn');
+            const logDiv = document.getElementById('activityLog');
+            
+            btn.disabled = true;
+            btn.textContent = '⏳ กำลังโหลด...';
+            
+            try {
+                const response = await fetch('/api/admin/activity_logs');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    if (data.logs && data.logs.length > 0) {
+                        let logHtml = '';
+                        data.logs.forEach(log => {
+                            const statusClass = log.success ? 'log-success' : 'log-error';
+                            const statusIcon = log.success ? '✅' : '❌';
+                            
+                            logHtml += `
+                                <div class="log-entry ${statusClass}">
+                                    <strong>${statusIcon} ${log.action}</strong><br>
+                                    <small>Admin: ${log.admin_name || 'ไม่ระบุ'} | IP: ${log.ip_address || 'ไม่ระบุ'}</small><br>
+                                    <small>เวลา: ${log.created_at}</small>
+                                    ${log.details ? `<br><small>รายละเอียด: ${log.details}</small>` : ''}
+                                </div>
+                            `;
+                        });
+                        logDiv.innerHTML = logHtml;
+                    } else {
+                        logDiv.innerHTML = '<p style="text-align: center; color: #666;">ไม่มีบันทึกกิจกรรม</p>';
+                    }
+                } else {
+                    logDiv.innerHTML = '<p style="text-align: center; color: #f44336;">เกิดข้อผิดพลาดในการโหลดบันทึก</p>';
+                }
+            } catch (error) {
+                console.error('Error loading logs:', error);
+                logDiv.innerHTML = '<p style="text-align: center; color: #f44336;">เกิดข้อผิดพลาดในการเชื่อมต่อ</p>';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🔄 โหลดบันทึก';
+            }
+        });
+    </script>
+</body>
+</html>

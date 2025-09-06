@@ -524,6 +524,25 @@
             box-shadow: 0 2px 8px rgba(255, 71, 87, 0.3);
         }
 
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .status-available {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-sold-out {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
         /* Bottom Navigation Styling */
         .bottom-nav {
             position: fixed;
@@ -806,6 +825,12 @@
                             <span class="filter-indicator" id="filter-grower_name"></span>
                             <div class="filter-dropdown" id="dropdown-grower_name"></div>
                         </th>
+                        <th onclick="handleHeaderClick(event, 'status')" data-column="status">
+                            สถานะ
+                            <span class="sort-indicator" id="sort-status"></span>
+                            <span class="filter-indicator" id="filter-status"></span>
+                            <div class="filter-dropdown" id="dropdown-status"></div>
+                        </th>
                         <th onclick="handleHeaderClick(event, 'created_at')" data-column="created_at">
                             วันที่เพิ่ม
                             <span class="sort-indicator" id="sort-created_at"></span>
@@ -1051,6 +1076,22 @@
             });
         }
 
+        function getStatusClass(status) {
+            switch(status) {
+                case 'available': return 'status-available';
+                case 'sold_out': return 'status-sold-out';
+                default: return 'status-available';
+            }
+        }
+
+        function getStatusText(status) {
+            switch(status) {
+                case 'available': return 'ยังเหลือ';
+                case 'sold_out': return 'หมดแล้ว';
+                default: return 'ยังเหลือ';
+            }
+        }
+
         function sortTable(column) {
             // Toggle sort direction if clicking the same column
             if (currentSortColumn === column) {
@@ -1112,7 +1153,7 @@
             const tbody = document.getElementById('tableBody');
 
             if (dataToDisplay.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="11" class="empty-state">ไม่พบข้อมูล</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="12" class="empty-state">ไม่พบข้อมูล</td></tr>';
                 return;
             }
 
@@ -1147,6 +1188,11 @@
                             ${bud.grower_name || 'ไม่ระบุ'}
                             ${bud.grower_license_verified ? ' ✅' : ''}
                         </div>
+                    </td>
+                    <td>
+                        <span class="status-badge ${getStatusClass(bud.status)}">
+                            ${getStatusText(bud.status)}
+                        </span>
                     </td>
                     <td>${formatDate(bud.created_at)}</td>
                     <td>

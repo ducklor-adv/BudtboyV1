@@ -3246,7 +3246,10 @@ def get_all_buds_report():
                 'is_grower': row[27],
                 'avg_rating': float(row[28]) if row[28] else 0,
                 'review_count': row[29]
-            })</old_str></old_str>
+            })
+
+        cur.close()
+        return_db_connection(conn)</old_str></old_str>
 
         cur.close()
         return_db_connection(conn)

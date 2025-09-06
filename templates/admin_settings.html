@@ -552,6 +552,18 @@
                     <div class="setting-group">
                         <div class="setting-item">
                             <div class="setting-info">
+                                <h4>🖼️ แก้ไขรูป Auth</h4>
+                                <p>เปลี่ยนรูป Logo และพื้นหลังของหน้า Login</p>
+                            </div>
+                            <div class="setting-actions">
+                                <button class="btn btn-primary" onclick="editAuthImages()">
+                                    แก้ไข
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="setting-item">
+                            <div class="setting-info">
                                 <h4>🔧 ระบบทั่วไป</h4>
                                 <p>ตั้งค่าพื้นฐานของระบบ</p>
                             </div>
@@ -1047,7 +1059,7 @@
             document.body.appendChild(modal);
         }
 
-        function saveGeneralSettings() {
+        async function saveGeneralSettings() {
             const settings = {
                 siteName: document.getElementById('siteName').value,
                 siteDescription: document.getElementById('siteDescription').value,
@@ -1059,12 +1071,31 @@
                 maintenanceMode: document.getElementById('maintenanceMode').checked
             };
 
-            // บันทึกลง localStorage
-            localStorage.setItem('generalSettings', JSON.stringify(settings));
-            
-            // แสดงข้อความสำเร็จ
-            AdminSettings.showMessage('บันทึกการตั้งค่าระบบทั่วไปสำเร็จ!', 'success');
-            closeModal();
+            try {
+                const response = await fetch('/api/admin/settings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(settings)
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    // บันทึกลง localStorage ด้วย
+                    localStorage.setItem('generalSettings', JSON.stringify(settings));
+                    
+                    // แสดงข้อความสำเร็จ
+                    AdminSettings.showMessage('บันทึกการตั้งค่าระบบทั่วไปสำเร็จ!', 'success');
+                    closeModal();
+                } else {
+                    AdminSettings.showMessage('เกิดข้อผิดพลาดในการบันทึก: ' + (result.error || 'ไม่ทราบสาเหตุ'), 'error');
+                }
+            } catch (error) {
+                console.error('Error saving general settings:', error);
+                AdminSettings.showMessage('เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error');
+            }
         }
 
         function editUserSettings() {

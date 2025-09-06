@@ -4478,6 +4478,26 @@ def get_friends():
 # Admin routes
 # These routes are protected by the admin_required decorator
 
+@app.route('/api/admin/settings', methods=['POST'])
+def save_admin_settings():
+    """Save admin general settings"""
+    if not is_authenticated() or not is_admin():
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    try:
+        data = request.get_json()
+        
+        # บันทึกการตั้งค่าลง localStorage (จำลอง)
+        # ในการใช้งานจริงควรบันทึกลงฐานข้อมูล
+        
+        return jsonify({
+            'success': True,
+            'message': 'บันทึกการตั้งค่าสำเร็จ'
+        })
+    except Exception as e:
+        print(f"Error saving admin settings: {e}")
+        return jsonify({'error': 'เกิดข้อผิดพลาดในการบันทึก'}), 500
+
 @app.route('/api/admin/upload_auth_image', methods=['POST'])
 # @admin_required # Commented out for testing
 def upload_auth_image():

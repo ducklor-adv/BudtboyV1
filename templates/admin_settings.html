@@ -958,6 +958,8 @@
 
             async sendToServer() {
                 try {
+                    console.log('Sending settings to server:', this.settings);
+                    
                     const response = await fetch('/api/admin/settings', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -965,31 +967,58 @@
                     });
 
                     const result = await response.json();
+                    console.log('Server response:', result);
                     
                     if (response.ok && result.success) {
                         console.log('Settings saved to server successfully');
-                        this.showMessage('บันทึกการตั้งค่าลงเซิร์ฟเวอร์สำเร็จ', 'success');
+                        this.showMessage(`✅ บันทึกการตั้งค่าลงเซิร์ฟเวอร์สำเร็จ (${result.saved_count || 'หลายรายการ'})`, 'success');
                     } else {
                         console.warn('Failed to save settings to server:', result.error);
-                        this.showMessage('เกิดข้อผิดพลาดในการบันทึก: ' + (result.error || 'ไม่ทราบสาเหตุ'), 'error');
+                        this.showMessage('❌ เกิดข้อผิดพลาดในการบันทึก: ' + (result.error || 'ไม่ทราบสาเหตุ'), 'error');
                     }
                 } catch (error) {
                     console.error('Error saving settings to server:', error);
-                    this.showMessage('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์', 'error');
+                    this.showMessage('❌ เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์', 'error');
                 }
             },
 
             showMessage(message, type) {
-                const messageDiv = document.createElement('div');
-                messageDiv.className = type === 'success' ? 'success-message' : 'error-message';
-                messageDiv.textContent = message;
+                // ตรวจสอบว่าอยู่ใน modal หรือไม่
+                const statusArea = document.getElementById('generalSettingsStatus');
+                
+                if (statusArea) {
+                    // แสดงใน modal
+                    statusArea.textContent = message;
+                    statusArea.className = type === 'success' ? 'success-message' : 'error-message';
+                    statusArea.style.display = 'block';
+                    
+                    if (type === 'success') {
+                        statusArea.style.backgroundColor = '#d4edda';
+                        statusArea.style.color = '#155724';
+                        statusArea.style.border = '1px solid #c3e6cb';
+                    } else {
+                        statusArea.style.backgroundColor = '#f8d7da';
+                        statusArea.style.color = '#721c24';
+                        statusArea.style.border = '1px solid #f5c6cb';
+                    }
+                    
+                    // ซ่อนข้อความหลังจาก 5 วินาที
+                    setTimeout(() => {
+                        statusArea.style.display = 'none';
+                    }, 5000);
+                } else {
+                    // แสดงในหน้าหลัก
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = type === 'success' ? 'success-message' : 'error-message';
+                    messageDiv.textContent = message;
 
-                const container = document.querySelector('.admin-content');
-                container.insertBefore(messageDiv, container.firstChild);
+                    const container = document.querySelector('.admin-content');
+                    container.insertBefore(messageDiv, container.firstChild);
 
-                setTimeout(() => {
-                    messageDiv.remove();
-                }, 3000);
+                    setTimeout(() => {
+                        messageDiv.remove();
+                    }, 4000);
+                }
             }
         };
 
@@ -1067,6 +1096,8 @@
                             </div>
                         </div>
                         
+                        <div id="generalSettingsStatus" style="margin: 15px 0; padding: 10px; border-radius: 5px; display: none;"></div>
+                        
                         <div class="form-actions">
                             <button class="btn btn-success" onclick="saveGeneralSettings()">บันทึก</button>
                             <button class="btn btn-secondary" onclick="closeModal()">ยกเลิก</button>
@@ -1079,6 +1110,13 @@
         }
 
         async function saveGeneralSettings() {
+            const submitBtn = document.querySelector('.btn-success');
+            const originalText = submitBtn.textContent;
+            
+            // แสดงสถานะกำลังบันทึก
+            submitBtn.textContent = 'กำลังบันทึก...';
+            submitBtn.disabled = true;
+            
             const settings = {
                 siteName: document.getElementById('siteName').value,
                 siteDescription: document.getElementById('siteDescription').value,
@@ -1091,6 +1129,8 @@
             };
 
             try {
+                console.log('Saving general settings:', settings);
+                
                 const response = await fetch('/api/admin/settings', {
                     method: 'POST',
                     headers: {
@@ -1100,20 +1140,29 @@
                 });
 
                 const result = await response.json();
+                console.log('Save response:', result);
 
                 if (response.ok && result.success) {
                     // บันทึกลง localStorage ด้วย
                     localStorage.setItem('generalSettings', JSON.stringify(settings));
                     
                     // แสดงข้อความสำเร็จ
-                    AdminSettings.showMessage('บันทึกการตั้งค่าระบบทั่วไปสำเร็จ!', 'success');
-                    closeModal();
+                    AdminSettings.showMessage(`✅ บันทึกการตั้งค่าระบบทั่วไปสำเร็จ! (${result.saved_count || 'หลายรายการ'})`, 'success');
+                    
+                    // ปิด modal หลังจาก 2 วินาที
+                    setTimeout(() => {
+                        closeModal();
+                    }, 2000);
                 } else {
-                    AdminSettings.showMessage('เกิดข้อผิดพลาดในการบันทึก: ' + (result.error || 'ไม่ทราบสาเหตุ'), 'error');
+                    AdminSettings.showMessage('❌ เกิดข้อผิดพลาดในการบันทึก: ' + (result.error || 'ไม่ทราบสาเหตุ'), 'error');
                 }
             } catch (error) {
                 console.error('Error saving general settings:', error);
-                AdminSettings.showMessage('เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error');
+                AdminSettings.showMessage('❌ เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์', 'error');
+            } finally {
+                // คืนสถานะปุ่ม
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
             }
         }
 

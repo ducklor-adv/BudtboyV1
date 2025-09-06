@@ -4642,6 +4642,93 @@ def save_admin_settings():
     else:
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
+@app.route('/api/admin/settings/general', methods=['POST'])
+def save_general_settings():
+    """Save admin general settings (specific endpoint)"""
+    if not is_authenticated() or not is_admin():
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            data = request.get_json()
+            if not data:
+                return jsonify({'error': 'No data provided'}), 400
+
+            cur = conn.cursor()
+
+            # ตรวจสอบว่าตาราง admin_settings มีอยู่หรือไม่
+            cur.execute("""
+                SELECT EXISTS (
+                    SELECT FROM information_schema.tables 
+                    WHERE table_name = 'admin_settings'
+                )
+            """)
+            table_exists = cur.fetchone()[0]
+
+            if not table_exists:
+                # สร้างตารางถ้ายังไม่มี
+                cur.execute("""
+                    CREATE TABLE admin_settings (
+                        id SERIAL PRIMARY KEY,
+                        setting_key VARCHAR(255) UNIQUE NOT NULL,
+                        setting_value TEXT,
+                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        updated_by INTEGER REFERENCES users(id)
+                    );
+                """)
+                print("Created admin_settings table")
+
+            admin_id = session['user_id']
+            saved_count = 0
+
+            # บันทึกการตั้งค่าแต่ละรายการ
+            for key, value in data.items():
+                if value is not None:
+                    try:
+                        cur.execute("""
+                            INSERT INTO admin_settings (setting_key, setting_value, updated_by)
+                            VALUES (%s, %s, %s)
+                            ON CONFLICT (setting_key)
+                            DO UPDATE SET 
+                                setting_value = EXCLUDED.setting_value,
+                                updated_at = CURRENT_TIMESTAMP,
+                                updated_by = EXCLUDED.updated_by
+                        """, (key, str(value), admin_id))
+                        saved_count += 1
+                        print(f"Saved general setting: {key} = {value}")
+                    except Exception as e:
+                        print(f"Error saving general setting {key}: {e}")
+                        continue
+
+            conn.commit()
+            print(f"Total general settings saved: {saved_count}")
+
+            cur.close()
+            return_db_connection(conn)
+
+            return jsonify({
+                'success': True,
+                'message': f'บันทึกการตั้งค่าระบบทั่วไปสำเร็จ ({saved_count} รายการ)',
+                'saved_count': saved_count
+            })
+
+        except Exception as e:
+            print(f"Error saving general settings: {e}")
+            if conn:
+                conn.rollback()
+            return jsonify({'error': f'เกิดข้อผิดพลาดในการบันทึก: {str(e)}'}), 500
+        finally:
+            if cur:
+                try:
+                    cur.close()
+                except:
+                    pass
+            if conn:
+                return_db_connection(conn)
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
 @app.route('/api/admin/get_settings', methods=['GET'])
 def get_admin_settings():
     """Get current admin settings"""

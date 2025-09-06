@@ -968,7 +968,103 @@
         }
 
         function editGeneralSettings() {
-            alert('การตั้งค่าระบบทั่วไป - ฟีเจอร์นี้กำลังพัฒนา');
+            showGeneralSettingsModal();
+        }
+
+        function showGeneralSettingsModal() {
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>🔧 ตั้งค่าระบบทั่วไป</h3>
+                        <button class="close-btn" onclick="closeModal()">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="setting-group">
+                            <div class="form-group">
+                                <label>ชื่อเว็บไซต์:</label>
+                                <input type="text" id="siteName" value="Cannabis App" class="input-field">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>คำอธิบายเว็บไซต์:</label>
+                                <textarea id="siteDescription" class="input-field" rows="3">แพลตฟอร์มสำหรับแชร์ข้อมูลและรีวิวกัญชา</textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>อีเมลผู้ดูแลระบบ:</label>
+                                <input type="email" id="adminEmail" value="admin@budtboy.app" class="input-field">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>ภาษาเริ่มต้น:</label>
+                                <select id="defaultLanguage" class="input-field">
+                                    <option value="th" selected>ไทย</option>
+                                    <option value="en">English</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>โหมดการแสดงผล:</label>
+                                <select id="displayMode" class="input-field">
+                                    <option value="auto" selected>อัตโนมัติ</option>
+                                    <option value="light">โหมดสว่าง</option>
+                                    <option value="dark">โหมดมืด</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>จำนวนรายการต่อหน้า:</label>
+                                <input type="number" id="itemsPerPage" value="20" min="5" max="100" class="input-field">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>เปิดใช้งานการแจ้งเตือน:</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="enableNotifications" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>เปิดใช้งานโหมดบำรุงรักษา:</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="maintenanceMode">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button class="btn btn-success" onclick="saveGeneralSettings()">บันทึก</button>
+                            <button class="btn btn-secondary" onclick="closeModal()">ยกเลิก</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+        }
+
+        function saveGeneralSettings() {
+            const settings = {
+                siteName: document.getElementById('siteName').value,
+                siteDescription: document.getElementById('siteDescription').value,
+                adminEmail: document.getElementById('adminEmail').value,
+                defaultLanguage: document.getElementById('defaultLanguage').value,
+                displayMode: document.getElementById('displayMode').value,
+                itemsPerPage: parseInt(document.getElementById('itemsPerPage').value),
+                enableNotifications: document.getElementById('enableNotifications').checked,
+                maintenanceMode: document.getElementById('maintenanceMode').checked
+            };
+
+            // บันทึกลง localStorage
+            localStorage.setItem('generalSettings', JSON.stringify(settings));
+            
+            // แสดงข้อความสำเร็จ
+            AdminSettings.showMessage('บันทึกการตั้งค่าระบบทั่วไปสำเร็จ!', 'success');
+            closeModal();
         }
 
         function editUserSettings() {

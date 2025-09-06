@@ -266,39 +266,14 @@
 
     <script>
         async function showForm(type) {
-            // ตรวจสอบว่าเป็นการเลือก signup และตรวจสอบโหมดการสมัครสมาชิก
-            if (type === 'signup') {
-                const urlParams = new URLSearchParams(window.location.search);
-                const refCode = urlParams.get('ref');
-                
-                // ตรวจสอบโหมดการสมัครสมาชิกจากเซิร์ฟเวอร์
-                try {
-                    const response = await fetch('/api/registration_mode');
-                    const result = await response.json();
-                    
-                    if (result.success && result.is_referral_only) {
-                        // โหมด referral only: ต้องมี referral code
-                        if (!refCode) {
-                            showReferralWarning();
-                            return;
-                        }
-                    }
-                    // โหมด public: สามารถสมัครได้โดยไม่ต้องมี referral code
-                } catch (error) {
-                    console.error('Error checking registration mode:', error);
-                    // หากเกิดข้อผิดพลาด ให้ใช้โหมดเดิม (referral only)
-                    if (!refCode) {
-                        showReferralWarning();
-                        return;
-                    }
-                }
-            }
-
             // Update tabs
             document.querySelectorAll('.auth-tab').forEach(tab => {
                 tab.classList.remove('active');
             });
-            event.target.classList.add('active');
+            
+            // Find the clicked tab
+            const clickedTab = event ? event.target : document.querySelector(`.auth-tab:${type === 'login' ? 'first' : 'last'}-child`);
+            if (clickedTab) clickedTab.classList.add('active');
 
             // Update forms
             document.querySelectorAll('.auth-form').forEach(form => {
@@ -309,6 +284,22 @@
                 document.getElementById('loginForm').classList.add('active');
             } else {
                 document.getElementById('signupForm').classList.add('active');
+                
+                // ตรวจสอบโหมดการสมัครสมาชิกหลังจากแสดงฟอร์มแล้ว
+                const urlParams = new URLSearchParams(window.location.search);
+                const refCode = urlParams.get('ref');
+                
+                try {
+                    const response = await fetch('/api/registration_mode');
+                    const result = await response.json();
+                    
+                    if (result.success && result.is_referral_only && !refCode) {
+                        // แสดงข้อความเตือนใน signup form แทนที่จะบล็อค
+                        showInlineReferralWarning();
+                    }
+                } catch (error) {
+                    console.error('Error checking registration mode:', error);
+                }
             }
 
             // Clear messages
@@ -435,28 +426,6 @@
         document.getElementById('signupForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
-            // ตรวจสอบโหมดการสมัครสมาชิกจากเซิร์ฟเวอร์
-            let registrationMode = 'referral_only'; // default
-            try {
-                const modeResponse = await fetch('/api/registration_mode');
-                const modeResult = await modeResponse.json();
-                if (modeResult.success) {
-                    registrationMode = modeResult.mode;
-                }
-            } catch (error) {
-                console.error('Error getting registration mode:', error);
-            }
-
-            // ตรวจสอบว่ามี referral code หรือไม่
-            const urlParams = new URLSearchParams(window.location.search);
-            const refCodeFromUrl = urlParams.get('ref');
-            
-            // ตรวจสอบความต้องการ referral code ตามโหมด
-            if (registrationMode === 'referral_only' && !refCodeFromUrl) {
-                showReferralWarning();
-                return;
-            }
-
             const username = document.getElementById('signupUsername').value;
             const email = document.getElementById('signupEmail').value;
             const password = document.getElementById('signupPassword').value;
@@ -471,6 +440,10 @@
                 document.getElementById('message').innerHTML = `<div class="message error">❌ รหัสผ่านต้องมีตัวพิมพ์ใหญ่ พิมพ์เล็ก และตัวเลข</div>`;
                 return;
             }
+
+            // Get referral code from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const refCodeFromUrl = urlParams.get('ref');
 
             try {
                 const response = await fetch('/quick_signup', {
@@ -502,91 +475,15 @@
             }
         });
 
-        // ฟังก์ชันแสดง popup เตือน
-        function showReferralWarning() {
-            // สร้าง popup overlay
-            const overlay = document.createElement('div');
-            overlay.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0, 0, 0, 0.6);
-                z-index: 10000;
-                display: flex;
-                justify-content: center;
-                align-items: center;
+        // ฟังก์ชันแสดงข้อความเตือนใน signup form
+        function showInlineReferralWarning() {
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = `
+                <div class="message error" style="margin: 20px 0; padding: 15px; background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; border-radius: 8px;">
+                    ⚠️ <strong>ขณะนี้ต้องใช้ Referral Link เท่านั้น</strong><br>
+                    <small>ระบบเปิดให้สมัครผ่านการแนะนำจากเพื่อนเท่านั้น กรุณาใช้ลิงก์ที่เพื่อนแชร์ให้</small>
+                </div>
             `;
-
-            // สร้าง popup content
-            const popup = document.createElement('div');
-            popup.style.cssText = `
-                background: white;
-                padding: 30px;
-                border-radius: 15px;
-                max-width: 400px;
-                width: 90%;
-                text-align: center;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-                animation: slideIn 0.3s ease-out;
-            `;
-
-            popup.innerHTML = `
-                <div style="font-size: 48px; margin-bottom: 15px;">⚠️</div>
-                <h3 style="color: #e74c3c; margin-bottom: 15px; font-size: 20px;">
-                    ไม่สามารถสมัครได้
-                </h3>
-                <p style="color: #666; margin-bottom: 20px; line-height: 1.5;">
-                    ขณะนี้ระบบเปิดให้สมัครผ่าน <strong>Referral Link</strong> แนะนำจากเพื่อนเท่านั้น
-                </p>
-                <p style="color: #888; margin-bottom: 25px; font-size: 14px;">
-                    กรุณาขอลิงก์เชิญจากเพื่อนที่เป็นสมาชิกอยู่แล้ว
-                </p>
-                <button onclick="closeReferralWarning()" style="
-                    background: #4CAF50;
-                    color: white;
-                    border: none;
-                    padding: 12px 24px;
-                    border-radius: 8px;
-                    font-size: 16px;
-                    font-weight: bold;
-                    cursor: pointer;
-                    transition: background 0.3s;
-                " onmouseover="this.style.background='#45a049'" onmouseout="this.style.background='#4CAF50'">
-                    เข้าใจแล้ว
-                </button>
-            `;
-
-            overlay.appendChild(popup);
-            document.body.appendChild(overlay);
-
-            // เพิ่ม animation
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes slideIn {
-                    from {
-                        transform: translateY(-50px);
-                        opacity: 0;
-                    }
-                    to {
-                        transform: translateY(0);
-                        opacity: 1;
-                    }
-                }
-            `;
-            document.head.appendChild(style);
-
-            // เก็บ reference เพื่อใช้ปิด popup
-            window.referralWarningOverlay = overlay;
-        }
-
-        // ฟังก์ชันปิด popup
-        function closeReferralWarning() {
-            if (window.referralWarningOverlay) {
-                document.body.removeChild(window.referralWarningOverlay);
-                window.referralWarningOverlay = null;
-            }
         }
 
         // ฟังก์ชันแสดง/ซ่อนรหัสผ่าน

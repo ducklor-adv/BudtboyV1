@@ -524,6 +524,48 @@
             box-shadow: 0 2px 8px rgba(255, 71, 87, 0.3);
         }
 
+        /* Bottom Navigation Styling */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            padding: 10px 0;
+            z-index: 100;
+        }
+
+        .nav-tab {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #6c757d;
+            font-size: 12px;
+            transition: color 0.3s ease;
+            flex: 1;
+            text-align: center;
+        }
+
+        .nav-tab.active {
+            color: #007bff; /* Or any active color you prefer */
+            font-weight: 600;
+        }
+
+        .nav-icon {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .nav-label {
+            font-size: 10px;
+        }
+
+
         @media (max-width: 768px) {
             body {
                 padding: 0;
@@ -777,6 +819,26 @@
                 </tbody>
             </table>
         </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <a href="/activity" class="nav-tab">
+            <div class="nav-icon">📊</div>
+            <div class="nav-label">ข้อมูลกิจกรรม</div>
+        </a>
+        <a href="/search-tool" class="nav-tab">
+            <div class="nav-icon">🔍</div>
+            <div class="nav-label">ค้นหาข้อมูล</div>
+        </a>
+        <a href="/report" class="nav-tab active">
+            <div class="nav-icon">📈</div>
+            <div class="nav-label">รายงานข้อมูล</div>
+        </a>
+        <a href="/profile" class="nav-tab">
+            <div class="nav-icon">👤</div>
+            <div class="nav-label">ข้อมูลของคุณ</div>
+        </a>
     </div>
 
     <script>

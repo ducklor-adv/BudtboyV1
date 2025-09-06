@@ -3192,12 +3192,14 @@ def get_all_buds_report():
                    b.physical_effects_positive, b.physical_effects_negative,
                    b.recommended_time, b.grow_method, b.harvest_date, b.batch_number,
                    b.grower_id, b.grower_license_verified, b.fertilizer_type, 
-                   b.flowering_type, b.created_at, b.updated_at,
-                   u.username as grower_name, u.is_grower,
+                   b.flowering_type, b.created_at, b.updated_at, b.created_by,
+                   COALESCE(u_grower.username, u_creator.username, 'บัดท์บอย') as grower_name, 
+                   COALESCE(u_grower.is_grower, u_creator.is_grower, false) as is_grower,
                    COALESCE(AVG(r.overall_rating), 0) as avg_rating,
                    COUNT(r.id) as review_count
             FROM buds_data b
-            LEFT JOIN users u ON b.grower_id = u.id
+            LEFT JOIN users u_grower ON b.grower_id = u_grower.id
+            LEFT JOIN users u_creator ON b.created_by = u_creator.id
             LEFT JOIN reviews r ON b.id = r.bud_reference_id
             GROUP BY b.id, b.strain_name_en, b.strain_name_th, b.breeder, b.strain_type,
                      b.thc_percentage, b.cbd_percentage, b.grade, b.aroma_flavor,
@@ -3206,8 +3208,8 @@ def get_all_buds_report():
                      b.physical_effects_positive, b.physical_effects_negative,
                      b.recommended_time, b.grow_method, b.harvest_date, b.batch_number,
                      b.grower_id, b.grower_license_verified, b.fertilizer_type, 
-                     b.flowering_type, b.created_at, b.updated_at,
-                     u.username, u.is_grower
+                     b.flowering_type, b.created_at, b.updated_at, b.created_by,
+                     u_grower.username, u_grower.is_grower, u_creator.username, u_creator.is_grower
             ORDER BY b.created_at DESC
         """)
 
@@ -3240,10 +3242,11 @@ def get_all_buds_report():
                 'flowering_type': row[23],
                 'created_at': row[24].strftime('%Y-%m-%d %H:%M:%S') if row[24] else None,
                 'updated_at': row[25].strftime('%Y-%m-%d %H:%M:%S') if row[25] else None,
-                'grower_name': row[26],
-                'is_grower': row[27],
-                'avg_rating': float(row[28]) if row[28] else 0,
-                'review_count': row[29]
+                'created_by': row[26],
+                'grower_name': row[27],
+                'is_grower': row[28],
+                'avg_rating': float(row[29]) if row[29] else 0,
+                'review_count': row[30]
             })
 
         return jsonify({'buds': buds})

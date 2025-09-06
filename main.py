@@ -3246,9 +3246,6 @@ def get_all_buds_report():
                 'review_count': row[29]
             })
 
-        cur.close()
-        return_db_connection(conn)
-
         return jsonify({'buds': buds})
     except Exception as e:
         return jsonify({'error': str(e)}), 500

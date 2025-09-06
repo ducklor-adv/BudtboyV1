@@ -1043,6 +1043,37 @@ def create_tables():
                 );
             """)
 
+            # Create admin_accounts table for secure admin management
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS admin_accounts (
+                    id SERIAL PRIMARY KEY,
+                    admin_name VARCHAR(100) UNIQUE NOT NULL,
+                    password_hash VARCHAR(255) NOT NULL,
+                    is_active BOOLEAN DEFAULT TRUE,
+                    last_login TIMESTAMP,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    created_by INTEGER REFERENCES users(id),
+                    login_attempts INTEGER DEFAULT 0,
+                    locked_until TIMESTAMP,
+                    session_token VARCHAR(255),
+                    token_expires TIMESTAMP
+                );
+            """)
+
+            # Create admin_activity_logs table for security tracking
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS admin_activity_logs (
+                    id SERIAL PRIMARY KEY,
+                    admin_name VARCHAR(100),
+                    action VARCHAR(255) NOT NULL,
+                    ip_address VARCHAR(45),
+                    user_agent TEXT,
+                    success BOOLEAN DEFAULT TRUE,
+                    details TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                );
+            """)
+
             # Insert default admin settings if table is empty
             cur.execute("SELECT COUNT(*) FROM admin_settings")
             settings_count = cur.fetchone()[0]
@@ -3425,10 +3456,182 @@ def is_admin():
     if not is_authenticated():
         return False
 
-    user_id = session.get('user_id')
-    # Admin check - you can modify this logic as needed
-    # For now, user_id = 1 is admin, or you can add admin field to users table
-    return user_id == 1
+    # Check if user has admin session
+    admin_token = session.get('admin_token')
+    if not admin_token:
+        return False
+
+    # Verify admin token from database
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("""
+                SELECT admin_name FROM admin_accounts 
+                WHERE session_token = %s AND token_expires > NOW() AND is_active = TRUE
+            """, (admin_token,))
+            result = cur.fetchone()
+            cur.close()
+            return_db_connection(conn)
+            return result is not None
+        except:
+            if conn:
+                return_db_connection(conn)
+            return False
+    return False
+
+def create_admin_account(admin_name, password, created_by_user_id=None):
+    """Create new admin account securely"""
+    # Validate password strength
+    is_valid, message = validate_password_strength(password)
+    if not is_valid:
+        return False, message
+
+    # Hash password securely
+    password_hash = hash_password(password)
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+
+            # Check if admin already exists
+            cur.execute("SELECT id FROM admin_accounts WHERE admin_name = %s", (admin_name,))
+            if cur.fetchone():
+                return False, "ชื่อ Admin นี้มีอยู่แล้ว"
+
+            # Insert new admin
+            cur.execute("""
+                INSERT INTO admin_accounts (admin_name, password_hash, created_by)
+                VALUES (%s, %s, %s)
+                RETURNING id
+            """, (admin_name, password_hash, created_by_user_id))
+
+            admin_id = cur.fetchone()[0]
+            conn.commit()
+
+            # Log the creation
+            log_admin_activity(admin_name, 'ADMIN_CREATED', success=True, 
+                             details=f'New admin account created: {admin_name}')
+
+            cur.close()
+            return_db_connection(conn)
+            return True, f"สร้าง Admin account '{admin_name}' สำเร็จ"
+
+        except Exception as e:
+            conn.rollback()
+            cur.close()
+            return_db_connection(conn)
+            return False, f"เกิดข้อผิดพลาด: {str(e)}"
+    return False, "เชื่อมต่อฐานข้อมูลไม่ได้"
+
+def verify_admin_login(password, ip_address=None, user_agent=None):
+    """Verify admin login with security measures"""
+    import secrets
+    import time
+    from datetime import datetime, timedelta
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+
+            # For simplicity, we'll use a master admin password
+            # In production, you should have individual admin accounts
+            admin_name = "master_admin"
+
+            # Check if admin is locked
+            cur.execute("""
+                SELECT login_attempts, locked_until FROM admin_accounts 
+                WHERE admin_name = %s
+            """, (admin_name,))
+            
+            admin_record = cur.fetchone()
+            
+            if admin_record:
+                attempts, locked_until = admin_record
+                if locked_until and locked_until > datetime.now():
+                    log_admin_activity(admin_name, 'LOGIN_BLOCKED', False, ip_address, user_agent,
+                                     'Account locked due to multiple failed attempts')
+                    return False, "บัญชี Admin ถูกล็อค เนื่องจากใส่รหัสผ่านผิดหลายครั้ง", None
+
+            # Check password (you can modify this logic for individual admin accounts)
+            # For now, we'll use environment variable or default
+            master_password = os.environ.get('ADMIN_MASTER_PASSWORD', 'Admin123!@#')
+            
+            if password == master_password:
+                # Generate session token
+                session_token = secrets.token_urlsafe(32)
+                token_expires = datetime.now() + timedelta(hours=2)  # 2 hour session
+
+                # Update admin record
+                cur.execute("""
+                    INSERT INTO admin_accounts (admin_name, password_hash, session_token, token_expires, last_login, login_attempts)
+                    VALUES (%s, %s, %s, %s, NOW(), 0)
+                    ON CONFLICT (admin_name) 
+                    DO UPDATE SET 
+                        session_token = EXCLUDED.session_token,
+                        token_expires = EXCLUDED.token_expires,
+                        last_login = NOW(),
+                        login_attempts = 0,
+                        locked_until = NULL
+                """, (admin_name, hash_password(master_password), session_token, token_expires))
+
+                conn.commit()
+
+                # Log successful login
+                log_admin_activity(admin_name, 'LOGIN_SUCCESS', True, ip_address, user_agent)
+
+                cur.close()
+                return_db_connection(conn)
+                return True, "เข้าสู่ระบบ Admin สำเร็จ", session_token
+            else:
+                # Increment failed attempts
+                cur.execute("""
+                    INSERT INTO admin_accounts (admin_name, password_hash, login_attempts)
+                    VALUES (%s, %s, 1)
+                    ON CONFLICT (admin_name) 
+                    DO UPDATE SET 
+                        login_attempts = admin_accounts.login_attempts + 1,
+                        locked_until = CASE 
+                            WHEN admin_accounts.login_attempts + 1 >= 5 THEN NOW() + INTERVAL '30 minutes'
+                            ELSE NULL 
+                        END
+                """, (admin_name, hash_password(master_password)))
+
+                conn.commit()
+
+                # Log failed login
+                log_admin_activity(admin_name, 'LOGIN_FAILED', False, ip_address, user_agent,
+                                 'Invalid password')
+
+                cur.close()
+                return_db_connection(conn)
+                return False, "รหัสผ่าน Admin ไม่ถูกต้อง", None
+
+        except Exception as e:
+            conn.rollback()
+            cur.close()
+            return_db_connection(conn)
+            return False, f"เกิดข้อผิดพลาด: {str(e)}", None
+    return False, "เชื่อมต่อฐานข้อมูลไม่ได้", None
+
+def log_admin_activity(admin_name, action, success=True, ip_address=None, user_agent=None, details=None):
+    """Log admin activity for security tracking"""
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("""
+                INSERT INTO admin_activity_logs (admin_name, action, ip_address, user_agent, success, details)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, (admin_name, action, ip_address, user_agent, success, details))
+            conn.commit()
+            cur.close()
+            return_db_connection(conn)
+        except:
+            if conn:
+                return_db_connection(conn)
 
 # Decorator for admin routes
 def admin_required(func):
@@ -3441,83 +3644,150 @@ def admin_required(func):
         return func(**kwargs)
     return decorated_view
 
+@app.route('/admin_login')
+def admin_login_page():
+    """Admin login page"""
+    return render_template('admin_login.html')
+
+@app.route('/admin_login', methods=['POST'])
+def admin_login():
+    """Handle admin login"""
+    data = request.get_json()
+    password = data.get('password')
+
+    if not password:
+        return jsonify({'success': False, 'error': 'กรุณากรอกรหัสผ่าน'}), 400
+
+    # Get client info for security logging
+    ip_address = request.environ.get('HTTP_X_FORWARDED_FOR', request.environ.get('REMOTE_ADDR'))
+    user_agent = request.headers.get('User-Agent')
+
+    success, message, session_token = verify_admin_login(password, ip_address, user_agent)
+
+    if success:
+        # Set admin session
+        session['admin_token'] = session_token
+        session['admin_logged_in'] = True
+        
+        return jsonify({
+            'success': True,
+            'message': message,
+            'redirect': '/admin'
+        })
+    else:
+        return jsonify({
+            'success': False,
+            'error': message
+        }), 400
+
+@app.route('/admin_logout')
+def admin_logout():
+    """Admin logout"""
+    admin_token = session.get('admin_token')
+    if admin_token:
+        # Clear token from database
+        conn = get_db_connection()
+        if conn:
+            try:
+                cur = conn.cursor()
+                cur.execute("""
+                    UPDATE admin_accounts 
+                    SET session_token = NULL, token_expires = NULL 
+                    WHERE session_token = %s
+                """, (admin_token,))
+                conn.commit()
+                cur.close()
+                return_db_connection(conn)
+            except:
+                if conn:
+                    return_db_connection(conn)
+
+        # Log logout
+        log_admin_activity("admin", 'LOGOUT', True, 
+                         request.environ.get('REMOTE_ADDR'), 
+                         request.headers.get('User-Agent'))
+
+    # Clear admin session
+    session.pop('admin_token', None)
+    session.pop('admin_logged_in', None)
+    
+    return redirect('/admin_login')
+
 @app.route('/admin')
 def admin_dashboard():
     """Admin dashboard page"""
-    if not is_authenticated():
-        return redirect('/auth')
     if not is_admin():
-        return redirect('/profile?no_admin=1')
+        return redirect('/admin_login')
+    
+    # Log admin access
+    log_admin_activity("admin", 'DASHBOARD_ACCESS', True,
+                     request.environ.get('REMOTE_ADDR'),
+                     request.headers.get('User-Agent'))
+    
     return render_template('admin.html')
 
 @app.route('/admin/users')
 def admin_users():
     """Admin users management page"""
-    if not is_authenticated():
-        return redirect('/auth')
     if not is_admin():
-        return redirect('/profile?no_admin=1')
+        return redirect('/admin_login')
     return render_template('admin_users.html')
 
 @app.route('/admin/buds')
 def admin_buds():
     """Admin buds management page"""
-    if not is_authenticated():
-        return redirect('/auth')
     if not is_admin():
-        return redirect('/profile?no_admin=1')
+        return redirect('/admin_login')
     return render_template('admin_buds.html')
 
 @app.route('/admin/reviews')
 def admin_reviews():
     """Admin reviews management page"""
-    if not is_authenticated():
-        return redirect('/auth')
     if not is_admin():
-        return redirect('/profile?no_admin=1')
+        return redirect('/admin_login')
     return render_template('admin_reviews.html')
 
 # Separated admin settings routes
 @app.route('/admin/settings')
 def admin_settings():
     if not is_admin():
-        return redirect('/admin')
+        return redirect('/admin_login')
     return render_template('admin_settings.html')
 
 @app.route('/admin/settings/general')
 def admin_settings_general():
     if not is_admin():
-        return redirect('/admin')
+        return redirect('/admin_login')
     return render_template('admin_settings_general.html')
 
 @app.route('/admin/settings/auth-images')
 def admin_settings_auth_images():
     if not is_admin():
-        return redirect('/admin')
+        return redirect('/admin_login')
     return render_template('admin_settings_auth_images.html')
 
 @app.route('/admin/settings/users')
 def admin_settings_users():
     if not is_admin():
-        return redirect('/admin')
+        return redirect('/admin_login')
     return render_template('admin_settings_users.html')
 
 @app.route('/admin/settings/content')
 def admin_settings_content():
     if not is_admin():
-        return redirect('/admin')
+        return redirect('/admin_login')
     return render_template('admin_settings_content.html')
 
 @app.route('/admin/settings/security')
 def admin_settings_security():
     if not is_admin():
-        return redirect('/admin')
+        return redirect('/admin_login')
     return render_template('admin_settings_security.html')
 
 @app.route('/admin/settings/maintenance')
 def admin_settings_maintenance():
     if not is_admin():
-        return redirect('/admin')
+        return redirect('/admin_login')
     return render_template('admin_settings_maintenance.html')
 
 
@@ -4820,6 +5090,83 @@ def get_admin_settings():
             if conn:
                 conn.rollback()
             return jsonify({'error': f'เกิดข้อผิดพลาด: {str(e)}'}), 500
+        finally:
+            if cur:
+                cur.close()
+            if conn:
+                return_db_connection(conn)
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+@app.route('/api/admin/create_admin', methods=['POST'])
+def create_new_admin():
+    """Create new admin account (requires existing admin)"""
+    if not is_admin():
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    data = request.get_json()
+    admin_name = data.get('admin_name')
+    password = data.get('password')
+
+    if not admin_name or not password:
+        return jsonify({'error': 'กรุณากรอกชื่อ Admin และรหัสผ่าน'}), 400
+
+    # Get current user ID (if any)
+    current_user_id = session.get('user_id')
+
+    success, message = create_admin_account(admin_name, password, current_user_id)
+
+    if success:
+        # Log admin creation
+        log_admin_activity("admin", 'ADMIN_ACCOUNT_CREATED', True,
+                         request.environ.get('REMOTE_ADDR'),
+                         request.headers.get('User-Agent'),
+                         f'Created admin: {admin_name}')
+        
+        return jsonify({
+            'success': True,
+            'message': message
+        })
+    else:
+        return jsonify({
+            'success': False,
+            'error': message
+        }), 400
+
+@app.route('/api/admin/activity_logs')
+def get_admin_activity_logs():
+    """Get admin activity logs"""
+    if not is_admin():
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("""
+                SELECT admin_name, action, ip_address, success, details, created_at
+                FROM admin_activity_logs
+                ORDER BY created_at DESC
+                LIMIT 100
+            """)
+
+            logs = []
+            for row in cur.fetchall():
+                logs.append({
+                    'admin_name': row[0],
+                    'action': row[1],
+                    'ip_address': row[2],
+                    'success': row[3],
+                    'details': row[4],
+                    'created_at': row[5].strftime('%Y-%m-%d %H:%M:%S') if row[5] else None
+                })
+
+            cur.close()
+            return_db_connection(conn)
+            return jsonify({'logs': logs})
+
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
         finally:
             if cur:
                 cur.close()

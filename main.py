@@ -3468,14 +3468,49 @@ def admin_reviews():
         return redirect('/profile?no_admin=1')
     return render_template('admin_reviews.html')
 
+# Separated admin settings routes
 @app.route('/admin/settings')
 def admin_settings():
-    """Admin settings page"""
-    if not is_authenticated():
-        return redirect('/auth')
     if not is_admin():
-        return redirect('/profile?no_admin=1')
+        return redirect('/admin')
     return render_template('admin_settings.html')
+
+@app.route('/admin/settings/general')
+def admin_settings_general():
+    if not is_admin():
+        return redirect('/admin')
+    return render_template('admin_settings_general.html')
+
+@app.route('/admin/settings/auth-images')
+def admin_settings_auth_images():
+    if not is_admin():
+        return redirect('/admin')
+    return render_template('admin_settings_auth_images.html')
+
+@app.route('/admin/settings/users')
+def admin_settings_users():
+    if not is_admin():
+        return redirect('/admin')
+    return render_template('admin_settings_users.html')
+
+@app.route('/admin/settings/content')
+def admin_settings_content():
+    if not is_admin():
+        return redirect('/admin')
+    return render_template('admin_settings_content.html')
+
+@app.route('/admin/settings/security')
+def admin_settings_security():
+    if not is_admin():
+        return redirect('/admin')
+    return render_template('admin_settings_security.html')
+
+@app.route('/admin/settings/maintenance')
+def admin_settings_maintenance():
+    if not is_admin():
+        return redirect('/admin')
+    return render_template('admin_settings_maintenance.html')
+
 
 @app.route('/api/admin/stats')
 def get_admin_stats():
@@ -3568,7 +3603,7 @@ def get_pending_users():
                     else:
                         profile_image_url = f'/uploads/{user_dict["profile_image_url"].split("/")[-1]}'
                 user_dict['profile_image_url'] = profile_image_url
-                
+
                 users_list.append(user_dict)
 
             return jsonify({'users': users_list})
@@ -4531,10 +4566,10 @@ def save_admin_settings():
         try:
             data = request.get_json()
             if not data:
-                return jsonify({'error': 'ไม่มีข้อมูลที่จะบันทึก'}), 400
-                
+                return jsonify({'error': 'No data provided'}), 400
+
             cur = conn.cursor()
-            
+
             # ตรวจสอบว่าตาราง admin_settings มีอยู่หรือไม่
             cur.execute("""
                 SELECT EXISTS (
@@ -4543,7 +4578,7 @@ def save_admin_settings():
                 )
             """)
             table_exists = cur.fetchone()[0]
-            
+
             if not table_exists:
                 # สร้างตารางถ้ายังไม่มี
                 cur.execute("""
@@ -4556,10 +4591,10 @@ def save_admin_settings():
                     );
                 """)
                 print("Created admin_settings table")
-            
+
             admin_id = session['user_id']
             saved_count = 0
-            
+
             # บันทึกการตั้งค่าแต่ละรายการ
             for key, value in data.items():
                 if value is not None:
@@ -4578,19 +4613,19 @@ def save_admin_settings():
                     except Exception as e:
                         print(f"Error saving setting {key}: {e}")
                         continue
-            
+
             conn.commit()
             print(f"Total settings saved: {saved_count}")
-            
+
             cur.close()
             return_db_connection(conn)
-            
+
             return jsonify({
                 'success': True,
-                'message': f'บันทึกการตั้งค่าสำเร็จ ({saved_count} รายการ)',
+                'message': f'บันทึกการตั้งค่าระบบทั่วไปสำเร็จ ({saved_count} รายการ)',
                 'saved_count': saved_count
             })
-            
+
         except Exception as e:
             print(f"Error saving admin settings: {e}")
             if conn:
@@ -4617,7 +4652,7 @@ def get_admin_settings():
     if conn:
         try:
             cur = conn.cursor()
-            
+
             # ตรวจสอบว่าตาราง admin_settings มีอยู่หรือไม่
             cur.execute("""
                 SELECT EXISTS (
@@ -4626,7 +4661,7 @@ def get_admin_settings():
                 )
             """)
             table_exists = cur.fetchone()[0]
-            
+
             if not table_exists:
                 # สร้างตารางถ้ายังไม่มี
                 cur.execute("""
@@ -4638,7 +4673,7 @@ def get_admin_settings():
                         updated_by INTEGER REFERENCES users(id)
                     );
                 """)
-                
+
                 # เพิ่มการตั้งค่าเริ่มต้น
                 default_settings = [
                     ('autoApproval', 'false'),
@@ -4651,19 +4686,19 @@ def get_admin_settings():
                     ('sessionTimeout', '60'),
                     ('loginLogging', 'true')
                 ]
-                
+
                 cur.executemany("""
                     INSERT INTO admin_settings (setting_key, setting_value)
                     VALUES (%s, %s)
                 """, default_settings)
-                
+
                 conn.commit()
-            
+
             # ดึงการตั้งค่าปัจจุบัน
             cur.execute("""
                 SELECT setting_key, setting_value FROM admin_settings
             """)
-            
+
             settings = {}
             for row in cur.fetchall():
                 key, value = row
@@ -4674,15 +4709,15 @@ def get_admin_settings():
                     settings[key] = int(value)
                 else:
                     settings[key] = value
-            
+
             cur.close()
             return_db_connection(conn)
-            
+
             return jsonify({
                 'success': True,
                 'settings': settings
             })
-            
+
         except Exception as e:
             print(f"Error getting admin settings: {e}")
             if conn:
@@ -4708,11 +4743,11 @@ def get_current_auth_images():
             'logo': None,
             'background': None
         }
-        
+
         # ค้นหารูป logo ปัจจุบัน
         if os.path.exists('attached_assets'):
             files = os.listdir('attached_assets')
-            
+
             # หา logo file ใหม่ล่าสุด
             logo_files = [f for f in files if f.startswith('budtboy_logo_')]
             if logo_files:
@@ -4725,18 +4760,18 @@ def get_current_auth_images():
                     if 'budtboy' in f.lower() and any(ext in f.lower() for ext in ['.png', '.jpg', '.jpeg']):
                         images['logo'] = f'/attached_assets/{f}'
                         break
-            
+
             # หา background files
             bg_files = [f for f in files if f.startswith('auth_background_')]
             if bg_files:
                 bg_files.sort(reverse=True)
                 images['background'] = f'/attached_assets/{bg_files[0]}'
-        
+
         return jsonify({
             'success': True,
             'images': images
         })
-        
+
     except Exception as e:
         print(f"Error getting auth images: {e}")
         return jsonify({'error': f'เกิดข้อผิดพลาด: {str(e)}'}), 500

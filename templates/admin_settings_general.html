@@ -1,0 +1,433 @@
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cannabis App - ตั้งค่าระบบทั่วไป</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .admin-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .admin-header {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .back-btn {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .admin-content {
+            padding: 40px;
+        }
+
+        .form-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #28a745;
+        }
+
+        .toggle-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #28a745;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-success:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .status-message {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        @media (max-width: 768px) {
+            .admin-container {
+                margin: 10px;
+            }
+
+            .admin-content {
+                padding: 20px;
+            }
+
+            .form-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <a href="/admin/settings" class="back-btn">← กลับเมนูตั้งค่า</a>
+            <h1>🔧 ตั้งค่าระบบทั่วไป</h1>
+            <p>จัดการการตั้งค่าพื้นฐานของระบบ</p>
+        </div>
+
+        <div class="admin-content">
+            <form id="generalSettingsForm">
+                <div class="form-section">
+                    <h3>📱 ข้อมูลพื้นฐาน</h3>
+                    
+                    <div class="form-group">
+                        <label for="siteName">ชื่อเว็บไซต์:</label>
+                        <input type="text" id="siteName" name="siteName" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="siteDescription">คำอธิบายเว็บไซต์:</label>
+                        <textarea id="siteDescription" name="siteDescription" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="adminEmail">อีเมลผู้ดูแลระบบ:</label>
+                        <input type="email" id="adminEmail" name="adminEmail" required>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>🌐 การแสดงผล</h3>
+                    
+                    <div class="form-group">
+                        <label for="defaultLanguage">ภาษาเริ่มต้น:</label>
+                        <select id="defaultLanguage" name="defaultLanguage">
+                            <option value="th">ไทย</option>
+                            <option value="en">English</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="displayMode">โหมดการแสดงผล:</label>
+                        <select id="displayMode" name="displayMode">
+                            <option value="auto">อัตโนมัติ</option>
+                            <option value="light">โหมดสว่าง</option>
+                            <option value="dark">โหมดมืด</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="itemsPerPage">จำนวนรายการต่อหน้า:</label>
+                        <input type="number" id="itemsPerPage" name="itemsPerPage" min="5" max="100">
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>🔔 ตั้งค่าอื่นๆ</h3>
+                    
+                    <div class="form-group">
+                        <label>เปิดใช้งานการแจ้งเตือน:</label>
+                        <div class="toggle-group">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="enableNotifications" name="enableNotifications">
+                                <span class="slider"></span>
+                            </label>
+                            <span id="notificationStatus">ปิดใช้งาน</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>เปิดใช้งานโหมดบำรุงรักษา:</label>
+                        <div class="toggle-group">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="maintenanceMode" name="maintenanceMode">
+                                <span class="slider"></span>
+                            </label>
+                            <span id="maintenanceStatus">ปิดใช้งาน</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="statusMessage" style="display: none;"></div>
+
+                <div style="text-align: center; margin-top: 30px;">
+                    <button type="submit" class="btn btn-success" id="saveBtn">
+                        💾 บันทึกการตั้งค่า
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        class GeneralSettings {
+            constructor() {
+                this.form = document.getElementById('generalSettingsForm');
+                this.saveBtn = document.getElementById('saveBtn');
+                this.statusMessage = document.getElementById('statusMessage');
+                this.init();
+            }
+
+            async init() {
+                console.log('General Settings: Starting initialization');
+                this.setupEventListeners();
+                await this.loadSettings();
+            }
+
+            setupEventListeners() {
+                this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+                
+                // Toggle switches
+                document.getElementById('enableNotifications').addEventListener('change', (e) => {
+                    document.getElementById('notificationStatus').textContent = e.target.checked ? 'เปิดใช้งาน' : 'ปิดใช้งาน';
+                });
+                
+                document.getElementById('maintenanceMode').addEventListener('change', (e) => {
+                    document.getElementById('maintenanceStatus').textContent = e.target.checked ? 'เปิดใช้งาน' : 'ปิดใช้งาน';
+                });
+            }
+
+            async loadSettings() {
+                try {
+                    const response = await fetch('/api/admin/get_settings');
+                    if (response.ok) {
+                        const result = await response.json();
+                        if (result.success && result.settings) {
+                            this.populateForm(result.settings);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error loading settings:', error);
+                    this.showMessage('เกิดข้อผิดพลาดในการโหลดข้อมูล', 'error');
+                }
+            }
+
+            populateForm(settings) {
+                // Basic info
+                document.getElementById('siteName').value = settings.siteName || 'Cannabis App';
+                document.getElementById('siteDescription').value = settings.siteDescription || '';
+                document.getElementById('adminEmail').value = settings.adminEmail || '';
+                
+                // Display settings
+                document.getElementById('defaultLanguage').value = settings.defaultLanguage || 'th';
+                document.getElementById('displayMode').value = settings.displayMode || 'auto';
+                document.getElementById('itemsPerPage').value = settings.itemsPerPage || 20;
+                
+                // Toggles
+                const enableNotifications = settings.enableNotifications === 'true' || settings.enableNotifications === true;
+                const maintenanceMode = settings.maintenanceMode === 'true' || settings.maintenanceMode === true;
+                
+                document.getElementById('enableNotifications').checked = enableNotifications;
+                document.getElementById('notificationStatus').textContent = enableNotifications ? 'เปิดใช้งาน' : 'ปิดใช้งาน';
+                
+                document.getElementById('maintenanceMode').checked = maintenanceMode;
+                document.getElementById('maintenanceStatus').textContent = maintenanceMode ? 'เปิดใช้งาน' : 'ปิดใช้งาน';
+            }
+
+            async handleSubmit(e) {
+                e.preventDefault();
+                
+                this.saveBtn.textContent = 'กำลังบันทึก...';
+                this.saveBtn.disabled = true;
+
+                const formData = new FormData(this.form);
+                const settings = {
+                    siteName: formData.get('siteName'),
+                    siteDescription: formData.get('siteDescription'),
+                    adminEmail: formData.get('adminEmail'),
+                    defaultLanguage: formData.get('defaultLanguage'),
+                    displayMode: formData.get('displayMode'),
+                    itemsPerPage: parseInt(formData.get('itemsPerPage')),
+                    enableNotifications: document.getElementById('enableNotifications').checked,
+                    maintenanceMode: document.getElementById('maintenanceMode').checked
+                };
+
+                try {
+                    console.log('Saving general settings:', settings);
+                    
+                    const response = await fetch('/api/admin/settings/general', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(settings)
+                    });
+
+                    const result = await response.json();
+                    console.log('Save response:', result);
+
+                    if (response.ok && result.success) {
+                        this.showMessage(`✅ บันทึกการตั้งค่าสำเร็จ! (${result.saved_count || 'หลายรายการ'})`, 'success');
+                    } else {
+                        this.showMessage(`❌ เกิดข้อผิดพลาด: ${result.error || 'ไม่ทราบสาเหตุ'}`, 'error');
+                    }
+                } catch (error) {
+                    console.error('Error saving settings:', error);
+                    this.showMessage('❌ เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์', 'error');
+                } finally {
+                    this.saveBtn.textContent = '💾 บันทึกการตั้งค่า';
+                    this.saveBtn.disabled = false;
+                }
+            }
+
+            showMessage(message, type) {
+                this.statusMessage.textContent = message;
+                this.statusMessage.className = `status-message ${type === 'success' ? 'success-message' : 'error-message'}`;
+                this.statusMessage.style.display = 'block';
+
+                setTimeout(() => {
+                    this.statusMessage.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        // Initialize when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => new GeneralSettings());
+        } else {
+            new GeneralSettings();
+        }
+    </script>
+</body>
+</html>

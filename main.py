@@ -3884,7 +3884,8 @@ def search_buds():
                         flavor_conditions.append("b.aroma_flavor ILIKE %s")
                         params.append(f"%{flavor}%")
                 if flavor_conditions:
-                    query_parts.append(f"AND ({' OR '.join(flavor_conditions)})")
+                    or_clause = "AND (" + " OR ".join(flavor_conditions) + ")"
+                    query_parts.append(or_clause)
 
             # Complete query
             full_query = base_query + ' '.join(query_parts) + """

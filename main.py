@@ -1606,8 +1606,42 @@ def register_page():
     return render_template('index.html')
 
 @app.route('/auth')
-def auth_page():
-    return render_template('auth.html')
+def auth():
+    # Get video settings from database
+    video_url = "https://www.youtube.com/embed/dQw4w9WgXcQ"  # default
+    video_title = "ทำความรู้จัก Budt.Boy"  # default
+    show_video = True  # default
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            # Get video settings
+            cur.execute("""
+                SELECT setting_key, setting_value 
+                FROM admin_settings 
+                WHERE setting_key IN ('authVideoUrl', 'authVideoTitle', 'showAuthVideo')
+            """)
+            settings = cur.fetchall()
+
+            for setting in settings:
+                if setting[0] == 'authVideoUrl' and setting[1]:
+                    video_url = setting[1]
+                elif setting[0] == 'authVideoTitle' and setting[1]:
+                    video_title = setting[1]
+                elif setting[0] == 'showAuthVideo':
+                    show_video = setting[1].lower() == 'true'
+
+            cur.close()
+        except Exception as e:
+            print(f"Error loading video settings: {e}")
+        finally:
+            return_db_connection(conn)
+
+    return render_template('auth.html', 
+                         video_url=video_url, 
+                         video_title=video_title, 
+                         show_video=show_video)
 
 @app.route('/add-buds')
 def add_buds_page():
@@ -3254,10 +3288,8 @@ def get_all_buds_report():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     finally:
-        if cur:
-            cur.close()
-        if conn:
-            return_db_connection(conn)
+        cur.close()
+        return_db_connection(conn)
 
 @app.route('/api/buds/for-review')
 def get_buds_for_review():

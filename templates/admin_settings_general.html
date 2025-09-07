@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -195,6 +194,87 @@
             border: 1px solid #f5c6cb;
         }
 
+        /* New styles for video settings */
+        .settings-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .setting-row {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap; /* Added for responsiveness */
+        }
+
+        .setting-label {
+            flex: 1;
+            min-width: 180px; /* Minimum width for label */
+        }
+
+        .setting-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .setting-description {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .setting-control {
+            flex-grow: 1; /* Allows control to take available space */
+            min-width: 200px; /* Minimum width for control */
+        }
+
+        .text-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: #28a745;
+        }
+
+        .toggle-switch.active {
+            background-color: #28a745;
+        }
+
+        .toggle-switch.active .toggle-slider {
+            transform: translateX(26px);
+            background-color: white;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 4px;
+            left: 4px;
+            height: 26px;
+            width: 26px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
         @media (max-width: 768px) {
             .admin-container {
                 margin: 10px;
@@ -206,6 +286,18 @@
 
             .form-section {
                 padding: 20px;
+            }
+
+            .setting-row {
+                flex-direction: column; /* Stack label and control on smaller screens */
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .setting-label,
+            .setting-control {
+                min-width: unset; /* Remove min-width */
+                width: 100%; /* Take full width */
             }
         }
     </style>
@@ -222,17 +314,17 @@
             <form id="generalSettingsForm">
                 <div class="form-section">
                     <h3>📱 ข้อมูลพื้นฐาน</h3>
-                    
+
                     <div class="form-group">
                         <label for="siteName">ชื่อเว็บไซต์:</label>
                         <input type="text" id="siteName" name="siteName" required>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="siteDescription">คำอธิบายเว็บไซต์:</label>
                         <textarea id="siteDescription" name="siteDescription" rows="3"></textarea>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="adminEmail">อีเมลผู้ดูแลระบบ:</label>
                         <input type="email" id="adminEmail" name="adminEmail" required>
@@ -241,7 +333,7 @@
 
                 <div class="form-section">
                     <h3>🌐 การแสดงผล</h3>
-                    
+
                     <div class="form-group">
                         <label for="defaultLanguage">ภาษาเริ่มต้น:</label>
                         <select id="defaultLanguage" name="defaultLanguage">
@@ -249,7 +341,7 @@
                             <option value="en">English</option>
                         </select>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="displayMode">โหมดการแสดงผล:</label>
                         <select id="displayMode" name="displayMode">
@@ -258,7 +350,7 @@
                             <option value="dark">โหมดมืด</option>
                         </select>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="itemsPerPage">จำนวนรายการต่อหน้า:</label>
                         <input type="number" id="itemsPerPage" name="itemsPerPage" min="5" max="100">
@@ -267,7 +359,7 @@
 
                 <div class="form-section">
                     <h3>🔔 ตั้งค่าอื่นๆ</h3>
-                    
+
                     <div class="form-group">
                         <label>เปิดใช้งานการแจ้งเตือน:</label>
                         <div class="toggle-group">
@@ -278,7 +370,7 @@
                             <span id="notificationStatus">ปิดใช้งาน</span>
                         </div>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="registrationMode">โหมดการสมัครสมาชิก:</label>
                         <select id="registrationMode" name="registrationMode">
@@ -289,7 +381,7 @@
                             โหมดทั่วไปเหมาะสำหรับช่วงเริ่มต้น, โหมด Referral ป้องกัน Spam
                         </small>
                     </div>
-                    
+
                     <div class="form-group">
                         <label>เปิดใช้งานโหมดบำรุงรักษา:</label>
                         <div class="toggle-group">
@@ -298,6 +390,45 @@
                                 <span class="slider"></span>
                             </label>
                             <span id="maintenanceStatus">ปิดใช้งาน</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Video Settings Section -->
+                <div class="settings-section">
+                    <div class="section-title">
+                        🎥 การตั้งค่าวิดีโอ
+                    </div>
+
+                    <div class="setting-row">
+                        <div class="setting-label">
+                            <div class="setting-title">ลิงค์วิดีโอในหน้า Auth</div>
+                            <div class="setting-description">URL ของวิดีโอ YouTube ที่จะแสดงในหน้าเข้าสู่ระบบ</div>
+                        </div>
+                        <div class="setting-control">
+                            <input type="url" class="text-input" data-setting="authVideoUrl" placeholder="https://www.youtube.com/embed/dQw4w9WgXcQ">
+                        </div>
+                    </div>
+
+                    <div class="setting-row">
+                        <div class="setting-label">
+                            <div class="setting-title">ข้อความแนะนำวิดีโอ</div>
+                            <div class="setting-description">ข้อความที่แสดงเหนือวิดีโอในหน้า Auth</div>
+                        </div>
+                        <div class="setting-control">
+                            <input type="text" class="text-input" data-setting="authVideoTitle" placeholder="ทำความรู้จัก Budt.Boy">
+                        </div>
+                    </div>
+
+                    <div class="setting-row">
+                        <div class="setting-label">
+                            <div class="setting-title">แสดงวิดีโอในหน้า Auth</div>
+                            <div class="setting-description">เปิด/ปิดการแสดงวิดีโอในหน้าเข้าสู่ระบบ</div>
+                        </div>
+                        <div class="setting-control">
+                            <div class="toggle-switch active" data-setting="showAuthVideo">
+                                <div class="toggle-slider"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -330,15 +461,23 @@
 
             setupEventListeners() {
                 this.form.addEventListener('submit', (e) => this.handleSubmit(e));
-                
+
                 // Toggle switches
                 document.getElementById('enableNotifications').addEventListener('change', (e) => {
                     document.getElementById('notificationStatus').textContent = e.target.checked ? 'เปิดใช้งาน' : 'ปิดใช้งาน';
                 });
-                
+
                 document.getElementById('maintenanceMode').addEventListener('change', (e) => {
                     document.getElementById('maintenanceStatus').textContent = e.target.checked ? 'เปิดใช้งาน' : 'ปิดใช้งาน';
                 });
+
+                // New event listeners for video settings toggles
+                const showAuthVideoToggle = document.querySelector('.toggle-switch[data-setting="showAuthVideo"]');
+                if (showAuthVideoToggle) {
+                    showAuthVideoToggle.addEventListener('click', () => {
+                        showAuthVideoToggle.classList.toggle('active');
+                    });
+                }
             }
 
             async loadSettings() {
@@ -361,29 +500,42 @@
                 document.getElementById('siteName').value = settings.siteName || 'Cannabis App';
                 document.getElementById('siteDescription').value = settings.siteDescription || '';
                 document.getElementById('adminEmail').value = settings.adminEmail || '';
-                
+
                 // Display settings
                 document.getElementById('defaultLanguage').value = settings.defaultLanguage || 'th';
                 document.getElementById('displayMode').value = settings.displayMode || 'auto';
                 document.getElementById('itemsPerPage').value = settings.itemsPerPage || 20;
-                
+
                 // Registration mode
                 document.getElementById('registrationMode').value = settings.registrationMode || 'public';
-                
+
                 // Toggles
                 const enableNotifications = settings.enableNotifications === 'true' || settings.enableNotifications === true;
                 const maintenanceMode = settings.maintenanceMode === 'true' || settings.maintenanceMode === true;
-                
+
                 document.getElementById('enableNotifications').checked = enableNotifications;
                 document.getElementById('notificationStatus').textContent = enableNotifications ? 'เปิดใช้งาน' : 'ปิดใช้งาน';
-                
+
                 document.getElementById('maintenanceMode').checked = maintenanceMode;
                 document.getElementById('maintenanceStatus').textContent = maintenanceMode ? 'เปิดใช้งาน' : 'ปิดใช้งาน';
+
+                // Populate video settings
+                document.querySelector('input[data-setting="authVideoUrl"]').value = settings.authVideoUrl || '';
+                document.querySelector('input[data-setting="authVideoTitle"]').value = settings.authVideoTitle || '';
+                const showAuthVideo = settings.showAuthVideo === 'true' || settings.showAuthVideo === true;
+                const showAuthVideoToggle = document.querySelector('.toggle-switch[data-setting="showAuthVideo"]');
+                if (showAuthVideoToggle) {
+                    if (showAuthVideo) {
+                        showAuthVideoToggle.classList.add('active');
+                    } else {
+                        showAuthVideoToggle.classList.remove('active');
+                    }
+                }
             }
 
             async handleSubmit(e) {
                 e.preventDefault();
-                
+
                 this.saveBtn.textContent = 'กำลังบันทึก...';
                 this.saveBtn.disabled = true;
 
@@ -397,12 +549,16 @@
                     itemsPerPage: parseInt(formData.get('itemsPerPage')),
                     registrationMode: formData.get('registrationMode'),
                     enableNotifications: document.getElementById('enableNotifications').checked,
-                    maintenanceMode: document.getElementById('maintenanceMode').checked
+                    maintenanceMode: document.getElementById('maintenanceMode').checked,
+                    // New settings
+                    authVideoUrl: formData.get('authVideoUrl'),
+                    authVideoTitle: formData.get('authVideoTitle'),
+                    showAuthVideo: document.querySelector('.toggle-switch[data-setting="showAuthVideo"]').classList.contains('active')
                 };
 
                 try {
                     console.log('Saving general settings:', settings);
-                    
+
                     const response = await fetch('/api/admin/settings/general', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },

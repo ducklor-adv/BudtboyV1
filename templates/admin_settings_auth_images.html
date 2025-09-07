@@ -151,63 +151,87 @@
             background: linear-gradient(135deg, #28a745, #1e7e34);
             color: white;
             border: none;
-            padding: 12px 25px;
+            padding: 15px 30px;
             border-radius: 8px;
             cursor: pointer;
             font-size: 16px;
-            font-weight: 500;
+            font-weight: 600;
             transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
         }
 
-        .upload-btn:hover {
+        .upload-btn:hover:not(:disabled) {
             background: linear-gradient(135deg, #1e7e34, #155724);
             transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
         }
 
         .upload-btn:disabled {
             background: #6c757d;
             cursor: not-allowed;
             transform: none;
+            box-shadow: none;
         }
 
         .selected-file {
             background: #e8f5e9;
-            padding: 10px 15px;
+            padding: 15px;
             border-radius: 8px;
             color: #155724;
             font-size: 14px;
             border: 1px solid #c3e6cb;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .message {
-            padding: 15px;
-            border-radius: 8px;
+            padding: 15px 20px;
+            border-radius: 10px;
             margin-bottom: 20px;
             font-weight: 500;
+            border-left: 4px solid;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
 
         .message.success {
             background: #d4edda;
             color: #155724;
-            border: 1px solid #c3e6cb;
+            border-color: #28a745;
         }
 
         .message.error {
             background: #f8d7da;
             color: #721c24;
-            border: 1px solid #f5c6cb;
+            border-color: #dc3545;
         }
 
         .loading {
             display: none;
             text-align: center;
-            padding: 20px;
+            padding: 30px;
             color: #007bff;
             font-weight: 500;
+            font-size: 18px;
         }
 
         .loading.show {
             display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007bff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         .image-info {
@@ -218,6 +242,23 @@
             font-size: 14px;
             color: #0c5460;
             border: 1px solid #b3d9ff;
+        }
+
+        .progress-container {
+            width: 100%;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            margin: 10px 0;
+            height: 8px;
+            display: none;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            border-radius: 10px;
+            transition: width 0.3s ease;
         }
 
         @media (max-width: 768px) {
@@ -311,8 +352,10 @@
         <div class="admin-content">
             <!-- Message Display -->
             <div id="messageContainer"></div>
+            
             <div id="loadingContainer" class="loading">
-                <div>🔄 กำลังดำเนินการ...</div>
+                <div class="spinner"></div>
+                <div>กำลังอัปโหลดรูปภาพ...</div>
             </div>
 
             <!-- Logo Section -->
@@ -335,7 +378,12 @@
                         <label for="logoFile" class="file-input-label">📁 เลือกไฟล์ Logo</label>
                     </div>
                     <div id="logoSelectedFile"></div>
-                    <button type="submit" class="upload-btn" disabled>🚀 อัปโหลด Logo</button>
+                    <div class="progress-container" id="logoProgress">
+                        <div class="progress-bar" id="logoProgressBar"></div>
+                    </div>
+                    <button type="submit" class="upload-btn" id="logoUploadBtn" disabled>
+                        🚀 อัปโหลดและบันทึก Logo
+                    </button>
                 </form>
             </div>
 
@@ -359,7 +407,12 @@
                         <label for="backgroundFile" class="file-input-label">📁 เลือกไฟล์พื้นหลัง</label>
                     </div>
                     <div id="backgroundSelectedFile"></div>
-                    <button type="submit" class="upload-btn" disabled>🚀 อัปโหลดพื้นหลัง</button>
+                    <div class="progress-container" id="backgroundProgress">
+                        <div class="progress-bar" id="backgroundProgressBar"></div>
+                    </div>
+                    <button type="submit" class="upload-btn" id="backgroundUploadBtn" disabled>
+                        🚀 อัปโหลดและบันทึกพื้นหลัง
+                    </button>
                 </form>
             </div>
         </div>
@@ -391,6 +444,7 @@
     <script>
         class AuthImagesManager {
             constructor() {
+                this.uploadInProgress = false;
                 this.init();
             }
 
@@ -404,52 +458,72 @@
                 // Logo upload
                 const logoFile = document.getElementById('logoFile');
                 const logoForm = document.getElementById('logoUploadForm');
-                const logoBtn = logoForm.querySelector('.upload-btn');
-
+                
                 logoFile.addEventListener('change', (e) => {
                     this.handleFileSelection(e, 'logo');
                 });
 
                 logoForm.addEventListener('submit', (e) => {
                     e.preventDefault();
-                    this.uploadImage('logo');
+                    if (!this.uploadInProgress) {
+                        this.uploadImage('logo');
+                    }
                 });
 
                 // Background upload
                 const backgroundFile = document.getElementById('backgroundFile');
                 const backgroundForm = document.getElementById('backgroundUploadForm');
-                const backgroundBtn = backgroundForm.querySelector('.upload-btn');
-
+                
                 backgroundFile.addEventListener('change', (e) => {
                     this.handleFileSelection(e, 'background');
                 });
 
                 backgroundForm.addEventListener('submit', (e) => {
                     e.preventDefault();
-                    this.uploadImage('background');
+                    if (!this.uploadInProgress) {
+                        this.uploadImage('background');
+                    }
                 });
             }
 
             handleFileSelection(event, type) {
                 const file = event.target.files[0];
                 const selectedFileDiv = document.getElementById(`${type}SelectedFile`);
-                const uploadBtn = document.querySelector(`#${type}UploadForm .upload-btn`);
+                const uploadBtn = document.getElementById(`${type}UploadBtn`);
 
                 if (file) {
+                    // Validate file type
+                    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+                    if (!validTypes.includes(file.type)) {
+                        this.showMessage('ประเภทไฟล์ไม่ถูกต้อง (รองรับ: PNG, JPG, JPEG, GIF, WEBP)', 'error');
+                        event.target.value = '';
+                        uploadBtn.disabled = true;
+                        selectedFileDiv.innerHTML = '';
+                        return;
+                    }
+
                     const fileSize = (file.size / 1024 / 1024).toFixed(2);
+                    const maxSize = type === 'logo' ? 2 : 5; // MB
+                    
+                    // Validate file size
+                    if (file.size > maxSize * 1024 * 1024) {
+                        this.showMessage(`ขนาดไฟล์ใหญ่เกินไป (สูงสุด ${maxSize}MB)`, 'error');
+                        event.target.value = '';
+                        uploadBtn.disabled = true;
+                        selectedFileDiv.innerHTML = '';
+                        return;
+                    }
+
                     selectedFileDiv.innerHTML = `
                         <div class="selected-file">
-                            📄 ไฟล์ที่เลือก: ${file.name} (${fileSize} MB)
+                            <span>📄</span>
+                            <div>
+                                <strong>ไฟล์ที่เลือก:</strong> ${file.name}<br>
+                                <small>ขนาด: ${fileSize} MB</small>
+                            </div>
                         </div>
                     `;
                     uploadBtn.disabled = false;
-                    
-                    // Validate file size
-                    const maxSize = type === 'logo' ? 2 : 5; // MB
-                    if (file.size > maxSize * 1024 * 1024) {
-                        this.showMessage(`ขนาดไฟล์ใหญ่เกินไป (สูงสุด ${maxSize}MB)`, 'error');
-                        uploadBtn.disabled = true;
-                    }
                 } else {
                     selectedFileDiv.innerHTML = '';
                     uploadBtn.disabled = true;
@@ -458,26 +532,32 @@
 
             async loadCurrentImages() {
                 try {
+                    console.log('Loading current auth images...');
                     const response = await fetch('/api/admin/get_auth_images');
                     const result = await response.json();
+
+                    console.log('Auth images response:', result);
 
                     if (result.success && result.images) {
                         // Load logo
                         if (result.images.logo) {
                             document.getElementById('currentLogo').innerHTML = `
-                                <img src="${result.images.logo}" alt="Current Logo">
+                                <img src="${result.images.logo}?t=${Date.now()}" alt="Current Logo">
                             `;
+                            console.log('Logo loaded:', result.images.logo);
                         }
 
                         // Load background
                         if (result.images.background) {
                             document.getElementById('currentBackground').innerHTML = `
-                                <img src="${result.images.background}" alt="Current Background">
+                                <img src="${result.images.background}?t=${Date.now()}" alt="Current Background">
                             `;
+                            console.log('Background loaded:', result.images.background);
                         }
                     }
                 } catch (error) {
                     console.error('Error loading current images:', error);
+                    this.showMessage('เกิดข้อผิดพลาดในการโหลดรูปปัจจุบัน', 'error');
                 }
             }
 
@@ -490,12 +570,24 @@
                     return;
                 }
 
+                if (this.uploadInProgress) {
+                    this.showMessage('กรุณารอการอัปโหลดก่อนหน้าให้เสร็จสิ้น', 'error');
+                    return;
+                }
+
+                this.uploadInProgress = true;
                 this.showLoading(true);
+                this.showProgress(type, 0);
 
                 try {
                     const formData = new FormData();
                     formData.append('authImage', file);
                     formData.append('imageType', type);
+
+                    console.log(`Starting upload for ${type}:`, file.name);
+
+                    // Simulate progress for better UX
+                    this.simulateProgress(type);
 
                     const response = await fetch('/api/admin/upload_auth_image', {
                         method: 'POST',
@@ -504,36 +596,77 @@
 
                     const result = await response.json();
 
-                    if (result.success) {
-                        this.showMessage(result.message, 'success');
-                        
-                        // Update current image display
-                        const currentImageDiv = document.getElementById(`current${type.charAt(0).toUpperCase() + type.slice(1)}`);
-                        currentImageDiv.innerHTML = `
-                            <img src="${result.file_path}" alt="Current ${type}">
-                        `;
+                    console.log(`Upload response for ${type}:`, result);
 
-                        // Reset form
-                        fileInput.value = '';
-                        document.getElementById(`${type}SelectedFile`).innerHTML = '';
-                        document.querySelector(`#${type}UploadForm .upload-btn`).disabled = true;
+                    if (result.success) {
+                        this.showProgress(type, 100);
+                        
+                        setTimeout(() => {
+                            this.showMessage(`✅ ${result.message}`, 'success');
+                            
+                            // Update current image display
+                            const currentImageDiv = document.getElementById(`current${type.charAt(0).toUpperCase() + type.slice(1)}`);
+                            currentImageDiv.innerHTML = `
+                                <img src="${result.file_path}?t=${Date.now()}" alt="Current ${type}">
+                            `;
+
+                            // Reset form
+                            fileInput.value = '';
+                            document.getElementById(`${type}SelectedFile`).innerHTML = '';
+                            document.getElementById(`${type}UploadBtn`).disabled = true;
+                            
+                            this.hideProgress(type);
+                            console.log(`${type} upload completed successfully`);
+                        }, 500);
 
                     } else {
-                        this.showMessage(result.error || 'เกิดข้อผิดพลาดในการอัปโหลด', 'error');
+                        this.showMessage(`❌ ${result.error || 'เกิดข้อผิดพลาดในการอัปโหลด'}`, 'error');
+                        this.hideProgress(type);
                     }
                 } catch (error) {
                     console.error('Upload error:', error);
-                    this.showMessage('เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error');
+                    this.showMessage('❌ เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error');
+                    this.hideProgress(type);
                 } finally {
+                    this.uploadInProgress = false;
                     this.showLoading(false);
                 }
             }
 
+            simulateProgress(type) {
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += Math.random() * 30;
+                    if (progress > 90) {
+                        progress = 90;
+                        clearInterval(interval);
+                    }
+                    this.showProgress(type, progress);
+                }, 200);
+            }
+
+            showProgress(type, percent) {
+                const progressContainer = document.getElementById(`${type}Progress`);
+                const progressBar = document.getElementById(`${type}ProgressBar`);
+                
+                progressContainer.style.display = 'block';
+                progressBar.style.width = `${percent}%`;
+            }
+
+            hideProgress(type) {
+                const progressContainer = document.getElementById(`${type}Progress`);
+                setTimeout(() => {
+                    progressContainer.style.display = 'none';
+                }, 1000);
+            }
+
             showMessage(message, type) {
                 const container = document.getElementById('messageContainer');
+                const icon = type === 'success' ? '✅' : '❌';
+                
                 container.innerHTML = `
                     <div class="message ${type}">
-                        ${message}
+                        ${icon} ${message}
                     </div>
                 `;
 
@@ -541,6 +674,9 @@
                 setTimeout(() => {
                     container.innerHTML = '';
                 }, 5000);
+
+                // Scroll to top to show message
+                container.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
 
             showLoading(show) {
@@ -555,6 +691,7 @@
 
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', () => {
+            console.log('Auth Images Manager: Page loaded, initializing...');
             new AuthImagesManager();
         });
     </script>

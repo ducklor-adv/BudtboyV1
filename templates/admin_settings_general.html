@@ -426,9 +426,10 @@
                             <div class="setting-description">เปิด/ปิดการแสดงวิดีโอในหน้าเข้าสู่ระบบ</div>
                         </div>
                         <div class="setting-control">
-                            <div class="toggle-switch active" data-setting="showAuthVideo">
-                                <div class="toggle-slider"></div>
-                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="showAuthVideo" name="showAuthVideo" checked>
+                                <span class="slider"></span>
+                            </label>
                         </div>
                     </div>
                 </div>
@@ -471,13 +472,10 @@
                     document.getElementById('maintenanceStatus').textContent = e.target.checked ? 'เปิดใช้งาน' : 'ปิดใช้งาน';
                 });
 
-                // New event listeners for video settings toggles
-                const showAuthVideoToggle = document.querySelector('.toggle-switch[data-setting="showAuthVideo"]');
-                if (showAuthVideoToggle) {
-                    showAuthVideoToggle.addEventListener('click', () => {
-                        showAuthVideoToggle.classList.toggle('active');
-                    });
-                }
+                // Event listener for show video toggle
+                document.getElementById('showAuthVideo').addEventListener('change', (e) => {
+                    console.log('Show video toggle changed:', e.target.checked);
+                });
             }
 
             async loadSettings() {
@@ -523,14 +521,7 @@
                 document.querySelector('input[data-setting="authVideoUrl"]').value = settings.authVideoUrl || '';
                 document.querySelector('input[data-setting="authVideoTitle"]').value = settings.authVideoTitle || '';
                 const showAuthVideo = settings.showAuthVideo === 'true' || settings.showAuthVideo === true;
-                const showAuthVideoToggle = document.querySelector('.toggle-switch[data-setting="showAuthVideo"]');
-                if (showAuthVideoToggle) {
-                    if (showAuthVideo) {
-                        showAuthVideoToggle.classList.add('active');
-                    } else {
-                        showAuthVideoToggle.classList.remove('active');
-                    }
-                }
+                document.getElementById('showAuthVideo').checked = showAuthVideo;
             }
 
             async handleSubmit(e) {
@@ -555,7 +546,7 @@
                 // Get video settings from inputs
                 settings.authVideoUrl = document.querySelector('input[data-setting="authVideoUrl"]').value.trim();
                 settings.authVideoTitle = document.querySelector('input[data-setting="authVideoTitle"]').value.trim();
-                settings.showAuthVideo = document.querySelector('.toggle-switch[data-setting="showAuthVideo"]').classList.contains('active');
+                settings.showAuthVideo = document.getElementById('showAuthVideo').checked;
 
                 try {
                     console.log('Saving general settings:', settings);

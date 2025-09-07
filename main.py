@@ -1608,13 +1608,13 @@ def register_page():
 @app.route('/auth')
 def auth():
     # Get video settings from database
-    video_url = "https://www.youtube.com/embed/dQw4w9WgXcQ"  # default
+    video_url = None  # default
     video_title = "ทำความรู้จัก Budt.Boy"  # default
-    show_video = True  # default
+    show_video = False  # default เป็น false
 
     def convert_youtube_url_to_embed(url):
         """Convert various YouTube URL formats to embeddable format"""
-        if not url or 'youtube.com' not in url and 'youtu.be' not in url:
+        if not url or ('youtube.com' not in url and 'youtu.be' not in url):
             return url
             
         # Handle YouTube Shorts
@@ -1649,10 +1649,12 @@ def auth():
             for setting in settings:
                 if setting[0] == 'authVideoUrl' and setting[1] and setting[1].strip():
                     video_url = convert_youtube_url_to_embed(setting[1].strip())
+                    print(f"Auth video URL set to: {video_url}")
                 elif setting[0] == 'authVideoTitle' and setting[1] and setting[1].strip():
                     video_title = setting[1].strip()
                 elif setting[0] == 'showAuthVideo':
                     show_video = setting[1].lower() == 'true'
+                    print(f"Show auth video: {show_video}")
 
             cur.close()
         except Exception as e:
@@ -1660,6 +1662,7 @@ def auth():
         finally:
             return_db_connection(conn)
 
+    print(f"Final auth settings - URL: {video_url}, Title: {video_title}, Show: {show_video}")
     return render_template('auth.html', 
                          video_url=video_url, 
                          video_title=video_title, 

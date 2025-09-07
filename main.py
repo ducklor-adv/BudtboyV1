@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, jsonify, url_for, session, redirect
 import psycopg2
-from psycopg2 import pool
+from psycopg2 import pool, sql
 from psycopg2.extras import RealDictCursor
 import os
 from datetime import datetime, timedelta
@@ -4277,9 +4277,9 @@ def search_buds():
         try:
             cur = conn.cursor()
 
-            # Build dynamic query
-            query_parts = []
-            params = []
+            # Build dynamic query with safe SQL composition
+            conditions = []
+            params = {}
 
             base_query = """
                 SELECT b.id, b.strain_name_en, b.strain_name_th, b.breeder, b.strain_type,
@@ -4294,65 +4294,66 @@ def search_buds():
 
             # Add search conditions
             if data.get('strain_name_en'):
-                query_parts.append("AND b.strain_name_en ILIKE %s")
-                params.append(f"%{data['strain_name_en']}%")
+                conditions.append("AND b.strain_name_en ILIKE %(strain_name_en)s")
+                params['strain_name_en'] = f"%{data['strain_name_en']}%"
 
             if data.get('strain_name_th'):
-                query_parts.append("AND b.strain_name_th ILIKE %s")
-                params.append(f"%{data['strain_name_th']}%")
+                conditions.append("AND b.strain_name_th ILIKE %(strain_name_th)s")
+                params['strain_name_th'] = f"%{data['strain_name_th']}%"
 
             if data.get('breeder'):
-                query_parts.append("AND b.breeder ILIKE %s")
-                params.append(f"%{data['breeder']}%")
+                conditions.append("AND b.breeder ILIKE %(breeder)s")
+                params['breeder'] = f"%{data['breeder']}%"
 
             if data.get('strain_type'):
-                query_parts.append("AND b.strain_type = %s")
-                params.append(data['strain_type'])
+                conditions.append("AND b.strain_type = %(strain_type)s")
+                params['strain_type'] = data['strain_type']
 
             if data.get('grade'):
-                query_parts.append("AND b.grade = %s")
-                params.append(data['grade'])
+                conditions.append("AND b.grade = %(grade)s")
+                params['grade'] = data['grade']
 
             if data.get('recommended_time'):
-                query_parts.append("AND b.recommended_time = %s")
-                params.append(data['recommended_time'])
+                conditions.append("AND b.recommended_time = %(recommended_time)s")
+                params['recommended_time'] = data['recommended_time']
 
             if data.get('grow_method'):
-                query_parts.append("AND b.grow_method = %s")
-                params.append(data['grow_method'])
+                conditions.append("AND b.grow_method = %(grow_method)s")
+                params['grow_method'] = data['grow_method']
 
             # THC range
             if data.get('thc_min'):
-                query_parts.append("AND b.thc_percentage >= %s")
-                params.append(float(data['thc_min']))
+                conditions.append("AND b.thc_percentage >= %(thc_min)s")
+                params['thc_min'] = float(data['thc_min'])
 
             if data.get('thc_max'):
-                query_parts.append("AND b.thc_percentage <= %s")
-                params.append(float(data['thc_max']))
+                conditions.append("AND b.thc_percentage <= %(thc_max)s")
+                params['thc_max'] = float(data['thc_max'])
 
             # CBD range
             if data.get('cbd_min'):
-                query_parts.append("AND b.cbd_percentage >= %s")
-                params.append(float(data['cbd_min']))
+                conditions.append("AND b.cbd_percentage >= %(cbd_min)s")
+                params['cbd_min'] = float(data['cbd_min'])
 
             if data.get('cbd_max'):
-                query_parts.append("AND b.cbd_percentage <= %s")
-                params.append(float(data['cbd_max']))
+                conditions.append("AND b.cbd_percentage <= %(cbd_max)s")
+                params['cbd_max'] = float(data['cbd_max'])
 
             # Aroma/flavor search
             if data.get('aroma_flavor'):
                 flavors = [f.strip() for f in data['aroma_flavor'].split(',')]
                 flavor_conditions = []
-                for flavor in flavors:
+                for i, flavor in enumerate(flavors):
                     if flavor:
-                        flavor_conditions.append("b.aroma_flavor ILIKE %s")
-                        params.append(f"%{flavor}%")
+                        param_name = f'flavor_{i}'
+                        flavor_conditions.append(f"b.aroma_flavor ILIKE %({param_name})s")
+                        params[param_name] = f"%{flavor}%"
                 if flavor_conditions:
                     or_clause = "AND (" + " OR ".join(flavor_conditions) + ")"
-                    query_parts.append(or_clause)
+                    conditions.append(or_clause)
 
             # Complete query
-            full_query = base_query + ' '.join(query_parts) + """
+            full_query = base_query + ' '.join(conditions) + """
                 GROUP BY b.id, b.strain_name_en, b.strain_name_th, b.breeder, b.strain_type,
                          b.thc_percentage, b.cbd_percentage, b.grade, b.aroma_flavor,
                          b.recommended_time, b.grow_method, b.created_at

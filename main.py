@@ -7,7 +7,6 @@ from datetime import datetime, timedelta
 from werkzeug.utils import secure_filename
 from flask_mail import Mail, Message
 import secrets
-import hashlib
 import bcrypt
 import threading
 import time
@@ -51,24 +50,25 @@ PROFILE_CACHE_TTL = 1800  # 30 minutes for profile data
 ACTIVITY_CACHE_TTL = 600  # 10 minutes for activity data
 
 def get_cache(key, ttl=CACHE_TTL):
+    """Get cached data if not expired"""
     with cache_lock:
         if key in cache:
             data, timestamp, cache_ttl = cache[key]
             if time.time() - timestamp < cache_ttl:
                 return data
-            else:
-                del cache[key]
+            del cache[key]
     return None
 
 def set_cache(key, data, ttl=CACHE_TTL):
+    """Set cache with automatic cleanup"""
     with cache_lock:
         cache[key] = (data, time.time(), ttl)
-        # Clean old cache entries periodically
+        # Periodic cleanup
         if len(cache) > 1000:
             current_time = time.time()
-            keys_to_delete = [k for k, (_, ts, cache_ttl) in cache.items() 
-                            if current_time - ts > cache_ttl]
-            for k in keys_to_delete[:100]:  # Remove max 100 at a time
+            expired_keys = [k for k, (_, ts, cache_ttl) in cache.items() 
+                          if current_time - ts > cache_ttl]
+            for k in expired_keys[:100]:
                 del cache[k]
 
 def clear_cache_pattern(pattern):
@@ -82,11 +82,11 @@ def allowed_file(filename):
 
 # Database connection function
 def get_db_connection():
+    """Get database connection with improved error handling"""
     global connection_pool
-    max_retries = 2
-    retry_count = 0
-
-    while retry_count < max_retries:
+    max_retries = 3
+    
+    for retry_count in range(max_retries):
         try:
             if connection_pool is None:
                 init_connection_pool()
@@ -95,45 +95,35 @@ def get_db_connection():
                 try:
                     conn = connection_pool.getconn()
                     if conn and not conn.closed:
-                        # Quick connection test
+                        # Test connection
+                        with conn.cursor() as test_cur:
+                            test_cur.execute("SELECT 1")
+                        return conn
+                except (psycopg2.OperationalError, psycopg2.InterfaceError):
+                    if conn:
                         try:
-                            with conn.cursor() as test_cur:
-                                test_cur.execute("SELECT 1")
-                            return conn
+                            connection_pool.putconn(conn, close=True)
                         except:
-                            # Connection is bad, put it back and try again
-                            try:
-                                connection_pool.putconn(conn, close=True)
-                            except:
-                                pass
-                            conn = None
-                except (psycopg2.OperationalError, psycopg2.InterfaceError) as e:
-                    print(f"Connection pool error: {e}, reinitializing...")
+                            pass
                     connection_pool = None
-                    retry_count += 1
                     continue
 
-            # Fallback to direct connection only on final retry
+            # Fallback to direct connection
             if retry_count == max_retries - 1:
                 database_url = os.environ.get('DATABASE_URL')
                 if not database_url:
                     raise Exception("DATABASE_URL environment variable not set")
-
-                conn = psycopg2.connect(
+                
+                return psycopg2.connect(
                     database_url,
                     sslmode='prefer',
                     connect_timeout=15,
-                    application_name='cannabis_app_direct'
+                    application_name='cannabis_app'
                 )
-                return conn
-
-            retry_count += 1
-            time.sleep(0.1)  # Brief pause between retries
 
         except Exception as e:
-            retry_count += 1
-            if retry_count >= max_retries:
-                print(f"Database connection error after {max_retries} retries: {e}")
+            if retry_count == max_retries - 1:
+                print(f"Database connection failed: {e}")
                 return None
             time.sleep(0.1)
 
@@ -1305,20 +1295,18 @@ def verify_password(password, hashed_password):
 
 def validate_password_strength(password):
     """Validate password meets security requirements"""
-    if len(password) < 8:
+    if not password or len(password) < 8:
         return False, "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร"
+    
+    if len(password) > 128:
+        return False, "รหัสผ่านยาวเกินไป (สูงสุด 128 ตัวอักษร)"
 
     has_upper = any(c.isupper() for c in password)
     has_lower = any(c.islower() for c in password)
     has_digit = any(c.isdigit() for c in password)
-    has_special = any(c in "!@#$%^&*()_+-=[]{}|;:,.<>?" for c in password)
 
     if not (has_upper and has_lower and has_digit):
         return False, "รหัสผ่านต้องมีตัวอักษรพิมพ์ใหญ่ พิมพ์เล็ก และตัวเลข"
-
-    # Optional: require special character
-    # if not has_special:
-    #     return False, "รหัสผ่านต้องมีอักขระพิเศษ"
 
     return True, "รหัสผ่านปลอดภัย"
 
@@ -1490,10 +1478,10 @@ def get_user_buds():
 
     except psycopg2.OperationalError as e:
         print(f"Database operational error in get_user_buds: {e}")
-        return jsonify({'error': 'Database connection lost', 'buds': []}), 500
+        return jsonify({'error': 'เกิดข้อผิดพลาดในการเชื่อมต่อฐานข้อมูล', 'buds': []}), 500
     except Exception as e:
         print(f"Error in get_user_buds: {e}")
-        return jsonify({'error': 'Internal server error', 'buds': []}), 500
+        return jsonify({'error': 'เกิดข้อผิดพลาดภายในระบบ', 'buds': []}), 500
     finally:
         if cur:
             try:
@@ -3945,7 +3933,7 @@ def admin_users():
         return redirect('/admin_login')
     return render_template('admin_users.html')
 
-# Separated admin settings routes
+# Admin settings routes
 @app.route('/admin/settings')
 def admin_settings():
     if not is_admin():
@@ -5546,4 +5534,7 @@ if __name__ == '__main__':
 
     # Create tables on startup
     create_tables()
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    
+    # Production configuration
+    debug_mode = os.environ.get('FLASK_ENV') != 'production'
+    app.run(host='0.0.0.0', port=5000, debug=debug_mode)

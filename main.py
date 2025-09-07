@@ -1612,6 +1612,28 @@ def auth():
     video_title = "ทำความรู้จัก Budt.Boy"  # default
     show_video = True  # default
 
+    def convert_youtube_url_to_embed(url):
+        """Convert various YouTube URL formats to embeddable format"""
+        if not url or 'youtube.com' not in url and 'youtu.be' not in url:
+            return url
+            
+        # Handle YouTube Shorts
+        if '/shorts/' in url:
+            video_id = url.split('/shorts/')[-1].split('?')[0]
+            return f"https://www.youtube.com/embed/{video_id}"
+        
+        # Handle regular YouTube URLs
+        if 'watch?v=' in url:
+            video_id = url.split('watch?v=')[-1].split('&')[0]
+            return f"https://www.youtube.com/embed/{video_id}"
+        
+        # Handle youtu.be URLs
+        if 'youtu.be/' in url:
+            video_id = url.split('youtu.be/')[-1].split('?')[0]
+            return f"https://www.youtube.com/embed/{video_id}"
+            
+        return url
+
     conn = get_db_connection()
     if conn:
         try:
@@ -1626,7 +1648,7 @@ def auth():
 
             for setting in settings:
                 if setting[0] == 'authVideoUrl' and setting[1] and setting[1].strip():
-                    video_url = setting[1].strip()
+                    video_url = convert_youtube_url_to_embed(setting[1].strip())
                 elif setting[0] == 'authVideoTitle' and setting[1] and setting[1].strip():
                     video_title = setting[1].strip()
                 elif setting[0] == 'showAuthVideo':

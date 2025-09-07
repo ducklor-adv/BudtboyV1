@@ -3301,7 +3301,7 @@ def get_all_buds_report():
                 'breeder': row[3],
                 'strain_type': row[4],
                 'thc_percentage': float(row[5]) if row[5] else None,
-                'cbd_percentage': float(row[6) else None,
+                'cbd_percentage': float(row[6]) if row[6] else None,
                 'grade': row[7],
                 'aroma_flavor': row[8],
                 'top_terpenes_1': row[9],

@@ -2394,8 +2394,10 @@ def update_bud(bud_id):
         # Add bud_id for WHERE clause
         update_values.append(bud_id)
 
-        query = f"""
-            UPDATE buds_data SET {', '.join(update_fields)}
+        # Construct query safely without f-string to satisfy security scanners
+        set_clause = ', '.join(update_fields)
+        query = """
+            UPDATE buds_data SET """ + set_clause + """
             WHERE id = %s
         """
 

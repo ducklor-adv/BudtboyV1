@@ -1144,12 +1144,15 @@ def create_tables():
                 cur.execute("SELECT id FROM users LIMIT 5")
                 user_ids = [row[0] for row in cur.fetchall()]
 
+                # Check for environment variable to force create sample data
+                force_create_sample = os.environ.get('FORCE_CREATE_SAMPLE_DATA', 'false').lower() == 'true'
+
                 if user_ids:
                     # Check if bud data already exists
                     cur.execute("SELECT COUNT(*) FROM buds_data")
                     bud_count = cur.fetchone()[0]
 
-                    if bud_count == 0:
+                    if bud_count == 0 or force_create_sample:
                         print("Adding sample bud data...")
 
                         # Sample bud data for each user
@@ -5353,6 +5356,86 @@ def create_new_admin():
             'success': False,
             'error': message
         }), 400
+
+@app.route('/api/admin/create_sample_data', methods=['POST'])
+def admin_create_sample_data():
+    """Admin endpoint to create sample data"""
+    if not is_admin():
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            
+            # Check if sample user exists
+            cur.execute("SELECT id FROM users WHERE username = 'Budt.Boy'")
+            sample_user = cur.fetchone()
+            
+            if not sample_user:
+                # Create sample user
+                password_hash = hash_password('BudtBoy123!')
+                import secrets
+                referral_code = secrets.token_urlsafe(8)
+                
+                cur.execute("""
+                    INSERT INTO users (username, email, password_hash, is_grower, is_consumer, 
+                                     is_verified, is_approved, referral_code, created_at)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, NOW())
+                    RETURNING id
+                """, ('Budt.Boy', 'budtboy@example.com', password_hash, True, True, True, True, referral_code))
+                
+                sample_user_id = cur.fetchone()[0]
+            else:
+                sample_user_id = sample_user[0]
+            
+            # Create sample buds
+            sample_buds = [
+                ('บลูดรีม', 'Blue Dream', 'Barney\'s Farm', 'Hybrid', 18.5, 1.2, 'A+', 'หวาน, เบอร์รี่, ซิตรัส',
+                 'Myrcene', 'Limonene', 'Pinene', 'ผ่อนคลาย, สร้างสรรค์, สุขใจ', '', 'บรรเทาปวด, คลายกล้าม', 'ปากแห้ง',
+                 'ตลอดวัน', 'Indoor', '2024-12-01', 'BD2024-001', sample_user_id, True, 'Organic', 'Photoperiod', sample_user_id),
+                ('โอจี คัช', 'OG Kush', 'DNA Genetics', 'Indica', 22.3, 0.8, 'A', 'ดิน, สน, เผ็ด',
+                 'Myrcene', 'Caryophyllene', 'Limonene', 'ผ่อนคลาย, หลับง่าย', 'ง่วงหนัก', 'บรรเทาปวด, หลับง่าย', 'ตาแดง, ปากแห้ง',
+                 'กลางคืน', 'Indoor', '2024-11-15', 'OG2024-001', sample_user_id, True, 'Chemical', 'Photoperiod', sample_user_id),
+                ('ไวท์ วิโดว์', 'White Widow', 'Green House Seed Company', 'Hybrid', 20.1, 1.5, 'A+', 'หวาน, ดอกไม้, มินต์',
+                 'Pinene', 'Myrcene', 'Limonene', 'ตื่นตัว, โฟกัส, เบิกบาน', '', 'ต้านอักเสบ, สดชื่น', 'ตาแห้ง',
+                 'กลางวัน', 'Greenhouse', '2024-10-20', 'WW2024-001', sample_user_id, True, 'Organic', 'Photoperiod', sample_user_id),
+                ('บลูดรีม 2', 'Blue Dream', 'DNA Genetics', 'Hybrid', 19.2, 2.0, 'B+', 'กาแฟ, สตรอว์เบอร์รี่, บัตเตอร์',
+                 'Myrcene', 'Limonene', 'Caryophyllene', 'ผ่อนคลาย, สร้างสรรค์', '', 'บรรเทาปวด, คลายกล้าม', 'ปากแห้ง',
+                 'ตลอดวัน', 'Indoor', '2025-07-16', '', sample_user_id, True, 'Organic', 'Photoperiod', sample_user_id)
+            ]
+            
+            cur.executemany("""
+                INSERT INTO buds_data (
+                    strain_name_th, strain_name_en, breeder, strain_type,
+                    thc_percentage, cbd_percentage, grade, aroma_flavor,
+                    top_terpenes_1, top_terpenes_2, top_terpenes_3,
+                    mental_effects_positive, mental_effects_negative,
+                    physical_effects_positive, physical_effects_negative,
+                    recommended_time, grow_method, harvest_date,
+                    batch_number, grower_id, grower_license_verified,
+                    fertilizer_type, flowering_type, created_by
+                ) VALUES (
+                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+                )
+            """, sample_buds)
+            
+            conn.commit()
+            
+            return jsonify({
+                'success': True,
+                'message': f'สร้างข้อมูลตัวอย่างสำเร็จ ({len(sample_buds)} buds)'
+            })
+            
+        except Exception as e:
+            conn.rollback()
+            return jsonify({'error': str(e)}), 500
+        finally:
+            cur.close()
+            return_db_connection(conn)
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
 @app.route('/api/admin/activity_logs')
 def get_admin_activity_logs():

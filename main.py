@@ -3588,15 +3588,21 @@ def get_registration_mode():
 
 def is_admin():
     """Check if current user is admin"""
-    if not is_authenticated():
-        return False
-
     # Check if user has admin session
+    admin_logged_in = session.get('admin_logged_in', False)
     admin_token = session.get('admin_token')
-    if not admin_token:
+    admin_name = session.get('admin_name')
+    
+    print(f"Admin check - logged_in: {admin_logged_in}, has_token: {bool(admin_token)}, admin_name: {admin_name}")
+    
+    if not admin_logged_in or not admin_token:
         return False
 
-    # Verify admin token from database
+    # For default admin, just check session
+    if admin_name == 'admin999':
+        return True
+
+    # For database admins, verify token
     conn = get_db_connection()
     if conn:
         try:
@@ -3665,6 +3671,18 @@ def verify_admin_login(admin_name, password, ip_address=None, user_agent=None):
     import secrets
     import time
     from datetime import datetime, timedelta
+
+    # Check for default admin first
+    master_password = os.environ.get('ADMIN_MASTER_PASSWORD', 'Admin123!@#')
+    if admin_name == "admin999" and password == master_password:
+        # Generate session token for default admin
+        session_token = secrets.token_urlsafe(32)
+        
+        # Log successful login
+        log_admin_activity(admin_name, 'LOGIN_SUCCESS', True, ip_address, user_agent, 'Default admin login')
+        print(f"Default admin login successful: {admin_name}")
+        
+        return True, "เข้าสู่ระบบ Admin สำเร็จ", session_token
 
     conn = get_db_connection()
     if conn:
@@ -3743,63 +3761,12 @@ def verify_admin_login(admin_name, password, ip_address=None, user_agent=None):
                 return_db_connection(conn)
                 return False, "ไม่พบบัญชี Admin นี้", None
 
-            # Fallback for master password if no admin found
-            master_password = os.environ.get('ADMIN_MASTER_PASSWORD', 'Admin123!@#')
-            if admin_name == "admin999" and password == master_password:
-                # Generate session token
-                session_token = secrets.token_urlsafe(32)
-                token_expires = datetime.now() + timedelta(hours=2)  # 2 hour session
-
-                # Update admin record
-                cur.execute("""
-                    INSERT INTO admin_accounts (admin_name, password_hash, session_token, token_expires, last_login, login_attempts)
-                    VALUES (%s, %s, %s, %s, NOW(), 0)
-                    ON CONFLICT (admin_name) 
-                    DO UPDATE SET 
-                        session_token = EXCLUDED.session_token,
-                        token_expires = EXCLUDED.token_expires,
-                        last_login = NOW(),
-                        login_attempts = 0,
-                        locked_until = NULL
-                """, (admin_name, hash_password(master_password), session_token, token_expires))
-
-                conn.commit()
-
-                # Log successful login
-                log_admin_activity(admin_name, 'LOGIN_SUCCESS', True, ip_address, user_agent)
-
-                cur.close()
-                return_db_connection(conn)
-                return True, "เข้าสู่ระบบ Admin สำเร็จ", session_token
-            else:
-                # Increment failed attempts
-                cur.execute("""
-                    INSERT INTO admin_accounts (admin_name, password_hash, login_attempts)
-                    VALUES (%s, %s, 1)
-                    ON CONFLICT (admin_name) 
-                    DO UPDATE SET 
-                        login_attempts = admin_accounts.login_attempts + 1,
-                        locked_until = CASE 
-                            WHEN admin_accounts.login_attempts + 1 >= 5 THEN NOW() + INTERVAL '30 minutes'
-                            ELSE NULL 
-                        END
-                """, (admin_name, hash_password(master_password)))
-
-                conn.commit()
-
-                # Log failed login
-                log_admin_activity(admin_name, 'LOGIN_FAILED', False, ip_address, user_agent,
-                                 'Invalid password')
-
-                cur.close()
-                return_db_connection(conn)
-                return False, "รหัสผ่าน Admin ไม่ถูกต้อง", None
-
         except Exception as e:
             conn.rollback()
             cur.close()
             return_db_connection(conn)
             return False, f"เกิดข้อผิดพลาด: {str(e)}", None
+    
     return False, "เชื่อมต่อฐานข้อมูลไม่ได้", None
 
 def log_admin_activity(admin_name, action, success=True, ip_address=None, user_agent=None, details=None):
@@ -3889,13 +3856,17 @@ def admin_login():
         # Set admin session
         session['admin_token'] = session_token
         session['admin_logged_in'] = True
+        session['admin_name'] = admin_name  # Add admin name to session
 
+        print(f"Admin login successful: {admin_name}, token: {session_token[:10]}...")
+        
         return jsonify({
             'success': True,
             'message': message,
             'redirect': '/admin'
         })
     else:
+        print(f"Admin login failed: {message}")
         return jsonify({
             'success': False,
             'error': message

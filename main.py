@@ -3599,7 +3599,7 @@ def is_admin():
         return False
 
     # For default admin, check if admin_name is admin999 OR if no admin_name but valid token
-    if admin_name == 'admin999' or (not admin_name and admin_logged_in):
+    if admin_name == 'admin999' or (not admin_name and admin_logged_in and admin_token):
         return True
 
     # For database admins, verify token
@@ -3979,7 +3979,7 @@ def admin_settings_maintenance():
 @app.route('/api/admin/stats')
 def get_admin_stats():
     """Get admin dashboard statistics"""
-    if not is_authenticated() or not is_admin():
+    if not is_admin():
         return jsonify({'error': 'Unauthorized'}), 401
 
     conn = get_db_connection()
@@ -4027,7 +4027,7 @@ def get_admin_stats():
 # @admin_required # Commented out to allow access for testing purposes - uncomment for production
 def get_pending_users():
     """Get list of users pending approval"""
-    if not is_authenticated() or not is_admin():
+    if not is_admin():
         return jsonify({'error': 'Unauthorized'}), 401
 
     conn = get_db_connection()
@@ -4087,7 +4087,7 @@ def get_pending_users():
 # @admin_required # Commented out for testing
 def admin_approve_user():
     """Admin approve a pending user"""
-    if not is_authenticated() or not is_admin():
+    if not is_admin():
         return jsonify({'error': 'Unauthorized'}), 401
 
     data = request.get_json()
@@ -4147,7 +4147,7 @@ def admin_approve_user():
 # @admin_required # Commented out for testing
 def admin_reject_user():
     """Admin reject a pending user (delete from system)"""
-    if not is_authenticated() or not is_admin():
+    if not is_admin():
         return jsonify({'error': 'Unauthorized'}), 401
 
     data = request.get_json()
@@ -4202,7 +4202,7 @@ def admin_reject_user():
 # @admin_required # Commented out for testing
 def get_admin_users():
     """Get all users for admin management"""
-    if not is_authenticated() or not is_admin():
+    if not is_admin():
         return jsonify({'error': 'Unauthorized'}), 401
 
     conn = get_db_connection()
@@ -5041,7 +5041,7 @@ def get_friends():
 @app.route('/api/admin/settings', methods=['POST'])
 def save_admin_settings():
     """Save admin general settings"""
-    if not is_authenticated() or not is_admin():
+    if not is_admin():
         return jsonify({'error': 'Unauthorized'}), 401
 
     conn = get_db_connection()
@@ -5128,7 +5128,7 @@ def save_admin_settings():
 @app.route('/api/admin/settings/general', methods=['POST'])
 def save_general_settings():
     """Save admin general settings (specific endpoint)"""
-    if not is_authenticated() or not is_admin():
+    if not is_admin():
         return jsonify({'error': 'Unauthorized'}), 401
 
     conn = get_db_connection()
@@ -5215,7 +5215,7 @@ def save_general_settings():
 @app.route('/api/admin/get_settings', methods=['GET'])
 def get_admin_settings():
     """Get current admin settings"""
-    if not is_authenticated() or not is_admin():
+    if not is_admin():
         return jsonify({'error': 'Unauthorized'}), 401
 
     conn = get_db_connection()
@@ -5381,7 +5381,7 @@ def get_admin_activity_logs():
 @app.route('/api/admin/get_auth_images', methods=['GET'])
 def get_current_auth_images():
     """Get current auth page images"""
-    if not is_authenticated() or not is_admin():
+    if not is_admin():
         return jsonify({'error': 'Unauthorized'}), 401
 
     try:
@@ -5427,7 +5427,7 @@ def get_current_auth_images():
 # @admin_required # Commented out for testing
 def upload_auth_image():
     """Upload and update auth page images"""
-    if not is_authenticated() or not is_admin():
+    if not is_admin():
         return jsonify({'error': 'Unauthorized'}), 401
 
     try:

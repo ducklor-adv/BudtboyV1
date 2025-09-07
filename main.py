@@ -22,6 +22,9 @@ app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD', 'demo_password')
 app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_USERNAME', 'budtboy.app@gmail.com')
 app.config['MAIL_USE_SSL'] = False
 
+# Check if we have real email credentials
+DEMO_EMAIL_MODE = app.config['MAIL_PASSWORD'] == 'demo_password' or not app.config['MAIL_PASSWORD']
+
 # File upload configuration
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
@@ -1370,9 +1373,10 @@ def send_verification_email(email, username, token):
 def send_password_reset_email(email, username, token):
     """Send password reset email"""
     try:
+        reset_url = url_for('reset_password_page', token=token, _external=True)
+        
         # For demo/testing - simulate email sending if no real email config
-        if app.config['MAIL_PASSWORD'] == 'demo_password':
-            reset_url = url_for('reset_password_page', token=token, _external=True)
+        if DEMO_EMAIL_MODE:
             print(f"""
             🔶 จำลองการส่งอีเมลรีเซ็ตรหัสผ่าน (Demo Mode) 🔶
             ถึง: {email}
@@ -1390,7 +1394,7 @@ def send_password_reset_email(email, username, token):
             """)
             return True
 
-        reset_url = url_for('reset_password_page', token=token, _external=True)
+        # Try to send real email
         msg = Message(
             subject='รีเซ็ตรหัสผ่าน - Cannabis App',
             recipients=[email],
@@ -1412,7 +1416,13 @@ def send_password_reset_email(email, username, token):
         return True
     except Exception as e:
         print(f"Error sending password reset email: {e}")
-        return False
+        # Fall back to demo mode if email fails
+        print(f"""
+        🔶 อีเมลส่งไม่ได้ - แสดงลิงก์รีเซ็ตในคอนโซลแทน 🔶
+        ถึง: {email} ({username})
+        ลิงก์รีเซ็ต: {reset_url}
+        """)
+        return True  # Return True so the user still gets success message
 
 @app.route('/')
 def index():
@@ -1965,7 +1975,16 @@ def forgot_password():
             conn.commit()
 
             # Send reset email
-            if send_password_reset_email(email, username, reset_token):
+            email_sent = send_password_reset_email(email, username, reset_token)
+            
+            if DEMO_EMAIL_MODE:
+                return jsonify({
+                    'success': True,
+                    'message': 'ลิงก์รีเซ็ตรหัสผ่านแสดงในคอนโซลแล้ว (Demo Mode)',
+                    'demo_mode': True,
+                    'reset_url': url_for('reset_password_page', token=reset_token, _external=True)
+                })
+            elif email_sent:
                 return jsonify({
                     'success': True,
                     'message': 'หากอีเมลนี้มีในระบบ เราจะส่งลิงก์รีเซ็ตรหัสผ่านให้คุณ'

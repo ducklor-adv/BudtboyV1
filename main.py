@@ -1616,22 +1616,22 @@ def auth():
         """Convert various YouTube URL formats to embeddable format"""
         if not url or ('youtube.com' not in url and 'youtu.be' not in url):
             return url
-            
+
         # Handle YouTube Shorts
         if '/shorts/' in url:
             video_id = url.split('/shorts/')[-1].split('?')[0]
             return f"https://www.youtube.com/embed/{video_id}"
-        
+
         # Handle regular YouTube URLs
         if 'watch?v=' in url:
             video_id = url.split('watch?v=')[-1].split('&')[0]
             return f"https://www.youtube.com/embed/{video_id}"
-        
+
         # Handle youtu.be URLs
         if 'youtu.be/' in url:
             video_id = url.split('youtu.be/')[-1].split('?')[0]
             return f"https://www.youtube.com/embed/{video_id}"
-            
+
         return url
 
     conn = get_db_connection()
@@ -3592,9 +3592,9 @@ def is_admin():
     admin_logged_in = session.get('admin_logged_in', False)
     admin_token = session.get('admin_token')
     admin_name = session.get('admin_name')
-    
+
     print(f"Admin check - logged_in: {admin_logged_in}, has_token: {bool(admin_token)}, admin_name: {admin_name}")
-    
+
     if not admin_logged_in or not admin_token:
         return False
 
@@ -3677,11 +3677,11 @@ def verify_admin_login(admin_name, password, ip_address=None, user_agent=None):
     if admin_name == "admin999" and password == master_password:
         # Generate session token for default admin
         session_token = secrets.token_urlsafe(32)
-        
+
         # Log successful login
         log_admin_activity(admin_name, 'LOGIN_SUCCESS', True, ip_address, user_agent, 'Default admin login')
         print(f"Default admin login successful: {admin_name}")
-        
+
         return True, "เข้าสู่ระบบ Admin สำเร็จ", session_token
 
     conn = get_db_connection()
@@ -3699,7 +3699,7 @@ def verify_admin_login(admin_name, password, ip_address=None, user_agent=None):
 
             if admin_record:
                 stored_admin_name, stored_password_hash, attempts, locked_until = admin_record
-                
+
                 # Check if account is locked
                 if locked_until and locked_until > datetime.now():
                     log_admin_activity(admin_name, 'LOGIN_BLOCKED', False, ip_address, user_agent,
@@ -3766,7 +3766,7 @@ def verify_admin_login(admin_name, password, ip_address=None, user_agent=None):
             cur.close()
             return_db_connection(conn)
             return False, f"เกิดข้อผิดพลาด: {str(e)}", None
-    
+
     return False, "เชื่อมต่อฐานข้อมูลไม่ได้", None
 
 def log_admin_activity(admin_name, action, success=True, ip_address=None, user_agent=None, details=None):
@@ -3859,7 +3859,7 @@ def admin_login():
         session['admin_name'] = admin_name  # Always set admin name to session
 
         print(f"Admin login successful: {admin_name}, token: {session_token[:10]}...")
-        
+
         return jsonify({
             'success': True,
             'message': message,
@@ -4116,7 +4116,10 @@ def admin_approve_user():
                 return jsonify({'error': 'ผู้ใช้นี้ได้รับการอนุมัติแล้ว'}), 400
 
             # Approve the user
-            admin_id = session['user_id']
+            admin_id = session.get('user_id') # Get current logged-in user ID
+            if not admin_id: # If admin logged in without user_id (e.g. default admin)
+                admin_id = None # Or handle as appropriate, e.g., use a placeholder admin ID
+
             cur.execute("""
                 UPDATE users 
                 SET is_approved = TRUE, approved_at = CURRENT_TIMESTAMP, approved_by = %s
@@ -4830,11 +4833,15 @@ def approve_user():
                 return jsonify({'error': 'ผู้ใช้นี้ได้รับการอนุมัติแล้ว'}), 400
 
             # Approve the user
+            admin_id = session.get('user_id') # Get current logged-in user ID
+            if not admin_id: # If admin logged in without user_id (e.g. default admin)
+                admin_id = None # Or handle as appropriate, e.g., use a placeholder admin ID
+
             cur.execute("""
                 UPDATE users 
                 SET is_approved = TRUE, approved_at = CURRENT_TIMESTAMP, approved_by = %s
                 WHERE id = %s
-            """, (approver_id, user_id_to_approve))
+            """, (admin_id, user_id_to_approve))
 
             conn.commit()
             cur.close()
@@ -5075,8 +5082,13 @@ def save_admin_settings():
                 """)
                 print("Created admin_settings table")
 
-            admin_id = session['user_id']
-            saved_count = 0
+            # Get admin ID - for admin sessions, user_id might not exist
+            admin_id = session.get('user_id')
+            if not admin_id:
+                # For admin-only sessions, use a default admin user ID or None
+                admin_id = None
+
+            saved_count = saved_count = 0
 
             # บันทึกการตั้งค่าแต่ละรายการ
             for key, value in data.items():
@@ -5162,7 +5174,12 @@ def save_general_settings():
                 """)
                 print("Created admin_settings table")
 
-            admin_id = session['user_id']
+            # Get admin ID - for admin sessions, user_id might not exist
+            admin_id = session.get('user_id')
+            if not admin_id:
+                # For admin-only sessions, use a default admin user ID or None
+                admin_id = None
+
             saved_count = 0
 
             # บันทึกการตั้งค่าแต่ละรายการ

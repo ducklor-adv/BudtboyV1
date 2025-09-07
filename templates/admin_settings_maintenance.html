@@ -1,0 +1,562 @@
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cannabis App - เครื่องมือบำรุงรักษา</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .admin-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .admin-header {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .admin-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .admin-subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .back-btn {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .admin-content {
+            padding: 40px;
+        }
+
+        .maintenance-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 2px solid #e9ecef;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .maintenance-item {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .item-info {
+            flex: 1;
+        }
+
+        .item-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+            font-size: 16px;
+        }
+
+        .item-description {
+            font-size: 14px;
+            color: #6c757d;
+            line-height: 1.4;
+        }
+
+        .item-status {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-top: 8px;
+            display: inline-block;
+        }
+
+        .status-ok {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: 15px;
+            min-width: 120px;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(76,175,80,0.3);
+        }
+
+        .action-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .danger-btn {
+            background: linear-gradient(135deg, #f44336, #d32f2f);
+        }
+
+        .danger-btn:hover {
+            box-shadow: 0 4px 12px rgba(244,67,54,0.3);
+        }
+
+        .warning-btn {
+            background: linear-gradient(135deg, #ff9800, #f57c00);
+        }
+
+        .warning-btn:hover {
+            box-shadow: 0 4px 12px rgba(255,152,0,0.3);
+        }
+
+        .info-btn {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+        }
+
+        .info-btn:hover {
+            box-shadow: 0 4px 12px rgba(33,150,243,0.3);
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            text-align: center;
+            display: none;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .message.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid #dee2e6;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        @media (max-width: 768px) {
+            .admin-container {
+                margin: 10px;
+            }
+
+            .admin-content {
+                padding: 20px;
+            }
+
+            .maintenance-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .action-btn {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <a href="/admin/settings" class="back-btn">
+                ← กลับ
+            </a>
+            <div class="admin-title">🛠️ เครื่องมือบำรุงรักษา</div>
+            <div class="admin-subtitle">จัดการระบบ ล้างแคช และสร้างข้อมูลตัวอย่าง</div>
+        </div>
+
+        <div class="admin-content">
+            <div id="message" class="message"></div>
+
+            <!-- System Stats -->
+            <div class="maintenance-section">
+                <div class="section-title">
+                    📊 สถิติระบบ
+                </div>
+                <div class="stats-grid" id="systemStats">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalUsers">-</div>
+                        <div class="stat-label">ผู้ใช้ทั้งหมด</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalBuds">-</div>
+                        <div class="stat-label">ข้อมูลดอกทั้งหมด</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalReviews">-</div>
+                        <div class="stat-label">รีวิวทั้งหมด</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="pendingUsers">-</div>
+                        <div class="stat-label">ผู้ใช้รอการอนุมัติ</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cache Management -->
+            <div class="maintenance-section">
+                <div class="section-title">
+                    🗄️ การจัดการแคช
+                </div>
+
+                <div class="maintenance-item">
+                    <div class="item-info">
+                        <div class="item-title">ล้างแคชระบบ</div>
+                        <div class="item-description">ลบข้อมูลแคชชั่วคราวเพื่อให้ระบบทำงานเร็วขึ้น</div>
+                        <div class="item-status status-ok">พร้อมใช้งาน</div>
+                    </div>
+                    <button class="action-btn info-btn" onclick="clearCache()">
+                        🧹 ล้างแคช
+                    </button>
+                </div>
+
+                <div class="maintenance-item">
+                    <div class="item-info">
+                        <div class="item-title">ล้างแคชรูปภาพ</div>
+                        <div class="item-description">ลบไฟล์รูปภาพชั่วคราวที่ไม่ได้ใช้</div>
+                        <div class="item-status status-warning">ตรวจสอบก่อนใช้</div>
+                    </div>
+                    <button class="action-btn warning-btn" onclick="clearImageCache()">
+                        🖼️ ล้างรูปภาพ
+                    </button>
+                </div>
+            </div>
+
+            <!-- Data Management -->
+            <div class="maintenance-section">
+                <div class="section-title">
+                    📝 การจัดการข้อมูล
+                </div>
+
+                <div class="maintenance-item">
+                    <div class="item-info">
+                        <div class="item-title">สร้างข้อมูลตัวอย่าง</div>
+                        <div class="item-description">สร้างผู้ใช้และข้อมูลดอกตัวอย่างสำหรับการทดสอบ</div>
+                        <div class="item-status status-ok">พร้อมใช้งาน</div>
+                    </div>
+                    <button class="action-btn" onclick="createSampleData()">
+                        🌱 สร้างข้อมูล
+                    </button>
+                </div>
+
+                <div class="maintenance-item">
+                    <div class="item-info">
+                        <div class="item-title">ตรวจสอบความสมบูรณ์ข้อมูล</div>
+                        <div class="item-description">ตรวจสอบและซ่อมแซมข้อมูลที่เสียหาย</div>
+                        <div class="item-status status-warning">ใช้เมื่อจำเป็น</div>
+                    </div>
+                    <button class="action-btn info-btn" onclick="checkDataIntegrity()">
+                        🔍 ตรวจสอบ
+                    </button>
+                </div>
+            </div>
+
+            <!-- Database Management -->
+            <div class="maintenance-section">
+                <div class="section-title">
+                    🗃️ การจัดการฐานข้อมูล
+                </div>
+
+                <div class="maintenance-item">
+                    <div class="item-info">
+                        <div class="item-title">สำรองข้อมูล</div>
+                        <div class="item-description">สร้างไฟล์สำรองข้อมูลสำคัญ</div>
+                        <div class="item-status status-ok">แนะนำให้ใช้เป็นประจำ</div>
+                    </div>
+                    <button class="action-btn" onclick="backupDatabase()">
+                        💾 สำรองข้อมูล
+                    </button>
+                </div>
+
+                <div class="maintenance-item">
+                    <div class="item-info">
+                        <div class="item-title">ปรับแต่งฐานข้อมูล</div>
+                        <div class="item-description">เพิ่มประสิทธิภาพและปรับโครงสร้างฐานข้อมูล</div>
+                        <div class="item-status status-warning">ใช้เวลานาน</div>
+                    </div>
+                    <button class="action-btn warning-btn" onclick="optimizeDatabase()">
+                        ⚡ ปรับแต่ง
+                    </button>
+                </div>
+            </div>
+
+            <!-- System Control -->
+            <div class="maintenance-section">
+                <div class="section-title">
+                    🔧 ควบคุมระบบ
+                </div>
+
+                <div class="maintenance-item">
+                    <div class="item-info">
+                        <div class="item-title">รีสตาร์ทแอปพลิเคชั่น</div>
+                        <div class="item-description">รีสตาร์ทระบบเพื่อใช้การตั้งค่าใหม่</div>
+                        <div class="item-status status-danger">ผู้ใช้จะถูกตัดการเชื่อมต่อ</div>
+                    </div>
+                    <button class="action-btn danger-btn" onclick="confirmRestart()">
+                        🔄 รีสตาร์ท
+                    </button>
+                </div>
+
+                <div class="maintenance-item">
+                    <div class="item-info">
+                        <div class="item-title">โหมดบำรุงรักษา</div>
+                        <div class="item-description">เปิดปิดโหมดบำรุงรักษาเพื่อหยุดการใช้งานชั่วคราว</div>
+                        <div class="item-status status-ok" id="maintenanceStatus">ปิดใช้งาน</div>
+                    </div>
+                    <button class="action-btn warning-btn" onclick="toggleMaintenance()" id="maintenanceBtn">
+                        🚧 เปิดโหมดบำรุงรักษา
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class MaintenanceManager {
+            constructor() {
+                this.init();
+            }
+
+            init() {
+                this.loadSystemStats();
+                console.log('Maintenance Manager: Initialized successfully');
+            }
+
+            async loadSystemStats() {
+                try {
+                    const response = await fetch('/api/admin/stats');
+                    if (response.ok) {
+                        const data = await response.json();
+                        document.getElementById('totalUsers').textContent = data.total_users || 0;
+                        document.getElementById('totalBuds').textContent = data.total_buds || 0;
+                        document.getElementById('totalReviews').textContent = data.total_reviews || 0;
+                        document.getElementById('pendingUsers').textContent = data.pending_users || 0;
+                    }
+                } catch (error) {
+                    console.error('Error loading system stats:', error);
+                }
+            }
+
+            showMessage(text, type = 'success') {
+                const messageDiv = document.getElementById('message');
+                messageDiv.textContent = text;
+                messageDiv.className = `message ${type}`;
+                messageDiv.style.display = 'block';
+
+                setTimeout(() => {
+                    messageDiv.style.display = 'none';
+                }, 5000);
+            }
+
+            async executeAction(action, buttonElement, confirmText = null) {
+                if (confirmText && !confirm(confirmText)) {
+                    return;
+                }
+
+                const originalText = buttonElement.textContent;
+                buttonElement.disabled = true;
+                buttonElement.textContent = '⏳ กำลังดำเนินการ...';
+
+                try {
+                    const response = await fetch(`/api/admin/${action}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok && result.success) {
+                        this.showMessage(result.message || 'ดำเนินการสำเร็จ', 'success');
+                        if (action === 'create_sample_data') {
+                            this.loadSystemStats(); // Refresh stats
+                        }
+                    } else {
+                        throw new Error(result.error || 'เกิดข้อผิดพลาด');
+                    }
+                } catch (error) {
+                    console.error(`Error executing ${action}:`, error);
+                    this.showMessage('เกิดข้อผิดพลาด: ' + error.message, 'error');
+                } finally {
+                    buttonElement.disabled = false;
+                    buttonElement.textContent = originalText;
+                }
+            }
+        }
+
+        // Initialize maintenance manager
+        let maintenanceManager;
+
+        // Action functions
+        function clearCache() {
+            const btn = event.target;
+            maintenanceManager.executeAction('clear_cache', btn);
+        }
+
+        function clearImageCache() {
+            const btn = event.target;
+            maintenanceManager.executeAction('clear_image_cache', btn, 
+                'คุณแน่ใจหรือไม่ว่าต้องการล้างแคชรูปภาพ?');
+        }
+
+        function createSampleData() {
+            const btn = event.target;
+            maintenanceManager.executeAction('create_sample_data', btn,
+                'สร้างข้อมูลตัวอย่างใหม่? ข้อมูลเดิมจะถูกเก็บไว้');
+        }
+
+        function checkDataIntegrity() {
+            const btn = event.target;
+            maintenanceManager.executeAction('check_data_integrity', btn);
+        }
+
+        function backupDatabase() {
+            const btn = event.target;
+            maintenanceManager.executeAction('backup_database', btn);
+        }
+
+        function optimizeDatabase() {
+            const btn = event.target;
+            maintenanceManager.executeAction('optimize_database', btn,
+                'การปรับแต่งฐานข้อมูลอาจใช้เวลานาน คุณแน่ใจหรือไม่?');
+        }
+
+        function confirmRestart() {
+            if (confirm('รีสตาร์ทระบบ? ผู้ใช้ทั้งหมดจะถูกตัดการเชื่อมต่อ')) {
+                const btn = event.target;
+                maintenanceManager.showMessage('กำลังรีสตาร์ทระบบ...', 'warning');
+                // Note: Restart would need server-side implementation
+            }
+        }
+
+        function toggleMaintenance() {
+            const btn = event.target;
+            // Note: Toggle maintenance mode would need server-side implementation
+            maintenanceManager.showMessage('ฟีเจอร์นี้จะเพิ่มในเวอร์ชันถัดไป', 'warning');
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            maintenanceManager = new MaintenanceManager();
+        });
+    </script>
+</body>
+</html>

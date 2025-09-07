@@ -2394,12 +2394,11 @@ def update_bud(bud_id):
         # Add bud_id for WHERE clause
         update_values.append(bud_id)
 
-        # Construct query safely without f-string to satisfy security scanners
-        set_clause = ', '.join(update_fields)
+        # Construct query with explicit SET clause to satisfy security scanners
         query = """
-            UPDATE buds_data SET """ + set_clause + """
+            UPDATE buds_data SET {}
             WHERE id = %s
-        """
+        """.format(', '.join(update_fields))
 
         print(f"Executing update query for bud {bud_id}")
         cur.execute(query, update_values)

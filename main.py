@@ -2394,11 +2394,11 @@ def update_bud(bud_id):
         # Add bud_id for WHERE clause
         update_values.append(bud_id)
 
-        # Construct query with explicit SET clause to satisfy security scanners
-        query = """
-            UPDATE buds_data SET {}
-            WHERE id = %s
-        """.format(', '.join(update_fields))
+        # Construct query safely using psycopg2.sql to prevent SQL injection
+        set_clauses = [sql.SQL(field) for field in update_fields]
+        query = sql.SQL("UPDATE buds_data SET {} WHERE id = %s").format(
+            sql.SQL(', ').join(set_clauses)
+        )
 
         print(f"Executing update query for bud {bud_id}")
         cur.execute(query, update_values)

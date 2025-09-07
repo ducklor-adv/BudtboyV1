@@ -4351,14 +4351,17 @@ def search_buds():
                     or_clause = "AND (" + " OR ".join(flavor_conditions) + ")"
                     conditions.append(or_clause)
 
-            # Complete query
-            full_query = base_query + ' '.join(conditions) + """
+            # Complete query with explicit structure
+            query_parts = [base_query]
+            query_parts.extend(conditions)
+            query_parts.append("""
                 GROUP BY b.id, b.strain_name_en, b.strain_name_th, b.breeder, b.strain_type,
                          b.thc_percentage, b.cbd_percentage, b.grade, b.aroma_flavor,
                          b.recommended_time, b.grow_method, b.created_at
                 ORDER BY avg_rating DESC, b.created_at DESC
                 LIMIT 50
-            """
+            """)
+            full_query = ' '.join(query_parts)
 
             cur.execute(full_query, params)
             results = cur.fetchall()

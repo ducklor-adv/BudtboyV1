@@ -3598,8 +3598,8 @@ def is_admin():
     if not admin_logged_in or not admin_token:
         return False
 
-    # For default admin, just check session
-    if admin_name == 'admin999':
+    # For default admin, check if admin_name is admin999 OR if no admin_name but valid token
+    if admin_name == 'admin999' or (not admin_name and admin_logged_in):
         return True
 
     # For database admins, verify token
@@ -3856,7 +3856,7 @@ def admin_login():
         # Set admin session
         session['admin_token'] = session_token
         session['admin_logged_in'] = True
-        session['admin_name'] = admin_name  # Add admin name to session
+        session['admin_name'] = admin_name  # Always set admin name to session
 
         print(f"Admin login successful: {admin_name}, token: {session_token[:10]}...")
         

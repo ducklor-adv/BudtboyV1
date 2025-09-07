@@ -1625,10 +1625,10 @@ def auth():
             settings = cur.fetchall()
 
             for setting in settings:
-                if setting[0] == 'authVideoUrl' and setting[1]:
-                    video_url = setting[1]
-                elif setting[0] == 'authVideoTitle' and setting[1]:
-                    video_title = setting[1]
+                if setting[0] == 'authVideoUrl' and setting[1] and setting[1].strip():
+                    video_url = setting[1].strip()
+                elif setting[0] == 'authVideoTitle' and setting[1] and setting[1].strip():
+                    video_title = setting[1].strip()
                 elif setting[0] == 'showAuthVideo':
                     show_video = setting[1].lower() == 'true'
 

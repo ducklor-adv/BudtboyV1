@@ -549,12 +549,13 @@
                     itemsPerPage: parseInt(formData.get('itemsPerPage')),
                     registrationMode: formData.get('registrationMode'),
                     enableNotifications: document.getElementById('enableNotifications').checked,
-                    maintenanceMode: document.getElementById('maintenanceMode').checked,
-                    // New settings
-                    authVideoUrl: formData.get('authVideoUrl'),
-                    authVideoTitle: formData.get('authVideoTitle'),
-                    showAuthVideo: document.querySelector('.toggle-switch[data-setting="showAuthVideo"]').classList.contains('active')
+                    maintenanceMode: document.getElementById('maintenanceMode').checked
                 };
+
+                // Get video settings from inputs
+                settings.authVideoUrl = document.querySelector('input[data-setting="authVideoUrl"]').value.trim();
+                settings.authVideoTitle = document.querySelector('input[data-setting="authVideoTitle"]').value.trim();
+                settings.showAuthVideo = document.querySelector('.toggle-switch[data-setting="showAuthVideo"]').classList.contains('active');
 
                 try {
                     console.log('Saving general settings:', settings);

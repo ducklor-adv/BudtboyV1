@@ -253,6 +253,18 @@ def create_tables():
                 );
             """)
 
+            # Create password reset table
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS password_resets (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE UNIQUE,
+                    token VARCHAR(128) UNIQUE NOT NULL,
+                    expires_at TIMESTAMP NOT NULL,
+                    is_used BOOLEAN DEFAULT FALSE,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                );
+            """)
+
             # Create strain_names table for autocomplete (removed strain_type)
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS strain_names (
@@ -1355,6 +1367,53 @@ def send_verification_email(email, username, token):
         print(f"Error sending email: {e}")
         return False
 
+def send_password_reset_email(email, username, token):
+    """Send password reset email"""
+    try:
+        # For demo/testing - simulate email sending if no real email config
+        if app.config['MAIL_PASSWORD'] == 'demo_password':
+            reset_url = url_for('reset_password_page', token=token, _external=True)
+            print(f"""
+            🔶 จำลองการส่งอีเมลรีเซ็ตรหัสผ่าน (Demo Mode) 🔶
+            ถึง: {email}
+            หัวข้อ: รีเซ็ตรหัสผ่าน - Cannabis App
+
+            สวัสดี {username}!
+            เราได้รับคำขอรีเซ็ตรหัสผ่านสำหรับบัญชีของคุณ
+
+            ลิงก์รีเซ็ตรหัสผ่าน: {reset_url}
+
+            📌 สำหรับการทดสอบ: คุณสามารถคัดลอกลิงก์ข้างต้นไปวางในเบราว์เซอร์เพื่อรีเซ็ตรหัสผ่านได้เลย
+            
+            หากคุณไม่ได้ขอรีเซ็ตรหัสผ่าน กรุณาเพิกเฉยต่ออีเมลนี้
+            ลิงก์นี้จะหมดอายุใน 1 ชั่วโมง
+            """)
+            return True
+
+        reset_url = url_for('reset_password_page', token=token, _external=True)
+        msg = Message(
+            subject='รีเซ็ตรหัสผ่าน - Cannabis App',
+            recipients=[email],
+            sender=app.config['MAIL_DEFAULT_SENDER'],
+            html=f"""
+            <h2>สวัสดี {username}!</h2>
+            <p>เราได้รับคำขอรีเซ็ตรหัสผ่านสำหรับบัญชีของคุณ</p>
+            <p>กรุณาคลิกลิงก์ด้านล่างเพื่อรีเซ็ตรหัสผ่าน:</p>
+            <a href="{reset_url}" style="background-color: #f44336; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">
+                รีเซ็ตรหัสผ่าน
+            </a>
+            <p>หากคุณไม่ได้ขอรีเซ็ตรหัสผ่าน กรุณาเพิกเฉยต่ออีเมลนี้</p>
+            <p>ลิงก์นี้จะหมดอายุใน 1 ชั่วโมง</p>
+            <p>เพื่อความปลอดภัย กรุณาเปลี่ยนรหัสผ่านหลังจากเข้าสู่ระบบ</p>
+            """
+        )
+        mail.send(msg)
+        print(f"Password reset email sent successfully to {email}")
+        return True
+    except Exception as e:
+        print(f"Error sending password reset email: {e}")
+        return False
+
 @app.route('/')
 def index():
     # Check if user is logged in, if not redirect to auth page
@@ -1853,6 +1912,142 @@ def quick_signup():
 def logout():
     session.clear()
     return redirect('/auth')
+
+@app.route('/forgot-password')
+def forgot_password_page():
+    """Forgot password page"""
+    return render_template('forgot_password.html')
+
+@app.route('/reset-password/<token>')
+def reset_password_page(token):
+    """Reset password page with token"""
+    return render_template('reset_password.html', token=token)
+
+@app.route('/api/forgot_password', methods=['POST'])
+def forgot_password():
+    """Send password reset email"""
+    data = request.get_json()
+    email = data.get('email')
+
+    if not email:
+        return jsonify({'success': False, 'error': 'กรุณากรอกอีเมล'}), 400
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+
+            # Check if user exists
+            cur.execute("SELECT id, username FROM users WHERE email = %s", (email,))
+            user = cur.fetchone()
+
+            if not user:
+                # Don't reveal if email exists or not for security
+                return jsonify({
+                    'success': True,
+                    'message': 'หากอีเมลนี้มีในระบบ เราจะส่งลิงก์รีเซ็ตรหัสผ่านให้คุณ'
+                })
+
+            user_id, username = user
+
+            # Generate reset token
+            reset_token = generate_verification_token()
+            expires_at = datetime.now() + timedelta(hours=1)  # 1 hour expiry
+
+            # Store reset token
+            cur.execute("""
+                INSERT INTO password_resets (user_id, token, expires_at)
+                VALUES (%s, %s, %s)
+                ON CONFLICT (user_id) 
+                DO UPDATE SET token = EXCLUDED.token, expires_at = EXCLUDED.expires_at
+            """, (user_id, reset_token, expires_at))
+
+            conn.commit()
+
+            # Send reset email
+            if send_password_reset_email(email, username, reset_token):
+                return jsonify({
+                    'success': True,
+                    'message': 'หากอีเมลนี้มีในระบบ เราจะส่งลิงก์รีเซ็ตรหัสผ่านให้คุณ'
+                })
+            else:
+                return jsonify({
+                    'success': False,
+                    'error': 'ไม่สามารถส่งอีเมลได้ กรุณาลองใหม่อีกครั้ง'
+                }), 500
+
+        except Exception as e:
+            conn.rollback()
+            print(f"Error in forgot_password: {e}")
+            return jsonify({'success': False, 'error': 'เกิดข้อผิดพลาดในระบบ'}), 500
+        finally:
+            cur.close()
+            return_db_connection(conn)
+    else:
+        return jsonify({'success': False, 'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+@app.route('/api/reset_password', methods=['POST'])
+def reset_password():
+    """Reset password with token"""
+    data = request.get_json()
+    token = data.get('token')
+    new_password = data.get('password')
+
+    if not token or not new_password:
+        return jsonify({'success': False, 'error': 'กรุณากรอกข้อมูลให้ครบถ้วน'}), 400
+
+    # Validate password strength
+    is_valid, message = validate_password_strength(new_password)
+    if not is_valid:
+        return jsonify({'success': False, 'error': message}), 400
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+
+            # Check if token is valid and not expired
+            cur.execute("""
+                SELECT pr.user_id, u.username, u.email
+                FROM password_resets pr
+                JOIN users u ON pr.user_id = u.id
+                WHERE pr.token = %s AND pr.expires_at > NOW() AND pr.is_used = FALSE
+            """, (token,))
+
+            result = cur.fetchone()
+            if not result:
+                return jsonify({
+                    'success': False,
+                    'error': 'ลิงก์รีเซ็ตรหัสผ่านไม่ถูกต้องหรือหมดอายุแล้ว'
+                }), 400
+
+            user_id, username, email = result
+
+            # Hash new password
+            password_hash = hash_password(new_password)
+
+            # Update password
+            cur.execute("UPDATE users SET password_hash = %s WHERE id = %s", (password_hash, user_id))
+
+            # Mark token as used
+            cur.execute("UPDATE password_resets SET is_used = TRUE WHERE token = %s", (token,))
+
+            conn.commit()
+
+            return jsonify({
+                'success': True,
+                'message': 'รีเซ็ตรหัสผ่านสำเร็จ กรุณาเข้าสู่ระบบด้วยรหัสผ่านใหม่'
+            })
+
+        except Exception as e:
+            conn.rollback()
+            print(f"Error in reset_password: {e}")
+            return jsonify({'success': False, 'error': 'เกิดข้อผิดพลาดในระบบ'}), 500
+        finally:
+            cur.close()
+            return_db_connection(conn)
+    else:
+        return jsonify({'success': False, 'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
 @app.route('/verify_email/<token>')
 def verify_email(token):

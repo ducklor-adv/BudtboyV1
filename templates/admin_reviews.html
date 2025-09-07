@@ -961,3 +961,954 @@
     </script>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cannabis App - จัดการรีวิว</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .admin-header {
+            background: linear-gradient(135deg, #ffc107, #ff8f00);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .admin-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .admin-subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .back-btn {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .admin-content {
+            padding: 40px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            border-color: #ffc107;
+            box-shadow: 0 8px 20px rgba(255,193,7,0.15);
+        }
+
+        .stat-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .stat-number {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #6c757d;
+            font-weight: 600;
+        }
+
+        .controls-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 2px solid #e9ecef;
+        }
+
+        .controls-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-group label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            padding: 8px 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: #ffc107;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #ffc107;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #ff8f00;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .reviews-table-container {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .reviews-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .reviews-table th {
+            background: #ffc107;
+            color: white;
+            padding: 15px 10px;
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .reviews-table td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #e9ecef;
+            vertical-align: middle;
+        }
+
+        .reviews-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .reviewer-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .reviewer-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #ffc107;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .rating-stars {
+            color: #ffc107;
+            font-size: 16px;
+        }
+
+        .review-text {
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .action-cell {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .btn-sm {
+            padding: 6px 10px;
+            font-size: 12px;
+            border-radius: 6px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #dc3545;
+            text-align: center;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #28a745;
+            text-align: center;
+        }
+
+        .no-data {
+            text-align: center;
+            color: #6c757d;
+            padding: 40px;
+            font-style: italic;
+        }
+
+        /* Bottom Navigation Styles */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 2px solid #e0e0e0;
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            overflow-x: auto;
+        }
+
+        .nav-tab {
+            background: none;
+            border: none;
+            padding: 8px 12px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            flex: 1;
+            min-width: 80px;
+            max-width: 120px;
+            text-decoration: none;
+            color: #666;
+        }
+
+        .nav-tab:hover {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .nav-tab.active {
+            background: #e8f5e9;
+            color: #4CAF50;
+        }
+
+        .nav-tab.active .nav-icon {
+            transform: scale(1.1);
+        }
+
+        .nav-icon {
+            font-size: 24px;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-label {
+            font-size: 10px;
+            font-weight: 600;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        @media (max-width: 768px) {
+            .admin-container {
+                margin: 10px;
+                margin-bottom: 90px;
+            }
+
+            .admin-content {
+                padding: 20px;
+                padding-bottom: 100px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 8px;
+                margin-bottom: 20px;
+            }
+
+            .stat-card {
+                padding: 10px 5px;
+            }
+
+            .stat-icon {
+                font-size: 18px;
+                margin-bottom: 4px;
+            }
+
+            .stat-number {
+                font-size: 16px;
+                margin-bottom: 2px;
+            }
+
+            .stat-label {
+                font-size: 9px;
+                line-height: 1.2;
+            }
+
+            .reviews-table {
+                font-size: 12px;
+            }
+
+            .reviews-table th,
+            .reviews-table td {
+                padding: 8px 4px;
+            }
+
+            .bottom-nav {
+                padding: 6px 0;
+            }
+
+            .nav-tab {
+                padding: 6px 4px;
+                gap: 2px;
+                min-width: 60px;
+            }
+
+            .nav-icon {
+                font-size: 20px;
+            }
+
+            .nav-label {
+                font-size: 9px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <a href="/admin" class="back-btn">
+                ← กลับ
+            </a>
+            <div class="admin-title">⭐ จัดการรีวิว</div>
+            <div class="admin-subtitle">จัดการและตรวจสอบรีวิวทั้งหมดในระบบ</div>
+        </div>
+
+        <div class="admin-content">
+            <!-- Statistics Section -->
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card">
+                    <div class="stat-icon">⭐</div>
+                    <div class="stat-number" id="totalReviews">-</div>
+                    <div class="stat-label">รีวิวทั้งหมด</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-number" id="averageRating">-</div>
+                    <div class="stat-label">คะแนนเฉลี่ย</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-number" id="totalReviewers">-</div>
+                    <div class="stat-label">ผู้รีวิว</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📝</div>
+                    <div class="stat-number" id="reviewsThisMonth">-</div>
+                    <div class="stat-label">รีวิวเดือนนี้</div>
+                </div>
+            </div>
+
+            <!-- Controls Section -->
+            <div class="controls-section">
+                <div class="controls-title">
+                    🔍 ค้นหาและกรองรีวิว
+                </div>
+
+                <div class="search-filters">
+                    <div class="filter-group">
+                        <label for="searchReviewer">ผู้รีวิว</label>
+                        <input type="text" id="searchReviewer" placeholder="ค้นหาผู้รีวิว...">
+                    </div>
+                    <div class="filter-group">
+                        <label for="searchStrain">สายพันธุ์</label>
+                        <input type="text" id="searchStrain" placeholder="ค้นหาสายพันธุ์...">
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterRating">คะแนน</label>
+                        <select id="filterRating">
+                            <option value="">ทั้งหมด</option>
+                            <option value="5">5 ดาว</option>
+                            <option value="4">4 ดาว</option>
+                            <option value="3">3 ดาว</option>
+                            <option value="2">2 ดาว</option>
+                            <option value="1">1 ดาว</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterDate">ช่วงวันที่</label>
+                        <select id="filterDate">
+                            <option value="">ทั้งหมด</option>
+                            <option value="today">วันนี้</option>
+                            <option value="week">สัปดาห์นี้</option>
+                            <option value="month">เดือนนี้</option>
+                            <option value="quarter">ไตรมาสนี้</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="searchReviews()">
+                        🔍 ค้นหา
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearFilters()">
+                        🗑️ ล้างตัวกรอง
+                    </button>
+                    <button class="btn btn-primary" onclick="exportReviews()">
+                        📊 ส่งออกข้อมูล
+                    </button>
+                </div>
+            </div>
+
+            <div id="loadingState" class="loading">
+                🔄 กำลังโหลดข้อมูล...
+            </div>
+
+            <div id="errorState" class="error-message" style="display: none;">
+                <div id="errorMessage"></div>
+                <button onclick="retryLoad()" style="margin-top: 10px; padding: 5px 10px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                    🔄 ลองใหม่
+                </button>
+            </div>
+
+            <!-- Reviews Table -->
+            <div id="reviewsTableContainer" class="reviews-table-container" style="display: none;">
+                <table class="reviews-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>ผู้รีวิว</th>
+                            <th>สายพันธุ์</th>
+                            <th>คะแนน</th>
+                            <th>รีวิวสั้น</th>
+                            <th>วันที่</th>
+                            <th>การดำเนินการ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reviewsTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="/admin" class="nav-tab">
+            <span class="nav-icon">📊</span>
+            <span class="nav-label">ภาพรวม</span>
+        </a>
+        <a href="/admin/users" class="nav-tab">
+            <span class="nav-icon">👥</span>
+            <span class="nav-label">ผู้ใช้</span>
+        </a>
+        <a href="/admin/buds" class="nav-tab">
+            <span class="nav-icon">🌿</span>
+            <span class="nav-label">สายพันธุ์</span>
+        </a>
+        <a href="/admin/reviews" class="nav-tab active">
+            <span class="nav-icon">⭐</span>
+            <span class="nav-label">รีวิว</span>
+        </a>
+        <a href="/admin/settings" class="nav-tab">
+            <span class="nav-icon">⚙️</span>
+            <span class="nav-label">ตั้งค่า</span>
+        </a>
+    </nav>
+
+    <script>
+        // Admin Reviews Manager
+        const AdminReviews = {
+            state: {
+                isLoading: false,
+                reviewsData: [],
+                filteredData: [],
+                stats: {}
+            },
+
+            async init() {
+                console.log('Admin Reviews: Starting initialization');
+                await this.loadReviewsData();
+            },
+
+            async loadReviewsData() {
+                if (this.state.isLoading) return;
+
+                this.state.isLoading = true;
+                this.showLoading();
+
+                try {
+                    const response = await fetch('/api/reviews');
+                    if (response.ok) {
+                        const data = await response.json();
+                        this.state.reviewsData = data || [];
+                        this.state.filteredData = [...this.state.reviewsData];
+
+                        this.calculateStats();
+                        this.displayStats();
+                        this.displayReviewsTable();
+                        this.showContent();
+
+                        console.log('Admin Reviews: Data loaded successfully');
+                    } else {
+                        throw new Error('ไม่สามารถโหลดข้อมูลได้');
+                    }
+                } catch (error) {
+                    console.error('Error loading reviews data:', error);
+                    this.showError('เกิดข้อผิดพลาดในการโหลดข้อมูล: ' + error.message);
+                } finally {
+                    this.state.isLoading = false;
+                }
+            },
+
+            calculateStats() {
+                const data = this.state.reviewsData;
+                const totalReviews = data.length;
+                const averageRating = data.length > 0 ? 
+                    (data.reduce((sum, review) => sum + (review.overall_rating || 0), 0) / data.length).toFixed(1) : 0;
+                const totalReviewers = new Set(data.map(review => review.reviewer_name).filter(name => name)).size;
+                
+                const currentMonth = new Date().getMonth();
+                const currentYear = new Date().getFullYear();
+                const reviewsThisMonth = data.filter(review => {
+                    if (!review.created_at) return false;
+                    const reviewDate = new Date(review.created_at);
+                    return reviewDate.getMonth() === currentMonth && reviewDate.getFullYear() === currentYear;
+                }).length;
+
+                this.state.stats = {
+                    totalReviews,
+                    averageRating,
+                    totalReviewers,
+                    reviewsThisMonth
+                };
+            },
+
+            displayStats() {
+                const stats = this.state.stats;
+                document.getElementById('totalReviews').textContent = stats.totalReviews;
+                document.getElementById('averageRating').textContent = stats.averageRating;
+                document.getElementById('totalReviewers').textContent = stats.totalReviewers;
+                document.getElementById('reviewsThisMonth').textContent = stats.reviewsThisMonth;
+            },
+
+            displayReviewsTable() {
+                const tbody = document.getElementById('reviewsTableBody');
+                const data = this.state.filteredData;
+
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="no-data">ไม่พบรีวิว</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = data.map(review => {
+                    const stars = this.generateStars(review.overall_rating);
+                    const reviewerInitial = review.reviewer_name ? review.reviewer_name.charAt(0).toUpperCase() : '?';
+
+                    return `
+                        <tr>
+                            <td>${review.id}</td>
+                            <td>
+                                <div class="reviewer-info">
+                                    <div class="reviewer-avatar">
+                                        ${review.reviewer_profile_image ? 
+                                            `<img src="${review.reviewer_profile_image}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="Profile">` :
+                                            reviewerInitial
+                                        }
+                                    </div>
+                                    <div>
+                                        <div style="font-weight: 600;">${review.reviewer_name || 'ไม่ระบุ'}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div style="font-weight: 600;">${review.strain_name_en || 'ไม่ระบุ'}</div>
+                                ${review.strain_name_th ? `<div style="font-size: 12px; color: #6c757d;">${review.strain_name_th}</div>` : ''}
+                            </td>
+                            <td>
+                                <div class="rating-stars">${stars}</div>
+                                <div style="font-size: 12px; color: #6c757d;">${review.overall_rating}/5</div>
+                            </td>
+                            <td>
+                                <div class="review-text" title="${review.short_summary || ''}">
+                                    ${review.short_summary || 'ไม่มีข้อความ'}
+                                </div>
+                            </td>
+                            <td>${new Date(review.created_at).toLocaleDateString('th-TH')}</td>
+                            <td>
+                                <div class="action-cell">
+                                    <button class="btn btn-primary btn-sm" onclick="AdminReviews.viewReview(${review.id})">
+                                        👁️ ดู
+                                    </button>
+                                    <button class="btn btn-danger btn-sm" onclick="AdminReviews.deleteReview(${review.id})">
+                                        🗑️ ลบ
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            },
+
+            generateStars(rating) {
+                const fullStars = Math.floor(rating);
+                const hasHalfStar = rating % 1 >= 0.5;
+                let stars = '';
+
+                for (let i = 0; i < fullStars; i++) {
+                    stars += '★';
+                }
+                if (hasHalfStar) {
+                    stars += '☆';
+                }
+                
+                // Fill remaining with empty stars
+                const remaining = 5 - Math.ceil(rating);
+                for (let i = 0; i < remaining; i++) {
+                    stars += '☆';
+                }
+
+                return stars || '☆☆☆☆☆';
+            },
+
+            searchReviews() {
+                const searchReviewer = document.getElementById('searchReviewer').value.toLowerCase();
+                const searchStrain = document.getElementById('searchStrain').value.toLowerCase();
+                const filterRating = document.getElementById('filterRating').value;
+                const filterDate = document.getElementById('filterDate').value;
+
+                this.state.filteredData = this.state.reviewsData.filter(review => {
+                    const matchesReviewer = !searchReviewer || 
+                        (review.reviewer_name && review.reviewer_name.toLowerCase().includes(searchReviewer));
+
+                    const matchesStrain = !searchStrain || 
+                        (review.strain_name_en && review.strain_name_en.toLowerCase().includes(searchStrain)) ||
+                        (review.strain_name_th && review.strain_name_th.toLowerCase().includes(searchStrain));
+
+                    const matchesRating = !filterRating || review.overall_rating == filterRating;
+
+                    let matchesDate = true;
+                    if (filterDate && review.created_at) {
+                        const reviewDate = new Date(review.created_at);
+                        const now = new Date();
+                        
+                        switch(filterDate) {
+                            case 'today':
+                                matchesDate = reviewDate.toDateString() === now.toDateString();
+                                break;
+                            case 'week':
+                                const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                                matchesDate = reviewDate >= weekAgo;
+                                break;
+                            case 'month':
+                                matchesDate = reviewDate.getMonth() === now.getMonth() && 
+                                            reviewDate.getFullYear() === now.getFullYear();
+                                break;
+                            case 'quarter':
+                                const quarterAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+                                matchesDate = reviewDate >= quarterAgo;
+                                break;
+                        }
+                    }
+
+                    return matchesReviewer && matchesStrain && matchesRating && matchesDate;
+                });
+
+                this.displayReviewsTable();
+            },
+
+            clearFilters() {
+                document.getElementById('searchReviewer').value = '';
+                document.getElementById('searchStrain').value = '';
+                document.getElementById('filterRating').value = '';
+                document.getElementById('filterDate').value = '';
+
+                this.state.filteredData = [...this.state.reviewsData];
+                this.displayReviewsTable();
+            },
+
+            viewReview(reviewId) {
+                // Create popup or modal to view full review details
+                const review = this.state.reviewsData.find(r => r.id === reviewId);
+                if (review) {
+                    alert(`รีวิวโดย: ${review.reviewer_name}\nสายพันธุ์: ${review.strain_name_en}\nคะแนน: ${review.overall_rating}/5\nรีวิว: ${review.full_review_content || review.short_summary}`);
+                }
+            },
+
+            async deleteReview(reviewId) {
+                if (!confirm('คุณต้องการลบรีวิวนี้หรือไม่? การกระทำนี้ไม่สามารถย้อนกลับได้')) return;
+
+                try {
+                    const response = await fetch(`/api/reviews/${reviewId}`, {
+                        method: 'DELETE'
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        this.showMessage(result.message, 'success');
+                        await this.loadReviewsData(); // Reload data
+                    } else {
+                        this.showMessage(result.error || 'เกิดข้อผิดพลาด', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error deleting review:', error);
+                    this.showMessage('เกิดข้อผิดพลาดในการลบรีวิว', 'error');
+                }
+            },
+
+            exportReviews() {
+                const data = this.state.filteredData;
+                const csv = this.generateCSV(data);
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+
+                if (link.download !== undefined) {
+                    const url = URL.createObjectURL(blob);
+                    link.setAttribute('href', url);
+                    link.setAttribute('download', 'reviews_data.csv');
+                    link.style.visibility = 'hidden';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
+            },
+
+            generateCSV(data) {
+                const headers = ['ID', 'ผู้รีวิว', 'สายพันธุ์ (EN)', 'สายพันธุ์ (TH)', 'คะแนน', 'รีวิวสั้น', 'รีวิวเต็ม', 'วันที่'];
+                const rows = data.map(review => [
+                    review.id,
+                    review.reviewer_name || '',
+                    review.strain_name_en || '',
+                    review.strain_name_th || '',
+                    review.overall_rating || 0,
+                    review.short_summary || '',
+                    review.full_review_content || '',
+                    review.created_at || ''
+                ]);
+
+                return [headers, ...rows].map(row => 
+                    row.map(field => `"${field}"`).join(',')
+                ).join('\n');
+            },
+
+            showLoading() {
+                document.getElementById('loadingState').style.display = 'block';
+                document.getElementById('errorState').style.display = 'none';
+                document.getElementById('reviewsTableContainer').style.display = 'none';
+            },
+
+            showError(message) {
+                document.getElementById('errorMessage').textContent = message;
+                document.getElementById('errorState').style.display = 'block';
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('reviewsTableContainer').style.display = 'none';
+            },
+
+            showContent() {
+                document.getElementById('reviewsTableContainer').style.display = 'block';
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('errorState').style.display = 'none';
+            },
+
+            showMessage(message, type) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = type === 'success' ? 'success-message' : 'error-message';
+                messageDiv.textContent = message;
+
+                const container = document.querySelector('.admin-content');
+                container.insertBefore(messageDiv, container.firstChild);
+
+                setTimeout(() => {
+                    messageDiv.remove();
+                }, 5000);
+            }
+        };
+
+        // Global functions
+        function retryLoad() {
+            AdminReviews.loadReviewsData();
+        }
+
+        function searchReviews() {
+            AdminReviews.searchReviews();
+        }
+
+        function clearFilters() {
+            AdminReviews.clearFilters();
+        }
+
+        function exportReviews() {
+            AdminReviews.exportReviews();
+        }
+
+        // Initialize when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => AdminReviews.init());
+        } else {
+            AdminReviews.init();
+        }
+
+        // Add search on Enter key
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInputs = ['searchReviewer', 'searchStrain'];
+            searchInputs.forEach(inputId => {
+                const input = document.getElementById(inputId);
+                if (input) {
+                    input.addEventListener('keypress', function(e) {
+                        if (e.key === 'Enter') {
+                            searchReviews();
+                        }
+                    });
+                }
+            });
+
+            // Auto-search on filter change
+            const filterSelects = ['filterRating', 'filterDate'];
+            filterSelects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                if (select) {
+                    select.addEventListener('change', searchReviews);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

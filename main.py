@@ -3979,6 +3979,20 @@ def admin_settings_maintenance():
         return redirect('/admin_login')
     return render_template('admin_settings_maintenance.html')
 
+@app.route('/admin/buds')
+def admin_buds():
+    """Admin buds management page"""
+    if not is_admin():
+        return redirect('/admin_login')
+    return render_template('admin_buds.html')
+
+@app.route('/admin/reviews')
+def admin_reviews():
+    """Admin reviews management page"""
+    if not is_admin():
+        return redirect('/admin_login')
+    return render_template('admin_reviews.html')
+
 
 @app.route('/api/admin/stats')
 def get_admin_stats():

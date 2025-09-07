@@ -2278,16 +2278,16 @@ def update_bud(bud_id):
 
         # Build update query with image deletions and constraint validation
         update_fields = [
-            'strain_name_th = %s', 'strain_name_en = %s', 'breeder = %s',
-            'strain_type = %s', 'thc_percentage = %s', 'cbd_percentage = %s',
-            'grade = %s', 'aroma_flavor = %s', 'top_terpenes_1 = %s',
-            'top_terpenes_2 = %s', 'top_terpenes_3 = %s', 
-            'mental_effects_positive = %s', 'mental_effects_negative = %s',
-            'physical_effects_positive = %s', 'physical_effects_negative = %s',
-            'recommended_time = %s', 'grow_method = %s', 'harvest_date = %s',
-            'batch_number = %s', 'grower_id = %s', 'grower_license_verified = %s',
-            'fertilizer_type = %s', 'flowering_type = %s',
-            'updated_at = CURRENT_TIMESTAMP'
+            sql.SQL("strain_name_th = %s"), sql.SQL("strain_name_en = %s"), sql.SQL("breeder = %s"),
+            sql.SQL("strain_type = %s"), sql.SQL("thc_percentage = %s"), sql.SQL("cbd_percentage = %s"),
+            sql.SQL("grade = %s"), sql.SQL("aroma_flavor = %s"), sql.SQL("top_terpenes_1 = %s"),
+            sql.SQL("top_terpenes_2 = %s"), sql.SQL("top_terpenes_3 = %s"), 
+            sql.SQL("mental_effects_positive = %s"), sql.SQL("mental_effects_negative = %s"),
+            sql.SQL("physical_effects_positive = %s"), sql.SQL("physical_effects_negative = %s"),
+            sql.SQL("recommended_time = %s"), sql.SQL("grow_method = %s"), sql.SQL("harvest_date = %s"),
+            sql.SQL("batch_number = %s"), sql.SQL("grower_id = %s"), sql.SQL("grower_license_verified = %s"),
+            sql.SQL("fertilizer_type = %s"), sql.SQL("flowering_type = %s"),
+            sql.SQL("updated_at = CURRENT_TIMESTAMP")
         ]
 
         # Validate and clean constraint fields with better handling
@@ -2388,16 +2388,15 @@ def update_bud(bud_id):
         allowed_image_columns = {'image_1_url', 'image_2_url', 'image_3_url', 'image_4_url'}
         for field, value in image_updates.items():
             if field in allowed_image_columns:  # Whitelist validation
-                update_fields.append(f'{field} = %s')
+                update_fields.append(sql.SQL("{} = %s").format(sql.Identifier(field)))
                 update_values.append(value)
 
         # Add bud_id for WHERE clause
         update_values.append(bud_id)
 
         # Construct query safely using psycopg2.sql to prevent SQL injection
-        set_clauses = [sql.SQL(field) for field in update_fields]
         query = sql.SQL("UPDATE buds_data SET {} WHERE id = %s").format(
-            sql.SQL(', ').join(set_clauses)
+            sql.SQL(', ').join(update_fields)
         )
 
         print(f"Executing update query for bud {bud_id}")

@@ -2033,6 +2033,7 @@ def update_profile():
                 SELECT id FROM users 
                 WHERE (username = %s OR email = %s) AND id != %s
             """, (username, email, user_id))
+
             existing_user = cur.fetchone()
 
             if existing_user:
@@ -2346,6 +2347,25 @@ def update_bud(bud_id):
                 flowering_type = None
         else:
             flowering_type = None
+
+        # Convert numeric fields - handle empty strings and None values properly
+        thc_percentage = data.get('thc_percentage')
+        if thc_percentage and str(thc_percentage).strip():
+            try:
+                thc_percentage = float(thc_percentage)
+            except (ValueError, TypeError):
+                thc_percentage = None
+        else:
+            thc_percentage = None
+
+        cbd_percentage = data.get('cbd_percentage')
+        if cbd_percentage and str(cbd_percentage).strip():
+            try:
+                cbd_percentage = float(cbd_percentage)
+            except (ValueError, TypeError):
+                cbd_percentage = None
+        else:
+            cbd_percentage = None
 
         update_values = [
             data.get('strain_name_th'),
@@ -3281,7 +3301,7 @@ def get_all_buds_report():
                 'breeder': row[3],
                 'strain_type': row[4],
                 'thc_percentage': float(row[5]) if row[5] else None,
-                'cbd_percentage': float(row[6]) if row[6] else None,
+                'cbd_percentage': float(row[6) else None,
                 'grade': row[7],
                 'aroma_flavor': row[8],
                 'top_terpenes_1': row[9],
@@ -3924,13 +3944,6 @@ def admin_users():
     if not is_admin():
         return redirect('/admin_login')
     return render_template('admin_users.html')
-
-@app.route('/admin/buds')
-def admin_buds():
-    """Admin buds management page"""
-    if not is_admin():
-        return redirect('/admin_login')
-    return render_template('admin_buds.html')
 
 # Separated admin settings routes
 @app.route('/admin/settings')

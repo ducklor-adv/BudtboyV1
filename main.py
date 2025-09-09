@@ -2150,12 +2150,12 @@ def oauth2callback():
         # Exchange authorization code for access token
         oauth_flow.fetch_token(authorization_response=callback_url)
 
-    # Get user info from Google
-    credentials = oauth_flow.credentials
-    user_info_response = requests.get(
-        'https://www.googleapis.com/oauth2/v1/userinfo',
-        headers={'Authorization': f'Bearer {credentials.token}'}
-    )
+        # Get user info from Google
+        credentials = oauth_flow.credentials
+        user_info_response = requests.get(
+            'https://www.googleapis.com/oauth2/v1/userinfo',
+            headers={'Authorization': f'Bearer {credentials.token}'}
+        )
 
     if user_info_response.status_code != 200:
         return jsonify({'error': 'ไม่สามารถดึงข้อมูลผู้ใช้จาก Google ได้'}), 400

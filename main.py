@@ -41,7 +41,6 @@ try:
                 "https://www.googleapis.com/auth/userinfo.profile"
             ]
         )
-        # Dynamic redirect URI - will be set in signin route
         print("Google OAuth initialized successfully")
     else:
         print("Warning: Google OAuth credentials not found in environment variables")
@@ -2142,11 +2141,8 @@ def signin():
         if not GOOGLE_OAUTH_CONFIG["web"]["client_secret"]:
             return redirect('/auth?error=missing_client_secret')
         
-        # Set redirect URI - use the exact URL from Google Console
-        redirect_uri = url_for('oauth2callback', _external=True)
-        if redirect_uri.startswith('http://'):
-            redirect_uri = redirect_uri.replace('http://', 'https://')
-        
+        # Set redirect URI with proper HTTPS handling for production
+        redirect_uri = url_for('oauth2callback', _external=True, _scheme='https')
         oauth_flow.redirect_uri = redirect_uri
         
         print(f"OAuth redirect URI: {redirect_uri}")
@@ -2178,19 +2174,21 @@ def oauth2callback():
         if 'state' not in session or request.args.get('state') != session['state']:
             return redirect('/auth?error=invalid_state')
 
-        # Set the same redirect URI as in signin
-        redirect_uri = url_for('oauth2callback', _external=True)
-        if redirect_uri.startswith('http://'):
-            redirect_uri = redirect_uri.replace('http://', 'https://')
-        
+        # Set the same redirect URI as in signin with proper HTTPS handling
+        redirect_uri = url_for('oauth2callback', _external=True, _scheme='https')
         oauth_flow.redirect_uri = redirect_uri
         
-        # Fix URL for HTTPS
+        # Fix URL for HTTPS in production
         callback_url = request.url
         if callback_url.startswith('http://'):
             callback_url = callback_url.replace('http://', 'https://')
         
+        # Handle X-Forwarded-Proto header for reverse proxies
+        if request.headers.get('X-Forwarded-Proto') == 'https':
+            callback_url = callback_url.replace('http://', 'https://')
+        
         print(f"OAuth callback URL: {callback_url}")
+        print(f"OAuth redirect URI: {redirect_uri}")
         
         # Exchange authorization code for access token
         oauth_flow.fetch_token(authorization_response=callback_url)

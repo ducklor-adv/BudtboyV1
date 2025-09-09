@@ -1198,6 +1198,41 @@ def create_tables():
                 # Check for environment variable to force create sample data
                 force_create_sample = os.environ.get('FORCE_CREATE_SAMPLE_DATA', 'false').lower() == 'true'
 
+
+@app.route('/api/verify_captcha', methods=['POST'])
+def verify_captcha():
+    """Verify reCAPTCHA token"""
+    data = request.get_json()
+    captcha_token = data.get('token')
+    
+    if not captcha_token:
+        return jsonify({'success': False, 'error': 'ไม่พบ CAPTCHA token'}), 400
+    
+    # For production, you would verify with Google reCAPTCHA API:
+    # secret_key = os.environ.get('RECAPTCHA_SECRET_KEY')
+    # verify_url = 'https://www.google.com/recaptcha/api/siteverify'
+    # response = requests.post(verify_url, data={
+    #     'secret': secret_key,
+    #     'response': captcha_token,
+    #     'remoteip': request.environ.get('REMOTE_ADDR')
+    # })
+    # result = response.json()
+    
+    # For demo purposes, we'll accept any non-empty token
+    if captcha_token:
+        session['captcha_verified'] = True
+        return jsonify({
+            'success': True,
+            'message': 'CAPTCHA verified successfully'
+        })
+    else:
+        return jsonify({
+            'success': False,
+            'error': 'CAPTCHA verification failed'
+        }), 400
+
+
+
                 if user_ids:
                     # Check if bud data already exists
                     cur.execute("SELECT COUNT(*) FROM buds_data")
@@ -2109,6 +2144,17 @@ def signin():
     """Initialize Google OAuth signin"""
     if not oauth_flow:
         return redirect('/auth?error=oauth_not_configured')
+
+    # Check for CAPTCHA token in session
+    captcha_token = request.args.get('captcha_token') or session.get('captcha_verified')
+    
+    if not captcha_token:
+        return redirect('/auth?error=captcha_required')
+
+    # Verify CAPTCHA token (optional - for production you'd verify with Google)
+    # For demo, we'll just check if token exists
+    if captcha_token:
+        session['captcha_verified'] = True
 
     try:
         # Check if we have valid credentials

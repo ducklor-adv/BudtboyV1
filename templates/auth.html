@@ -282,6 +282,12 @@
 
         <!-- OAuth Error Messages -->
         <div id="oauthErrorMessage" style="display: none; color: #d32f2f; margin-top: 10px; padding: 10px; background: #ffebee; border-radius: 4px; font-size: 14px;"></div>
+        
+        <!-- Debug Information -->
+        <div id="debugInfo" style="display: none; margin-top: 20px; padding: 15px; background: #f5f5f5; border-radius: 8px; font-family: monospace; font-size: 12px; color: #333;">
+            <h4 style="margin: 0 0 10px 0; color: #666;">🔧 Debug Information</h4>
+            <div id="debugContent"></div>
+        </div>
 
         <!-- Message Section for Google-only authentication -->
         <div style="margin-top: 30px; text-align: center; padding: 20px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e0e0e0;">
@@ -379,6 +385,42 @@
                 loginBtn.style.opacity = '1';
             }
         }
+
+        // Debug mode toggle
+        let debugMode = false;
+        
+        // Show debug info
+        function showDebugInfo() {
+            const debugDiv = document.getElementById('debugInfo');
+            const debugContent = document.getElementById('debugContent');
+            
+            debugContent.innerHTML = `
+                <p><strong>Current Host:</strong> ${window.location.host}</p>
+                <p><strong>Current URL:</strong> ${window.location.href}</p>
+                <p><strong>User Agent:</strong> ${navigator.userAgent}</p>
+                <p><strong>Timestamp:</strong> ${new Date().toISOString()}</p>
+                <p><strong>CAPTCHA Verified:</strong> ${captchaVerified}</p>
+                <p><strong>Age Verified:</strong> ${ageVerified}</p>
+                <p><strong>Session Storage:</strong> ${JSON.stringify({
+                    captcha_token: !!sessionStorage.getItem('captcha_token'),
+                    age_verified: !!sessionStorage.getItem('age_verified')
+                })}</p>
+            `;
+            
+            debugDiv.style.display = 'block';
+        }
+        
+        // Toggle debug mode with key combination
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+                debugMode = !debugMode;
+                if (debugMode) {
+                    showDebugInfo();
+                } else {
+                    document.getElementById('debugInfo').style.display = 'none';
+                }
+            }
+        });
 
         // Check for OAuth error messages in URL parameters
         document.addEventListener('DOMContentLoaded', function() {

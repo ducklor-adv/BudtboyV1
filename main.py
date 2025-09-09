@@ -2141,15 +2141,12 @@ def signin():
         if not GOOGLE_OAUTH_CONFIG["web"]["client_secret"]:
             return redirect('/auth?error=missing_client_secret')
         
-        # Determine the correct redirect URI based on the request
-        if 'budtboy.replit.app' in request.host:
-            redirect_uri = 'https://budtboy.replit.app/oauth2callback'
-        else:
-            redirect_uri = url_for('oauth2callback', _external=True, _scheme='https')
-        
+        # ALWAYS use production URL for OAuth redirect
+        redirect_uri = 'https://budtboy.replit.app/oauth2callback'
         oauth_flow.redirect_uri = redirect_uri
         
-        print(f"OAuth redirect URI: {redirect_uri}")
+        print(f"🔧 Fixed OAuth redirect URI to production: {redirect_uri}")
+        print(f"🌐 Current request host: {request.host}")
         
         # Generate authorization URL with proper parameters
         authorization_url, state = oauth_flow.authorization_url(
@@ -2159,12 +2156,12 @@ def signin():
         )
         
         session['state'] = state
-        print(f"Generated authorization URL: {authorization_url}")
+        print(f"✅ Generated authorization URL: {authorization_url}")
         
         return redirect(authorization_url)
         
     except Exception as e:
-        print(f"Error in signin: {e}")
+        print(f"❌ Error in signin: {e}")
         return redirect(f'/auth?error=oauth_error&message={str(e)}')
 
 @app.route('/oauth2callback')
@@ -2176,17 +2173,14 @@ def oauth2callback():
     try:
         # Verify state parameter
         if 'state' not in session or request.args.get('state') != session['state']:
+            print(f"❌ State mismatch - Session: {session.get('state')}, Request: {request.args.get('state')}")
             return redirect('/auth?error=invalid_state')
 
-        # Determine the correct redirect URI based on the request
-        if 'budtboy.replit.app' in request.host:
-            redirect_uri = 'https://budtboy.replit.app/oauth2callback'
-        else:
-            redirect_uri = url_for('oauth2callback', _external=True, _scheme='https')
-        
+        # ALWAYS use production URL for OAuth redirect consistency
+        redirect_uri = 'https://budtboy.replit.app/oauth2callback'
         oauth_flow.redirect_uri = redirect_uri
         
-        # Fix URL for HTTPS in production
+        # Construct callback URL properly - force HTTPS
         callback_url = request.url
         if callback_url.startswith('http://'):
             callback_url = callback_url.replace('http://', 'https://')
@@ -2195,8 +2189,9 @@ def oauth2callback():
         if request.headers.get('X-Forwarded-Proto') == 'https':
             callback_url = callback_url.replace('http://', 'https://')
         
-        print(f"OAuth callback URL: {callback_url}")
-        print(f"OAuth redirect URI: {redirect_uri}")
+        print(f"🔧 OAuth callback URL: {callback_url}")
+        print(f"🔧 OAuth redirect URI: {redirect_uri}")
+        print(f"🌐 Request host: {request.host}")
         
         # Exchange authorization code for access token
         oauth_flow.fetch_token(authorization_response=callback_url)
@@ -2209,12 +2204,15 @@ def oauth2callback():
         )
 
         if user_info_response.status_code != 200:
+            print(f"❌ Failed to get user info: {user_info_response.status_code}")
             return redirect('/auth?error=failed_to_get_user_info')
 
         user_info = user_info_response.json()
         email = user_info.get('email')
         name = user_info.get('name')
         google_id = user_info.get('id')
+
+        print(f"✅ Got user info: {email}, {name}")
 
         if not email:
             return redirect('/auth?error=no_email_from_google')
@@ -2235,9 +2233,15 @@ def oauth2callback():
                     session['username'] = username
                     session['email'] = email
 
+                    print(f"✅ Existing user logged in: {username}")
                     cur.close()
                     return_db_connection(conn)
-                    return redirect('/profile')
+                    
+                    # Redirect to production if coming from preview
+                    if 'budtboy.replit.app' not in request.host:
+                        return redirect('https://budtboy.replit.app/profile')
+                    else:
+                        return redirect('/profile')
                 else:
                     # Create new user
                     username = name or email.split('@')[0]
@@ -2271,14 +2275,20 @@ def oauth2callback():
                     session['username'] = username
                     session['email'] = email
 
+                    print(f"✅ New user created and logged in: {username}")
                     cur.close()
                     return_db_connection(conn)
-                    return redirect('/profile')
+                    
+                    # Redirect to production if coming from preview
+                    if 'budtboy.replit.app' not in request.host:
+                        return redirect('https://budtboy.replit.app/profile')
+                    else:
+                        return redirect('/profile')
 
             except Exception as e:
                 if conn:
                     conn.rollback()
-                print(f"Error in oauth2callback: {e}")
+                print(f"❌ Database error in oauth2callback: {e}")
                 return redirect('/auth?error=database_error')
             finally:
                 if cur:
@@ -2289,7 +2299,9 @@ def oauth2callback():
         return redirect('/auth?error=database_connection_failed')
 
     except Exception as e:
-        print(f"OAuth callback error: {e}")
+        print(f"❌ OAuth callback error: {e}")
+        import traceback
+        traceback.print_exc()
         return redirect('/auth?error=oauth_callback_failed')
 
 @app.route('/verify_email/<token>')

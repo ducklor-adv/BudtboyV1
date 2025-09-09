@@ -5028,7 +5028,7 @@ def register_user():
     profile_image_url = None
     if 'profile_image' in request.files:
         file = request.files['profile_image']
-        if file and file.filename != '' and allowed_ file and allowed_file(file.filename):
+        if file and file.filename != '' and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             # Add timestamp to filename to avoid conflicts
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_')

@@ -11,10 +11,13 @@
             margin: 0;
             padding: 20px;
             min-height: 100vh;
-            /* ปรับแต่งการแสดงผลฟอนต์ให้คมชัด */
+            /* ปรับแต่งการแสดงผลฟอนต์ให้คมชัดสูงสุด */
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             text-rendering: optimizeLegibility;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
         }
 
         .container {
@@ -24,10 +27,14 @@
             border-radius: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             overflow: hidden;
-            /* ปรับแต่งสำหรับการจับภาพคุณภาพสูง */
+            /* ปรับแต่งสำหรับการจับภาพคุณภาพสูงสุด */
             image-rendering: -webkit-optimize-contrast;
             image-rendering: crisp-edges;
             image-rendering: pixelated;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            transform: translateZ(0);
+            will-change: transform;
         }
 
         .header {
@@ -811,6 +818,13 @@
             cursor: pointer;
             transition: all 0.3s ease;
             box-sizing: border-box;
+            /* คุณภาพรูปภาพสูงสุด */
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            transform: translateZ(0);
         }
 
         .bud-image:hover {
@@ -2246,7 +2260,7 @@
 
                     html2canvas(container, {
                         backgroundColor: '#ffffff',
-                        scale: isMobile ? 2 : 4, // เพิ่มความละเอียดสำหรับมือถือเป็น 2x และ PC เป็น 4x
+                        scale: isMobile ? 4 : 6, // เพิ่มความละเอียดสูงสุด มือถือ 4x, PC 6x
                         useCORS: true,
                         allowTaint: false,
                         scrollX: 0,
@@ -2256,6 +2270,30 @@
                         logging: true,
                         quality: 1.0, // คุณภาพสูงสุด
                         removeContainer: true,
+                        pixelRatio: window.devicePixelRatio || 1, // ใช้ pixel ratio ของอุปกรณ์
+                        foreignObjectRendering: true, // เพิ่มการ render ที่ดีขึ้น
+                        imageTimeout: 15000, // เพิ่มเวลารอโหลดรูป
+                        onclone: function(clonedDoc) {
+                            // ปรับแต่ง cloned document เพื่อความคมชัด
+                            const style = clonedDoc.createElement('style');
+                            style.innerHTML = `
+                                * {
+                                    -webkit-font-smoothing: antialiased !important;
+                                    -moz-osx-font-smoothing: grayscale !important;
+                                    text-rendering: optimizeLegibility !important;
+                                    image-rendering: -webkit-optimize-contrast !important;
+                                    image-rendering: crisp-edges !important;
+                                }
+                                img {
+                                    image-rendering: -webkit-optimize-contrast !important;
+                                    image-rendering: crisp-edges !important;
+                                    image-rendering: pixelated !important;
+                                    max-width: none !important;
+                                    height: auto !important;
+                                }
+                            `;
+                            clonedDoc.head.appendChild(style);
+                        },
                         ignoreElements: function(element) {
                             // ละเว้น element ที่ไม่จำเป็น เช่น scrollbar
                             return element.classList.contains('no-print');
@@ -2283,7 +2321,7 @@
 
                         if (isMobile) {
                             // สำหรับมือถือ: สร้างรูปภาพและแสดงแบบ Modal พร้อมลิงก์ดาวน์โหลด
-                            const imageDataUrl = canvas.toDataURL('image/png', 1.0); // คุณภาพสูงสุด
+                            const imageDataUrl = canvas.toDataURL('image/png', 1.0); // คุณภาพสูงสุด PNG
 
                             // ลบ Modal เก่าถ้ามี
                             const existingModal = document.getElementById('mobileImageModal');
@@ -2421,7 +2459,7 @@
                             // สำหรับ PC: ใช้วิธีเดิม
                             const link = document.createElement('a');
                             link.download = fileName;
-                            link.href = canvas.toDataURL('image/png', 1.0); // คุณภาพสูงสุด
+                            link.href = canvas.toDataURL('image/png', 1.0); // คุณภาพสูงสุด PNG
 
                             document.body.appendChild(link);
                             link.click();

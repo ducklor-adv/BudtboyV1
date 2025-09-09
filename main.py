@@ -10,6 +10,9 @@ import secrets
 import bcrypt
 import threading
 import time
+import google_auth_oauthlib.flow
+import json
+import requests
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'budtboy-secret-key-2024')
 
@@ -31,6 +34,29 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg'}
 
 mail = Mail(app)
+
+# Google OAuth Configuration
+GOOGLE_OAUTH_ENABLED = False
+oauth_flow = None
+
+try:
+    google_oauth_secrets = os.environ.get('GOOGLE_OAUTH_SECRETS')
+    if google_oauth_secrets:
+        oauth_config = json.loads(google_oauth_secrets)
+        oauth_flow = google_auth_oauthlib.flow.Flow.from_client_config(
+            oauth_config,
+            scopes=[
+                "https://www.googleapis.com/auth/userinfo.email",
+                "openid", 
+                "https://www.googleapis.com/auth/userinfo.profile"
+            ]
+        )
+        GOOGLE_OAUTH_ENABLED = True
+        print("✅ Google OAuth enabled")
+    else:
+        print("⚠️ Google OAuth not configured - GOOGLE_OAUTH_SECRETS not found")
+except Exception as e:
+    print(f"⚠️ Google OAuth configuration error: {e}")
 
 # Create uploads directory if it doesn't exist
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
@@ -1025,6 +1051,12 @@ def create_tables():
                 ADD COLUMN IF NOT EXISTS approved_by INTEGER REFERENCES users(id);
             """)
 
+            # Add Google OAuth column
+            cur.execute("""
+                ALTER TABLE users 
+                ADD COLUMN IF NOT EXISTS google_id VARCHAR(255) UNIQUE;
+            """)
+
             # Set existing users as approved
             cur.execute("UPDATE users SET is_approved = TRUE WHERE is_approved IS NULL")
 
@@ -1922,6 +1954,131 @@ def quick_signup():
 def logout():
     session.clear()
     return redirect('/auth')
+
+# Google OAuth Routes
+@app.route('/google_login')
+def google_login():
+    """Initiate Google OAuth login"""
+    if not GOOGLE_OAUTH_ENABLED or not oauth_flow:
+        return jsonify({'error': 'Google OAuth ไม่ได้เปิดใช้งาน'}), 400
+    
+    try:
+        # Set redirect URI with HTTPS for external access
+        oauth_flow.redirect_uri = url_for('google_callback', _external=True).replace('http://', 'https://')
+        authorization_url, state = oauth_flow.authorization_url()
+        session['oauth_state'] = state
+        return redirect(authorization_url)
+    except Exception as e:
+        print(f"Error in google_login: {e}")
+        return redirect('/auth?error=google_oauth_error')
+
+@app.route('/google_callback')
+def google_callback():
+    """Handle Google OAuth callback"""
+    if not GOOGLE_OAUTH_ENABLED or not oauth_flow:
+        return redirect('/auth?error=google_oauth_disabled')
+    
+    try:
+        # Verify state parameter
+        if not session.get('oauth_state') == request.args.get('state'):
+            return redirect('/auth?error=invalid_state')
+        
+        # Exchange authorization code for access token
+        oauth_flow.fetch_token(authorization_response=request.url.replace('http:', 'https:'))
+        
+        # Get user info from Google
+        user_info = get_google_user_info(oauth_flow.credentials.token)
+        if not user_info:
+            return redirect('/auth?error=failed_to_get_user_info')
+        
+        # Check if user exists in our database
+        email = user_info.get('email')
+        name = user_info.get('name', email.split('@')[0])
+        google_id = user_info.get('sub')
+        
+        if not email:
+            return redirect('/auth?error=no_email_from_google')
+        
+        conn = get_db_connection()
+        if conn:
+            try:
+                cur = conn.cursor()
+                
+                # Check if user exists by email
+                cur.execute("SELECT id, username, email, is_verified FROM users WHERE email = %s", (email,))
+                existing_user = cur.fetchone()
+                
+                if existing_user:
+                    # User exists - log them in
+                    user_id, username, user_email, is_verified = existing_user
+                    
+                    # Update Google ID if not set
+                    cur.execute("UPDATE users SET google_id = %s WHERE id = %s", (google_id, user_id))
+                    conn.commit()
+                    
+                    # Create session
+                    session['user_id'] = user_id
+                    session['username'] = username
+                    session['email'] = user_email
+                    session['google_login'] = True
+                    
+                    return redirect('/profile?google_login=success')
+                else:
+                    # New user - create account
+                    import secrets
+                    referral_code = secrets.token_urlsafe(8)
+                    
+                    cur.execute("""
+                        INSERT INTO users (username, email, password_hash, is_consumer, is_verified, 
+                                         google_id, referral_code, is_approved)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                        RETURNING id
+                    """, (name, email, '', True, True, google_id, referral_code, True))
+                    
+                    user_id = cur.fetchone()[0]
+                    conn.commit()
+                    
+                    # Create session
+                    session['user_id'] = user_id
+                    session['username'] = name
+                    session['email'] = email
+                    session['google_login'] = True
+                    
+                    return redirect('/profile?google_signup=success')
+                    
+            except Exception as e:
+                print(f"Database error in google_callback: {e}")
+                if conn:
+                    conn.rollback()
+                return redirect('/auth?error=database_error')
+            finally:
+                if cur:
+                    cur.close()
+                if conn:
+                    return_db_connection(conn)
+        else:
+            return redirect('/auth?error=database_connection_failed')
+            
+    except Exception as e:
+        print(f"Error in google_callback: {e}")
+        return redirect('/auth?error=oauth_callback_error')
+
+def get_google_user_info(access_token):
+    """Get user information from Google API"""
+    try:
+        response = requests.get(
+            "https://www.googleapis.com/oauth2/v3/userinfo",
+            headers={"Authorization": f"Bearer {access_token}"},
+            timeout=10
+        )
+        if response.status_code == 200:
+            return response.json()
+        else:
+            print(f"Failed to fetch Google user info: {response.status_code} {response.text}")
+            return None
+    except Exception as e:
+        print(f"Error fetching Google user info: {e}")
+        return None
 
 @app.route('/forgot-password')
 def forgot_password_page():

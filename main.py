@@ -2157,7 +2157,7 @@ def oauth2callback():
             headers={'Authorization': f'Bearer {credentials.token}'}
         )
 
-    if user_info_response.status_code != 200:
+        if user_info_response.status_code != 200:
         return jsonify({'error': 'ไม่สามารถดึงข้อมูลผู้ใช้จาก Google ได้'}), 400
 
     user_info = user_info_response.json()

@@ -2141,8 +2141,12 @@ def signin():
         if not GOOGLE_OAUTH_CONFIG["web"]["client_secret"]:
             return redirect('/auth?error=missing_client_secret')
         
-        # Set redirect URI with proper HTTPS handling for production
-        redirect_uri = url_for('oauth2callback', _external=True, _scheme='https')
+        # Determine the correct redirect URI based on the request
+        if 'budtboy.replit.app' in request.host:
+            redirect_uri = 'https://budtboy.replit.app/oauth2callback'
+        else:
+            redirect_uri = url_for('oauth2callback', _external=True, _scheme='https')
+        
         oauth_flow.redirect_uri = redirect_uri
         
         print(f"OAuth redirect URI: {redirect_uri}")
@@ -2174,8 +2178,12 @@ def oauth2callback():
         if 'state' not in session or request.args.get('state') != session['state']:
             return redirect('/auth?error=invalid_state')
 
-        # Set the same redirect URI as in signin with proper HTTPS handling
-        redirect_uri = url_for('oauth2callback', _external=True, _scheme='https')
+        # Determine the correct redirect URI based on the request
+        if 'budtboy.replit.app' in request.host:
+            redirect_uri = 'https://budtboy.replit.app/oauth2callback'
+        else:
+            redirect_uri = url_for('oauth2callback', _external=True, _scheme='https')
+        
         oauth_flow.redirect_uri = redirect_uri
         
         # Fix URL for HTTPS in production

@@ -2141,12 +2141,19 @@ def signin():
         if not GOOGLE_OAUTH_CONFIG["web"]["client_secret"]:
             return redirect('/auth?error=missing_client_secret')
         
-        # ALWAYS use production URL for OAuth redirect
-        redirect_uri = 'https://budtboy.replit.app/oauth2callback'
+        # Use current host for development, production URL for production
+        current_host = request.host
+        if 'budtboy.replit.app' in current_host:
+            # Production environment
+            redirect_uri = 'https://budtboy.replit.app/oauth2callback'
+        else:
+            # Development environment - use current host
+            redirect_uri = f'https://{current_host}/oauth2callback'
+        
         oauth_flow.redirect_uri = redirect_uri
         
-        print(f"🔧 Fixed OAuth redirect URI to production: {redirect_uri}")
-        print(f"🌐 Current request host: {request.host}")
+        print(f"🔧 OAuth redirect URI set to: {redirect_uri}")
+        print(f"🌐 Current request host: {current_host}")
         
         # Generate authorization URL with proper parameters
         authorization_url, state = oauth_flow.authorization_url(
@@ -2176,8 +2183,15 @@ def oauth2callback():
             print(f"❌ State mismatch - Session: {session.get('state')}, Request: {request.args.get('state')}")
             return redirect('/auth?error=invalid_state')
 
-        # ALWAYS use production URL for OAuth redirect consistency
-        redirect_uri = 'https://budtboy.replit.app/oauth2callback'
+        # Use same logic as signin for redirect URI
+        current_host = request.host
+        if 'budtboy.replit.app' in current_host:
+            # Production environment
+            redirect_uri = 'https://budtboy.replit.app/oauth2callback'
+        else:
+            # Development environment - use current host
+            redirect_uri = f'https://{current_host}/oauth2callback'
+        
         oauth_flow.redirect_uri = redirect_uri
         
         # Construct callback URL properly - force HTTPS
@@ -2191,7 +2205,7 @@ def oauth2callback():
         
         print(f"🔧 OAuth callback URL: {callback_url}")
         print(f"🔧 OAuth redirect URI: {redirect_uri}")
-        print(f"🌐 Request host: {request.host}")
+        print(f"🌐 Request host: {current_host}")
         
         # Exchange authorization code for access token
         oauth_flow.fetch_token(authorization_response=callback_url)

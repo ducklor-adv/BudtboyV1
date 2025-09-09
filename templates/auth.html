@@ -273,7 +273,7 @@
                 </svg>
                 <span>เข้าสู่ระบบ / สมัครสมาชิกด้วย Google</span>
             </a>
-            
+
             <p style="color: #666; font-size: 14px; margin: 10px 0;">
                 🚀 เข้าใช้งานได้ทันทีด้วยบัญชี Google ของคุณ<br>
                 ไม่ต้องจำรหัสผ่าน ปลอดภัย 100%
@@ -304,19 +304,19 @@
         function onCaptchaSuccess(token) {
             console.log('reCAPTCHA verified successfully');
             captchaVerified = true;
-            
+
             // Update CAPTCHA message
             const captchaMessage = document.getElementById('captcha-message');
             captchaMessage.innerHTML = '✅ ยืนยันว่าเป็นมนุษย์สำเร็จ!';
             captchaMessage.style.color = '#4CAF50';
-            
+
             // Show age verification section
             const ageSection = document.getElementById('ageVerificationSection');
             ageSection.style.display = 'block';
-            
+
             // Scroll to age verification section
             ageSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            
+
             // Store token for verification
             sessionStorage.setItem('captcha_token', token);
         }
@@ -324,48 +324,48 @@
         // Age verification functions
         function confirmAge() {
             ageVerified = true;
-            
+
             // Update age message
             const ageMessage = document.getElementById('age-message');
             ageMessage.innerHTML = '✅ ยืนยันอายุสำเร็จ! สามารถเข้าสู่ระบบได้แล้ว';
             ageMessage.style.color = '#4CAF50';
-            
+
             // Hide age buttons
             const confirmBtn = document.getElementById('confirmAgeBtn');
             const denyBtn = document.getElementById('denyAgeBtn');
             confirmBtn.style.display = 'none';
             denyBtn.style.display = 'none';
-            
+
             // Enable Google login button
             enableGoogleLogin();
-            
+
             // Store age verification
             sessionStorage.setItem('age_verified', 'true');
-            
+
             // Scroll to login button
             document.getElementById('google-login-btn').scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
         function denyAge() {
             ageVerified = false;
-            
+
             // Update age message
             const ageMessage = document.getElementById('age-message');
             ageMessage.innerHTML = '❌ ขออภัย คุณต้องมีอายุเกิน 20 ปีเพื่อใช้งานระบบนี้';
             ageMessage.style.color = '#f44336';
-            
+
             // Hide age buttons
             const confirmBtn = document.getElementById('confirmAgeBtn');
             const denyBtn = document.getElementById('denyAgeBtn');
             confirmBtn.style.display = 'none';
             denyBtn.style.display = 'none';
-            
+
             // Keep login button disabled
             const loginBtn = document.getElementById('google-login-btn');
             loginBtn.style.background = '#ccc';
             loginBtn.style.pointerEvents = 'none';
             loginBtn.style.opacity = '0.6';
-            
+
             // Remove stored tokens
             sessionStorage.removeItem('age_verified');
             sessionStorage.removeItem('captcha_token');
@@ -423,11 +423,11 @@
             // Add age verification button handlers
             const confirmAgeBtn = document.getElementById('confirmAgeBtn');
             const denyAgeBtn = document.getElementById('denyAgeBtn');
-            
+
             if (confirmAgeBtn) {
                 confirmAgeBtn.addEventListener('click', confirmAge);
             }
-            
+
             if (denyAgeBtn) {
                 denyAgeBtn.addEventListener('click', denyAge);
             }
@@ -437,19 +437,19 @@
             googleLoginBtn.addEventListener('click', function(e) {
                 const captchaToken = sessionStorage.getItem('captcha_token');
                 const ageVerifiedStorage = sessionStorage.getItem('age_verified');
-                
+
                 if (!captchaToken) {
                     e.preventDefault();
                     alert('กรุณายืนยันว่าคุณเป็นมนุษย์ก่อนเข้าสู่ระบบ');
                     return false;
                 }
-                
+
                 if (!ageVerifiedStorage) {
                     e.preventDefault();
                     alert('กรุณายืนยันอายุของคุณก่อนเข้าสู่ระบบ');
                     return false;
                 }
-                
+
                 // Send CAPTCHA token to verify endpoint
                 fetch('/api/verify_captcha', {
                     method: 'POST',
@@ -474,7 +474,7 @@
                     console.error('Error:', error);
                     alert('เกิดข้อผิดพลาดในการตรวจสอบ');
                 });
-                
+
                 e.preventDefault();
                 return false;
             });
@@ -484,26 +484,26 @@
         function resetVerifications() {
             captchaVerified = false;
             ageVerified = false;
-            
+
             // Reset CAPTCHA
             if (typeof grecaptcha !== 'undefined') {
                 grecaptcha.reset();
             }
-            
+
             // Clear storage
             sessionStorage.removeItem('captcha_token');
             sessionStorage.removeItem('age_verified');
-            
+
             // Reset UI
             const googleLoginBtn = document.getElementById('google-login-btn');
             googleLoginBtn.style.background = '#ccc';
             googleLoginBtn.style.pointerEvents = 'none';
             googleLoginBtn.style.opacity = '0.6';
-            
+
             const captchaMessage = document.getElementById('captcha-message');
             captchaMessage.innerHTML = 'กรุณายืนยันว่าคุณเป็นมนุษย์ก่อนเข้าสู่ระบบ';
             captchaMessage.style.color = '#666';
-            
+
             const ageSection = document.getElementById('ageVerificationSection');
             ageSection.style.display = 'none';
         }

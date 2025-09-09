@@ -2119,10 +2119,20 @@ def signin():
     if not captcha_token:
         return redirect('/auth?error=captcha_required')
 
+    # Check for age verification
+    age_verified = request.args.get('age_verified') or session.get('age_verified')
+    
+    if not age_verified:
+        return redirect('/auth?error=age_required')
+
     # Verify CAPTCHA token (optional - for production you'd verify with Google)
     # For demo, we'll just check if token exists
     if captcha_token:
         session['captcha_verified'] = True
+    
+    # Store age verification in session
+    if age_verified:
+        session['age_verified'] = True
 
     try:
         # Check if we have valid credentials

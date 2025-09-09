@@ -237,6 +237,31 @@
             </p>
         </div>
 
+        <!-- Age Verification -->
+        <div class="age-verification-section" id="ageVerificationSection" style="margin-bottom: 20px; text-align: center; display: none;">
+            <h3 style="color: #2c5530; margin-bottom: 15px; font-size: 18px;">🔞 ยืนยันอายุ</h3>
+            <div style="background: #f8f9fa; border: 2px solid #e0e0e0; border-radius: 8px; padding: 20px; margin-bottom: 15px;">
+                <p style="color: #333; font-size: 16px; margin: 0 0 15px 0; font-weight: 600;">
+                    📋 คุณมีอายุเกิน 20 ปีบริบูรณ์หรือไม่?
+                </p>
+                <p style="color: #666; font-size: 14px; margin: 0 0 20px 0; line-height: 1.5;">
+                    การใช้งานแอปพลิเคชันนี้จำเป็นต้องมีอายุเกิน 20 ปี<br>
+                    ตามกฎหมายและข้อกำหนดการใช้งาน
+                </p>
+                <div style="display: flex; gap: 15px; justify-content: center;">
+                    <button type="button" id="confirmAgeBtn" class="auth-button" style="background: #4CAF50; color: white; border: none; border-radius: 8px; padding: 12px 24px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.3s;">
+                        ✅ ใช่ ฉันมีอายุเกิน 20 ปี
+                    </button>
+                    <button type="button" id="denyAgeBtn" class="auth-button" style="background: #f44336; color: white; border: none; border-radius: 8px; padding: 12px 24px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.3s;">
+                        ❌ ไม่ ฉันอายุไม่ถึง 20 ปี
+                    </button>
+                </div>
+            </div>
+            <p id="age-message" style="color: #666; font-size: 14px; margin: 0;">
+                กรุณายืนยันอายุของคุณเพื่อดำเนินการต่อ
+            </p>
+        </div>
+
         <!-- Main Google Authentication -->
         <div class="google-auth-section" style="text-align: center;">
             <a href="/signin" id="google-login-btn" class="auth-button" style="display: inline-flex; align-items: center; justify-content: center; gap: 12px; text-decoration: none; color: white; background: #ccc; border: none; border-radius: 8px; padding: 15px 20px; font-size: 18px; font-weight: bold; transition: background 0.3s; width: 100%; box-sizing: border-box; margin-bottom: 20px; pointer-events: none; opacity: 0.6;">
@@ -271,23 +296,88 @@
     </div>
 
     <script>
+        // Global state tracking
+        let captchaVerified = false;
+        let ageVerified = false;
+
         // reCAPTCHA callback function
         function onCaptchaSuccess(token) {
             console.log('reCAPTCHA verified successfully');
+            captchaVerified = true;
             
-            // Enable Google login button
-            const loginBtn = document.getElementById('google-login-btn');
-            loginBtn.style.background = '#4285f4';
-            loginBtn.style.pointerEvents = 'auto';
-            loginBtn.style.opacity = '1';
-            
-            // Update message
+            // Update CAPTCHA message
             const captchaMessage = document.getElementById('captcha-message');
-            captchaMessage.innerHTML = '✅ ยืนยันสำเร็จ! สามารถเข้าสู่ระบบได้แล้ว';
+            captchaMessage.innerHTML = '✅ ยืนยันว่าเป็นมนุษย์สำเร็จ!';
             captchaMessage.style.color = '#4CAF50';
+            
+            // Show age verification section
+            const ageSection = document.getElementById('ageVerificationSection');
+            ageSection.style.display = 'block';
+            
+            // Scroll to age verification section
+            ageSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
             
             // Store token for verification
             sessionStorage.setItem('captcha_token', token);
+        }
+
+        // Age verification functions
+        function confirmAge() {
+            ageVerified = true;
+            
+            // Update age message
+            const ageMessage = document.getElementById('age-message');
+            ageMessage.innerHTML = '✅ ยืนยันอายุสำเร็จ! สามารถเข้าสู่ระบบได้แล้ว';
+            ageMessage.style.color = '#4CAF50';
+            
+            // Hide age buttons
+            const confirmBtn = document.getElementById('confirmAgeBtn');
+            const denyBtn = document.getElementById('denyAgeBtn');
+            confirmBtn.style.display = 'none';
+            denyBtn.style.display = 'none';
+            
+            // Enable Google login button
+            enableGoogleLogin();
+            
+            // Store age verification
+            sessionStorage.setItem('age_verified', 'true');
+            
+            // Scroll to login button
+            document.getElementById('google-login-btn').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function denyAge() {
+            ageVerified = false;
+            
+            // Update age message
+            const ageMessage = document.getElementById('age-message');
+            ageMessage.innerHTML = '❌ ขออภัย คุณต้องมีอายุเกิน 20 ปีเพื่อใช้งานระบบนี้';
+            ageMessage.style.color = '#f44336';
+            
+            // Hide age buttons
+            const confirmBtn = document.getElementById('confirmAgeBtn');
+            const denyBtn = document.getElementById('denyAgeBtn');
+            confirmBtn.style.display = 'none';
+            denyBtn.style.display = 'none';
+            
+            // Keep login button disabled
+            const loginBtn = document.getElementById('google-login-btn');
+            loginBtn.style.background = '#ccc';
+            loginBtn.style.pointerEvents = 'none';
+            loginBtn.style.opacity = '0.6';
+            
+            // Remove stored tokens
+            sessionStorage.removeItem('age_verified');
+            sessionStorage.removeItem('captcha_token');
+        }
+
+        function enableGoogleLogin() {
+            if (captchaVerified && ageVerified) {
+                const loginBtn = document.getElementById('google-login-btn');
+                loginBtn.style.background = '#4285f4';
+                loginBtn.style.pointerEvents = 'auto';
+                loginBtn.style.opacity = '1';
+            }
         }
 
         // Check for OAuth error messages in URL parameters
@@ -315,6 +405,9 @@
                     case 'captcha_required':
                         errorMessage = '⚠️ กรุณายืนยันว่าคุณเป็นมนุษย์ก่อนเข้าสู่ระบบ';
                         break;
+                    case 'age_required':
+                        errorMessage = '⚠️ กรุณายืนยันอายุก่อนเข้าสู่ระบบ';
+                        break;
                     default:
                         errorMessage = '⚠️ เกิดข้อผิดพลาดในการเข้าสู่ระบบด้วย Google';
                 }
@@ -327,13 +420,33 @@
                 window.history.replaceState({}, document.title, newUrl);
             }
 
-            // Add click handler to Google login button to check captcha
+            // Add age verification button handlers
+            const confirmAgeBtn = document.getElementById('confirmAgeBtn');
+            const denyAgeBtn = document.getElementById('denyAgeBtn');
+            
+            if (confirmAgeBtn) {
+                confirmAgeBtn.addEventListener('click', confirmAge);
+            }
+            
+            if (denyAgeBtn) {
+                denyAgeBtn.addEventListener('click', denyAge);
+            }
+
+            // Add click handler to Google login button
             const googleLoginBtn = document.getElementById('google-login-btn');
             googleLoginBtn.addEventListener('click', function(e) {
                 const captchaToken = sessionStorage.getItem('captcha_token');
+                const ageVerifiedStorage = sessionStorage.getItem('age_verified');
+                
                 if (!captchaToken) {
                     e.preventDefault();
                     alert('กรุณายืนยันว่าคุณเป็นมนุษย์ก่อนเข้าสู่ระบบ');
+                    return false;
+                }
+                
+                if (!ageVerifiedStorage) {
+                    e.preventDefault();
+                    alert('กรุณายืนยันอายุของคุณก่อนเข้าสู่ระบบ');
                     return false;
                 }
                 
@@ -350,18 +463,11 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Redirect to signin with CAPTCHA verified
-                        window.location.href = '/signin?captcha_token=' + captchaToken;
+                        // Redirect to signin with both verifications
+                        window.location.href = '/signin?captcha_token=' + captchaToken + '&age_verified=true';
                     } else {
                         alert('การยืนยัน CAPTCHA ล้มเหลว กรุณาลองใหม่');
-                        grecaptcha.reset();
-                        sessionStorage.removeItem('captcha_token');
-                        // Reset button state
-                        googleLoginBtn.style.background = '#ccc';
-                        googleLoginBtn.style.pointerEvents = 'none';
-                        googleLoginBtn.style.opacity = '0.6';
-                        document.getElementById('captcha-message').innerHTML = 'กรุณายืนยันว่าคุณเป็นมนุษย์ก่อนเข้าสู่ระบบ';
-                        document.getElementById('captcha-message').style.color = '#666';
+                        resetVerifications();
                     }
                 })
                 .catch(error => {
@@ -373,6 +479,34 @@
                 return false;
             });
         });
+
+        // Function to reset all verifications
+        function resetVerifications() {
+            captchaVerified = false;
+            ageVerified = false;
+            
+            // Reset CAPTCHA
+            if (typeof grecaptcha !== 'undefined') {
+                grecaptcha.reset();
+            }
+            
+            // Clear storage
+            sessionStorage.removeItem('captcha_token');
+            sessionStorage.removeItem('age_verified');
+            
+            // Reset UI
+            const googleLoginBtn = document.getElementById('google-login-btn');
+            googleLoginBtn.style.background = '#ccc';
+            googleLoginBtn.style.pointerEvents = 'none';
+            googleLoginBtn.style.opacity = '0.6';
+            
+            const captchaMessage = document.getElementById('captcha-message');
+            captchaMessage.innerHTML = 'กรุณายืนยันว่าคุณเป็นมนุษย์ก่อนเข้าสู่ระบบ';
+            captchaMessage.style.color = '#666';
+            
+            const ageSection = document.getElementById('ageVerificationSection');
+            ageSection.style.display = 'none';
+        }
     </script>
 </body>
 </html>

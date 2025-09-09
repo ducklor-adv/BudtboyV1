@@ -17,11 +17,28 @@ import requests
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'budtboy-secret-key-2024')
 
-# Google OAuth configuration
+# Environment detection
+def is_production():
+    """Check if running in production deployment"""
+    current_host = os.environ.get('REPL_SLUG', '')
+    return 'budtboy.replit.app' in os.environ.get('REPLIT_DEPLOYMENT', '') or os.environ.get('REPLIT_DEPLOYMENT') == 'production'
+
+def is_preview():
+    """Check if running in preview mode"""
+    return not is_production() and 'REPLIT_DEV_DOMAIN' in os.environ
+
+# Fallback authentication settings
+FALLBACK_AUTH_ENABLED = is_preview()
+FALLBACK_SECRET_KEY = os.environ.get('FALLBACK_AUTH_SECRET', 'fallback-dev-secret-2024')
+
+print(f"🌍 Environment: {'Production' if is_production() else 'Preview' if is_preview() else 'Development'}")
+print(f"🔐 Fallback Auth: {'Enabled' if FALLBACK_AUTH_ENABLED else 'Disabled'}")
+
+# Google OAuth configuration - only in production
 GOOGLE_OAUTH_CONFIG = {
     "web": {
-        "client_id": os.environ.get('GOOGLE_CLIENT_ID'),
-        "client_secret": os.environ.get('GOOGLE_CLIENT_SECRET'),
+        "client_id": os.environ.get('GOOGLE_CLIENT_ID') if is_production() else None,
+        "client_secret": os.environ.get('GOOGLE_CLIENT_SECRET') if is_production() else None,
         "auth_uri": "https://accounts.google.com/o/oauth2/auth",
         "token_uri": "https://oauth2.googleapis.com/token",
         "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
@@ -29,24 +46,27 @@ GOOGLE_OAUTH_CONFIG = {
     }
 }
 
-# Initialize OAuth flow if credentials are available
+# Initialize OAuth flow only in production
 oauth_flow = None
-try:
-    if GOOGLE_OAUTH_CONFIG["web"]["client_id"] and GOOGLE_OAUTH_CONFIG["web"]["client_secret"]:
-        oauth_flow = google_auth_oauthlib.flow.Flow.from_client_config(
-            GOOGLE_OAUTH_CONFIG,
-            scopes=[
-                "https://www.googleapis.com/auth/userinfo.email",
-                "openid", 
-                "https://www.googleapis.com/auth/userinfo.profile"
-            ]
-        )
-        print("Google OAuth initialized successfully")
-    else:
-        print("Warning: Google OAuth credentials not found in environment variables")
-except Exception as e:
-    print(f"Error initializing Google OAuth: {e}")
-    oauth_flow = None
+if is_production():
+    try:
+        if GOOGLE_OAUTH_CONFIG["web"]["client_id"] and GOOGLE_OAUTH_CONFIG["web"]["client_secret"]:
+            oauth_flow = google_auth_oauthlib.flow.Flow.from_client_config(
+                GOOGLE_OAUTH_CONFIG,
+                scopes=[
+                    "https://www.googleapis.com/auth/userinfo.email",
+                    "openid", 
+                    "https://www.googleapis.com/auth/userinfo.profile"
+                ]
+            )
+            print("✅ Google OAuth initialized successfully (Production)")
+        else:
+            print("⚠️ Warning: Google OAuth credentials not found in environment variables")
+    except Exception as e:
+        print(f"❌ Error initializing Google OAuth: {e}")
+        oauth_flow = None
+else:
+    print("🔧 Google OAuth disabled in preview mode - using fallback authentication")
 
 # Email configuration - using environment variables with fallback for testing
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
@@ -2109,6 +2129,10 @@ def reset_password():
 @app.route('/signin')
 def signin():
     """Initialize Google OAuth signin"""
+    # Block OAuth in preview mode
+    if FALLBACK_AUTH_ENABLED:
+        return redirect('/auth?error=oauth_disabled_preview')
+    
     if not oauth_flow:
         return redirect('/auth?error=oauth_not_configured')
 
@@ -4291,6 +4315,146 @@ def verify_captcha():
             'success': False,
             'error': 'CAPTCHA verification failed'
         }), 400
+
+@app.route('/fallback_login', methods=['POST'])
+def fallback_login():
+    """Fallback login for preview mode"""
+    if not FALLBACK_AUTH_ENABLED:
+        return jsonify({'success': False, 'error': 'Fallback authentication is disabled'}), 403
+    
+    data = request.get_json()
+    email = data.get('email')
+    password = data.get('password')
+    
+    if not email or not password:
+        return jsonify({'success': False, 'error': 'กรุณากรอกอีเมลและรหัสผ่าน'}), 400
+    
+    # Special fallback accounts for development
+    fallback_accounts = {
+        'dev@budtboy.com': 'dev123',
+        'test@budtboy.com': 'test123',
+        'admin@budtboy.com': 'admin123'
+    }
+    
+    if email in fallback_accounts and password == fallback_accounts[email]:
+        # Create temporary session for fallback user
+        session['user_id'] = 999  # Special fallback user ID
+        session['username'] = email.split('@')[0].title()
+        session['email'] = email
+        session['fallback_mode'] = True
+        
+        return jsonify({
+            'success': True,
+            'message': f'เข้าสู่ระบบสำเร็จ (Preview Mode)',
+            'redirect': '/profile'
+        })
+    else:
+        # Try regular database authentication
+        conn = get_db_connection()
+        if conn:
+            try:
+                cur = conn.cursor()
+                cur.execute("""
+                    SELECT id, username, email, password_hash
+                    FROM users 
+                    WHERE email = %s
+                """, (email,))
+                
+                user = cur.fetchone()
+                if user and verify_password(password, user[3]):
+                    session['user_id'] = user[0]
+                    session['username'] = user[1]
+                    session['email'] = user[2]
+                    session['fallback_mode'] = True
+                    
+                    return jsonify({
+                        'success': True,
+                        'message': f'เข้าสู่ระบบสำเร็จ ยินดีต้อนรับ {user[1]}!',
+                        'redirect': '/profile'
+                    })
+                else:
+                    return jsonify({
+                        'success': False,
+                        'error': 'อีเมลหรือรหัสผ่านไม่ถูกต้อง'
+                    }), 400
+                    
+            except Exception as e:
+                return jsonify({'success': False, 'error': str(e)}), 500
+            finally:
+                cur.close()
+                return_db_connection(conn)
+        
+        return jsonify({'success': False, 'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+@app.route('/fallback_signup', methods=['POST'])
+def fallback_signup():
+    """Fallback signup for preview mode"""
+    if not FALLBACK_AUTH_ENABLED:
+        return jsonify({'success': False, 'error': 'Fallback authentication is disabled'}), 403
+    
+    data = request.get_json()
+    username = data.get('username')
+    email = data.get('email')
+    password = data.get('password')
+    
+    if not username or not email or not password:
+        return jsonify({'success': False, 'error': 'กรุณากรอกข้อมูลให้ครบถ้วน'}), 400
+    
+    # Validate password strength
+    is_valid, message = validate_password_strength(password)
+    if not is_valid:
+        return jsonify({'success': False, 'error': message}), 400
+    
+    # Hash password securely
+    password_hash = hash_password(password)
+    
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            
+            # Check if user exists
+            cur.execute("SELECT id FROM users WHERE username = %s OR email = %s", (username, email))
+            if cur.fetchone():
+                return jsonify({
+                    'success': False,
+                    'error': 'ชื่อผู้ใช้หรืออีเมลนี้ถูกใช้แล้ว'
+                }), 400
+            
+            # Generate referral code
+            import secrets
+            new_referral_code = secrets.token_urlsafe(8)
+            
+            # Create user
+            cur.execute("""
+                INSERT INTO users (username, email, password_hash, is_consumer, is_verified, referral_code, is_approved)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                RETURNING id
+            """, (username, email, password_hash, True, True, new_referral_code, True))
+            
+            user_id = cur.fetchone()[0]
+            conn.commit()
+            
+            # Auto login
+            session['user_id'] = user_id
+            session['username'] = username
+            session['email'] = email
+            session['fallback_mode'] = True
+            
+            return jsonify({
+                'success': True,
+                'message': f'สมัครสมาชิกสำเร็จ! ยินดีต้อนรับ {username} (Preview Mode)',
+                'redirect': '/profile'
+            })
+            
+        except Exception as e:
+            conn.rollback()
+            return jsonify({'success': False, 'error': str(e)}), 500
+        finally:
+            cur.close()
+            return_db_connection(conn)
+    else:
+        return jsonify({'success': False, 'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
 def log_user_activity(user_id, username, action, resource_type=None, resource_id=None, 
                      old_data=None, new_data=None, success=True, details=None, request_obj=None):

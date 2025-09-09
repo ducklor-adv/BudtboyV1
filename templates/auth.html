@@ -116,32 +116,11 @@
             color: #999;
         }
         .divider::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: #e0e0e0;
+            display: none;
         }
         .divider span {
             background: white;
             padding: 0 15px;
-        }
-        .google-button {
-            width: 100%;
-            padding: 12px;
-            background: #4285f4;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background 0.3s;
-            margin-bottom: 10px;
-        }
-        .google-button:hover {
-            background: #3367d6;
         }
         .guest-button {
             width: 100%;
@@ -244,14 +223,6 @@
             </div>
             <button type="submit" class="auth-button">🔑 เข้าสู่ระบบ</button>
             
-            <div class="divider">
-                <span>หรือ</span>
-            </div>
-            
-            <button type="button" class="google-button" onclick="window.location.href='/google_login'">
-                🔍 เข้าสู่ระบบด้วย Google
-            </button>
-            
             <div style="text-align: center; margin-top: 15px;">
                 <a href="/forgot-password" style="color: #666; text-decoration: none; font-size: 14px; transition: color 0.3s;">
                     ลืมรหัสผ่าน?
@@ -283,14 +254,6 @@
                 <div id="passwordStrength" style="margin-top: 5px; font-size: 12px;"></div>
             </div>
             <button type="submit" class="auth-button">🎯 สมัครสมาชิก</button>
-            
-            <div class="divider">
-                <span>หรือ</span>
-            </div>
-            
-            <button type="button" class="google-button" onclick="window.location.href='/google_login'">
-                🔍 สมัครด้วย Google
-            </button>
         </form>
 
         <div id="message"></div>
@@ -388,7 +351,7 @@
             }
         });
 
-        // Check for referral code in URL and handle Google login status
+        // Check for referral code in URL
         document.addEventListener('DOMContentLoaded', function() {
             const urlParams = new URLSearchParams(window.location.search);
             const refCode = urlParams.get('ref');
@@ -396,43 +359,6 @@
                 document.getElementById('referralCode').value = refCode;
                 // Switch to signup tab if referral code is present
                 showForm('signup');
-            }
-
-            // Handle Google login/signup success messages
-            const googleLogin = urlParams.get('google_login');
-            const googleSignup = urlParams.get('google_signup');
-            const error = urlParams.get('error');
-
-            if (googleLogin === 'success') {
-                document.getElementById('message').innerHTML = `
-                    <div class="message success">✅ เข้าสู่ระบบด้วย Google สำเร็จ!</div>
-                `;
-                setTimeout(() => {
-                    window.location.href = '/profile';
-                }, 1500);
-            } else if (googleSignup === 'success') {
-                document.getElementById('message').innerHTML = `
-                    <div class="message success">✅ สมัครสมาชิกด้วย Google สำเร็จ!</div>
-                `;
-                setTimeout(() => {
-                    window.location.href = '/profile';
-                }, 1500);
-            } else if (error) {
-                let errorMessage = 'เกิดข้อผิดพลาดในการเข้าสู่ระบบด้วย Google';
-                switch (error) {
-                    case 'google_oauth_disabled':
-                        errorMessage = 'ระบบ Google OAuth ไม่ได้เปิดใช้งาน';
-                        break;
-                    case 'invalid_state':
-                        errorMessage = 'การตรวจสอบความปลอดภัยล้มเหลว กรุณาลองใหม่';
-                        break;
-                    case 'no_email_from_google':
-                        errorMessage = 'ไม่สามารถดึงข้อมูลอีเมลจาก Google ได้';
-                        break;
-                }
-                document.getElementById('message').innerHTML = `
-                    <div class="message error">❌ ${errorMessage}</div>
-                `;
             }
         });
 

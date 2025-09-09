@@ -2102,7 +2102,12 @@ def signin():
         return jsonify({'error': 'Google OAuth ไม่ได้ถูกตั้งค่า'}), 500
     
     # Set redirect URI to match your Google Console settings
-    oauth_flow.redirect_uri = url_for('oauth2callback', _external=True)
+    # Convert http to https for Replit deployment
+    redirect_uri = url_for('oauth2callback', _external=True)
+    if redirect_uri.startswith('http://'):
+        redirect_uri = redirect_uri.replace('http://', 'https://')
+    
+    oauth_flow.redirect_uri = redirect_uri
     authorization_url, state = oauth_flow.authorization_url()
     session['state'] = state
     return redirect(authorization_url)
@@ -2118,8 +2123,18 @@ def oauth2callback():
         return jsonify({'error': 'Invalid state parameter'}), 400
     
     # Exchange authorization code for access token
-    oauth_flow.redirect_uri = url_for('oauth2callback', _external=True)
-    oauth_flow.fetch_token(authorization_response=request.url)
+    redirect_uri = url_for('oauth2callback', _external=True)
+    if redirect_uri.startswith('http://'):
+        redirect_uri = redirect_uri.replace('http://', 'https://')
+    
+    oauth_flow.redirect_uri = redirect_uri
+    
+    # Handle authorization response URL for HTTPS
+    auth_response_url = request.url
+    if auth_response_url.startswith('http://'):
+        auth_response_url = auth_response_url.replace('http://', 'https://')
+    
+    oauth_flow.fetch_token(authorization_response=auth_response_url)
     
     # Get user info from Google
     credentials = oauth_flow.credentials

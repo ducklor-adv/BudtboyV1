@@ -2275,11 +2275,8 @@ def oauth2callback():
                     cur.close()
                     return_db_connection(conn)
                     
-                    # Redirect to production if coming from preview
-                    if 'budtboy.replit.app' not in request.host:
-                        return redirect('https://budtboy.replit.app/profile')
-                    else:
-                        return redirect('/profile')
+                    # Always redirect to profile page
+                    return redirect('/profile')
                 else:
                     # Create new user
                     username = name or email.split('@')[0]
@@ -2317,11 +2314,8 @@ def oauth2callback():
                     cur.close()
                     return_db_connection(conn)
                     
-                    # Redirect to production if coming from preview
-                    if 'budtboy.replit.app' not in request.host:
-                        return redirect('https://budtboy.replit.app/profile')
-                    else:
-                        return redirect('/profile')
+                    # Always redirect to profile page
+                    return redirect('/profile')
 
             except Exception as e:
                 if conn:

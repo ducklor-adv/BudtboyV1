@@ -115,7 +115,7 @@ def get_db_connection():
     """Get database connection with improved error handling"""
     global connection_pool
     max_retries = 3
-    
+
     for retry_count in range(max_retries):
         try:
             if connection_pool is None:
@@ -143,7 +143,7 @@ def get_db_connection():
                 database_url = os.environ.get('DATABASE_URL')
                 if not database_url:
                     raise Exception("DATABASE_URL environment variable not set")
-                
+
                 return psycopg2.connect(
                     database_url,
                     sslmode='prefer',
@@ -286,7 +286,7 @@ def create_tables():
             # Create password reset table
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS password_resets (
-                    id SERIAL PRIMARY KEY,
+                    id SERIAL PRIMARYKEY,
                     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE UNIQUE,
                     token VARCHAR(128) UNIQUE NOT NULL,
                     expires_at TIMESTAMP NOT NULL,
@@ -1342,7 +1342,7 @@ def validate_password_strength(password):
     """Validate password meets security requirements"""
     if not password or len(password) < 8:
         return False, "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร"
-    
+
     if len(password) > 128:
         return False, "รหัสผ่านยาวเกินไป (สูงสุด 128 ตัวอักษร)"
 
@@ -1401,7 +1401,7 @@ def send_password_reset_email(email, username, token):
     """Send password reset email"""
     try:
         reset_url = url_for('reset_password_page', token=token, _external=True)
-        
+
         # For demo/testing - simulate email sending if no real email config
         if DEMO_EMAIL_MODE:
             print(f"""
@@ -1415,7 +1415,7 @@ def send_password_reset_email(email, username, token):
             ลิงก์รีเซ็ตรหัสผ่าน: {reset_url}
 
             📌 สำหรับการทดสอบ: คุณสามารถคัดลอกลิงก์ข้างต้นไปวางในเบราว์เซอร์เพื่อรีเซ็ตรหัสผ่านได้เลย
-            
+
             หากคุณไม่ได้ขอรีเซ็ตรหัสผ่าน กรุณาเพิกเฉยต่ออีเมลนี้
             ลิงก์นี้จะหมดอายุใน 1 ชั่วโมง
             """)
@@ -2003,7 +2003,7 @@ def forgot_password():
 
             # Send reset email
             email_sent = send_password_reset_email(email, username, reset_token)
-            
+
             if DEMO_EMAIL_MODE:
                 return jsonify({
                     'success': True,
@@ -2100,13 +2100,20 @@ def signin():
     """Initialize Google OAuth signin"""
     if not oauth_flow:
         return jsonify({'error': 'Google OAuth ไม่ได้ถูกตั้งค่า'}), 500
-    
+
     # Set redirect URI to match your Google Console settings
     # Convert http to https for Replit deployment
     redirect_uri = url_for('oauth2callback', _external=True)
     if redirect_uri.startswith('http://'):
         redirect_uri = redirect_uri.replace('http://', 'https://')
-    
+
+    # Ensure proper Replit URL format
+    if 'replit.app' not in redirect_uri and 'replit.dev' not in redirect_uri:
+        # Get the actual Replit URL from environment or headers
+        host = request.headers.get('X-Forwarded-Host') or request.headers.get('Host')
+        if host:
+            redirect_uri = f"https://{host}/oauth2callback"
+
     oauth_flow.redirect_uri = redirect_uri
     authorization_url, state = oauth_flow.authorization_url()
     session['state'] = state
@@ -2117,66 +2124,56 @@ def oauth2callback():
     """Handle Google OAuth callback"""
     if not oauth_flow:
         return jsonify({'error': 'Google OAuth ไม่ได้ถูกตั้งค่า'}), 500
-    
+
     # Verify state parameter
     if 'state' not in session or request.args.get('state') != session['state']:
         return jsonify({'error': 'Invalid state parameter'}), 400
-    
+
     # Exchange authorization code for access token
-    redirect_uri = url_for('oauth2callback', _external=True)
-    if redirect_uri.startswith('http://'):
-        redirect_uri = redirect_uri.replace('http://', 'https://')
-    
-    oauth_flow.redirect_uri = redirect_uri
-    
-    # Handle authorization response URL for HTTPS
-    auth_response_url = request.url
-    if auth_response_url.startswith('http://'):
-        auth_response_url = auth_response_url.replace('http://', 'https://')
-    
-    oauth_flow.fetch_token(authorization_response=auth_response_url)
-    
+    oauth_flow.redirect_uri = url_for('oauth2callback', _external=True)
+    oauth_flow.fetch_token(authorization_response=request.url)
+
     # Get user info from Google
     credentials = oauth_flow.credentials
     user_info_response = requests.get(
         'https://www.googleapis.com/oauth2/v1/userinfo',
         headers={'Authorization': f'Bearer {credentials.token}'}
     )
-    
+
     if user_info_response.status_code != 200:
         return jsonify({'error': 'ไม่สามารถดึงข้อมูลผู้ใช้จาก Google ได้'}), 400
-    
+
     user_info = user_info_response.json()
     email = user_info.get('email')
     name = user_info.get('name')
     google_id = user_info.get('id')
-    
+
     if not email:
         return jsonify({'error': 'ไม่สามารถดึงอีเมลจาก Google ได้'}), 400
-    
+
     conn = get_db_connection()
     if conn:
         try:
             cur = conn.cursor()
-            
+
             # Check if user exists
             cur.execute("SELECT id, username FROM users WHERE email = %s", (email,))
             existing_user = cur.fetchone()
-            
+
             if existing_user:
                 # User exists, log them in
                 user_id, username = existing_user
                 session['user_id'] = user_id
                 session['username'] = username
                 session['email'] = email
-                
+
                 cur.close()
                 return_db_connection(conn)
                 return redirect('/profile')
             else:
                 # Create new user
                 username = name or email.split('@')[0]
-                
+
                 # Make sure username is unique
                 base_username = username
                 counter = 1
@@ -2186,10 +2183,10 @@ def oauth2callback():
                         break
                     username = f"{base_username}_{counter}"
                     counter += 1
-                
+
                 # Generate referral code
                 referral_code = secrets.token_urlsafe(8)
-                
+
                 # Create user account
                 cur.execute("""
                     INSERT INTO users (username, email, password_hash, is_consumer, is_verified, 
@@ -2197,19 +2194,19 @@ def oauth2callback():
                     VALUES (%s, %s, %s, %s, %s, %s, %s, NOW())
                     RETURNING id
                 """, (username, email, '', True, True, referral_code, True))
-                
+
                 user_id = cur.fetchone()[0]
                 conn.commit()
-                
+
                 # Log them in
                 session['user_id'] = user_id
                 session['username'] = username
                 session['email'] = email
-                
+
                 cur.close()
                 return_db_connection(conn)
                 return redirect('/profile')
-                
+
         except Exception as e:
             if conn:
                 conn.rollback()
@@ -2220,7 +2217,7 @@ def oauth2callback():
                 cur.close()
             if conn:
                 return_db_connection(conn)
-    
+
     return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
 @app.route('/verify_email/<token>')
@@ -2850,7 +2847,6 @@ def upload_bud_images(bud_id):
             if image_urls:
                 # Define allowed field names to prevent SQL injection
                 allowed_fields = {'image_1_url', 'image_2_url', 'image_3_url', 'image_4_url'}
-
                 update_fields = []
                 update_values = []
                 for field, url in image_urls.items():
@@ -4276,7 +4272,7 @@ def admin_logout():
 
         # Log logout
         log_admin_activity("admin", 'LOGOUT', True, 
-                         request.environ.get('REMOTE_ADDR'), 
+                         request.environ.get('REMOTE_ADDR'),
                          request.headers.get('User-Agent'))
 
     # Clear admin session
@@ -4601,9 +4597,9 @@ def get_admin_users():
             cur = conn.cursor()
 
             cur.execute("""
-                SELECT u.id, u.username, u.email, u.is_grower, u.is_budtender, u.is_consumer,
-                       u.birth_year, u.profile_image_url, u.is_verified, u.is_approved,
-                       u.created_at, u.approved_at, u.referred_by,
+                SELECT id, username, email, is_grower, is_budtender, is_consumer,
+                       birth_year, profile_image_url, is_verified, is_approved,
+                       created_at, approved_at, referred_by,
                        ref.username as referred_by_username
                 FROM users u
                 LEFT JOIN users ref ON u.referred_by = ref.id
@@ -4785,8 +4781,8 @@ def search_buds():
 @app.route('/api/buds/<int:bud_id>/detail', methods=['GET'])
 def get_bud_detail(bud_id):
     """Get individual bud data for editing (renamed route to avoid conflict)"""
-    if 'user_id' not in session:
-        return jsonify({'error': 'ไม่ได้เข้าสู่ระบบ'}), 401
+    if not is_authenticated():
+        return jsonify({'error': 'Unauthorized'}), 401
 
     user_id = session['user_id']
     cache_key = f"bud_detail_{bud_id}_{user_id}"
@@ -4874,7 +4870,7 @@ def get_bud_detail(bud_id):
 
     except psycopg2.OperationalError as e:
         print(f"Database operational error in get_bud_detail: {e}")
-        return jsonify({'error': 'เกิดข้อผิดพลาดในการเชื่อมต่อฐานข้อมูล กรุณาลองใหม่ออีกครั้ง'}), 500
+        return jsonify({'error': 'เกิดข้อผิดพลาดในการเชื่อมต่อฐานข้อมูล กรุณาลองใหม่อีกครั้ง'}), 500
     except Exception as e:
         print(f"Error in get_bud_detail for bud {bud_id}: {e}")
         import traceback
@@ -5032,7 +5028,7 @@ def register_user():
     profile_image_url = None
     if 'profile_image' in request.files:
         file = request.files['profile_image']
-        if file and file.filename != '' and allowed_file(file.filename):
+        if file and file.filename != '' and allowed_ file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             # Add timestamp to filename to avoid conflicts
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_')
@@ -5421,7 +5417,7 @@ def get_friends():
                 'referral_code': referral_code,
                 'total_friends': len(friends),
                 'pending_friends': pending_count
-    })
+            })
 
         except Exception as e:
             return jsonify({'error': str(e)}), 500
@@ -5749,33 +5745,33 @@ def admin_create_sample_data():
     """Admin endpoint to create sample data"""
     if not is_admin():
         return jsonify({'error': 'Unauthorized'}), 401
-    
+
     conn = get_db_connection()
     if conn:
         try:
             cur = conn.cursor()
-            
+
             # Check if sample user exists
             cur.execute("SELECT id FROM users WHERE username = 'Budt.Boy'")
             sample_user = cur.fetchone()
-            
+
             if not sample_user:
                 # Create sample user
                 password_hash = hash_password('BudtBoy123!')
                 import secrets
                 referral_code = secrets.token_urlsafe(8)
-                
+
                 cur.execute("""
                     INSERT INTO users (username, email, password_hash, is_grower, is_consumer, 
                                      is_verified, is_approved, referral_code, created_at)
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, NOW())
                     RETURNING id
                 """, ('Budt.Boy', 'budtboy@example.com', password_hash, True, True, True, True, referral_code))
-                
+
                 sample_user_id = cur.fetchone()[0]
             else:
                 sample_user_id = sample_user[0]
-            
+
             # Create sample buds
             sample_buds = [
                 ('บลูดรีม', 'Blue Dream', 'Barney\'s Farm', 'Hybrid', 18.5, 1.2, 'A+', 'หวาน, เบอร์รี่, ซิตรัส',
@@ -5791,7 +5787,7 @@ def admin_create_sample_data():
                  'Myrcene', 'Limonene', 'Caryophyllene', 'ผ่อนคลาย, สร้างสรรค์', '', 'บรรเทาปวด, คลายกล้าม', 'ปากแห้ง',
                  'ตลอดวัน', 'Indoor', '2025-07-16', '', sample_user_id, True, 'Organic', 'Photoperiod', sample_user_id)
             ]
-            
+
             cur.executemany("""
                 INSERT INTO buds_data (
                     strain_name_th, strain_name_en, breeder, strain_type,
@@ -5807,14 +5803,14 @@ def admin_create_sample_data():
                     %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
                 )
             """, sample_buds)
-            
+
             conn.commit()
-            
+
             return jsonify({
                 'success': True,
                 'message': f'สร้างข้อมูลตัวอย่างสำเร็จ ({len(sample_buds)} buds)'
             })
-            
+
         except Exception as e:
             conn.rollback()
             return jsonify({'error': str(e)}), 500
@@ -6004,7 +6000,7 @@ if __name__ == '__main__':
 
     # Create tables on startup
     create_tables()
-    
+
     # Production configuration
     debug_mode = os.environ.get('FLASK_ENV') != 'production'
     app.run(host='0.0.0.0', port=5000, debug=debug_mode)

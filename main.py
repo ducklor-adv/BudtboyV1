@@ -2158,84 +2158,88 @@ def oauth2callback():
         )
 
         if user_info_response.status_code != 200:
-        return jsonify({'error': 'ไม่สามารถดึงข้อมูลผู้ใช้จาก Google ได้'}), 400
+            return jsonify({'error': 'ไม่สามารถดึงข้อมูลผู้ใช้จาก Google ได้'}), 400
 
-    user_info = user_info_response.json()
+        user_info = user_info_response.json()
     email = user_info.get('email')
-    name = user_info.get('name')
-    google_id = user_info.get('id')
+        name = user_info.get('name')
+        google_id = user_info.get('id')
 
-    if not email:
-        return jsonify({'error': 'ไม่สามารถดึงอีเมลจาก Google ได้'}), 400
+        if not email:
+            return jsonify({'error': 'ไม่สามารถดึงอีเมลจาก Google ได้'}), 400
 
-    conn = get_db_connection()
-    if conn:
-        try:
-            cur = conn.cursor()
+        conn = get_db_connection()
+        if conn:
+            try:
+                cur = conn.cursor()
 
-            # Check if user exists
-            cur.execute("SELECT id, username FROM users WHERE email = %s", (email,))
-            existing_user = cur.fetchone()
+                # Check if user exists
+                cur.execute("SELECT id, username FROM users WHERE email = %s", (email,))
+                existing_user = cur.fetchone()
 
-            if existing_user:
-                # User exists, log them in
-                user_id, username = existing_user
-                session['user_id'] = user_id
-                session['username'] = username
-                session['email'] = email
+                if existing_user:
+                    # User exists, log them in
+                    user_id, username = existing_user
+                    session['user_id'] = user_id
+                    session['username'] = username
+                    session['email'] = email
 
-                cur.close()
-                return_db_connection(conn)
-                return redirect('/profile')
-            else:
-                # Create new user
-                username = name or email.split('@')[0]
+                    cur.close()
+                    return_db_connection(conn)
+                    return redirect('/profile')
+                else:
+                    # Create new user
+                    username = name or email.split('@')[0]
 
-                # Make sure username is unique
-                base_username = username
-                counter = 1
-                while True:
-                    cur.execute("SELECT id FROM users WHERE username = %s", (username,))
-                    if not cur.fetchone():
-                        break
-                    username = f"{base_username}_{counter}"
-                    counter += 1
+                    # Make sure username is unique
+                    base_username = username
+                    counter = 1
+                    while True:
+                        cur.execute("SELECT id FROM users WHERE username = %s", (username,))
+                        if not cur.fetchone():
+                            break
+                        username = f"{base_username}_{counter}"
+                        counter += 1
 
-                # Generate referral code
-                referral_code = secrets.token_urlsafe(8)
+                    # Generate referral code
+                    referral_code = secrets.token_urlsafe(8)
 
-                # Create user account
-                cur.execute("""
-                    INSERT INTO users (username, email, password_hash, is_consumer, is_verified, 
-                                     referral_code, is_approved, created_at)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, NOW())
-                    RETURNING id
-                """, (username, email, '', True, True, referral_code, True))
+                    # Create user account
+                    cur.execute("""
+                        INSERT INTO users (username, email, password_hash, is_consumer, is_verified, 
+                                         referral_code, is_approved, created_at)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, NOW())
+                        RETURNING id
+                    """, (username, email, '', True, True, referral_code, True))
 
-                user_id = cur.fetchone()[0]
-                conn.commit()
+                    user_id = cur.fetchone()[0]
+                    conn.commit()
 
-                # Log them in
-                session['user_id'] = user_id
-                session['username'] = username
-                session['email'] = email
+                    # Log them in
+                    session['user_id'] = user_id
+                    session['username'] = username
+                    session['email'] = email
 
-                cur.close()
-                return_db_connection(conn)
-                return redirect('/profile')
+                    cur.close()
+                    return_db_connection(conn)
+                    return redirect('/profile')
 
-        except Exception as e:
-            if conn:
-                conn.rollback()
-            print(f"Error in oauth2callback: {e}")
-            return jsonify({'error': 'เกิดข้อผิดพลาดในการสร้างบัญชี'}), 500
-        finally:
-            if cur:
-                cur.close()
-            if conn:
-                return_db_connection(conn)
+            except Exception as e:
+                if conn:
+                    conn.rollback()
+                print(f"Error in oauth2callback: {e}")
+                return jsonify({'error': 'เกิดข้อผิดพลาดในการสร้างบัญชี'}), 500
+            finally:
+                if cur:
+                    cur.close()
+                if conn:
+                    return_db_connection(conn)
 
-    return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+    except Exception as e:
+        print(f"OAuth callback error: {e}")
+        return jsonify({'error': 'เกิดข้อผิดพลาดในการเข้าสู่ระบบด้วย Google'}), 500
 
 @app.route('/verify_email/<token>')
 def verify_email(token):

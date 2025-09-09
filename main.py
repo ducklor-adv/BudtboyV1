@@ -24,21 +24,31 @@ GOOGLE_OAUTH_CONFIG = {
         "client_secret": os.environ.get('GOOGLE_CLIENT_SECRET'),
         "auth_uri": "https://accounts.google.com/o/oauth2/auth",
         "token_uri": "https://oauth2.googleapis.com/token",
-        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs"
+        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+        "redirect_uris": ["https://budtboy.replit.app/oauth2callback"]
     }
 }
 
 # Initialize OAuth flow if credentials are available
 oauth_flow = None
-if GOOGLE_OAUTH_CONFIG["web"]["client_id"] and GOOGLE_OAUTH_CONFIG["web"]["client_secret"]:
-    oauth_flow = google_auth_oauthlib.flow.Flow.from_client_config(
-        GOOGLE_OAUTH_CONFIG,
-        scopes=[
-            "https://www.googleapis.com/auth/userinfo.email",
-            "openid", 
-            "https://www.googleapis.com/auth/userinfo.profile"
-        ]
-    )
+try:
+    if GOOGLE_OAUTH_CONFIG["web"]["client_id"] and GOOGLE_OAUTH_CONFIG["web"]["client_secret"]:
+        oauth_flow = google_auth_oauthlib.flow.Flow.from_client_config(
+            GOOGLE_OAUTH_CONFIG,
+            scopes=[
+                "https://www.googleapis.com/auth/userinfo.email",
+                "openid", 
+                "https://www.googleapis.com/auth/userinfo.profile"
+            ]
+        )
+        # Set the redirect URI
+        oauth_flow.redirect_uri = "https://budtboy.replit.app/oauth2callback"
+        print("Google OAuth initialized successfully")
+    else:
+        print("Warning: Google OAuth credentials not found in environment variables")
+except Exception as e:
+    print(f"Error initializing Google OAuth: {e}")
+    oauth_flow = None
 
 # Email configuration - using environment variables with fallback for testing
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
@@ -2099,31 +2109,36 @@ def reset_password():
 def signin():
     """Initialize Google OAuth signin"""
     if not oauth_flow:
-        return jsonify({'error': 'Google OAuth ไม่ได้ถูกตั้งค่า'}), 500
+        return redirect('/auth?error=oauth_not_configured')
 
     try:
-        # Set redirect URI to match your Google Console settings
-        redirect_uri = url_for('oauth2callback', _external=True)
+        # Check if we have valid credentials
+        if not GOOGLE_OAUTH_CONFIG["web"]["client_id"]:
+            return redirect('/auth?error=missing_client_id')
         
-        # Force https for production
-        if redirect_uri.startswith('http://'):
-            redirect_uri = redirect_uri.replace('http://', 'https://')
+        if not GOOGLE_OAUTH_CONFIG["web"]["client_secret"]:
+            return redirect('/auth?error=missing_client_secret')
         
-        # For Replit, make sure we use the correct domain
-        if 'budtboy.replit.app' not in redirect_uri:
-            redirect_uri = 'https://budtboy.replit.app/oauth2callback'
+        # Set redirect URI - always use HTTPS for Replit
+        redirect_uri = 'https://budtboy.replit.app/oauth2callback'
+        oauth_flow.redirect_uri = redirect_uri
         
         print(f"OAuth redirect URI: {redirect_uri}")
         
-        oauth_flow.redirect_uri = redirect_uri
-        authorization_url, state = oauth_flow.authorization_url()
+        # Generate authorization URL
+        authorization_url, state = oauth_flow.authorization_url(
+            access_type='offline',
+            include_granted_scopes='true'
+        )
+        
         session['state'] = state
+        print(f"Generated authorization URL: {authorization_url}")
         
         return redirect(authorization_url)
         
     except Exception as e:
         print(f"Error in signin: {e}")
-        return f"Error: {str(e)}", 500
+        return redirect(f'/auth?error=oauth_error&message={str(e)}')
 
 @app.route('/oauth2callback')
 def oauth2callback():

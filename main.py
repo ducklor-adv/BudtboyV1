@@ -10,8 +10,35 @@ import secrets
 import bcrypt
 import threading
 import time
+import json
+import google_auth_oauthlib.flow
+import google.oauth2.credentials
+import requests
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'budtboy-secret-key-2024')
+
+# Google OAuth configuration
+GOOGLE_OAUTH_CONFIG = {
+    "web": {
+        "client_id": os.environ.get('GOOGLE_CLIENT_ID'),
+        "client_secret": os.environ.get('GOOGLE_CLIENT_SECRET'),
+        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+        "token_uri": "https://oauth2.googleapis.com/token",
+        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs"
+    }
+}
+
+# Initialize OAuth flow if credentials are available
+oauth_flow = None
+if GOOGLE_OAUTH_CONFIG["web"]["client_id"] and GOOGLE_OAUTH_CONFIG["web"]["client_secret"]:
+    oauth_flow = google_auth_oauthlib.flow.Flow.from_client_config(
+        GOOGLE_OAUTH_CONFIG,
+        scopes=[
+            "https://www.googleapis.com/auth/userinfo.email",
+            "openid", 
+            "https://www.googleapis.com/auth/userinfo.profile"
+        ]
+    )
 
 # Email configuration - using environment variables with fallback for testing
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
@@ -2067,6 +2094,119 @@ def reset_password():
             return_db_connection(conn)
     else:
         return jsonify({'success': False, 'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+@app.route('/signin')
+def signin():
+    """Initialize Google OAuth signin"""
+    if not oauth_flow:
+        return jsonify({'error': 'Google OAuth ไม่ได้ถูกตั้งค่า'}), 500
+    
+    # Set redirect URI to match your Google Console settings
+    oauth_flow.redirect_uri = url_for('oauth2callback', _external=True)
+    authorization_url, state = oauth_flow.authorization_url()
+    session['state'] = state
+    return redirect(authorization_url)
+
+@app.route('/oauth2callback')
+def oauth2callback():
+    """Handle Google OAuth callback"""
+    if not oauth_flow:
+        return jsonify({'error': 'Google OAuth ไม่ได้ถูกตั้งค่า'}), 500
+    
+    # Verify state parameter
+    if 'state' not in session or request.args.get('state') != session['state']:
+        return jsonify({'error': 'Invalid state parameter'}), 400
+    
+    # Exchange authorization code for access token
+    oauth_flow.redirect_uri = url_for('oauth2callback', _external=True)
+    oauth_flow.fetch_token(authorization_response=request.url)
+    
+    # Get user info from Google
+    credentials = oauth_flow.credentials
+    user_info_response = requests.get(
+        'https://www.googleapis.com/oauth2/v1/userinfo',
+        headers={'Authorization': f'Bearer {credentials.token}'}
+    )
+    
+    if user_info_response.status_code != 200:
+        return jsonify({'error': 'ไม่สามารถดึงข้อมูลผู้ใช้จาก Google ได้'}), 400
+    
+    user_info = user_info_response.json()
+    email = user_info.get('email')
+    name = user_info.get('name')
+    google_id = user_info.get('id')
+    
+    if not email:
+        return jsonify({'error': 'ไม่สามารถดึงอีเมลจาก Google ได้'}), 400
+    
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            
+            # Check if user exists
+            cur.execute("SELECT id, username FROM users WHERE email = %s", (email,))
+            existing_user = cur.fetchone()
+            
+            if existing_user:
+                # User exists, log them in
+                user_id, username = existing_user
+                session['user_id'] = user_id
+                session['username'] = username
+                session['email'] = email
+                
+                cur.close()
+                return_db_connection(conn)
+                return redirect('/profile')
+            else:
+                # Create new user
+                username = name or email.split('@')[0]
+                
+                # Make sure username is unique
+                base_username = username
+                counter = 1
+                while True:
+                    cur.execute("SELECT id FROM users WHERE username = %s", (username,))
+                    if not cur.fetchone():
+                        break
+                    username = f"{base_username}_{counter}"
+                    counter += 1
+                
+                # Generate referral code
+                referral_code = secrets.token_urlsafe(8)
+                
+                # Create user account
+                cur.execute("""
+                    INSERT INTO users (username, email, password_hash, is_consumer, is_verified, 
+                                     referral_code, is_approved, created_at)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, NOW())
+                    RETURNING id
+                """, (username, email, '', True, True, referral_code, True))
+                
+                user_id = cur.fetchone()[0]
+                conn.commit()
+                
+                # Log them in
+                session['user_id'] = user_id
+                session['username'] = username
+                session['email'] = email
+                
+                cur.close()
+                return_db_connection(conn)
+                return redirect('/profile')
+                
+        except Exception as e:
+            if conn:
+                conn.rollback()
+            print(f"Error in oauth2callback: {e}")
+            return jsonify({'error': 'เกิดข้อผิดพลาดในการสร้างบัญชี'}), 500
+        finally:
+            if cur:
+                cur.close()
+            if conn:
+                return_db_connection(conn)
+    
+    return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
 @app.route('/verify_email/<token>')
 def verify_email(token):

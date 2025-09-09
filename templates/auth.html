@@ -116,11 +116,19 @@
             color: #999;
         }
         .divider::before {
-            display: none;
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #e0e0e0;
         }
         .divider span {
             background: white;
             padding: 0 15px;
+            position: relative;
+            z-index: 1;
         }
         .guest-button {
             width: 100%;
@@ -223,6 +231,15 @@
             </div>
             <button type="submit" class="auth-button">🔑 เข้าสู่ระบบ</button>
             
+            <div class="divider">
+                <span>หรือ</span>
+            </div>
+            
+            <a href="/signin" class="guest-button" style="display: block; text-decoration: none; color: #666; text-align: center;">
+                <img src="https://developers.google.com/identity/images/g-logo.png" style="width: 18px; height: 18px; margin-right: 8px; vertical-align: middle;">
+                เข้าสู่ระบบด้วย Google
+            </a>
+            
             <div style="text-align: center; margin-top: 15px;">
                 <a href="/forgot-password" style="color: #666; text-decoration: none; font-size: 14px; transition: color 0.3s;">
                     ลืมรหัสผ่าน?
@@ -254,6 +271,15 @@
                 <div id="passwordStrength" style="margin-top: 5px; font-size: 12px;"></div>
             </div>
             <button type="submit" class="auth-button">🎯 สมัครสมาชิก</button>
+            
+            <div class="divider">
+                <span>หรือ</span>
+            </div>
+            
+            <a href="/signin" class="guest-button" style="display: block; text-decoration: none; color: #666; text-align: center;">
+                <img src="https://developers.google.com/identity/images/g-logo.png" style="width: 18px; height: 18px; margin-right: 8px; vertical-align: middle;">
+                สมัครด้วย Google
+            </a>
         </form>
 
         <div id="message"></div>

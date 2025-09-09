@@ -11,6 +11,10 @@
             margin: 0;
             padding: 20px;
             min-height: 100vh;
+            /* ปรับแต่งการแสดงผลฟอนต์ให้คมชัด */
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
         }
 
         .container {
@@ -20,6 +24,10 @@
             border-radius: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             overflow: hidden;
+            /* ปรับแต่งสำหรับการจับภาพคุณภาพสูง */
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
         }
 
         .header {
@@ -2238,14 +2246,20 @@
 
                     html2canvas(container, {
                         backgroundColor: '#ffffff',
-                        scale: isMobile ? 1 : 2,
+                        scale: isMobile ? 2 : 4, // เพิ่มความละเอียดสำหรับมือถือเป็น 2x และ PC เป็น 4x
                         useCORS: true,
                         allowTaint: false,
                         scrollX: 0,
                         scrollY: 0,
                         width: container.scrollWidth,
                         height: container.scrollHeight,
-                        logging: true
+                        logging: true,
+                        quality: 1.0, // คุณภาพสูงสุด
+                        removeContainer: true,
+                        ignoreElements: function(element) {
+                            // ละเว้น element ที่ไม่จำเป็น เช่น scrollbar
+                            return element.classList.contains('no-print');
+                        }
                     }).then(canvas => {
                         console.log('Canvas created successfully');
 
@@ -2269,7 +2283,7 @@
 
                         if (isMobile) {
                             // สำหรับมือถือ: สร้างรูปภาพและแสดงแบบ Modal พร้อมลิงก์ดาวน์โหลด
-                            const imageDataUrl = canvas.toDataURL('image/png', 0.9);
+                            const imageDataUrl = canvas.toDataURL('image/png', 1.0); // คุณภาพสูงสุด
 
                             // ลบ Modal เก่าถ้ามี
                             const existingModal = document.getElementById('mobileImageModal');
@@ -2407,7 +2421,7 @@
                             // สำหรับ PC: ใช้วิธีเดิม
                             const link = document.createElement('a');
                             link.download = fileName;
-                            link.href = canvas.toDataURL('image/png');
+                            link.href = canvas.toDataURL('image/png', 1.0); // คุณภาพสูงสุด
 
                             document.body.appendChild(link);
                             link.click();

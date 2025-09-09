@@ -2119,16 +2119,20 @@ def signin():
         if not GOOGLE_OAUTH_CONFIG["web"]["client_secret"]:
             return redirect('/auth?error=missing_client_secret')
         
-        # Set redirect URI - always use HTTPS for Replit
-        redirect_uri = 'https://budtboy.replit.app/oauth2callback'
+        # Set redirect URI - use the exact URL from Google Console
+        redirect_uri = url_for('oauth2callback', _external=True)
+        if redirect_uri.startswith('http://'):
+            redirect_uri = redirect_uri.replace('http://', 'https://')
+        
         oauth_flow.redirect_uri = redirect_uri
         
         print(f"OAuth redirect URI: {redirect_uri}")
         
-        # Generate authorization URL
+        # Generate authorization URL with proper parameters
         authorization_url, state = oauth_flow.authorization_url(
             access_type='offline',
-            include_granted_scopes='true'
+            include_granted_scopes='true',
+            prompt='select_account'  # Force account selection
         )
         
         session['state'] = state
@@ -2144,15 +2148,18 @@ def signin():
 def oauth2callback():
     """Handle Google OAuth callback"""
     if not oauth_flow:
-        return jsonify({'error': 'Google OAuth ไม่ได้ถูกตั้งค่า'}), 500
+        return redirect('/auth?error=oauth_not_configured')
 
     try:
         # Verify state parameter
         if 'state' not in session or request.args.get('state') != session['state']:
-            return jsonify({'error': 'Invalid state parameter'}), 400
+            return redirect('/auth?error=invalid_state')
 
         # Set the same redirect URI as in signin
-        redirect_uri = 'https://budtboy.replit.app/oauth2callback'
+        redirect_uri = url_for('oauth2callback', _external=True)
+        if redirect_uri.startswith('http://'):
+            redirect_uri = redirect_uri.replace('http://', 'https://')
+        
         oauth_flow.redirect_uri = redirect_uri
         
         # Fix URL for HTTPS
@@ -2173,7 +2180,7 @@ def oauth2callback():
         )
 
         if user_info_response.status_code != 200:
-            return jsonify({'error': 'ไม่สามารถดึงข้อมูลผู้ใช้จาก Google ได้'}), 400
+            return redirect('/auth?error=failed_to_get_user_info')
 
         user_info = user_info_response.json()
         email = user_info.get('email')
@@ -2181,7 +2188,7 @@ def oauth2callback():
         google_id = user_info.get('id')
 
         if not email:
-            return jsonify({'error': 'ไม่สามารถดึงอีเมลจาก Google ได้'}), 400
+            return redirect('/auth?error=no_email_from_google')
 
         conn = get_db_connection()
         if conn:
@@ -2243,18 +2250,18 @@ def oauth2callback():
                 if conn:
                     conn.rollback()
                 print(f"Error in oauth2callback: {e}")
-                return jsonify({'error': 'เกิดข้อผิดพลาดในการสร้างบัญชี'}), 500
+                return redirect('/auth?error=database_error')
             finally:
                 if cur:
                     cur.close()
                 if conn:
                     return_db_connection(conn)
 
-        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+        return redirect('/auth?error=database_connection_failed')
 
     except Exception as e:
         print(f"OAuth callback error: {e}")
-        return jsonify({'error': 'เกิดข้อผิดพลาดในการเข้าสู่ระบบด้วย Google'}), 500
+        return redirect('/auth?error=oauth_callback_failed')
 
 @app.route('/verify_email/<token>')
 def verify_email(token):

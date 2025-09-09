@@ -21,11 +21,23 @@ app.secret_key = os.environ.get('SECRET_KEY', 'budtboy-secret-key-2024')
 def is_production():
     """Check if running in production deployment"""
     current_host = os.environ.get('REPL_SLUG', '')
-    return 'budtboy.replit.app' in os.environ.get('REPLIT_DEPLOYMENT', '') or os.environ.get('REPLIT_DEPLOYMENT') == 'production'
+    deployment_env = os.environ.get('REPLIT_DEPLOYMENT', '')
+    request_host = os.environ.get('HTTP_HOST', '')
+    
+    # Check multiple indicators for production
+    is_prod = (
+        'budtboy.replit.app' in deployment_env or 
+        deployment_env == 'production' or
+        'budtboy.replit.app' in request_host or
+        current_host == 'budtboy'
+    )
+    
+    print(f"🔍 Production check - REPL_SLUG: {current_host}, REPLIT_DEPLOYMENT: {deployment_env}, HTTP_HOST: {request_host}")
+    return is_prod
 
 def is_preview():
     """Check if running in preview mode"""
-    return not is_production() and 'REPLIT_DEV_DOMAIN' in os.environ
+    return not is_production() and ('REPLIT_DEV_DOMAIN' in os.environ or 'pike.replit.dev' in os.environ.get('HTTP_HOST', ''))
 
 # Fallback authentication settings
 FALLBACK_AUTH_ENABLED = is_preview()
@@ -2129,14 +2141,14 @@ def reset_password():
 @app.route('/signin')
 def signin():
     """Initialize Google OAuth signin"""
-    # Block OAuth in preview mode
-    if FALLBACK_AUTH_ENABLED:
+    # Block OAuth in preview mode only
+    if FALLBACK_AUTH_ENABLED and is_preview():
         return redirect('/auth?error=oauth_disabled_preview')
     
     if not oauth_flow:
         return redirect('/auth?error=oauth_not_configured')
 
-    # Check for CAPTCHA token in session
+    # Check for CAPTCHA token in session or URL
     captcha_token = request.args.get('captcha_token') or session.get('captcha_verified')
     
     if not captcha_token:
@@ -2148,12 +2160,10 @@ def signin():
     if not age_verified:
         return redirect('/auth?error=age_required')
 
-    # Verify CAPTCHA token (optional - for production you'd verify with Google)
-    # For demo, we'll just check if token exists
+    # Store verifications in session
     if captcha_token:
         session['captcha_verified'] = True
     
-    # Store age verification in session
     if age_verified:
         session['age_verified'] = True
 
@@ -2165,19 +2175,13 @@ def signin():
         if not GOOGLE_OAUTH_CONFIG["web"]["client_secret"]:
             return redirect('/auth?error=missing_client_secret')
         
-        # Use current host for development, production URL for production
-        current_host = request.host
-        if 'budtboy.replit.app' in current_host:
-            # Production environment
-            redirect_uri = 'https://budtboy.replit.app/oauth2callback'
-        else:
-            # Development environment - use current host
-            redirect_uri = f'https://{current_host}/oauth2callback'
-        
+        # Always use production URL for OAuth callback to avoid redirect issues
+        redirect_uri = 'https://budtboy.replit.app/oauth2callback'
         oauth_flow.redirect_uri = redirect_uri
         
         print(f"🔧 OAuth redirect URI set to: {redirect_uri}")
-        print(f"🌐 Current request host: {current_host}")
+        print(f"🌐 Current request host: {request.host}")
+        print(f"🔑 Environment: {'Production' if is_production() else 'Preview'}")
         
         # Generate authorization URL with proper parameters
         authorization_url, state = oauth_flow.authorization_url(
@@ -2207,29 +2211,27 @@ def oauth2callback():
             print(f"❌ State mismatch - Session: {session.get('state')}, Request: {request.args.get('state')}")
             return redirect('/auth?error=invalid_state')
 
-        # Use same logic as signin for redirect URI
-        current_host = request.host
-        if 'budtboy.replit.app' in current_host:
-            # Production environment
-            redirect_uri = 'https://budtboy.replit.app/oauth2callback'
-        else:
-            # Development environment - use current host
-            redirect_uri = f'https://{current_host}/oauth2callback'
-        
+        # Always use production URL for OAuth callback
+        redirect_uri = 'https://budtboy.replit.app/oauth2callback'
         oauth_flow.redirect_uri = redirect_uri
         
-        # Construct callback URL properly - force HTTPS
+        # Construct callback URL properly - ensure HTTPS
         callback_url = request.url
         if callback_url.startswith('http://'):
             callback_url = callback_url.replace('http://', 'https://')
         
-        # Handle X-Forwarded-Proto header for reverse proxies
+        # Handle reverse proxy headers
         if request.headers.get('X-Forwarded-Proto') == 'https':
             callback_url = callback_url.replace('http://', 'https://')
+            
+        # Ensure callback URL uses production domain
+        if 'pike.replit.dev' in callback_url:
+            callback_url = callback_url.replace(request.host, 'budtboy.replit.app')
         
         print(f"🔧 OAuth callback URL: {callback_url}")
         print(f"🔧 OAuth redirect URI: {redirect_uri}")
-        print(f"🌐 Request host: {current_host}")
+        print(f"🌐 Request host: {request.host}")
+        print(f"🔑 Environment: {'Production' if is_production() else 'Preview'}")
         
         # Exchange authorization code for access token
         oauth_flow.fetch_token(authorization_response=callback_url)
@@ -2270,12 +2272,16 @@ def oauth2callback():
                     session['user_id'] = user_id
                     session['username'] = username
                     session['email'] = email
+                    
+                    # Clear verification session data
+                    session.pop('captcha_verified', None)
+                    session.pop('age_verified', None)
+                    session.pop('state', None)
 
                     print(f"✅ Existing user logged in: {username}")
                     cur.close()
                     return_db_connection(conn)
                     
-                    # Always redirect to profile page
                     return redirect('/profile')
                 else:
                     # Create new user
@@ -2309,12 +2315,16 @@ def oauth2callback():
                     session['user_id'] = user_id
                     session['username'] = username
                     session['email'] = email
+                    
+                    # Clear verification session data
+                    session.pop('captcha_verified', None)
+                    session.pop('age_verified', None)
+                    session.pop('state', None)
 
                     print(f"✅ New user created and logged in: {username}")
                     cur.close()
                     return_db_connection(conn)
                     
-                    # Always redirect to profile page
                     return redirect('/profile')
 
             except Exception as e:

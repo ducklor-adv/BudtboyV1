@@ -496,10 +496,13 @@
         function detectEnvironment() {
             const currentHost = window.location.host;
             const isPreview = currentHost.includes('pike.replit.dev');
-            const isProduction = currentHost.includes('budtboy.replit.app');
+            const isProduction = currentHost.includes('budtboy.replit.app') || currentHost === 'budtboy.replit.app';
             
             const googleAuthSection = document.getElementById('google-auth-section');
             const fallbackAuthSection = document.getElementById('fallback-auth-section');
+            
+            console.log(`🌐 Current host: ${currentHost}`);
+            console.log(`🔍 Is production: ${isProduction}, Is preview: ${isPreview}`);
             
             if (isProduction) {
                 // Production: Use Google OAuth
@@ -704,62 +707,72 @@
 
             // Add click handler to Google login button
             const googleLoginBtn = document.getElementById('google-login-btn');
-            googleLoginBtn.addEventListener('click', function(e) {
-                const captchaToken = sessionStorage.getItem('captcha_token');
-                const ageVerifiedStorage = sessionStorage.getItem('age_verified');
-
-                if (!captchaToken) {
+            if (googleLoginBtn) {
+                googleLoginBtn.addEventListener('click', function(e) {
                     e.preventDefault();
-                    alert('กรุณายืนยันว่าคุณเป็นมนุษย์ก่อนเข้าสู่ระบบ');
-                    return false;
-                }
+                    
+                    const captchaToken = sessionStorage.getItem('captcha_token');
+                    const ageVerifiedStorage = sessionStorage.getItem('age_verified');
+                    const currentHost = window.location.host;
+                    const isProduction = currentHost.includes('budtboy.replit.app') || currentHost === 'budtboy.replit.app';
+                    
+                    console.log(`🔍 Google login clicked - Host: ${currentHost}, Production: ${isProduction}`);
+                    console.log(`🔑 CAPTCHA token: ${!!captchaToken}, Age verified: ${!!ageVerifiedStorage}`);
 
-                if (!ageVerifiedStorage) {
-                    e.preventDefault();
-                    alert('กรุณายืนยันอายุของคุณก่อนเข้าสู่ระบบ');
-                    return false;
-                }
-
-                // Check if we're in preview environment
-                const currentHost = window.location.host;
-                const isPreview = currentHost.includes('pike.replit.dev');
-
-                if (isPreview) {
-                    // For preview environment, redirect to production for OAuth
-                    alert('กำลังเปลี่ยนเส้นทางไปยังเว็บไซต์หลักเพื่อการเข้าสู่ระบบที่ปลอดภัย...');
-                    window.open('https://budtboy.replit.app/auth', '_blank');
-                    e.preventDefault();
-                    return false;
-                }
-
-                // Send CAPTCHA token to verify endpoint
-                fetch('/api/verify_captcha', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        token: captchaToken
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Redirect to signin with both verifications
-                        window.location.href = '/signin?captcha_token=' + captchaToken + '&age_verified=true';
-                    } else {
-                        alert('การยืนยัน CAPTCHA ล้มเหลว กรุณาลองใหม่');
-                        resetVerifications();
+                    if (!captchaToken) {
+                        alert('กรุณายืนยันว่าคุณเป็นมนุษย์ก่อนเข้าสู่ระบบ');
+                        return false;
                     }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('เกิดข้อผิดพลาดในการตรวจสอบ');
-                });
 
-                e.preventDefault();
-                return false;
-            });
+                    if (!ageVerifiedStorage) {
+                        alert('กรุณายืนยันอายุของคุณก่อนเข้าสู่ระบบ');
+                        return false;
+                    }
+
+                    if (!isProduction) {
+                        // For preview environment, redirect to production for OAuth
+                        alert('กำลังเปลี่ยนเส้นทางไปยังเว็บไซต์หลักเพื่อการเข้าสู่ระบบที่ปลอดภัย...');
+                        window.open('https://budtboy.replit.app/auth', '_blank');
+                        return false;
+                    }
+
+                    // For production, verify CAPTCHA first, then redirect
+                    console.log('🚀 Production: Verifying CAPTCHA...');
+                    
+                    fetch('/api/verify_captcha', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            token: captchaToken
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            console.log('✅ CAPTCHA verified, redirecting to OAuth...');
+                            // Clear storage to prevent reuse
+                            sessionStorage.removeItem('captcha_token');
+                            sessionStorage.removeItem('age_verified');
+                            
+                            // Redirect to signin with both verifications
+                            window.location.href = `/signin?captcha_token=${captchaToken}&age_verified=true`;
+                        } else {
+                            console.error('❌ CAPTCHA verification failed:', data.error);
+                            alert('การยืนยัน CAPTCHA ล้มเหลว กรุณาลองใหม่');
+                            resetVerifications();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('❌ Error verifying CAPTCHA:', error);
+                        alert('เกิดข้อผิดพลาดในการตรวจสอบ กรุณาลองใหม่');
+                        resetVerifications();
+                    });
+
+                    return false;
+                });
+            }
         });
 
         // Function to reset all verifications

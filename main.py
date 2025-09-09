@@ -286,7 +286,7 @@ def create_tables():
             # Create password reset table
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS password_resets (
-                    id SERIAL PRIMARYKEY,
+                    id SERIAL PRIMARY KEY,
                     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE UNIQUE,
                     token VARCHAR(128) UNIQUE NOT NULL,
                     expires_at TIMESTAMP NOT NULL,
@@ -2101,23 +2101,29 @@ def signin():
     if not oauth_flow:
         return jsonify({'error': 'Google OAuth ไม่ได้ถูกตั้งค่า'}), 500
 
-    # Set redirect URI to match your Google Console settings
-    # Convert http to https for Replit deployment
-    redirect_uri = url_for('oauth2callback', _external=True)
-    if redirect_uri.startswith('http://'):
-        redirect_uri = redirect_uri.replace('http://', 'https://')
-
-    # Ensure proper Replit URL format
-    if 'replit.app' not in redirect_uri and 'replit.dev' not in redirect_uri:
-        # Get the actual Replit URL from environment or headers
-        host = request.headers.get('X-Forwarded-Host') or request.headers.get('Host')
-        if host:
-            redirect_uri = f"https://{host}/oauth2callback"
-
-    oauth_flow.redirect_uri = redirect_uri
-    authorization_url, state = oauth_flow.authorization_url()
-    session['state'] = state
-    return redirect(authorization_url)
+    try:
+        # Set redirect URI to match your Google Console settings
+        redirect_uri = url_for('oauth2callback', _external=True)
+        
+        # Force https for production
+        if redirect_uri.startswith('http://'):
+            redirect_uri = redirect_uri.replace('http://', 'https://')
+        
+        # For Replit, make sure we use the correct domain
+        if 'budtboy.replit.app' not in redirect_uri:
+            redirect_uri = 'https://budtboy.replit.app/oauth2callback'
+        
+        print(f"OAuth redirect URI: {redirect_uri}")
+        
+        oauth_flow.redirect_uri = redirect_uri
+        authorization_url, state = oauth_flow.authorization_url()
+        session['state'] = state
+        
+        return redirect(authorization_url)
+        
+    except Exception as e:
+        print(f"Error in signin: {e}")
+        return f"Error: {str(e)}", 500
 
 @app.route('/oauth2callback')
 def oauth2callback():
@@ -2125,13 +2131,24 @@ def oauth2callback():
     if not oauth_flow:
         return jsonify({'error': 'Google OAuth ไม่ได้ถูกตั้งค่า'}), 500
 
-    # Verify state parameter
-    if 'state' not in session or request.args.get('state') != session['state']:
-        return jsonify({'error': 'Invalid state parameter'}), 400
+    try:
+        # Verify state parameter
+        if 'state' not in session or request.args.get('state') != session['state']:
+            return jsonify({'error': 'Invalid state parameter'}), 400
 
-    # Exchange authorization code for access token
-    oauth_flow.redirect_uri = url_for('oauth2callback', _external=True)
-    oauth_flow.fetch_token(authorization_response=request.url)
+        # Set the same redirect URI as in signin
+        redirect_uri = 'https://budtboy.replit.app/oauth2callback'
+        oauth_flow.redirect_uri = redirect_uri
+        
+        # Fix URL for HTTPS
+        callback_url = request.url
+        if callback_url.startswith('http://'):
+            callback_url = callback_url.replace('http://', 'https://')
+        
+        print(f"OAuth callback URL: {callback_url}")
+        
+        # Exchange authorization code for access token
+        oauth_flow.fetch_token(authorization_response=callback_url)
 
     # Get user info from Google
     credentials = oauth_flow.credentials

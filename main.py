@@ -2161,7 +2161,7 @@ def oauth2callback():
             return jsonify({'error': 'ไม่สามารถดึงข้อมูลผู้ใช้จาก Google ได้'}), 400
 
         user_info = user_info_response.json()
-    email = user_info.get('email')
+        email = user_info.get('email')
         name = user_info.get('name')
         google_id = user_info.get('id')
 

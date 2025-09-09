@@ -41,8 +41,7 @@ try:
                 "https://www.googleapis.com/auth/userinfo.profile"
             ]
         )
-        # Set the redirect URI
-        oauth_flow.redirect_uri = "https://budtboy.replit.app/oauth2callback"
+        # Dynamic redirect URI - will be set in signin route
         print("Google OAuth initialized successfully")
     else:
         print("Warning: Google OAuth credentials not found in environment variables")

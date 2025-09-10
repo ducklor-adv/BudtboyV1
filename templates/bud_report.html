@@ -1003,37 +1003,7 @@
         .contact-link.other { background: #f3e5f5; color: #9c27b0; }
         .contact-link.other:hover { background: #9c27b0; color: white; }
 
-        .verification-card {
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            border-left: 4px solid #ffc107;
-        }
-
-        .verification-card.verified {
-            border-left-color: #28a745;
-            background: linear-gradient(135deg, #f8fff9 0%, #f0f8f0 100%);
-        }
-
-        .verification-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .verification-item {
-            font-size: 16px;
-            color: #666;
-            margin-bottom: 8px;
-            line-height: 1.4;
-        }
-
-        .verification-item:last-child {
-            margin-bottom: 0;
-        }
+        
 
         @media (max-width: 768px) {
             .video-modal {
@@ -1087,21 +1057,7 @@
                 border-radius: 15px;
             }
 
-            .verification-card {
-                padding: 15px;
-                margin-bottom: 12px;
-                border-radius: 12px;
-            }
-
-            .verification-title {
-                font-size: 16px;
-                margin-bottom: 8px;
-            }
-
-            .verification-item {
-                font-size: 14px;
-                margin-bottom: 6px;
-            }
+            
 
             .container {
                 margin: 0;
@@ -1508,9 +1464,7 @@
                 <a href="#images" class="nav-item" onclick="scrollToSection('images')">
                     📸 รูปภาพ
                 </a>
-                <a href="#verification" class="nav-item" onclick="scrollToSection('verification')">
-                    🏆 การตรวจสอบ
-                </a>
+                
             </div>
         </div>
 
@@ -1560,13 +1514,7 @@
                     </div>
                 </div>
 
-                <!-- การตรวจสอบและใบรับรอง -->
-                <div class="section" id="verification">
-                    <div class="section-title">🏆 การตรวจสอบและใบรับรอง</div>
-                    <div id="verificationInfo">
-                        <!-- Verification info will be populated here -->
-                    </div>
-                </div>
+                
 
                 <div class="actions">
                     <a href="#" class="action-btn" id="writeReviewBtn">⭐ เขียนรีวิว</a>
@@ -1863,8 +1811,7 @@
                 // Display components with individual error handling
                 const components = [
                     { name: 'Bud images', func: () => displayBudImages(bud) },
-                    { name: 'Bud info', func: () => displayAllBudInfo(bud) },
-                    { name: 'Verification info', func: () => displayVerificationInfo(bud) }
+                    { name: 'Bud info', func: () => displayAllBudInfo(bud) }
                 ];
 
                 components.forEach(component => {
@@ -2349,14 +2296,7 @@
                         { label: 'Terpene อันดับ 3', value: bud.top_terpenes_3 }
                     ]
                 },
-                {
-                    title: '🏆 การตรวจสอบและใบรับรอง',
-                    items: [
-                        { label: 'Lab test', value: bud.lab_test_name },
-                        { label: 'Test type', value: bud.test_type },
-                        { label: 'ผู้ปลูกที่ได้รับการรับรอง', value: bud.grower_license_verified ? 'ใช่' : 'ไม่ได้รับการรับรอง' }
-                    ]
-                },
+                
                 {
                     title: '💭 ผลกระทบและการใช้งาน',
                     items: [
@@ -2893,44 +2833,7 @@
             }
         }
 
-        function displayVerificationInfo(bud) {
-            const verificationInfo = document.getElementById('verificationInfo');
-
-            let verificationHtml = '';
-
-            // Lab test information
-            if (bud.lab_test_name || bud.test_type) {
-                verificationHtml += `
-                    <div class="verification-card">
-                        <div class="verification-title">🔬 การตรวจสอบในห้องแล็บ</div>
-                        ${bud.lab_test_name ? `<div class="verification-item"><strong>สถานที่ตรวจ:</strong> ${bud.lab_test_name}</div>` : ''}
-                        ${bud.test_type ? `<div class="verification-item"><strong>วิธีการตรวจ:</strong> ${bud.test_type}</div>` : ''}
-                    </div>
-                `;
-            }
-
-            // License verification
-            if (bud.grower_license_verified) {
-                verificationHtml += `
-                    <div class="verification-card verified">
-                        <div class="verification-title">✅ ผู้ปลูกที่ได้รับการรับรอง</div>
-                        <div class="verification-item">ผู้ปลูกได้รับการตรวจสอบและยืนยันความถูกต้องแล้ว</div>
-                    </div>
-                `;
-            }
-
-            // Fallback if no verification info is present
-            if (!verificationHtml) {
-                verificationHtml = `
-                    <div class="verification-card">
-                        <div class="verification-title">ℹ️ ข้อมูลการตรวจสอบ</div>
-                        <div class="verification-item">ยังไม่มีข้อมูลการตรวจสอบในห้องแล็บ</div>
-                    </div>
-                `;
-            }
-
-            verificationInfo.innerHTML = verificationHtml;
-        }
+        
     </script>
 </body>
 </html>

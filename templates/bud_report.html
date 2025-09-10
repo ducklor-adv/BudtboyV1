@@ -2293,27 +2293,21 @@
                         { label: 'เวลาที่แนะนำ', value: bud.recommended_time },
                         { 
                             label: 'Terpene อันดับ 1', 
-                            value: (() => {
-                                if (!bud.top_terpenes_1) return null;
-                                const percentage = bud.terpene_1_percentage || bud.terpene_1_percent || bud.percentage_1;
-                                return percentage ? `${bud.top_terpenes_1} (${percentage}%)` : bud.top_terpenes_1;
-                            })()
+                            value: bud.top_terpenes_1 && bud.terpene_1_percentage ? 
+                                `${bud.top_terpenes_1} (${bud.terpene_1_percentage}%)` : 
+                                bud.top_terpenes_1 
                         },
                         { 
                             label: 'Terpene อันดับ 2', 
-                            value: (() => {
-                                if (!bud.top_terpenes_2) return null;
-                                const percentage = bud.terpene_2_percentage || bud.terpene_2_percent || bud.percentage_2;
-                                return percentage ? `${bud.top_terpenes_2} (${percentage}%)` : bud.top_terpenes_2;
-                            })()
+                            value: bud.top_terpenes_2 && bud.terpene_2_percentage ? 
+                                `${bud.top_terpenes_2} (${bud.terpene_2_percentage}%)` : 
+                                bud.top_terpenes_2 
                         },
                         { 
                             label: 'Terpene อันดับ 3', 
-                            value: (() => {
-                                if (!bud.top_terpenes_3) return null;
-                                const percentage = bud.terpene_3_percentage || bud.terpene_3_percent || bud.percentage_3;
-                                return percentage ? `${bud.top_terpenes_3} (${percentage}%)` : bud.top_terpenes_3;
-                            })()
+                            value: bud.top_terpenes_3 && bud.terpene_3_percentage ? 
+                                `${bud.top_terpenes_3} (${bud.terpene_3_percentage}%)` : 
+                                bud.top_terpenes_3 
                         }
                     ]
                 },

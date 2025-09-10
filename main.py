@@ -4292,63 +4292,7 @@ def join_activity(activity_id):
     else:
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
-@app.route('/api/admin/activities', methods=['POST'])
-def admin_create_activity():
-    """Admin create new activity"""
-    if not is_admin():
-        return jsonify({'error': 'Unauthorized'}), 401
 
-    data = request.get_json()
-    required_fields = ['name', 'start_registration_date', 'end_registration_date']
-    
-    for field in required_fields:
-        if not data.get(field):
-            return jsonify({'error': f'กรุณากรอก {field}'}), 400
-
-    conn = get_db_connection()
-    if conn:
-        try:
-            cur = conn.cursor()
-
-            cur.execute("""
-                INSERT INTO activities (
-                    name, description, start_registration_date, end_registration_date,
-                    judging_criteria, max_participants, first_prize_amount, 
-                    second_prize_amount, third_prize_amount, status, created_by
-                ) VALUES (
-                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
-                ) RETURNING id
-            """, (
-                data.get('name'),
-                data.get('description'),
-                data.get('start_registration_date'),
-                data.get('end_registration_date'),
-                data.get('judging_criteria'),
-                data.get('max_participants', 0),
-                data.get('first_prize_amount', 0),
-                data.get('second_prize_amount', 0),
-                data.get('third_prize_amount', 0),
-                data.get('status', 'upcoming'),
-                session.get('user_id')
-            ))
-
-            activity_id = cur.fetchone()[0]
-            conn.commit()
-
-            return jsonify({
-                'success': True,
-                'message': 'สร้างกิจกรรมสำเร็จ',
-                'activity_id': activity_id
-            }), 201
-
-        except Exception as e:
-            conn.rollback()
-            return jsonify({'error': str(e)}), 500
-        finally:
-            cur.close()
-            return_db_connection(conn)
-    else:
-        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
 @app.route('/api/admin/activities/<int:activity_id>', methods=['PUT'])
 def admin_update_activity(activity_id):

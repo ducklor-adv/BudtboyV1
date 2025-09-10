@@ -627,7 +627,7 @@
 
     <script>
         // Admin Reviews Manager
-        const AdminReviews = {
+        window.AdminReviews = class AdminReviews {
             state: {
                 isLoading: false,
                 reviewsData: [],
@@ -738,10 +738,10 @@
                             <td>${new Date(review.created_at).toLocaleDateString('th-TH')}</td>
                             <td>
                                 <div class="action-cell">
-                                    <button class="btn btn-primary btn-sm" onclick="AdminReviews.viewReview(${review.id})">
+                                    <button class="btn btn-primary btn-sm" onclick="window.adminReviewsInstance.viewReview(${review.id})">
                                         👁️ ดู
                                     </button>
-                                    <button class="btn btn-danger btn-sm" onclick="AdminReviews.deleteReview(${review.id})">
+                                    <button class="btn btn-danger btn-sm" onclick="window.adminReviewsInstance.deleteReview(${review.id})">
                                         🗑️ ลบ
                                     </button>
                                 </div>
@@ -913,26 +913,34 @@
 
         // Global functions
         function retryLoad() {
-            AdminReviews.loadReviewsData();
+            window.adminReviewsInstance.loadReviewsData();
         }
 
         function searchReviews() {
-            AdminReviews.searchReviews();
+            window.adminReviewsInstance.searchReviews();
         }
 
         function clearFilters() {
-            AdminReviews.clearFilters();
+            window.adminReviewsInstance.clearFilters();
         }
 
         function exportData() {
-            AdminReviews.exportData();
+            window.adminReviewsInstance.exportData();
         }
 
         // Initialize when DOM is ready
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => AdminReviews.init());
+            document.addEventListener('DOMContentLoaded', () => {
+                if (!window.adminReviewsInstance) {
+                    window.adminReviewsInstance = new window.AdminReviews();
+                }
+                window.adminReviewsInstance.init();
+            });
         } else {
-            AdminReviews.init();
+            if (!window.adminReviewsInstance) {
+                window.adminReviewsInstance = new window.AdminReviews();
+            }
+            window.adminReviewsInstance.init();
         }
 
         // Add search on Enter key
@@ -1555,7 +1563,7 @@
 
     <script>
         // Admin Reviews Manager
-        const AdminReviews = {
+        window.AdminReviews = class AdminReviews {
             state: {
                 isLoading: false,
                 reviewsData: [],
@@ -1604,7 +1612,7 @@
                 const averageRating = data.length > 0 ? 
                     (data.reduce((sum, review) => sum + (review.overall_rating || 0), 0) / data.length).toFixed(1) : 0;
                 const totalReviewers = new Set(data.map(review => review.reviewer_name).filter(name => name)).size;
-                
+
                 const currentMonth = new Date().getMonth();
                 const currentYear = new Date().getFullYear();
                 const reviewsThisMonth = data.filter(review => {
@@ -1674,10 +1682,10 @@
                             <td>${new Date(review.created_at).toLocaleDateString('th-TH')}</td>
                             <td>
                                 <div class="action-cell">
-                                    <button class="btn btn-primary btn-sm" onclick="AdminReviews.viewReview(${review.id})">
+                                    <button class="btn btn-primary btn-sm" onclick="window.adminReviewsInstance.viewReview(${review.id})">
                                         👁️ ดู
                                     </button>
-                                    <button class="btn btn-danger btn-sm" onclick="AdminReviews.deleteReview(${review.id})">
+                                    <button class="btn btn-danger btn-sm" onclick="window.adminReviewsInstance.deleteReview(${review.id})">
                                         🗑️ ลบ
                                     </button>
                                 </div>
@@ -1698,7 +1706,7 @@
                 if (hasHalfStar) {
                     stars += '☆';
                 }
-                
+
                 // Fill remaining with empty stars
                 const remaining = 5 - Math.ceil(rating);
                 for (let i = 0; i < remaining; i++) {
@@ -1728,7 +1736,7 @@
                     if (filterDate && review.created_at) {
                         const reviewDate = new Date(review.created_at);
                         const now = new Date();
-                        
+
                         switch(filterDate) {
                             case 'today':
                                 matchesDate = reviewDate.toDateString() === now.toDateString();
@@ -1864,26 +1872,34 @@
 
         // Global functions
         function retryLoad() {
-            AdminReviews.loadReviewsData();
+            window.adminReviewsInstance.loadReviewsData();
         }
 
         function searchReviews() {
-            AdminReviews.searchReviews();
+            window.adminReviewsInstance.searchReviews();
         }
 
         function clearFilters() {
-            AdminReviews.clearFilters();
+            window.adminReviewsInstance.clearFilters();
         }
 
         function exportReviews() {
-            AdminReviews.exportReviews();
+            window.adminReviewsInstance.exportReviews();
         }
 
         // Initialize when DOM is ready
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => AdminReviews.init());
+            document.addEventListener('DOMContentLoaded', () => {
+                if (!window.adminReviewsInstance) {
+                    window.adminReviewsInstance = new window.AdminReviews();
+                }
+                window.adminReviewsInstance.init();
+            });
         } else {
-            AdminReviews.init();
+            if (!window.adminReviewsInstance) {
+                window.adminReviewsInstance = new window.AdminReviews();
+            }
+            window.adminReviewsInstance.init();
         }
 
         // Add search on Enter key

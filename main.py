@@ -5165,7 +5165,9 @@ def admin_login():
         session['admin_logged_in'] = True
         session['admin_name'] = admin_name  # Always set admin name to session
 
-        print(f"Admin login successful: {admin_name}, token: {session_token[:10]}...")        return jsonify({
+        print(f"Admin login successful: {admin_name}, token: {session_token[:10]}...")
+        
+        return jsonify({
             'success': True,
             'message': message,
             'redirect': '/admin'

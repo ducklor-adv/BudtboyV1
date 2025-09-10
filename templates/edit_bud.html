@@ -1,8 +1,9 @@
+
 <!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, relevant=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>แก้ไขข้อมูลดอก - Cannabis App</title>
     <style>
         * {
@@ -743,78 +744,6 @@
             margin-top: 15px;
         }
 
-        /* Simplified Terpene Styles */
-        .terpenes-simple-container {
-            width: 100%;
-            margin-bottom: 20px;
-        }
-
-        /* Terpene Selection Grid Styles */
-        .terpene-selection-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .terpene-column {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .terpene-column label {
-            font-size: 14px;
-            font-weight: 600;
-            color: #2c5530;
-            margin-bottom: 5px;
-            text-align: center;
-        }
-
-        .terpene-select {
-            width: 100%;
-            padding: 10px 12px;
-            border: 2px solid #e9ecef;
-            border-radius: 6px;
-            font-size: 13px;
-            background: white;
-            color: #495057;
-            transition: border-color 0.3s ease;
-            min-height: 42px;
-        }
-
-        .terpene-select:focus {
-            outline: none;
-            border-color: #FF8C00;
-        }
-
-        .terpene-select option {
-            padding: 8px;
-            font-size: 13px;
-            line-height: 1.4;
-        }
-
-        .terpene-column input[type="number"] {
-            padding: 10px 12px;
-            border: 2px solid #e9ecef;
-            border-radius: 6px;
-            font-size: 14px;
-            text-align: center;
-            transition: border-color 0.3s ease;
-        }
-
-        .terpene-column input[type="number"]:focus {
-            outline: none;
-            border-color: #FF8C00;
-        }
-
-        /* Effects Table Styles */
-        .effects-table-container {
-            width: 100%;
-            overflow-x: auto;
-            margin: 20px 0;
-        }
-
         @media (max-width: 768px) {
             .form-row {
                 flex-direction: column;
@@ -857,11 +786,6 @@
             .column-title {
                 font-size: 1.1em;
                 margin-bottom: 15px;
-            }
-
-            .terpene-selection-grid {
-                grid-template-columns: 1fr;
-                gap: 15px;
             }
         }
     </style>
@@ -964,115 +888,6 @@
                                 <option value="B">B</option>
                                 <option value="C">C</option>
                             </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Certificate Information -->
-                <div class="form-section">
-                    <div class="section-title">
-                        🏆 ใบรับรอง (Certificate)
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="lab_test_name">Lab test (ชื่อสถานที่ตรวจ)</label>
-                            <input type="text" id="lab_test_name" name="lab_test_name" placeholder="เช่น Cannabis Testing Lab, Green Lab Thailand">
-                            <div class="help-text">ชื่อห้องปฏิบัติการหรือสถานที่ที่ทำการตรวจสอบ</div>
-                        </div>
-                        <div class="form-group">
-                            <label for="test_type">Test type (วิธีการตรวจ)</label>
-                            <input type="text" id="test_type" name="test_type" placeholder="เช่น HPLC, GC-MS, LC-MS/MS">
-                            <div class="help-text">วิธีการหรือเทคนิคที่ใช้ในการตรวจสอบ</div>
-                        </div>
-                    </div>
-
-                    <!-- Image Management Section -->
-                    <div class="image-upload-section">
-                        <p class="help-text">จัดการรูปภาพใบรับรอง (สูงสุด 4 รูป, ขนาดไม่เกิน 16MB ต่อรูป)</p>
-
-                        <div class="image-upload-grid">
-                            <div class="image-upload-item">
-                                <label for="certificate_image_1" class="upload-label">
-                                    <div class="upload-placeholder">
-                                        <span class="upload-icon">📷</span>
-                                        <span class="upload-text">รูปที่ 1</span>
-                                    </div>
-                                </label>
-                                <input type="file" id="certificate_image_1" name="certificate_image_1" accept="image/*" style="display: none;">
-                                <div class="image-preview" id="certificate_preview_1" style="display: none;">
-                                    <img src="" alt="Preview">
-                                    <button type="button" class="remove-image-btn" onclick="removeCertificateImage(1)">×</button>
-                                </div>
-                                <div class="current-image" id="current_certificate_1" style="display: none;">
-                                    <img src="" alt="Current Image">
-                                    <button type="button" class="remove-image-btn" onclick="removeCurrentCertificateImage(1)">×</button>
-                                    <button type="button" class="replace-image-btn" onclick="replaceCurrentCertificateImage(1)">🔄</button>
-                                </div>
-                            </div>
-
-                            <div class="image-upload-item">
-                                <label for="certificate_image_2" class="upload-label">
-                                    <div class="upload-placeholder">
-                                        <span class="upload-icon">📷</span>
-                                        <span class="upload-text">รูปที่ 2</span>
-                                    </div>
-                                </label>
-                                <input type="file" id="certificate_image_2" name="certificate_image_2" accept="image/*" style="display: none;">
-                                <div class="image-preview" id="certificate_preview_2" style="display: none;">
-                                    <img src="" alt="Preview">
-                                    <button type="button" class="remove-image-btn" onclick="removeCertificateImage(2)">×</button>
-                                </div>
-                                <div class="current-image" id="current_certificate_2" style="display: none;">
-                                    <img src="" alt="Current Image">
-                                    <button type="button" class="remove-image-btn" onclick="removeCurrentCertificateImage(2)">×</button>
-                                    <button type="button" class="replace-image-btn" onclick="replaceCurrentCertificateImage(2)">🔄</button>
-                                </div>
-                            </div>
-
-                            <div class="image-upload-item">
-                                <label for="certificate_image_3" class="upload-label">
-                                    <div class="upload-placeholder">
-                                        <span class="upload-icon">📷</span>
-                                        <span class="upload-text">รูปที่ 3</span>
-                                    </div>
-                                </label>
-                                <input type="file" id="certificate_image_3" name="certificate_image_3" accept="image/*" style="display: none;">
-                                <div class="image-preview" id="certificate_preview_3" style="display: none;">
-                                    <img src="" alt="Preview">
-                                    <button type="button" class="remove-image-btn" onclick="removeCertificateImage(3)">×</button>
-                                </div>
-                                <div class="current-image" id="current_certificate_3" style="display: none;">
-                                    <img src="" alt="Current Image">
-                                    <button type="button" class="remove-image-btn" onclick="removeCurrentCertificateImage(3)">×</button>
-                                    <button type="button" class="replace-image-btn" onclick="replaceCurrentCertificateImage(3)">🔄</button>
-                                </div>
-                            </div>
-
-                            <div class="image-upload-item">
-                                <label for="certificate_image_4" class="upload-label">
-                                    <div class="upload-placeholder">
-                                        <span class="upload-icon">📷</span>
-                                        <span class="upload-text">รูปที่ 4</span>
-                                    </div>
-                                </label>
-                                <input type="file" id="certificate_image_4" name="certificate_image_4" accept="image/*" style="display: none;">
-                                <div class="image-preview" id="certificate_preview_4" style="display: none;">
-                                    <img src="" alt="Preview">
-                                    <button type="button" class="remove-image-btn" onclick="removeCertificateImage(4)">×</button>
-                                </div>
-                                <div class="current-image" id="current_certificate_4" style="display: none;">
-                                    <img src="" alt="Current Image">
-                                    <button type="button" class="remove-image-btn" onclick="removeCurrentCertificateImage(4)">×</button>
-                                    <button type="button" class="replace-image-btn" onclick="replaceCurrentCertificateImage(4)">🔄</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="upload-actions">
-                            <button type="button" id="clearAllCertificateImagesBtn" class="btn btn-secondary" onclick="clearAllCertificateImages()">
-                                🗑️ ล้างรูปใบรับรองทั้งหมด
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -1207,366 +1022,371 @@
                         </div>
                     </div>
 
-                    <!-- Simplified Terpenes Container -->
-                    <div class="terpenes-simple-container">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="top_terpenes_1">Terpene อันดับ 1</label>
+                            <select id="top_terpenes_1" name="top_terpenes_1">
+                                <option value="">เลือก Terpene อันดับ 1</option>
+                                <option value="ไมร์ซีน (Myrcene)">ไมร์ซีน (Myrcene) - มะม่วง/สมุนไพร → ผ่อนคลาย, ง่วง</option>
+                                <option value="ลิโมนีน (Limonene)">ลิโมนีน (Limonene) - ส้ม/เลมอน → อารมณ์ดี, ต้านเครียด</option>
+                                <option value="แอลฟา‑ไพนีน (α‑Pinene)">แอลฟา‑ไพนีน (α‑Pinene) - สน → เปิดปอด, ช่วยโฟกัส</option>
+                                <option value="เบตา‑ไพนีน (β‑Pinene)">เบตา‑ไพนีน (β‑Pinene) - โรสแมรี่ → ต้านอักเสบ</option>
+                                <option value="เบตา‑คาริโอฟีลลีน (β‑Caryophyllene)">เบตา‑คาริโอฟีลลีน (β‑Caryophyllene) - พริกไทย/เผ็ด → บรรเทาปวด, ต้านอักเสบ</option>
+                                <option value="ลินาลูล (Linalool)">ลินาลูล (Linalool) - ลาเวนเดอร์ → คลายกังวล, ช่วยหลับ</option>
+                                <option value="ฮิวมูเลน (Humulene)">ฮิวมูเลน (Humulene) - ฮ็อปส์/ไม้ → ลดอยากอาหาร, ต้านอักเสบ</option>
+                                <option value="เทอร์พินอลีน (Terpinolene)">เทอร์พินอลีน (Terpinolene) - ดอกไม้/สนหวาน → กระตุ้นเบา, ต้านอนุมูลฯ</option>
+                                <option value="โอซิมีน (Ocimene)">โอซิมีน (Ocimene) - ดอกไม้หวาน → ขยายหลอดลม, ต้านไวรัส</option>
+                                <option value="ยูคาลิปตอล / 1,8‑ซิเนออล (Eucalyptol)">ยูคาลิปตอล / 1,8‑ซิเนออล (Eucalyptol) - เมนทอล/ยูคาลิปตัส → สดชื่น,ต้านจุลชีพ</option>
+                                <option value="เนโรลิดอล (Nerolidol)">เนโรลิดอล (Nerolidol) - ชาเขียว/ไม้ → ผ่อนคลายกล้ามเนื้อ</option>
+                                <option value="บิซาโบลอล (Bisabolol)">บิซาโบลอล (Bisabolol) - คาโมมายล์ → ปกป้องผิว, ต้านอักเสบ</option>
+                                <option value="ฟาร์นีซีน (Farnesene)">ฟาร์นีซีน (Farnesene) - แอปเปิ้ลเขียว → ต้านแบคทีเรีย</option>
+                                <option value="แคมฟีน (Camphene)">แคมฟีน (Camphene) - การบูรเบา → ต้านออกซิแดนต์</option>
+                                <option value="เทอร์พิโนล (Terpineol)">เทอร์พิโนล (Terpineol) - ไม้ขาว/ไพน์หวาน → ช่วยสงบใจ</option>
+                                <option value="วาลินซีน (Valencene)">วาลินซีน (Valencene) - ส้มวาเลนเซีย → ยับยั้งยุง, อารมณ์ดี</option>
+                                <option value="เจอราเนียล (Geraniol)">เจอราเนียล (Geraniol) - กุหลาบ → ต้านจุลชีพ</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="top_terpenes_2">Terpene อันดับ 2</label>
+                            <select id="top_terpenes_2" name="top_terpenes_2">
+                                <option value="">เลือก Terpene อันดับ 2</option>
+                                <option value="ไมร์ซีน (Myrcene)">ไมร์ซีน (Myrcene) - มะม่วง/สมุนไพร → ผ่อนคลาย, ง่วง</option>
+                                <option value="ลิโมนีน (Limonene)">ลิโมนีน (Limonene) - ส้ม/เลมอน → อารมณ์ดี, ต้านเครียด</option>
+                                <option value="แอลฟา‑ไพนีน (α‑Pinene)">แอลฟา‑ไพนีน (α‑Pinene) - สน → เปิดปอด, ช่วยโฟกัส</option>
+                                <option value="เบตา‑ไพนีน (β‑Pinene)">เบตา‑ไพนีน (β‑Pinene) - โรสแมรี่ → ต้านอักเสบ</option>
+                                <option value="เบตา‑คาริโอฟีลลีน (β‑Caryophyllene)">เบตา‑คาริโอฟีลลีน (β‑Caryophyllene) - พริกไทย/เผ็ด → บรรเทาปวด, ต้านอักเสบ</option>
+                                <option value="ลินาลูล (Linalool)">ลินาลูล (Linalool) - ลาเวนเดอร์ → คลายกังวล, ช่วยหลับ</option>
+                                <option value="ฮิวมูเลน (Humulene)">ฮิวมูเลน (Humulene) - ฮ็อปส์/ไม้ → ลดอยากอาหาร, ต้านอักเสบ</option>
+                                <option value="เทอร์พินอลีน (Terpinolene)">เทอร์พินอลีน (Terpinolene) - ดอกไม้/สนหวาน → กระตุ้นเบา, ต้านอนุมูลฯ</option>
+                                <option value="โอซิมีน (Ocimene)">โอซิมีน (Ocimene) - ดอกไม้หวาน → ขยายหลอดลม, ต้านไวรัส</option>
+                                <option value="ยูคาลิปตอล / 1,8‑ซิเนออล (Eucalyptol)">ยูคาลิปตอล / 1,8‑ซิเนออล (Eucalyptol) - เมนทอล/ยูคาลิปตัส → สดชื่น, ต้านจุลชีพ</option>
+                                <option value="เนโรลิดอล (Nerolidol)">เนโรลิดอล (Nerolidol) - ชาเขียว/ไม้ → ผ่อนคลายกล้ามเนื้อ</option>
+                                <option value="บิซาโบลอล (Bisabolol)">บิซาโบลอล (Bisabolol) - คาโมมายล์ → ปกป้องผิว, ต้านอักเสบ</option>
+                                <option value="ฟาร์นีซีน (Farnesene)">ฟาร์นีซีน (Farnesene) - แอปเปิ้ลเขียว → ต้านแบคทีเรีย</option>
+                                <option value="แคมฟีน (Camphene)">แคมฟีน (Camphene) - การบูรเบา → ต้านออกซิแดนต์</option>
+                                <option value="เทอร์พิโนล (Terpineol)">เทอร์พิโนล (Terpineol) - ไม้ขาว/ไพน์หวาน → ช่วยสงบใจ</option>
+                                <option value="วาลินซีน (Valencene)">วาลินซีน (Valencene) - ส้มวาเลนเซีย → ยับยั้งยุง, อารมณ์ดี</option>
+                                <option value="เจอราเนียล (Geraniol)">เจอราเนียล (Geraniol) - กุหลาบ → ต้านจุลชีพ</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="top_terpenes_3">Terpene อันดับ 3</label>
+                            <select id="top_terpenes_3" name="top_terpenes_3">
+                                <option value="">เลือก Terpene อันดับ 3</option>
+                                <option value="ไมร์ซีน (Myrcene)">ไมร์ซีน (Myrcene) - มะม่วง/สมุนไพร → ผ่อนคลาย, ง่วง</option>
+                                <option value="ลิโมนีน (Limonene)">ลิโมนีน (Limonene) - ส้ม/เลมอน → อารมณ์ดี, ต้านเครียด</option>
+                                <option value="แอลฟา‑ไพนีน (α‑Pinene)">แอลฟา‑ไพนีน (α‑Pinene) - สน → เปิดปอด, ช่วยโฟกัส</option>
+                                <option value="เบตา‑ไพนีน (β‑Pinene)">เบตา‑ไพนีน (β‑Pinene) - โรสแมรี่ → ต้านอักเสบ</option>
+                                <option value="เบตา‑คาริโอฟีลลีน (β‑Caryophyllene)">เบตา‑คาริโอฟีลลีน (β‑Caryophyllene) - พริกไทย/เผ็ด → บรรเทาปวด, ต้านอักเสบ</option>
+                                <option value="ลินาลูล (Linalool)">ลินาลูล (Linalool) - ลาเวนเดอร์ → คลายกังวล, ช่วยหลับ</option>
+                                <option value="ฮิวมูเลน (Humulene)">ฮิวมูเลน (Humulene) - ฮ็อปส์/ไม้ → ลดอยากอาหาร, ต้านอักเสบ</option>
+                                <option value="เทอร์พินอลีน (Terpinolene)">เทอร์พินอลีน (Terpinolene) - ดอกไม้/สนหวาน → กระตุ้นเบา, ต้านอนุมูลฯ</option>
+                                <option value="โอซิมีน (Ocimene)">โอซิมีน (Ocimene) - ดอกไม้หวาน → ขยายหลอดลม, ต้านไวรัส</option>
+                                <option value="ยูคาลิปตอล / 1,8‑ซิเนออล (Eucalyptol)">ยูคาลิปตอล / 1,8‑ซิเนออล (Eucalyptol) - เมนทอล/ยูคาลิปตัส → สดชื่น, ต้านจุลชีพ</option>
+                                <option value="เนโรลิดอล (Nerolidol)">เนโรลิดอล (Nerolidol) - ชาเขียว/ไม้ → ผ่อนคลายกล้ามเนื้อ</option>
+                                <option value="บิซาโบลอล (Bisabolol)">บิซาโบลอล (Bisabolol) - คาโมมายล์ → ปกป้องผิว, ต้านอักเสบ</option>
+                                <option value="ฟาร์นีซีน (Farnesene)">ฟาร์นีซีน (Farnesene) - แอปเปิ้ลเขียว → ต้านแบคทีเรีย</option>
+                                <option value="แคมฟีน (Camphene)">แคมฟีน (Camphene) - การบูรเบา → ต้านออกซิแดนต์</option>
+                                <option value="เทอร์พิโนล (Terpineol)">เทอร์พิโนล (Terpineol) - ไม้ขาว/ไพน์หวาน → ช่วยสงบใจ</option>
+                                <option value="วาลินซีน (Valencene)">วาลินซีน (Valencene) - ส้มวาเลนเซีย → ยับยั้งยุง, อารมณ์ดี</option>
+                                <option value="เจอราเนียล (Geraniol)">เจอราเนียล (Geraniol) - กุหลาบ → ต้านจุลชีพ</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Effects & Usage -->
+                <div class="form-section">
+                    <div class="section-title">
+                        ✨ ผลกระทบและการใช้งาน
+                    </div>
+
+                    <div class="effects-two-columns">
+                        <!-- Mental Effects Column -->
+                        <div class="effects-column">
+                            <h3 class="column-title">🧠 ผลกระทบต่อจิตใจ</h3>
+                            
+                            <!-- Mental Positive Effects -->
+                            <div class="form-group effects-selector">
+                                <label>😊 ผลกระทบเชิงบวก</label>
+                                <div id="selected-mental-positive" class="selected-effects">
+                                    <span class="placeholder">คลิกเพื่อเลือกผลกระทบเชิงบวก...</span>
+                                </div>
+                                <textarea id="mental_effects_positive" name="mental_effects_positive" style="display: none;"></textarea>
+                                <div class="effects-categories">
+                                    <div class="effect-options">
+                                        <button type="button" class="effect-btn" data-effect="สุขใจ">😄 สุขใจ</button>
+                                        <button type="button" class="effect-btn" data-effect="ผ่อนคลาย">😌 ผ่อนคลาย</button>
+                                        <button type="button" class="effect-btn" data-effect="สร้างสรรค์">🎨 สร้างสรรค์</button>
+                                        <button type="button" class="effect-btn" data-effect="ร่าเริง">😆 ร่าเริง</button>
+                                        <button type="button" class="effect-btn" data-effect="เบิกบาน">🤗 เบิกบาน</button>
+                                        <button type="button" class="effect-btn" data-effect="โฟกัส">🎯 โฟกัส</button>
+                                        <button type="button" class="effect-btn" data-effect="ตื่นตัว">⚡ ตื่นตัว</button>
+                                        <button type="button" class="effect-btn" data-effect="คิดลึก">🧠 คิดลึก</button>
+                                        <button type="button" class="effect-btn" data-effect="หลับง่าย">😴 หลับง่าย</button>
+                                        <button type="button" class="effect-btn" data-effect="เพลิดเพลิน">🎉 เพลิดเพลิน</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Mental Negative Effects -->
+                            <div class="form-group effects-selector">
+                                <label>😟 ผลกระทบเชิงลบ</label>
+                                <div id="selected-mental-negative" class="selected-effects">
+                                    <span class="placeholder">คลิกเพื่อเลือกผลกระทบเชิงลบ...</span>
+                                </div>
+                                <textarea id="mental_effects_negative" name="mental_effects_negative" style="display: none;"></textarea>
+                                <div class="effects-categories">
+                                    <div class="effect-options">
+                                        <button type="button" class="effect-btn negative" data-effect="วิตก">😰 วิตก</button>
+                                        <button type="button" class="effect-btn negative" data-effect="พารานอยด์">👁️ พารานอยด์</button>
+                                        <button type="button" class="effect-btn negative" data-effect="แพนิค">😱 แพนิค</button>
+                                        <button type="button" class="effect-btn negative" data-effect="สับสน">😵 สับสน</button>
+                                        <button type="button" class="effect-btn negative" data-effect="ความจำสั้น">🤔 ความจำสั้น</button>
+                                        <button type="button" class="effect-btn negative" data-effect="สมาธิหาย">🌪️ สมาธิหาย</button>
+                                        <button type="button" class="effect-btn negative" data-effect="หลอน">👻 หลอน</button>
+                                        <button type="button" class="effect-btn negative" data-effect="ง่วงหนัก">😪 ง่วงหนัก</button>
+                                        <button type="button" class="effect-btn negative" data-effect="ซึมเศร้า">😔 ซึมเศร้า</button>
+                                        <button type="button" class="effect-btn negative" data-effect="หงุดหงิด">😤 หงุดหงิด</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Physical Effects Column -->
+                        <div class="effects-column">
+                            <h3 class="column-title">💪 ผลกระทบทางร่างกาย</h3>
+                            
+                            <!-- Physical Positive Effects -->
+                            <div class="form-group effects-selector">
+                                <label>💪 ผลกระทบเชิงบวก</label>
+                                <div id="selected-physical-positive" class="selected-effects">
+                                    <span class="placeholder">คลิกเพื่อเลือกผลกระทบเชิงบวก...</span>
+                                </div>
+                                <textarea id="physical_effects_positive" name="physical_effects_positive" style="display: none;"></textarea>
+                                <div class="effects-categories">
+                                    <div class="effect-options">
+                                        <button type="button" class="effect-btn" data-effect="บรรเทาปวด">🩹 บรรเทาปวด</button>
+                                        <button type="button" class="effect-btn" data-effect="คลายกล้าม">💆 คลายกล้าม</button>
+                                        <button type="button" class="effect-btn" data-effect="ต้านอักเสบ">🛡️ ต้านอักเสบ</button>
+                                        <button type="button" class="effect-btn" data-effect="หลับง่าย">😴 หลับง่าย</button>
+                                        <button type="button" class="effect-btn" data-effect="คลายเกร็ง">🧘 คลายเกร็ง</button>
+                                        <button type="button" class="effect-btn" data-effect="ต้านคลื่นไส้">🤢 ต้านคลื่นไส้</button>
+                                        <button type="button" class="effect-btn" data-effect="กระตุ้นกิน">🍽️ กระตุ้นกิน</button>
+                                        <button type="button" class="effect-btn" data-effect="ผ่อนคลาย">😌 ผ่อนคลาย</button>
+                                        <button type="button" class="effect-btn" data-effect="สดชื่น">✨ สดชื่น</button>
+                                        <button type="button" class="effect-btn" data-effect="สุขภาพลำไส้">🫁 สุขภาพลำไส้</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Physical Negative Effects -->
+                            <div class="form-group effects-selector">
+                                <label>🤒 ผลกระทบเชิงลบ</label>
+                                <div id="selected-physical-negative" class="selected-effects">
+                                    <span class="placeholder">คลิกเพื่อเลือกผลกระทบเชิงลบ...</span>
+                                </div>
+                                <textarea id="physical_effects_negative" name="physical_effects_negative" style="display: none;"></textarea>
+                                <div class="effects-categories">
+                                    <div class="effect-options">
+                                        <button type="button" class="effect-btn negative" data-effect="ปากแห้ง">👄 ปากแห้ง</button>
+                                        <button type="button" class="effect-btn negative" data-effect="ตาแดง">👁️ ตาแดง</button>
+                                        <button type="button" class="effect-btn negative" data-effect="ตาแห้ง">🏜️ ตาแห้ง</button>
+                                        <button type="button" class="effect-btn negative" data-effect="เวียนหัว">💫 เวียนหัว</button>
+                                        <button type="button" class="effect-btn negative" data-effect="ใจเต้นเร็ว">💓 ใจเต้นเร็ว</button>
+                                        <button type="button" class="effect-btn negative" data-effect="ความดันตก">📉 ความดันตก</button>
+                                        <button type="button" class="effect-btn negative" data-effect="มือสั่น">🤲 มือสั่น</button>
+                                        <button type="button" class="effect-btn negative" data-effect="เหงื่อออก">💦 เหงื่อออก</button>
+                                        <button type="button" class="effect-btn negative" data-effect="คลื่นไส้">🤮 คลื่นไส้</button>
+                                        <button type="button" class="effect-btn negative" data-effect="ไอ/เจ็บคอ">😷 ไอ/เจ็บคอ</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="recommended_time">⏰ เวลาที่แนะนำ</label>
+                            <select id="recommended_time" name="recommended_time">
+                                <option value="">เลือกเวลา</option>
+                                <option value="กลางวัน">☀️ กลางวัน</option>
+                                <option value="กลางคืน">🌙 กลางคืน</option>
+                                <option value="ตลอดวัน">🌅 ตลอดวัน</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Image Management Section -->
+                <div class="form-section">
+                    <div class="section-title">
+                        📸 จัดการรูปภาพ
+                    </div>
+                    <div class="image-upload-section">
+                        <p class="help-text">จัดการรูปภาพดอก (สูงสุด 4 รูป, ขนาดไม่เกิน 16MB ต่อรูป) - กดลบรูปเดิมหรือเพิ่มรูปใหม่ได้</p>
                         
-
-                        <!-- Terpene Selection Grid -->
-                        <div class="terpene-selection-grid">
-                            <div class="terpene-column">
-                                <label for="terpene_1_select">Terpene อันดับ 1</label>
-                                <select id="terpene_1_select" class="terpene-select">
-                                    <option value="">เลือก Terpene อันดับ 1</option>
-                                    <option value="ไมร์ซีน (Myrcene)">ไมร์ซีน (Myrcene) - มะม่วง/สมุนไพร → ผ่อนคลาย, ง่วง</option>
-                                    <option value="ลิโมนีน (Limonene)">ลิโมนีน (Limonene) - ส้ม/เลมอน → อารมณ์ดี, ต้านเครียด</option>
-                                    <option value="เบตา‑คาริโอฟีลลีน (β‑Caryophyllene)">เบตา‑คาริโอฟีลลีน (β‑Caryophyllene) - พริกไทย/เผ็ด → บรรเทาปวด, ต้านอักเสบ</option>
-                                    <option value="ลินาลูล (Linalool)">ลินาลูล (Linalool) - ลาเวนเดอร์ → คลายกังวล, ช่วยหลับ</option>
-                                    <option value="แอลฟา‑ไพนีน (α‑Pinene)">แอลฟา‑ไพนีน (α‑Pinene) - สน → เปิดปอด, ช่วยโฟกัส</option>
-                                    <option value="ฮิวมูเลน (Humulene)">ฮิวมูเลน (Humulene) - ฮ็อปส์/ไม้ → ลดอยากอาหาร, ต้านอักเสบ</option>
-                                    <option value="เทอร์พินอลีน (Terpinolene)">เทอร์พินอลีน (Terpinolene) - ดอกไม้/สนหวาน → กระตุ้นเบา, ต้านอนุมูลฯ</option>
-                                    <option value="เบตา‑ไพนีน (β‑Pinene)">เบตา‑ไพนีน (β‑Pinene) - โรสแมรี่ → ต้านอักเสบ</option>
-                                    <option value="โอซิมีน (Ocimene)">โอซิมีน (Ocimene) - ดอกไม้หวาน → ขยายหลอดลม, ต้านไวรัส</option>
-                                    <option value="กัมมา‑เทอร์พินีน (γ‑Terpinene)">กัมมา‑เทอร์พินีน (γ‑Terpinene) - มะนาว/สมุนไพร → ต้านอนุมูลฯ, ต้านจุลชีพ</option>
-                                    <option value="เนโรลิดอล (Nerolidol)">เนโรลิดอล (Nerolidol) - ชาเขียว/ไม้ → ผ่อนคลายกล้ามเนื้อ, ช่วยหลับ</option>
-                                    <option value="บิซาโบลอล (Bisabolol)">บิซาโบลอล (Bisabolol) - คาโมมายล์ → ปกป้องผิว, ต้านอักเสบ</option>
-                                    <option value="เทอร์พิโนล (Terpineol)">เทอร์พิโนล (Terpineol) - ไม้ขาว/ไพน์หวาน → ช่วยสงบใจ, ผ่อนคลาย</option>
-                                    <option value="ฟาร์นีซีน (Farnesene)">ฟาร์นีซีน (Farnesene) - แอปเปิ้ลเขียว → ต้านแบคทีเรีย, ปลอบประโลม</option>
-                                    <option value="ยูคาลิปตอล (Eucalyptol)">ยูคาลิปตอล (Eucalyptol) - เมนทอล/ยูคาลิปตัส → สดชื่น, ต้านจุลชีพ</option>
-                                </select>
-                                <label for="terpene_1_percentage">% Terpene อันดับ 1</label>
-                                <input type="number" id="terpene_1_percentage" name="terpene_1_percentage" 
-                                       step="0.01" min="0" max="100" placeholder="0.00">
+                        <div class="image-upload-grid">
+                            <div class="image-upload-item">
+                                <label for="image_1" class="upload-label">
+                                    <div class="upload-placeholder">
+                                        <span class="upload-icon">📷</span>
+                                        <span class="upload-text">รูปที่ 1</span>
+                                    </div>
+                                </label>
+                                <input type="file" id="image_1" name="image_1" accept="image/*" style="display: none;">
+                                <div class="image-preview" id="preview_1" style="display: none;">
+                                    <img src="" alt="Preview">
+                                    <button type="button" class="remove-image-btn" onclick="removeImage(1)">×</button>
+                                </div>
+                                <div class="current-image" id="current_1" style="display: none;">
+                                    <img src="" alt="Current Image">
+                                    <button type="button" class="remove-image-btn" onclick="removeCurrentImage(1)">×</button>
+                                    <button type="button" class="replace-image-btn" onclick="replaceCurrentImage(1)">🔄</button>
+                                </div>
                             </div>
 
-                            <div class="terpene-column">
-                                <label for="terpene_2_select">Terpene อันดับ 2</label>
-                                <select id="terpene_2_select" class="terpene-select">
-                                    <option value="">เลือก Terpene อันดับ 2</option>
-                                    <option value="ไมร์ซีน (Myrcene)">ไมร์ซีน (Myrcene) - มะม่วง/สมุนไพร → ผ่อนคลาย, ง่วง</option>
-                                    <option value="ลิโมนีน (Limonene)">ลิโมนีน (Limonene) - ส้ม/เลมอน → อารมณ์ดี, ต้านเครียด</option>
-                                    <option value="เบตา‑คาริโอฟีลลีน (β‑Caryophyllene)">เบตา‑คาริโอฟีลลีน (β‑Caryophyllene) - พริกไทย/เผ็ด → บรรเทาปวด, ต้านอักเสบ</option>
-                                    <option value="ลินาลูล (Linalool)">ลินาลูล (Linalool) - ลาเวนเดอร์ → คลายกังวล, ช่วยหลับ</option>
-                                    <option value="แอลฟา‑ไพนีน (α‑Pinene)">แอลฟา‑ไพนีน (α‑Pinene) - สน → เปิดปอด, ช่วยโฟกัส</option>
-                                    <option value="ฮิวมูเลน (Humulene)">ฮิวมูเลน (Humulene) - ฮ็อปส์/ไม้ → ลดอยากอาหาร, ต้านอักเสบ</option>
-                                    <option value="เทอร์พินอลีน (Terpinolene)">เทอร์พินอลีน (Terpinolene) - ดอกไม้/สนหวาน → กระตุ้นเบา, ต้านอนุมูลฯ</option>
-                                    <option value="เบตา‑ไพนีน (β‑Pinene)">เบตา‑ไพนีน (β‑Pinene) - โรสแมรี่ → ต้านอักเสบ</option>
-                                    <option value="โอซิมีน (Ocimene)">โอซิมีน (Ocimene) - ดอกไม้หวาน → ขยายหลอดลม, ต้านไวรัส</option>
-                                    <option value="กัมมา‑เทอร์พินีน (γ‑Terpinene)">กัมมา‑เทอร์พินีน (γ‑Terpinene) - มะนาว/สมุนไพร → ต้านอนุมูลฯ, ต้านจุลชีพ</option>
-                                    <option value="เนโรลิดอล (Nerolidol)">เนโรลิดอล (Nerolidol) - ชาเขียว/ไม้ → ผ่อนคลายกล้ามเนื้อ, ช่วยหลับ</option>
-                                    <option value="บิซาโบลอล (Bisabolol)">บิซาโบลอล (Bisabolol) - คาโมมายล์ → ปกป้องผิว, ต้านอักเสบ</option>
-                                    <option value="เทอร์พิโนล (Terpineol)">เทอร์พิโนล (Terpineol) - ไม้ขาว/ไพน์หวาน → ช่วยสงบใจ, ผ่อนคลาย</option>
-                                    <option value="ฟาร์นีซีน (Farnesene)">ฟาร์นีซีน (Farnesene) - แอปเปิ้ลเขียว → ต้านแบคทีเรีย, ปลอบประโลม</option>
-                                    <option value="ยูคาลิปตอล (Eucalyptol)">ยูคาลิปตอล (Eucalyptol) - เมนทอล/ยูคาลิปตัส → สดชื่น, ต้านจุลชีพ</option>
-                                </select>
-                                <label for="terpene_2_percentage">% Terpene อันดับ 2</label>
-                                <input type="number" id="terpene_2_percentage" name="terpene_2_percentage" 
-                                       step="0.01" min="0" max="100" placeholder="0.00">
+                            <div class="image-upload-item">
+                                <label for="image_2" class="upload-label">
+                                    <div class="upload-placeholder">
+                                        <span class="upload-icon">📷</span>
+                                        <span class="upload-text">รูปที่ 2</span>
+                                    </div>
+                                </label>
+                                <input type="file" id="image_2" name="image_2" accept="image/*" style="display: none;">
+                                <div class="image-preview" id="preview_2" style="display: none;">
+                                    <img src="" alt="Preview">
+                                    <button type="button" class="remove-image-btn" onclick="removeImage(2)">×</button>
+                                </div>
+                                <div class="current-image" id="current_2" style="display: none;">
+                                    <img src="" alt="Current Image">
+                                    <button type="button" class="remove-image-btn" onclick="removeCurrentImage(2)">×</button>
+                                    <button type="button" class="replace-image-btn" onclick="replaceCurrentImage(2)">🔄</button>
+                                </div>
                             </div>
 
-                            <div class="terpene-column">
-                                <label for="terpene_3_select">Terpene อันดับ 3</label>
-                                <select id="terpene_3_select" class="terpene-select">
-                                    <option value="">เลือก Terpene อันดับ 3</option>
-                                    <option value="ไมร์ซีน (Myrcene)">ไมร์ซีน (Myrcene) - มะม่วง/สมุนไพร → ผ่อนคลาย, ง่วง</option>
-                                    <option value="ลิโมนีน (Limonene)">ลิโมนีน (Limonene) - ส้ม/เลมอน → อารมณ์ดี, ต้านเครียด</option>
-                                    <option value="เบตา‑คาริโอฟีลลีน (β‑Caryophyllene)">เบตา‑คาริโอฟีลลีน (β‑Caryophyllene) - พริกไทย/เผ็ด → บรรเทาปวด, ต้านอักเสบ</option>
-                                    <option value="ลินาลูล (Linalool)">ลินาลูล (Linalool) - ลาเวนเดอร์ → คลายกังวล, ช่วยหลับ</option>
-                                    <option value="แอลฟา‑ไพนีน (α‑Pinene)">แอลฟา‑ไพนีน (α‑Pinene) - สน → เปิดปอด, ช่วยโฟกัส</option>
-                                    <option value="ฮิวมูเลน (Humulene)">ฮิวมูเลน (Humulene) - ฮ็อปส์/ไม้ → ลดอยากอาหาร, ต้านอักเสบ</option>
-                                    <option value="เทอร์พินอลีน (Terpinolene)">เทอร์พินอลีน (Terpinolene) - ดอกไม้/สนหวาน → กระตุ้นเบา, ต้านอนุมูลฯ</option>
-                                    <option value="เบตา‑ไพนีน (β‑Pinene)">เบตา‑ไพนีน (β‑Pinene) - โรสแมรี่ → ต้านอักเสบ</option>
-                                    <option value="โอซิมีน (Ocimene)">โอซิมีน (Ocimene) - ดอกไม้หวาน → ขยายหลอดลม, ต้านไวรัส</option>
-                                    <option value="กัมมา‑เทอร์พินีน (γ‑Terpinene)">กัมมา‑เทอร์พินีน (γ‑Terpinene) - มะนาว/สมุนไพร → ต้านอนุมูลฯ, ต้านจุลชีพ</option>
-                                    <option value="เนโรลิดอล (Nerolidol)">เนโรลิดอล (Nerolidol) - ชาเขียว/ไม้ → ผ่อนคลายกล้ามเนื้อ, ช่วยหลับ</option>
-                                    <option value="บิซาโบลอล (Bisabolol)">บิซาโบลอล (Bisabolol) - คาโมมายล์ → ปกป้องผิว, ต้านอักเสบ</option>
-                                    <option value="เทอร์พิโนล (Terpineol)">เทอร์พิโนล (Terpineol) - ไม้ขาว/ไพน์หวาน → ช่วยสงบใจ, ผ่อนคลาย</option>
-                                    <option value="ฟาร์นีซีน (Farnesene)">ฟาร์นีซีน (Farnesene) - แอปเปิ้ลเขียว → ต้านแบคทีเรีย, ปลอบประโลม</option>
-                                    <option value="ยูคาลิปตอล (Eucalyptol)">ยูคาลิปตอล (Eucalyptol) - เมนทอล/ยูคาลิปตัส → สดชื่น, ต้านจุลชีพ</option>
-                                </select>
-                                <label for="terpene_3_percentage">% Terpene อันดับ 3</label>
-                                <input type="number" id="terpene_3_percentage" name="terpene_3_percentage" 
-                                       step="0.01" min="0" max="100" placeholder="0.00">
+                            <div class="image-upload-item">
+                                <label for="image_3" class="upload-label">
+                                    <div class="upload-placeholder">
+                                        <span class="upload-icon">📷</span>
+                                        <span class="upload-text">รูปที่ 3</span>
+                                    </div>
+                                </label>
+                                <input type="file" id="image_3" name="image_3" accept="image/*" style="display: none;">
+                                <div class="image-preview" id="preview_3" style="display: none;">
+                                    <img src="" alt="Preview">
+                                    <button type="button" class="remove-image-btn" onclick="removeImage(3)">×</button>
+                                </div>
+                                <div class="current-image" id="current_3" style="display: none;">
+                                    <img src="" alt="Current Image">
+                                    <button type="button" class="remove-image-btn" onclick="removeCurrentImage(3)">×</button>
+                                    <button type="button" class="replace-image-btn" onclick="replaceCurrentImage(3)">🔄</button>
+                                </div>
+                            </div>
+
+                            <div class="image-upload-item">
+                                <label for="image_4" class="upload-label">
+                                    <div class="upload-placeholder">
+                                        <span class="upload-icon">📷</span>
+                                        <span class="upload-text">รูปที่ 4</span>
+                                    </div>
+                                </label>
+                                <input type="file" id="image_4" name="image_4" accept="image/*" style="display: none;">
+                                <div class="image-preview" id="preview_4" style="display: none;">
+                                    <img src="" alt="Preview">
+                                    <button type="button" class="remove-image-btn" onclick="removeImage(4)">×</button>
+                                </div>
+                                <div class="current-image" id="current_4" style="display: none;">
+                                    <img src="" alt="Current Image">
+                                    <button type="button" class="remove-image-btn" onclick="removeCurrentImage(4)">×</button>
+                                    <button type="button" class="replace-image-btn" onclick="replaceCurrentImage(4)">🔄</button>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Hidden inputs for form submission -->
-                        <input type="hidden" id="top_terpenes_1" name="top_terpenes_1">
-                        <input type="hidden" id="top_terpenes_2" name="top_terpenes_2">
-                        <input type="hidden" id="top_terpenes_3" name="top_terpenes_3">
+                        <div class="upload-actions">
+                            <button type="button" id="clearAllImagesBtn" class="btn btn-secondary" onclick="clearAllImages()">
+                                🗑️ ล้างรูปทั้งหมด
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Certificate Information -->
+                <div class="form-section">
+                    <div class="section-title">
+                        🏆 ใบรับรอง (Certificate)
                     </div>
 
-                    <!-- Effects & Usage -->
-                    <div class="form-section">
-                        <div class="section-title">
-                            ✨ ผลกระทบและการใช้งาน
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="lab_test_name">Lab test (ชื่อสถานที่ตรวจ)</label>
+                            <input type="text" id="lab_test_name" name="lab_test_name" placeholder="เช่น Cannabis Testing Lab, Green Lab Thailand">
+                            <div class="help-text">ชื่อห้องปฏิบัติการหรือสถานที่ที่ทำการตรวจสอบ</div>
                         </div>
-
-                        <div class="effects-two-columns">
-                            <!-- Mental Effects Column -->
-                            <div class="effects-column">
-                                <h3 class="column-title">🧠 ผลกระทบต่อจิตใจ</h3>
-
-                                <!-- Mental Positive Effects -->
-                                <div class="form-group effects-selector">
-                                    <label>😊 ผลกระทบเชิงบวก</label>
-                                    <div id="selected-mental-positive" class="selected-effects">
-                                        <span class="placeholder">คลิกเพื่อเลือกผลกระทบเชิงบวก...</span>
-                                    </div>
-                                    <textarea id="mental_effects_positive" name="mental_effects_positive" style="display: none;"></textarea>
-                                    <div class="effects-categories">
-                                        <div class="effect-options">
-                                            <button type="button" class="effect-btn" data-effect="สุขใจ">😄 สุขใจ</button>
-                                            <button type="button" class="effect-btn" data-effect="ผ่อนคลาย">😌 ผ่อนคลาย</button>
-                                            <button type="button" class="effect-btn" data-effect="สร้างสรรค์">🎨 สร้างสรรค์</button>
-                                            <button type="button" class="effect-btn" data-effect="ร่าเริง">😆 ร่าเริง</button>
-                                            <button type="button" class="effect-btn" data-effect="เบิกบาน">🤗 เบิกบาน</button>
-                                            <button type="button" class="effect-btn" data-effect="โฟกัส">🎯 โฟกัส</button>
-                                            <button type="button" class="effect-btn" data-effect="ตื่นตัว">⚡ ตื่นตัว</button>
-                                            <button type="button" class="effect-btn" data-effect="คิดลึก">🧠 คิดลึก</button>
-                                            <button type="button" class="effect-btn" data-effect="หลับง่าย">😴 หลับง่าย</button>
-                                            <button type="button" class="effect-btn" data-effect="เพลิดเพลิน">🎉 เพลิดเพลิน</button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Mental Negative Effects -->
-                                <div class="form-group effects-selector">
-                                    <label>😟 ผลกระทบเชิงลบ</label>
-                                    <div id="selected-mental-negative" class="selected-effects">
-                                        <span class="placeholder">คลิกเพื่อเลือกผลกระทบเชิงลบ...</span>
-                                    </div>
-                                    <textarea id="mental_effects_negative" name="mental_effects_negative" style="display: none;"></textarea>
-                                    <div class="effects-categories">
-                                        <div class="effect-options">
-                                            <button type="button" class="effect-btn negative" data-effect="วิตก">😰 วิตก</button>
-                                            <button type="button" class="effect-btn negative" data-effect="พารานอยด์">👁️ พารานอยด์</button>
-                                            <button type="button" class="effect-btn negative" data-effect="แพนิค">😱 แพนิค</button>
-                                            <button type="button" class="effect-btn negative" data-effect="สับสน">😵 สับสน</button>
-                                            <button type="button" class="effect-btn negative" data-effect="ความจำสั้น">🤔 ความจำสั้น</button>
-                                            <button type="button" class="effect-btn negative" data-effect="สมาธิหาย">🌪️ สมาธิหาย</button>
-                                            <button type="button" class="effect-btn negative" data-effect="หลอน">👻 หลอน</button>
-                                            <button type="button" class="effect-btn negative" data-effect="ง่วงหนัก">😪 ง่วงหนัก</button>
-                                            <button type="button" class="effect-btn negative" data-effect="ซึมเศร้า">😔 ซึมเศร้า</button>
-                                            <button type="button" class="effect-btn negative" data-effect="หงุดหงิด">😤 หงุดหงิด</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Physical Effects Column -->
-                            <div class="effects-column">
-                                <h3 class="column-title">💪 ผลกระทบทางร่างกาย</h3>
-
-                                <!-- Physical Positive Effects -->
-                                <div class="form-group effects-selector">
-                                    <label>💪 ผลกระทบเชิงบวก</label>
-                                    <div id="selected-physical-positive" class="selected-effects">
-                                        <span class="placeholder">คลิกเพื่อเลือกผลกระทบเชิงบวก...</span>
-                                    </div>
-                                    <textarea id="physical_effects_positive" name="physical_effects_positive" style="display: none;"></textarea>
-                                    <div class="effects-categories">
-                                        <div class="effect-options">
-                                            <button type="button" class="effect-btn" data-effect="บรรเทาปวด">🩹 บรรเทาปวด</button>
-                                            <button type="button" class="effect-btn" data-effect="คลายกล้าม">💆 คลายกล้าม</button>
-                                            <button type="button" class="effect-btn" data-effect="ต้านอักเสบ">🛡️ ต้านอักเสบ</button>
-                                            <button type="button" class="effect-btn" data-effect="หลับง่าย">😴 หลับง่าย</button>
-                                            <button type="button" class="effect-btn" data-effect="คลายเกร็ง">🧘 คลายเกร็ง</button>
-                                            <button type="button" class="effect-btn" data-effect="ต้านคลื่นไส้">🤢 ต้านคลื่นไส้</button>
-                                            <button type="button" class="effect-btn" data-effect="กระตุ้นกิน">🍽️ กระตุ้นกิน</button>
-                                            <button type="button" class="effect-btn" data-effect="ผ่อนคลาย">😌 ผ่อนคลาย</button>
-                                            <button type="button" class="effect-btn" data-effect="สดชื่น">✨ สดชื่น</button>
-                                            <button type="button" class="effect-btn" data-effect="สุขภาพลำไส้">🫁 สุขภาพลำไส้</button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Physical Negative Effects -->
-                                <div class="form-group effects-selector">
-                                    <label>🤒 ผลกระทบเชิงลบ</label>
-                                    <div id="selected-physical-negative" class="selected-effects">
-                                        <span class="placeholder">คลิกเพื่อเลือกผลกระทบเชิงลบ...</span>
-                                    </div>
-                                    <textarea id="physical_effects_negative" name="physical_effects_negative" style="display: none;"></textarea>
-                                    <div class="effects-categories">
-                                        <div class="effect-options">
-                                            <button type="button" class="effect-btn negative" data-effect="ปากแห้ง">👄 ปากแห้ง</button>
-                                            <button type="button" class="effect-btn negative" data-effect="ตาแดง">👁️ ตาแดง</button>
-                                            <button type="button" class="effect-btn negative" data-effect="ตาแห้ง">🏜️ ตาแห้ง</button>
-                                            <button type="button" class="effect-btn negative" data-effect="เวียนหัว">💫 เวียนหัว</button>
-                                            <button type="button" class="effect-btn negative" data-effect="ใจเต้นเร็ว">💓 ใจเต้นเร็ว</button>
-                                            <button type="button" class="effect-btn negative" data-effect="ความดันตก">📉 ความดันตก</button>
-                                            <button type="button" class="effect-btn negative" data-effect="มือสั่น">🤲 มือสั่น</button>
-                                            <button type="button" class="effect-btn negative" data-effect="เหงื่อออก">💦 เหงื่อออก</button>
-                                            <button type="button" class="effect-btn negative" data-effect="คลื่นไส้">🤮 คลื่นไส้</button>
-                                            <button type="button" class="effect-btn negative" data-effect="ไอ/เจ็บคอ">😷 ไอ/เจ็บคอ</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="form-group">
+                            <label for="test_type">Test type (วิธีการตรวจ)</label>
+                            <input type="text" id="test_type" name="test_type" placeholder="เช่น HPLC, GC-MS, LC-MS/MS">
+                            <div class="help-text">วิธีการหรือเทคนิคที่ใช้ในการตรวจสอบ</div>
                         </div>
+                    </div>
+                </div>
 
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="recommended_time">⏰ เวลาที่แนะนำ</label>
-                                <select id="recommended_time" name="recommended_time">
-                                    <option value="">เลือกเวลา</option>
-                                    <option value="กลางวัน">☀️ กลางวัน</option>
-                                    <option value="กลางคืน">🌙 กลางคืน</option>
-                                    <option value="ตลอดวัน">🌅 ตลอดวัน</option>
-                                </select>
-                            </div>
+                <!-- Growing Information -->
+                <div class="form-section">
+                    <div class="section-title">
+                        🌱 ข้อมูลการปลูก
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="grow_method">วิธีการปลูก</label>
+                            <select id="grow_method" name="grow_method">
+                                <option value="">เลือกวิธีการปลูก</option>
+                                <option value="Indoor">Indoor</option>
+                                <option value="Outdoor">Outdoor</option>
+                                <option value="Greenhouse">Greenhouse</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="fertilizer_type">ประเภทปุ่ย</label>
+                            <select id="fertilizer_type" name="fertilizer_type">
+                                <option value="">เลือกประเภทปุ่ย</option>
+                                <option value="Organic">Organic</option>
+                                <option value="Chemical">Chemical</option>
+                                <option value="Mixed">Mixed</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="flowering_type">ประเภทการออกดอก</label>
+                            <select id="flowering_type" name="flowering_type">
+                                <option value="">เลือกประเภท</option>
+                                <option value="Photoperiod">Photoperiod</option>
+                                <option value="Autoflower">Autoflower</option>
+                            </select>
                         </div>
                     </div>
 
-                    <!-- Growing Information -->
-                    <div class="form-section">
-                        <div class="section-title">
-                            🌱 ข้อมูลการปลูก
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="harvest_date">วันที่เก็บเกี่ยว</label>
+                            <input type="date" id="harvest_date" name="harvest_date">
                         </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="grow_method">วิธีการปลูก</label>
-                                <select id="grow_method" name="grow_method">
-                                    <option value="">เลือกวิธีการปลูก</option>
-                                    <option value="Indoor">Indoor</option>
-                                    <option value="Outdoor">Outdoor</option>
-                                    <option value="Greenhouse">Greenhouse</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="fertilizer_type">ประเภทปุ่ย</label>
-                                <select id="fertilizer_type" name="fertilizer_type">
-                                    <option value="">เลือกประเภทปุ่ย</option>
-                                    <option value="Organic">Organic</option>
-                                    <option value="Chemical">Chemical</option>
-                                    <option value="Mixed">Mixed</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="flowering_type">ประเภทการออกดอก</label>
-                                <select id="flowering_type" name="flowering_type">
-                                    <option value="">เลือกประเภท</option>
-                                    <option value="Photoperiod">Photoperiod</option>
-                                    <option value="Autoflower">Autoflower</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="harvest_date">วันที่เก็บเกี่ยว</label>
-                                <input type="date" id="harvest_date" name="harvest_date">
-                            </div>
-                            <div class="form-group">
-                                <label for="batch_number">หมายเลข Batch</label>
-                                <input type="text" id="batch_number" name="batch_number">
-                            </div>
+                        <div class="form-group">
+                            <label for="batch_number">หมายเลข Batch</label>
+                            <input type="text" id="batch_number" name="batch_number">
                         </div>
                     </div>
+                </div>
 
-                    <!-- Image Management Section -->
-                    <div class="form-section">
-                        <div class="section-title">
-                            📸 จัดการรูปภาพ
-                        </div>
-                        <div class="image-upload-section">
-                            <p class="help-text">จัดการรูปภาพดอก (สูงสุด 4 รูป, ขนาดไม่เกิน 16MB ต่อรูป) - กดลบรูปเดิมหรือเพิ่มรูปใหม่ได้</p>
-
-                            <div class="image-upload-grid">
-                                <div class="image-upload-item">
-                                    <label for="image_1" class="upload-label">
-                                        <div class="upload-placeholder">
-                                            <span class="upload-icon">📷</span>
-                                            <span class="upload-text">รูปที่ 1</span>
-                                        </div>
-                                    </label>
-                                    <input type="file" id="image_1" name="image_1" accept="image/*" style="display: none;">
-                                    <div class="image-preview" id="preview_1" style="display: none;">
-                                        <img src="" alt="Preview">
-                                        <button type="button" class="remove-image-btn" onclick="removeImage(1)">×</button>
-                                    </div>
-                                    <div class="current-image" id="current_1" style="display: none;">
-                                        <img src="" alt="Current Image">
-                                        <button type="button" class="remove-image-btn" onclick="removeCurrentImage(1)">×</button>
-                                        <button type="button" class="replace-image-btn" onclick="replaceCurrentImage(1)">🔄</button>
-                                    </div>
-                                </div>
-
-                                <div class="image-upload-item">
-                                    <label for="image_2" class="upload-label">
-                                        <div class="upload-placeholder">
-                                            <span class="upload-icon">📷</span>
-                                            <span class="upload-text">รูปที่ 2</span>
-                                        </div>
-                                    </label>
-                                    <input type="file" id="image_2" name="image_2" accept="image/*" style="display: none;">
-                                    <div class="image-preview" id="preview_2" style="display: none;">
-                                        <img src="" alt="Preview">
-                                        <button type="button" class="remove-image-btn" onclick="removeImage(2)">×</button>
-                                    </div>
-                                    <div class="current-image" id="current_2" style="display: none;">
-                                        <img src="" alt="Current Image">
-                                        <button type="button" class="remove-image-btn" onclick="removeCurrentImage(2)">×</button>
-                                        <button type="button" class="replace-image-btn" onclick="replaceCurrentImage(2)">🔄</button>
-                                    </div>
-                                </div>
-
-                                <div class="image-upload-item">
-                                    <label for="image_3" class="upload-label">
-                                        <div class="upload-placeholder">
-                                            <span class="upload-icon">📷</span>
-                                            <span class="upload-text">รูปที่ 3</span>
-                                        </div>
-                                    </label>
-                                    <input type="file" id="image_3" name="image_3" accept="image/*" style="display: none;">
-                                    <div class="image-preview" id="preview_3" style="display: none;">
-                                        <img src="" alt="Preview">
-                                        <button type="button" class="remove-image-btn" onclick="removeImage(3)">×</button>
-                                    </div>
-                                    <div class="current-image" id="current_3" style="display: none;">
-                                        <img src="" alt="Current Image">
-                                        <button type="button" class="remove-image-btn" onclick="removeCurrentImage(3)">×</button>
-                                        <button type="button" class="replace-image-btn" onclick="replaceCurrentImage(3)">🔄</button>
-                                    </div>
-                                </div>
-
-                                <div class="image-upload-item">
-                                    <label for="image_4" class="upload-label">
-                                        <div class="upload-placeholder">
-                                            <span class="upload-icon">📷</span>
-                                            <span class="upload-text">รูปที่ 4</span>
-                                        </div>
-                                    </label>
-                                    <input type="file" id="image_4" name="image_4" accept="image/*" style="display: none;">
-                                    <div class="image-preview" id="preview_4" style="display: none;">
-                                        <img src="" alt="Preview">
-                                        <button type="button" class="remove-image-btn" onclick="removeImage(4)">×</button>
-                                    </div>
-                                    <div class="current-image" id="current_4" style="display: none;">
-                                        <img src="" alt="Current Image">
-                                        <button type="button" class="remove-image-btn" onclick="removeCurrentImage(4)">×</button>
-                                        <button type="button" class="replace-image-btn" onclick="replaceCurrentImage(4)">🔄</button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="upload-actions">
-                                <button type="button" id="clearAllImagesBtn" class="btn btn-secondary" onclick="clearAllImages()">
-                                    🗑️ ล้างรูปทั้งหมด
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-actions">
-                        <button type="submit" id="submitBtn" class="btn btn-primary">
-                            💾 บันทึกการแก้ไข
-                        </button>
-                        <a href="/activity" class="btn btn-secondary">
-                            ❌ ยกเลิก
-                        </a>
-                    </div>
+                <div class="form-actions">
+                    <button type="submit" id="submitBtn" class="btn btn-primary">
+                        💾 บันทึกการแก้ไข
+                    </button>
+                    <a href="/activity" class="btn btn-secondary">
+                        ❌ ยกเลิก
+                    </a>
+                </div>
             </form>
         </div>
     </div>
@@ -1581,27 +1401,6 @@
             physicalPositive: [],
             physicalNegative: []
         };
-
-        // Terpene data (example, should be fetched or defined)
-        const terpeneData = [
-            { name: "ไมร์ซีน (Myrcene)", effects: "มะม่วง/สมุนไพร → ผ่อนคลาย, ง่วง", category: "Terpenes" },
-            { name: "ลิโมนีน (Limonene)", effects: "ส้ม/เลมอน → อารมณ์ดี, ต้านเครียด", category: "Terpenes" },
-            { name: "แอลฟา‑ไพนีน (α‑Pinene)", effects: "สน → เปิดปอด, ช่วยโฟกัส", category: "Terpenes" },
-            { name: "เบตา‑ไพนีน (β‑Pinene)", effects: "โรสแมรี่ → ต้านอักเสบ", category: "Terpenes" },
-            { name: "เบตา‑คาริโอฟีลลีน (β‑Caryophyllene)", effects: "พริกไทย/เผ็ด → บรรเทาปวด, ต้านอักเสบ", category: "Terpenes" },
-            { name: "ลินาลูล (Linalool)", effects: "ลาเวนเดอร์ → คลายกังวล, ช่วยหลับ", category: "Terpenes" },
-            { name: "ฮิวมูเลน (Humulene)", effects: "ฮ็อปส์/ไม้ → ลดอยากอาหาร, ต้านอักเสบ", category: "Terpenes" },
-            { name: "เทอร์พินอลีน (Terpinolene)", effects: "ดอกไม้/สนหวาน → กระตุ้นเบา, ต้านอนุมูลฯ", category: "Terpenes" },
-            { name: "โอซิมีน (Ocimene)", effects: "ดอกไม้หวาน → ขยายหลอดลม, ต้านไวรัส", category: "Terpenes" },
-            { name: "ยูคาลิปตอล / 1,8‑ซิเนออล (Eucalyptol)", effects: "เมนทอล/ยูคาลิปตัส → สดชื่น,ต้านจุลชีพ", category: "Terpenes" },
-            { name: "เนโรลิดอล (Nerolidol)", effects: "ชาเขียว/ไม้ → ผ่อนคลายกล้ามเนื้อ", category: "Terpenes" },
-            { name: "บิซาโบลอล (Bisabolol)", effects: "คาโมมายล์ → ปกป้องผิว, ต้านอักเสบ", category: "Terpenes" },
-            { name: "ฟาร์นีซีน (Farnesene)", effects: "แอปเปิ้ลเขียว → ต้านแบคทีเรีย", category: "Terpenes" },
-            { name: "แคมฟีน (Camphene)", effects: "การบูรเบา → ต้านออกซิแดนต์", category: "Terpenes" },
-            { name: "เทอร์พิโนล (Terpineol)", effects: "ไม้ขาว/ไพน์หวาน → ช่วยสงบใจ", category: "Terpenes" },
-            { name: "วาลินซีน (Valencene)", effects: "ส้มวาเลนเซีย → ยับยั้งยุง, อารมณ์ดี", category: "Terpenes" },
-            { name: "เจอราเนียล (Geraniol)", effects: "กุหลาบ → ต้านจุลชีพ", category: "Terpenes" }
-        ];
 
         // Get bud ID from URL parameters
         function getBudIdFromUrl() {
@@ -1720,11 +1519,7 @@
                 console.log('Bud data loaded successfully:', budData.strain_name_en);
                 populateForm(budData);
                 loadCurrentImages(budData);
-                loadCurrentCertificateImages(budData);
                 showForm();
-                // Load existing terpene selections
-                loadTerpeneData(budData);
-
 
             } catch (error) {
                 console.error('Error loading bud data:', error);
@@ -1748,7 +1543,7 @@
             const label = document.querySelector(`label[for="image_${index}"]`);
             const preview = document.getElementById(`preview_${index}`);
             const current = document.getElementById(`current_${index}`);
-
+            
             if (label && current) {
                 label.style.display = 'none';
                 if (preview) preview.style.display = 'none';
@@ -1761,18 +1556,18 @@
             const label = document.querySelector(`label[for="image_${index}"]`);
             const current = document.getElementById(`current_${index}`);
             const input = document.getElementById(`image_${index}`);
-
+            
             if (label && current) {
                 current.style.display = 'none';
                 current.querySelector('img').src = '';
                 label.style.display = 'block';
-
+                
                 // Clear any new file selection too
                 if (input) input.value = '';
-
+                
                 // Mark for deletion - create hidden input to track deletion
                 current.setAttribute('data-deleted', 'true');
-
+                
                 // Add hidden field to form to indicate deletion
                 let deletionInput = document.getElementById(`deleted_image_${index}`);
                 if (!deletionInput) {
@@ -1794,13 +1589,13 @@
                 if (current) {
                     current.removeAttribute('data-deleted');
                 }
-
+                
                 // Remove deletion input if exists
                 const deletionInput = document.getElementById(`deleted_image_${index}`);
                 if (deletionInput) {
                     deletionInput.remove();
                 }
-
+                
                 input.click();
             }
         }
@@ -1856,7 +1651,7 @@
             }
         }
 
-        // Image handling functions for bud images
+        // Image handling functions
         function initializeImageUpload() {
             for (let i = 1; i <= 4; i++) {
                 const input = document.getElementById(`image_${i}`);
@@ -1895,7 +1690,7 @@
             const label = document.querySelector(`label[for="image_${index}"]`);
             const preview = document.getElementById(`preview_${index}`);
             const current = document.getElementById(`current_${index}`);
-
+            
             if (label && preview) {
                 label.style.display = 'none';
                 if (current) current.style.display = 'none';
@@ -1909,7 +1704,7 @@
             const label = document.querySelector(`label[for="image_${index}"]`);
             const preview = document.getElementById(`preview_${index}`);
             const current = document.getElementById(`current_${index}`);
-
+            
             if (input) input.value = '';
             if (label) label.style.display = 'block';
             if (preview) {
@@ -1929,155 +1724,15 @@
             }
         }
 
-        // Image handling functions for certificate images
-        function initializeCertificateImageUpload() {
-            for (let i = 1; i <= 4; i++) {
-                const input = document.getElementById(`certificate_image_${i}`);
-                if (input) {
-                    input.addEventListener('change', function(e) {
-                        handleCertificateImageSelect(i, e.target.files[0]);
-                    });
-                }
-            }
-        }
-
-        function handleCertificateImageSelect(index, file) {
-            if (!file) return;
-
-            if (!file.type.startsWith('image/')) {
-                showAlert('กรุณาเลือกไฟล์รูปภาพเท่านั้น', 'error');
-                return;
-            }
-
-            if (file.size > 16 * 1024 * 1024) {
-                showAlert('ขนาดไฟล์ต้องไม่เกิน 16MB', 'error');
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                showCertificateImagePreview(index, e.target.result);
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function showCertificateImagePreview(index, src) {
-            const label = document.querySelector(`label[for="certificate_image_${index}"]`);
-            const preview = document.getElementById(`certificate_preview_${index}`);
-            const current = document.getElementById(`current_certificate_${index}`);
-
-            if (label && preview) {
-                label.style.display = 'none';
-                if (current) current.style.display = 'none';
-                preview.style.display = 'block';
-                preview.querySelector('img').src = src;
-            }
-        }
-
-        function removeCurrentCertificateImage(index) {
-            const label = document.querySelector(`label[for="certificate_image_${index}"]`);
-            const current = document.getElementById(`current_certificate_${index}`);
-            const input = document.getElementById(`certificate_image_${index}`);
-
-            if (label && current) {
-                current.style.display = 'none';
-                current.querySelector('img').src = '';
-                label.style.display = 'block';
-                if (input) input.value = '';
-
-                current.setAttribute('data-deleted', 'true');
-                let deletionInput = document.getElementById(`deleted_certificate_image_${index}`);
-                if (!deletionInput) {
-                    deletionInput = document.createElement('input');
-                    deletionInput.type = 'hidden';
-                    deletionInput.id = `deleted_certificate_image_${index}`;
-                    deletionInput.name = `deleted_certificate_image_${index}`;
-                    document.getElementById('editBudForm').appendChild(deletionInput);
-                }
-                deletionInput.value = 'true';
-            }
-        }
-
-        function replaceCurrentCertificateImage(index) {
-            const input = document.getElementById(`certificate_image_${index}`);
-            if (input) {
-                const current = document.getElementById(`current_certificate_${index}`);
-                if (current) {
-                    current.removeAttribute('data-deleted');
-                }
-                const deletionInput = document.getElementById(`deleted_certificate_image_${index}`);
-                if (deletionInput) {
-                    deletionInput.remove();
-                }
-                input.click();
-            }
-        }
-
-        function removeCertificateImage(index) {
-            const input = document.getElementById(`certificate_image_${index}`);
-            const label = document.querySelector(`label[for="certificate_image_${index}"]`);
-            const preview = document.getElementById(`certificate_preview_${index}`);
-            const current = document.getElementById(`current_certificate_${index}`);
-
-            if (input) input.value = '';
-            if (label) label.style.display = 'block';
-            if (preview) {
-                preview.style.display = 'none';
-                preview.querySelector('img').src = '';
-            }
-            if (current) {
-                current.style.display = 'none';
-                current.querySelector('img').src = '';
-            }
-        }
-
-        function clearAllCertificateImages() {
-            for (let i = 1; i <= 4; i++) {
-                removeCertificateImage(i);
-                removeCurrentCertificateImage(i);
-            }
-        }
-
-        function loadCurrentCertificateImages(budData) {
-            for (let i = 1; i <= 4; i++) {
-                const imageUrl = budData[`certificate_image_${i}_url`];
-                if (imageUrl) {
-                    showCurrentCertificateImage(i, imageUrl);
-                }
-            }
-        }
-
-        function showCurrentCertificateImage(index, imageUrl) {
-            const label = document.querySelector(`label[for="certificate_image_${index}"]`);
-            const preview = document.getElementById(`certificate_preview_${index}`);
-            const current = document.getElementById(`current_certificate_${index}`);
-
-            if (label && current) {
-                label.style.display = 'none';
-                if (preview) preview.style.display = 'none';
-                current.style.display = 'block';
-                current.querySelector('img').src = imageUrl;
-            }
-        }
-
         async function uploadImages() {
             const formData = new FormData();
             let hasImages = false;
 
-            // Add bud image files to form data
+            // Add image files to form data
             for (let i = 1; i <= 4; i++) {
                 const input = document.getElementById(`image_${i}`);
                 if (input && input.files[0]) {
                     formData.append(`image_${i}`, input.files[0]);
-                    hasImages = true;
-                }
-            }
-
-            // Add certificate image files to form data
-            for (let i = 1; i <= 4; i++) {
-                const input = document.getElementById(`certificate_image_${i}`);
-                if (input && input.files[0]) {
-                    formData.append(`certificate_image_${i}`, input.files[0]);
                     hasImages = true;
                 }
             }
@@ -2122,14 +1777,9 @@
                 delete data.image_2;
                 delete data.image_3;
                 delete data.image_4;
-                delete data.certificate_image_1;
-                delete data.certificate_image_2;
-                delete data.certificate_image_3;
-                delete data.certificate_image_4;
-
 
                 // Keep deletion flags
-                // deleted_image_* and deleted_certificate_image_* fields will be included in data automatically
+                // deleted_image_* fields will be included in data automatically
 
                 // Convert numeric fields
                 if (data.thc_percentage) data.thc_percentage = parseFloat(data.thc_percentage);
@@ -2179,23 +1829,18 @@
         window.clearAllImages = clearAllImages;
         window.removeCurrentImage = removeCurrentImage;
         window.replaceCurrentImage = replaceCurrentImage;
-        window.removeCertificateImage = removeCertificateImage;
-        window.clearAllCertificateImages = clearAllCertificateImages;
-        window.removeCurrentCertificateImage = removeCurrentCertificateImage;
-        window.replaceCurrentCertificateImage = replaceCurrentCertificateImage;
-
 
         function retryLoadBud() {
             // Reset loading state before retry
             isLoading = false;
             currentBudId = null;
-
+            
             // Clear form to force reload
             const form = document.getElementById('editBudForm');
             if (form) {
                 form.reset();
             }
-
+            
             loadBudData();
         }
 
@@ -2374,7 +2019,7 @@
         function initializeBreederAutocomplete(inputId, suggestionsId, apiUrl) {
             const input = document.getElementById(inputId);
             const suggestionsContainer = document.getElementById(suggestionsId);
-
+            
             if (!input || !suggestionsContainer) return;
 
             let currentSelection = -1;
@@ -2589,7 +2234,7 @@
             effectsSelectors.forEach(selector => {
                 const selectedDiv = document.getElementById(selector.selectedId);
                 const hiddenInput = document.getElementById(selector.hiddenId);
-
+                
                 if (selectedDiv && hiddenInput) {
                     initializeEffectSelector(selector);
                 }
@@ -2599,11 +2244,11 @@
         function initializeEffectSelector(config) {
             const selectedDiv = document.getElementById(config.selectedId);
             const hiddenInput = document.getElementById(config.hiddenId);
-
+            
             if (!selectedDiv || !hiddenInput) return;
 
             const categoriesDiv = selectedDiv.nextElementSibling.nextElementSibling;
-
+            
             if (!categoriesDiv) return;
 
             const effectButtons = categoriesDiv.querySelectorAll('.effect-btn');
@@ -2720,11 +2365,11 @@
                 // Update button states
                 const isNegative = effectType.includes('negative');
                 const selector = isNegative ? '.effect-btn.negative' : '.effect-btn:not(.negative)';
-
+                
                 const container = document.getElementById(effectType.includes('mental') ? 
                     (effectType.includes('positive') ? 'selected-mental-positive' : 'selected-mental-negative') :
                     (effectType.includes('positive') ? 'selected-physical-positive' : 'selected-physical-negative'));
-
+                
                 if (container) {
                     const categoriesDiv = container.nextElementSibling.nextElementSibling;
                     if (categoriesDiv) {
@@ -2748,55 +2393,6 @@
             window.effectsClickHandlerAdded = true;
         }
 
-        // Terpene Dropdown functionality
-        function initializeTerpeneDropdowns() {
-            for (let i = 1; i <= 3; i++) {
-                const dropdown = document.getElementById(`terpene_${i}_select`);
-                const hiddenInput = document.getElementById(`top_terpenes_${i}`);
-
-                if (dropdown && hiddenInput) {
-                    dropdown.addEventListener('change', function() {
-                        const selectedValue = this.value;
-                        hiddenInput.value = selectedValue;
-                        
-                        // Clear this selection from other dropdowns to prevent duplicates
-                        for (let j = 1; j <= 3; j++) {
-                            if (j !== i) {
-                                const otherDropdown = document.getElementById(`terpene_${j}_select`);
-                                if (otherDropdown && otherDropdown.value === selectedValue && selectedValue !== '') {
-                                    otherDropdown.value = '';
-                                    document.getElementById(`top_terpenes_${j}`).value = '';
-                                }
-                            }
-                        }
-                    });
-                }
-            }
-        }
-
-        // Function to load terpene data into the UI
-        function loadTerpeneData(budData) {
-            // Load existing top terpenes and percentages
-            for (let i = 1; i <= 3; i++) {
-                const hiddenInput = document.getElementById(`top_terpenes_${i}`);
-                const dropdown = document.getElementById(`terpene_${i}_select`);
-                const percentageInput = document.getElementById(`terpene_${i}_percentage`);
-                
-                if (hiddenInput && budData[`top_terpenes_${i}`]) {
-                    hiddenInput.value = budData[`top_terpenes_${i}`];
-                    
-                    if (dropdown) {
-                        dropdown.value = budData[`top_terpenes_${i}`];
-                    }
-                }
-                
-                if (percentageInput && budData[`terpene_${i}_percentage`]) {
-                    percentageInput.value = budData[`terpene_${i}_percentage`];
-                }
-            }
-        }
-
-
         // Prevent multiple initialization
         let isPageInitialized = false;
 
@@ -2806,7 +2402,7 @@
                 console.log('Page already initialized, skipping...');
                 return;
             }
-
+            
             console.log('Edit bud page initialized');
             isPageInitialized = true;
 
@@ -2821,14 +2417,7 @@
                 initializeBreederAutocomplete('breeder', 'breeder-suggestions', '/api/breeders/search');
                 initializeFlavorSelector();
                 initializeEffectsSelectors();
-                // Initialize image upload
                 initializeImageUpload();
-                initializeCertificateImageUpload();
-
-                // Initialize flavor selector
-                initializeFlavorSelector();
-                // Initialize terpene dropdowns
-                initializeTerpeneDropdowns();
             } catch (error) {
                 console.error('Error initializing page features:', error);
             }

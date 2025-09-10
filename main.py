@@ -5489,7 +5489,7 @@ def get_review(review_id):
 def update_review(review_id):
     """Update existing review"""
     if 'user_id' not in session:
-        return jsonify({'error: 'ไม่ได้เข้าสู่ระบบ'}), 401
+        return jsonify({'error': 'ไม่ได้เข้าสู่ระบบ'}), 401
 
     data = request.get_json()
     user_id = session['user_id']

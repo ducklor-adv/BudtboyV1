@@ -4516,6 +4516,24 @@ def admin_delete_activity(activity_id):
     else:
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
+@app.route('/activities/<int:activity_id>/participants')
+def activity_participants_page(activity_id):
+    """Activity participants page"""
+    if 'user_id' not in session:
+        return redirect('/auth')
+    if not is_approved():
+        return redirect('/profile?not_approved=1')
+    return render_template('activity_participants.html', activity_id=activity_id)
+
+@app.route('/activities/<int:activity_id>/join')
+def activity_join_page(activity_id):
+    """Activity join page"""
+    if 'user_id' not in session:
+        return redirect('/auth')
+    if not is_approved():
+        return redirect('/profile?not_approved=1')
+    return render_template('activity_join.html', activity_id=activity_id)
+
 
 
 def get_registration_mode():

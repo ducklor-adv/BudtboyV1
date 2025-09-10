@@ -586,7 +586,7 @@
             height: 25px;
             object-fit: cover;
             border-radius: 3px;
-            border: 1px solid #ddd;
+            border: 1px solid #e9ecef;
             cursor: pointer;
             transition: transform 0.2s ease;
         }
@@ -1656,7 +1656,7 @@
 
                     // เพิ่ม cache buster เพื่อป้องกัน caching issues
                     const cacheBuster = Date.now();
-                    
+
                     // Load bud info with timeout และ retry logic
                     const budResponse = await Promise.race([
                         fetch(`/api/buds/${budId}/info?_cb=${cacheBuster}`, {
@@ -1676,12 +1676,12 @@
                     if (!budResponse.ok) {
                         const errorText = await budResponse.text().catch(() => 'Unknown error');
                         console.error(`Bud info API error: ${budResponse.status} - ${errorText}`);
-                        
+
                         // ถ้าเป็น 404 หรือ 403 ไม่ต้อง retry
                         if (budResponse.status === 404 || budResponse.status === 403) {
                             throw new Error(`ไม่พบข้อมูลดอก (${budResponse.status})`);
                         }
-                        
+
                         // ถ้าเป็น server error ให้ retry
                         if (budResponse.status >= 500 && retryCount < maxRetries - 1) {
                             retryCount++;
@@ -1689,7 +1689,7 @@
                             await new Promise(resolve => setTimeout(resolve, retryCount * 1000));
                             continue;
                         }
-                        
+
                         throw new Error(`เกิดข้อผิดพลาดจากเซิร์ฟเวอร์ (${budResponse.status})`);
                     }
 
@@ -1700,11 +1700,11 @@
                     if (!budData) {
                         throw new Error('ไม่ได้รับข้อมูลจากเซิร์ฟเวอร์');
                     }
-                    
+
                     if (!budData.success) {
                         throw new Error(budData.error || 'API ส่งกลับสถานะไม่สำเร็จ');
                     }
-                    
+
                     if (!budData.bud) {
                         throw new Error('ไม่พบข้อมูลดอกในการตอบกลับ');
                     }
@@ -1734,28 +1734,28 @@
                     }
 
                     console.log('Displaying bud report...');
-                    
+
                     // เพิ่ม delay เล็กน้อยเพื่อให้ DOM พร้อม
                     await new Promise(resolve => setTimeout(resolve, 100));
-                    
+
                     displayBudReport(bud, reviews);
 
                     document.getElementById('loadingMessage').style.display = 'none';
                     document.getElementById('budContent').style.display = 'block';
                     console.log('Bud report display completed');
-                    
+
                     // สำเร็จแล้ว ออกจาก loop
                     break;
 
                 } catch (error) {
                     console.error(`Error loading bud report (attempt ${retryCount + 1}):`, error);
-                    
+
                     // ถ้าเป็นครั้งสุดท้าย หรือเป็น error ที่ไม่ควร retry
                     if (retryCount >= maxRetries - 1 || 
                         error.message.includes('ไม่พบ ID ของดอก') ||
                         error.message.includes('ไม่พบข้อมูลดอก (404)') ||
                         error.message.includes('ไม่พบข้อมูลดอก (403)')) {
-                        
+
                         const urlParams = new URLSearchParams(window.location.search);
                         const budId = urlParams.get('id');
 
@@ -1794,7 +1794,7 @@
                     }
                 }
             }
-            
+
             isLoading = false;
         }
 
@@ -1827,14 +1827,14 @@
                     const strainNameEn = bud.strain_name_en || bud.name || 'ไม่ระบุชื่อ';
                     budNameEl.textContent = strainNameEn;
                 }
-                
+
                 if (budNameThaiEl) {
                     const strainNameTh = bud.strain_name_th || '';
                     budNameThaiEl.textContent = strainNameTh;
                     // ซ่อนถ้าไม่มีชื่อไทย
                     budNameThaiEl.style.display = strainNameTh ? 'block' : 'none';
                 }
-                
+
                 if (budIdEl) {
                     const budId = bud.id || bud.bud_id || 'N/A';
                     budIdEl.textContent = `Bud ID: ${budId}`;
@@ -1881,14 +1881,14 @@
                 try {
                     let avgRating = 0;
                     let reviewsArray = [];
-                    
+
                     if (Array.isArray(reviews)) {
                         reviewsArray = reviews;
                         if (reviews.length > 0) {
                             const validRatings = reviews
                                 .map(review => review.overall_rating || 0)
                                 .filter(rating => rating > 0);
-                            
+
                             if (validRatings.length > 0) {
                                 avgRating = validRatings.reduce((sum, rating) => sum + rating, 0) / validRatings.length;
                             }
@@ -1903,11 +1903,11 @@
                         const starCount = Math.max(0, Math.min(5, Math.round(avgRating)));
                         ratingStarsEl.textContent = starCount > 0 ? '⭐'.repeat(starCount) : '☆☆☆☆☆';
                     }
-                    
+
                     if (ratingNumberEl) {
                         ratingNumberEl.textContent = avgRating > 0 ? avgRating.toFixed(1) : '0.0';
                     }
-                    
+
                     if (reviewCountEl) {
                         reviewCountEl.textContent = `(${reviewsArray.length} รีวิว)`;
                     }
@@ -1919,7 +1919,7 @@
                     const ratingStarsEl = document.getElementById('ratingStars');
                     const ratingNumberEl = document.getElementById('ratingNumber');
                     const reviewCountEl = document.getElementById('reviewCount');
-                    
+
                     if (ratingStarsEl) ratingStarsEl.textContent = '☆☆☆☆☆';
                     if (ratingNumberEl) ratingNumberEl.textContent = '0.0';
                     if (reviewCountEl) reviewCountEl.textContent = '(0 รีวิว)';
@@ -1966,7 +1966,7 @@
 
             } catch (error) {
                 console.error('Error in displayBudReport:', error);
-                
+
                 // แสดง fallback UI
                 const budContent = document.getElementById('budContent');
                 if (budContent) {
@@ -1979,7 +1979,7 @@
                         </div>
                     `;
                 }
-                
+
                 throw error; // Re-throw to be caught by loadBudReport
             }
         }
@@ -2347,13 +2347,6 @@
                         { label: 'Terpene อันดับ 1', value: bud.top_terpenes_1 },
                         { label: 'Terpene อันดับ 2', value: bud.top_terpenes_2 },
                         { label: 'Terpene อันดับ 3', value: bud.top_terpenes_3 }
-                    ]
-                },
-                {
-                    title: '🏆 การตรวจสอบและใบรับรอง',
-                    items: [
-                        { label: 'Lab test', value: bud.lab_test_name },
-                        { label: 'Test type', value: bud.test_type }
                     ]
                 },
                 {

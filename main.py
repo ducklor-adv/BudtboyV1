@@ -4292,6 +4292,155 @@ def join_activity(activity_id):
     else:
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
+@app.route('/api/admin/activities', methods=['POST'])
+def admin_create_activity():
+    """Admin create new activity"""
+    if not is_admin():
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    data = request.get_json()
+    required_fields = ['name', 'start_registration_date', 'end_registration_date']
+    
+    for field in required_fields:
+        if not data.get(field):
+            return jsonify({'error': f'กรุณากรอก {field}'}), 400
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+
+            cur.execute("""
+                INSERT INTO activities (
+                    name, description, start_registration_date, end_registration_date,
+                    judging_criteria, max_participants, first_prize_amount, 
+                    second_prize_amount, third_prize_amount, status, created_by
+                ) VALUES (
+                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+                ) RETURNING id
+            """, (
+                data.get('name'),
+                data.get('description'),
+                data.get('start_registration_date'),
+                data.get('end_registration_date'),
+                data.get('judging_criteria'),
+                data.get('max_participants', 0),
+                data.get('first_prize_amount', 0),
+                data.get('second_prize_amount', 0),
+                data.get('third_prize_amount', 0),
+                data.get('status', 'upcoming'),
+                session.get('user_id')
+            ))
+
+            activity_id = cur.fetchone()[0]
+            conn.commit()
+
+            return jsonify({
+                'success': True,
+                'message': 'สร้างกิจกรรมสำเร็จ',
+                'activity_id': activity_id
+            }), 201
+
+        except Exception as e:
+            conn.rollback()
+            return jsonify({'error': str(e)}), 500
+        finally:
+            cur.close()
+            return_db_connection(conn)
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+@app.route('/api/admin/activities/<int:activity_id>', methods=['PUT'])
+def admin_update_activity(activity_id):
+    """Admin update activity"""
+    if not is_admin():
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    data = request.get_json()
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+
+            # Check if activity exists
+            cur.execute("SELECT id FROM activities WHERE id = %s", (activity_id,))
+            if not cur.fetchone():
+                return jsonify({'error': 'ไม่พบกิจกรรมนี้'}), 404
+
+            cur.execute("""
+                UPDATE activities SET
+                    name = %s, description = %s, start_registration_date = %s,
+                    end_registration_date = %s, judging_criteria = %s,
+                    max_participants = %s, first_prize_amount = %s,
+                    second_prize_amount = %s, third_prize_amount = %s,
+                    status = %s, updated_at = CURRENT_TIMESTAMP
+                WHERE id = %s
+            """, (
+                data.get('name'),
+                data.get('description'),
+                data.get('start_registration_date'),
+                data.get('end_registration_date'),
+                data.get('judging_criteria'),
+                data.get('max_participants', 0),
+                data.get('first_prize_amount', 0),
+                data.get('second_prize_amount', 0),
+                data.get('third_prize_amount', 0),
+                data.get('status'),
+                activity_id
+            ))
+
+            conn.commit()
+
+            return jsonify({
+                'success': True,
+                'message': 'อัพเดทกิจกรรมสำเร็จ'
+            })
+
+        except Exception as e:
+            conn.rollback()
+            return jsonify({'error': str(e)}), 500
+        finally:
+            cur.close()
+            return_db_connection(conn)
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+@app.route('/api/admin/activities/<int:activity_id>', methods=['DELETE'])
+def admin_delete_activity(activity_id):
+    """Admin delete activity"""
+    if not is_admin():
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+
+            # Check if activity exists
+            cur.execute("SELECT name FROM activities WHERE id = %s", (activity_id,))
+            activity = cur.fetchone()
+            if not activity:
+                return jsonify({'error': 'ไม่พบกิจกรรมนี้'}), 404
+
+            # Delete activity (CASCADE will handle participants)
+            cur.execute("DELETE FROM activities WHERE id = %s", (activity_id,))
+            conn.commit()
+
+            return jsonify({
+                'success': True,
+                'message': f'ลบกิจกรรม "{activity[0]}" สำเร็จ'
+            })
+
+        except Exception as e:
+            conn.rollback()
+            return jsonify({'error': str(e)}), 500
+        finally:
+            cur.close()
+            return_db_connection(conn)
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
 def get_registration_mode():
     """Get current registration mode from admin settings"""
     conn = get_db_connection()
@@ -4885,6 +5034,13 @@ def admin_reviews():
         return redirect('/admin_login')
     return render_template('admin_reviews.html')
 
+@app.route('/admin/activities')
+def admin_activities():
+    """Admin activities management page"""
+    if not is_admin():
+        return redirect('/admin_login')
+    return render_template('admin_activities.html')
+
 
 @app.route('/api/admin/stats')
 def get_admin_stats():
@@ -4913,6 +5069,14 @@ def get_admin_stats():
             cur.execute("SELECT COUNT(*) FROM reviews")
             total_reviews = cur.fetchone()[0]
 
+            # Get total activities
+            cur.execute("SELECT COUNT(*) FROM activities")
+            total_activities = cur.fetchone()[0]
+
+            # Get active activities
+            cur.execute("SELECT COUNT(*) FROM activities WHERE status IN ('registration_open', 'judging')")
+            active_activities = cur.fetchone()[0]
+
             cur.close()
             return_db_connection(conn)
 
@@ -4920,7 +5084,9 @@ def get_admin_stats():
                 'total_users': total_users,
                 'pending_users': pending_users,
                 'total_buds': total_buds,
-                'total_reviews': total_reviews
+                'total_reviews': total_reviews,
+                'total_activities': total_activities,
+                'active_activities': active_activities
             })
 
         except Exception as e:

@@ -474,6 +474,16 @@
                     <div class="stat-number" id="totalReviews">-</div>
                     <div class="stat-label">รีวิวทั้งหมด</div>
                 </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🎉</div>
+                    <div class="stat-number" id="totalActivities">-</div>
+                    <div class="stat-label">กิจกรรมทั้งหมด</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🔥</div>
+                    <div class="stat-number" id="activeActivities">-</div>
+                    <div class="stat-label">กิจกรรมที่เปิดอยู่</div>
+                </div>
             </div>
 
             <div id="loadingState" class="loading">
@@ -525,6 +535,10 @@
         <a href="/admin/reviews" class="nav-tab">
             <span class="nav-icon">⭐</span>
             <span class="nav-label">รีวิว</span>
+        </a>
+        <a href="/admin/activities" class="nav-tab">
+            <span class="nav-icon">🎉</span>
+            <span class="nav-label">กิจกรรม</span>
         </a>
         <a href="/admin/settings" class="nav-tab">
             <span class="nav-icon">⚙️</span>
@@ -625,6 +639,8 @@
                 document.getElementById('pendingUsers').textContent = stats.pending_users || 0;
                 document.getElementById('totalBuds').textContent = stats.total_buds || 0;
                 document.getElementById('totalReviews').textContent = stats.total_reviews || 0;
+                document.getElementById('totalActivities').textContent = stats.total_activities || 0;
+                document.getElementById('activeActivities').textContent = stats.active_activities || 0;
             },
 
             displayPendingUsers(users) {

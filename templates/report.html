@@ -896,19 +896,23 @@
 
     <!-- Bottom Navigation -->
     <div class="bottom-nav">
-        <a href="/activity" class="nav-tab">
+        <a href="/activity" class="nav-tab" style="text-decoration: none; color: inherit;">
             <div class="nav-icon">📊</div>
             <div class="nav-label">รายการของคุณ</div>
         </a>
-        <a href="/search-tool" class="nav-tab">
+        <a href="/search-tool" class="nav-tab" style="text-decoration: none; color: inherit;">
             <div class="nav-icon">🔍</div>
             <div class="nav-label">ค้นหา</div>
         </a>
-        <a href="/report" class="nav-tab active">
+        <a href="/report" class="nav-tab active" style="text-decoration: none; color: inherit;">
             <div class="nav-icon">📈</div>
             <div class="nav-label">รายการทั้งหมด</div>
         </a>
-        <a href="/profile" class="nav-tab">
+        <a href="/activities" class="nav-tab" style="text-decoration: none; color: inherit;">
+            <div class="nav-icon">🎉</div>
+            <div class="nav-label">กิจกรรม</div>
+        </a>
+        <a href="/profile" class="nav-tab" style="text-decoration: none; color: inherit;">
             <div class="nav-icon">👤</div>
             <div class="nav-label">โปรไฟล์</div>
         </a>
@@ -995,7 +999,7 @@
             } else {
                 populateFilterDropdown(column);
                 dropdown.style.display = 'block';
-                
+
                 // Position dropdown correctly
                 const header = dropdown.parentElement;
                 const rect = header.getBoundingClientRect();
@@ -1070,7 +1074,7 @@
         function updateFilterCount() {
             const filterCount = Object.keys(activeFilters).length;
             const summaryCards = document.getElementById('summaryCards');
-            
+
             // ลบการแสดงจำนวน filter เก่า (ถ้ามี)
             const existingFilterInfo = document.getElementById('filterInfo');
             if (existingFilterInfo) {
@@ -1098,7 +1102,7 @@
         function clearAllFilters() {
             // ลบ filter ทั้งหมด
             activeFilters = {};
-            
+
             // ซ่อน indicator ทั้งหมด
             document.querySelectorAll('.filter-indicator').forEach(indicator => {
                 indicator.style.display = 'none';

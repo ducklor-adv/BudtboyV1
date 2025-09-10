@@ -1196,6 +1196,42 @@ def create_tables():
                     VALUES (%s, %s)
                 """, default_settings)
 
+            # Create activities table
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS activities (
+                    id SERIAL PRIMARY KEY,
+                    name VARCHAR(255) NOT NULL,
+                    description TEXT,
+                    start_registration_date TIMESTAMP NOT NULL,
+                    end_registration_date TIMESTAMP NOT NULL,
+                    judging_criteria TEXT,
+                    max_participants INTEGER DEFAULT 0,
+                    first_prize_amount DECIMAL(10,2) DEFAULT 0,
+                    second_prize_amount DECIMAL(10,2) DEFAULT 0,
+                    third_prize_amount DECIMAL(10,2) DEFAULT 0,
+                    status VARCHAR(20) CHECK (status IN ('upcoming', 'registration_open', 'registration_closed', 'judging', 'completed')) DEFAULT 'upcoming',
+                    created_by INTEGER REFERENCES users(id),
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                );
+            """)
+
+            # Create activity participants table
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS activity_participants (
+                    id SERIAL PRIMARY KEY,
+                    activity_id INTEGER REFERENCES activities(id) ON DELETE CASCADE,
+                    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                    bud_id INTEGER REFERENCES buds_data(id) ON DELETE CASCADE,
+                    submission_images TEXT[] DEFAULT '{}',
+                    submission_description TEXT,
+                    rank INTEGER,
+                    prize_amount DECIMAL(10,2),
+                    registered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    UNIQUE(activity_id, user_id, bud_id)
+                );
+            """)
+
             # Create index for better performance
             cur.execute("""
                 CREATE INDEX IF NOT EXISTS idx_strain_names_th ON strain_names(name_th);
@@ -1216,6 +1252,10 @@ def create_tables():
                 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
                 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
                 CREATE INDEX IF NOT EXISTS idx_admin_settings_key ON admin_settings(setting_key);
+                CREATE INDEX IF NOT EXISTS idx_activities_status ON activities(status);
+                CREATE INDEX IF NOT EXISTS idx_activities_dates ON activities(start_registration_date, end_registration_date);
+                CREATE INDEX IF NOT EXISTS idx_activity_participants_activity ON activity_participants(activity_id);
+                CREATE INDEX IF NOT EXISTS idx_activity_participants_user ON activity_participants(user_id);
             """)
 
             conn.commit()
@@ -4063,6 +4103,195 @@ def friends_reviews_page():
         return redirect('/profile?not_approved=1')
     return render_template('friends_reviews.html')
 
+@app.route('/activities')
+def activities_page():
+    # Check if user is logged in
+    if 'user_id' not in session:
+        return redirect('/auth')
+    if not is_approved():
+        return redirect('/profile?not_approved=1')
+    return render_template('activities.html')
+
+@app.route('/api/activities', methods=['GET'])
+def get_activities():
+    """Get all activities"""
+    if not is_authenticated():
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("""
+                SELECT a.id, a.name, a.description, a.start_registration_date, a.end_registration_date,
+                       a.judging_criteria, a.max_participants, a.first_prize_amount, a.second_prize_amount,
+                       a.third_prize_amount, a.status, a.created_at,
+                       COUNT(ap.id) as participant_count
+                FROM activities a
+                LEFT JOIN activity_participants ap ON a.id = ap.activity_id
+                GROUP BY a.id, a.name, a.description, a.start_registration_date, a.end_registration_date,
+                         a.judging_criteria, a.max_participants, a.first_prize_amount, a.second_prize_amount,
+                         a.third_prize_amount, a.status, a.created_at
+                ORDER BY a.created_at DESC
+            """)
+
+            activities = []
+            for row in cur.fetchall():
+                activities.append({
+                    'id': row[0],
+                    'name': row[1],
+                    'description': row[2],
+                    'start_registration_date': row[3].strftime('%Y-%m-%d %H:%M:%S') if row[3] else None,
+                    'end_registration_date': row[4].strftime('%Y-%m-%d %H:%M:%S') if row[4] else None,
+                    'judging_criteria': row[5],
+                    'max_participants': row[6],
+                    'first_prize_amount': float(row[7]) if row[7] else 0,
+                    'second_prize_amount': float(row[8]) if row[8] else 0,
+                    'third_prize_amount': float(row[9]) if row[9] else 0,
+                    'status': row[10],
+                    'created_at': row[11].strftime('%Y-%m-%d %H:%M:%S') if row[11] else None,
+                    'participant_count': row[12]
+                })
+
+            return jsonify({'activities': activities})
+
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+        finally:
+            cur.close()
+            return_db_connection(conn)
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+@app.route('/api/activities/<int:activity_id>/participants', methods=['GET'])
+def get_activity_participants(activity_id):
+    """Get participants for specific activity"""
+    if not is_authenticated():
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("""
+                SELECT ap.id, ap.submission_description, ap.submission_images, ap.rank, ap.prize_amount,
+                       ap.registered_at, u.username, u.profile_image_url,
+                       b.strain_name_en, b.strain_name_th, b.image_1_url, b.image_2_url, b.image_3_url, b.image_4_url
+                FROM activity_participants ap
+                JOIN users u ON ap.user_id = u.id
+                JOIN buds_data b ON ap.bud_id = b.id
+                WHERE ap.activity_id = %s
+                ORDER BY ap.rank ASC NULLS LAST, ap.registered_at ASC
+            """, (activity_id,))
+
+            participants = []
+            for row in cur.fetchall():
+                participants.append({
+                    'id': row[0],
+                    'submission_description': row[1],
+                    'submission_images': row[2] if row[2] else [],
+                    'rank': row[3],
+                    'prize_amount': float(row[4]) if row[4] else 0,
+                    'registered_at': row[5].strftime('%Y-%m-%d %H:%M:%S') if row[5] else None,
+                    'username': row[6],
+                    'profile_image_url': row[7],
+                    'strain_name_en': row[8],
+                    'strain_name_th': row[9],
+                    'bud_images': [row[10], row[11], row[12], row[13]]
+                })
+
+            return jsonify({'participants': participants})
+
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+        finally:
+            cur.close()
+            return_db_connection(conn)
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+@app.route('/api/activities/<int:activity_id>/join', methods=['POST'])
+def join_activity(activity_id):
+    """Join an activity with a bud"""
+    if not is_authenticated():
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    user_id = session['user_id']
+    data = request.get_json()
+    bud_id = data.get('bud_id')
+    submission_description = data.get('submission_description', '')
+
+    if not bud_id:
+        return jsonify({'error': 'กรุณาเลือกดอกที่ต้องการส่งเข้าประกวด'}), 400
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+
+            # Check if activity exists and is open for registration
+            cur.execute("""
+                SELECT id, name, status, max_participants, end_registration_date
+                FROM activities 
+                WHERE id = %s
+            """, (activity_id,))
+            
+            activity = cur.fetchone()
+            if not activity:
+                return jsonify({'error': 'ไม่พบกิจกรรมนี้'}), 404
+
+            if activity[2] != 'registration_open':
+                return jsonify({'error': 'กิจกรรมนี้ไม่เปิดรับสมัครแล้ว'}), 400
+
+            if activity[4] and activity[4] < datetime.now():
+                return jsonify({'error': 'หมดเวลาการสมัครแล้ว'}), 400
+
+            # Check if user owns the bud
+            cur.execute("SELECT id FROM buds_data WHERE id = %s AND created_by = %s", (bud_id, user_id))
+            if not cur.fetchone():
+                return jsonify({'error': 'ไม่พบดอกนี้หรือคุณไม่ใช่เจ้าของ'}), 403
+
+            # Check if already joined with this bud
+            cur.execute("""
+                SELECT id FROM activity_participants 
+                WHERE activity_id = %s AND user_id = %s AND bud_id = %s
+            """, (activity_id, user_id, bud_id))
+            
+            if cur.fetchone():
+                return jsonify({'error': 'คุณได้ส่งดอกนี้เข้าร่วมกิจกรรมแล้ว'}), 400
+
+            # Check participant limit
+            if activity[3] > 0:  # max_participants
+                cur.execute("SELECT COUNT(*) FROM activity_participants WHERE activity_id = %s", (activity_id,))
+                current_count = cur.fetchone()[0]
+                if current_count >= activity[3]:
+                    return jsonify({'error': 'กิจกรรมนี้เต็มแล้ว'}), 400
+
+            # Join activity
+            cur.execute("""
+                INSERT INTO activity_participants (activity_id, user_id, bud_id, submission_description)
+                VALUES (%s, %s, %s, %s)
+                RETURNING id
+            """, (activity_id, user_id, bud_id, submission_description))
+
+            participant_id = cur.fetchone()[0]
+            conn.commit()
+
+            return jsonify({
+                'success': True,
+                'message': f'เข้าร่วมกิจกรรม "{activity[1]}" สำเร็จ',
+                'participant_id': participant_id
+            })
+
+        except Exception as e:
+            conn.rollback()
+            return jsonify({'error': str(e)}), 500
+        finally:
+            cur.close()
+            return_db_connection(conn)
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
 def get_registration_mode():
     """Get current registration mode from admin settings"""
     conn = get_db_connection()
@@ -6037,6 +6266,127 @@ def create_new_admin():
             'success': False,
             'error': message
         }), 400
+
+@app.route('/admin/activities')
+def admin_activities():
+    """Admin activities management page"""
+    if not is_admin():
+        return redirect('/admin_login')
+    return render_template('admin_activities.html')
+
+@app.route('/api/admin/activities', methods=['GET'])
+def admin_get_activities():
+    """Admin get all activities"""
+    if not is_admin():
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("""
+                SELECT a.id, a.name, a.description, a.start_registration_date, a.end_registration_date,
+                       a.judging_criteria, a.max_participants, a.first_prize_amount, a.second_prize_amount,
+                       a.third_prize_amount, a.status, a.created_at, a.created_by,
+                       COUNT(ap.id) as participant_count,
+                       u.username as created_by_username
+                FROM activities a
+                LEFT JOIN activity_participants ap ON a.id = ap.activity_id
+                LEFT JOIN users u ON a.created_by = u.id
+                GROUP BY a.id, a.name, a.description, a.start_registration_date, a.end_registration_date,
+                         a.judging_criteria, a.max_participants, a.first_prize_amount, a.second_prize_amount,
+                         a.third_prize_amount, a.status, a.created_at, a.created_by, u.username
+                ORDER BY a.created_at DESC
+            """)
+
+            activities = []
+            for row in cur.fetchall():
+                activities.append({
+                    'id': row[0],
+                    'name': row[1],
+                    'description': row[2],
+                    'start_registration_date': row[3].strftime('%Y-%m-%d %H:%M:%S') if row[3] else None,
+                    'end_registration_date': row[4].strftime('%Y-%m-%d %H:%M:%S') if row[4] else None,
+                    'judging_criteria': row[5],
+                    'max_participants': row[6],
+                    'first_prize_amount': float(row[7]) if row[7] else 0,
+                    'second_prize_amount': float(row[8]) if row[8] else 0,
+                    'third_prize_amount': float(row[9]) if row[9] else 0,
+                    'status': row[10],
+                    'created_at': row[11].strftime('%Y-%m-%d %H:%M:%S') if row[11] else None,
+                    'created_by': row[12],
+                    'participant_count': row[13],
+                    'created_by_username': row[14]
+                })
+
+            return jsonify({'activities': activities})
+
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+        finally:
+            cur.close()
+            return_db_connection(conn)
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+@app.route('/api/admin/activities', methods=['POST'])
+def admin_create_activity():
+    """Admin create new activity"""
+    if not is_admin():
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    data = request.get_json()
+    admin_id = session.get('user_id')  # Get admin user ID if available
+
+    required_fields = ['name', 'start_registration_date', 'end_registration_date']
+    for field in required_fields:
+        if not data.get(field):
+            return jsonify({'error': f'กรุณากรอก {field}'}), 400
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+
+            cur.execute("""
+                INSERT INTO activities (
+                    name, description, start_registration_date, end_registration_date,
+                    judging_criteria, max_participants, first_prize_amount, second_prize_amount,
+                    third_prize_amount, status, created_by
+                ) VALUES (
+                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+                ) RETURNING id
+            """, (
+                data.get('name'),
+                data.get('description'),
+                data.get('start_registration_date'),
+                data.get('end_registration_date'),
+                data.get('judging_criteria'),
+                data.get('max_participants', 0),
+                data.get('first_prize_amount', 0),
+                data.get('second_prize_amount', 0),
+                data.get('third_prize_amount', 0),
+                data.get('status', 'upcoming'),
+                admin_id
+            ))
+
+            activity_id = cur.fetchone()[0]
+            conn.commit()
+
+            return jsonify({
+                'success': True,
+                'message': 'สร้างกิจกรรมสำเร็จ',
+                'activity_id': activity_id
+            }), 201
+
+        except Exception as e:
+            conn.rollback()
+            return jsonify({'error': str(e)}), 500
+        finally:
+            cur.close()
+            return_db_connection(conn)
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
 @app.route('/api/admin/create_sample_data', methods=['POST'])
 def admin_create_sample_data():

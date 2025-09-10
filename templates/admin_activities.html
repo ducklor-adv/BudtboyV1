@@ -571,20 +571,106 @@
                         <div class="form-group">
                             <label class="form-label">ประเภทดอกที่รับสมัคร</label>
                             <select id="allowedStrainTypes" class="form-control" multiple>
+                                <option value="">ทุกประเภท</option>
                                 <option value="Indica">Indica</option>
                                 <option value="Sativa">Sativa</option>
                                 <option value="Hybrid">Hybrid</option>
                             </select>
-                            <small class="form-text">กด Ctrl/Cmd เพื่อเลือกหลายประเภท (ว่างเปล่า = ทุกประเภท)</small>
+                            <small class="form-text">กด Ctrl/Cmd เพื่อเลือกหลายประเภท</small>
                         </div>
                         <div class="form-group">
                             <label class="form-label">วิธีการปลูกที่รับสมัคร</label>
                             <select id="allowedGrowMethods" class="form-control" multiple>
+                                <option value="">ทุกวิธี</option>
                                 <option value="Indoor">Indoor</option>
                                 <option value="Outdoor">Outdoor</option>
                                 <option value="Greenhouse">Greenhouse</option>
+                                <option value="Hydroponic">Hydroponic</option>
                             </select>
-                            <small class="form-text">กด Ctrl/Cmd เพื่อเลือกหลายวิธี (ว่างเปล่า = ทุกวิธี)</small>
+                            <small class="form-text">กด Ctrl/Cmd เพื่อเลือกหลายวิธี</small>
+                        </div>
+                    </div>
+
+                    <!-- เกรดและประเภทปุ่ย -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">เกรดที่รับสมัคร</label>
+                            <select id="allowedGrades" class="form-control" multiple>
+                                <option value="">ทุกเกรด</option>
+                                <option value="A+">A+</option>
+                                <option value="A">A</option>
+                                <option value="B+">B+</option>
+                                <option value="B">B</option>
+                                <option value="C">C</option>
+                            </select>
+                            <small class="form-text">กด Ctrl/Cmd เพื่อเลือกหลายเกรด</small>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">ประเภทปุ่ยที่รับสมัคร</label>
+                            <select id="allowedFertilizerTypes" class="form-control" multiple>
+                                <option value="">ทุกประเภท</option>
+                                <option value="Organic">Organic</option>
+                                <option value="Chemical">Chemical</option>
+                                <option value="Mixed">Mixed</option>
+                            </select>
+                            <small class="form-text">กด Ctrl/Cmd เพื่อเลือกหลายประเภท</small>
+                        </div>
+                    </div>
+
+                    <!-- เวลาแนะนำและประเภทการออกดอก -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">เวลาที่แนะนำ</label>
+                            <select id="allowedRecommendedTimes" class="form-control" multiple>
+                                <option value="">ทุกเวลา</option>
+                                <option value="กลางวัน">กลางวัน</option>
+                                <option value="กลางคืน">กลางคืน</option>
+                                <option value="ตลอดวัน">ตลอดวัน</option>
+                            </select>
+                            <small class="form-text">กด Ctrl/Cmd เพื่อเลือกหลายเวลา</small>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">ประเภทการออกดอก</label>
+                            <select id="allowedFloweringTypes" class="form-control" multiple>
+                                <option value="">ทุกประเภท</option>
+                                <option value="Photoperiod">Photoperiod</option>
+                                <option value="Autoflower">Autoflower</option>
+                            </select>
+                            <small class="form-text">กด Ctrl/Cmd เพื่อเลือกหลายประเภท</small>
+                        </div>
+                    </div>
+
+                    <!-- Terpenes ที่ต้องการ -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Terpenes หลักที่ต้องการ</label>
+                            <select id="preferredTerpenes" class="form-control" multiple>
+                                <option value="">ทุกประเภท</option>
+                                <option value="Myrcene">Myrcene</option>
+                                <option value="Limonene">Limonene</option>
+                                <option value="Pinene">Pinene</option>
+                                <option value="Linalool">Linalool</option>
+                                <option value="Caryophyllene">Caryophyllene</option>
+                                <option value="Humulene">Humulene</option>
+                                <option value="Terpinolene">Terpinolene</option>
+                                <option value="Ocimene">Ocimene</option>
+                                <option value="Bisabolol">Bisabolol</option>
+                                <option value="Camphene">Camphene</option>
+                                <option value="Eucalyptol">Eucalyptol</option>
+                                <option value="Geraniol">Geraniol</option>
+                                <option value="Nerolidol">Nerolidol</option>
+                                <option value="Valencene">Valencene</option>
+                                <option value="Borneol">Borneol</option>
+                            </select>
+                            <small class="form-text">เลือก Terpenes ที่ต้องการให้คะแนนพิเศษ</small>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">สถานะดอกที่รับสมัคร</label>
+                            <select id="allowedStatus" class="form-control" multiple>
+                                <option value="available" selected>ยังเหลือ</option>
+                                <option value="sold_out">หมดแล้ว</option>
+                            </select>
+                            <small class="form-text">สถานะของดอกที่รับเข้าประกวด</small>
                         </div>
                     </div>
 
@@ -686,6 +772,24 @@
                         <label class="form-label">ผลกระทบที่ให้คะแนนพิเศษ</label>
                         <input type="text" id="preferredEffects" class="form-control" placeholder="เช่น ผ่อนคลาย, สร้างสรรค์, หลับง่าย (คั่นด้วยเครื่องหมายจุลภาค)">
                         <small class="form-text">ดอกที่มีผลกระทบเหล่านี้จะได้คะแนนพิเศษ</small>
+                    </div>
+                </div>
+
+                <!-- ตัวอย่างดอกที่เข้าเกณฑ์ -->
+                <div class="form-section" style="background: #f8f9fa; border-left: 4px solid #17a2b8;">
+                    <h3 style="color: #17a2b8; margin-bottom: 15px;">🔍 ตัวอย่างดอกที่เข้าเกณฑ์</h3>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="AdminActivities.previewEligibleBuds()" style="margin-bottom: 15px;">
+                        🔍 ดูดอกที่เข้าเกณฑ์
+                    </button>
+                    <div id="eligibleBudsPreview" style="display: none;">
+                        <div style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px; padding: 15px; background: white;">
+                            <div id="eligibleBudsList">
+                                <!-- ดอกที่เข้าเกณฑ์จะแสดงที่นี่ -->
+                            </div>
+                        </div>
+                        <div style="margin-top: 10px; font-size: 14px; color: #666;">
+                            <strong>รวม: <span id="eligibleBudsCount">0</span> ดอก</strong> ที่เข้าเกณฑ์การประกวด
+                        </div>
                     </div>
                 </div>
 
@@ -1008,6 +1112,87 @@
                 }
             },
 
+            async previewEligibleBuds() {
+                const criteria = this.buildCriteriaFromForm();
+                
+                try {
+                    const response = await fetch('/api/admin/preview_eligible_buds', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(criteria)
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        this.displayEligibleBuds(data.buds || []);
+                        document.getElementById('eligibleBudsPreview').style.display = 'block';
+                    } else {
+                        const error = await response.json();
+                        this.showMessage(error.error || 'เกิดข้อผิดพลาด', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error previewing eligible buds:', error);
+                    this.showMessage('เกิดข้อผิดพลาดในการดูตัวอย่าง', 'error');
+                }
+            },
+
+            buildCriteriaFromForm() {
+                return {
+                    allowed_strain_types: this.getMultiSelectValues('allowedStrainTypes'),
+                    allowed_grow_methods: this.getMultiSelectValues('allowedGrowMethods'),
+                    allowed_grades: this.getMultiSelectValues('allowedGrades'),
+                    allowed_fertilizer_types: this.getMultiSelectValues('allowedFertilizerTypes'),
+                    allowed_recommended_times: this.getMultiSelectValues('allowedRecommendedTimes'),
+                    allowed_flowering_types: this.getMultiSelectValues('allowedFloweringTypes'),
+                    preferred_terpenes: this.getMultiSelectValues('preferredTerpenes'),
+                    allowed_status: this.getMultiSelectValues('allowedStatus'),
+                    min_thc: this.getFloatValue('minThc'),
+                    max_thc: this.getFloatValue('maxThc'),
+                    min_cbd: this.getFloatValue('minCbd'),
+                    max_cbd: this.getFloatValue('maxCbd'),
+                    require_certificate: document.getElementById('requireCertificate').checked,
+                    require_min_images: document.getElementById('requireMinImages').checked,
+                    min_image_count: parseInt(document.getElementById('minImageCount').value) || 3,
+                    require_min_reviews: document.getElementById('requireMinReviews').checked,
+                    min_review_count: parseInt(document.getElementById('minReviewCount').value) || 1,
+                    preferred_aromas: document.getElementById('preferredAromas').value,
+                    preferred_effects: document.getElementById('preferredEffects').value
+                };
+            },
+
+            displayEligibleBuds(buds) {
+                const container = document.getElementById('eligibleBudsList');
+                const countElement = document.getElementById('eligibleBudsCount');
+                
+                countElement.textContent = buds.length;
+
+                if (buds.length === 0) {
+                    container.innerHTML = '<div style="text-align: center; color: #666; padding: 20px;">ไม่มีดอกที่เข้าเกณฑ์การประกวด</div>';
+                    return;
+                }
+
+                container.innerHTML = buds.map(bud => `
+                    <div style="border: 1px solid #eee; border-radius: 8px; padding: 10px; margin-bottom: 10px; background: #f9f9f9;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong>${bud.strain_name_en || 'ไม่ระบุ'}</strong>
+                                ${bud.strain_name_th ? `<br><small style="color: #666;">${bud.strain_name_th}</small>` : ''}
+                                <br><small style="color: #999;">ID: ${bud.id} | ${bud.strain_type || 'ไม่ระบุ'} | ${bud.grade || 'ไม่ระบุ'}</small>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 12px; color: #666;">
+                                    THC: ${bud.thc_percentage ? bud.thc_percentage.toFixed(1) + '%' : '-'}<br>
+                                    CBD: ${bud.cbd_percentage ? bud.cbd_percentage.toFixed(1) + '%' : '-'}
+                                </div>
+                                <div style="font-size: 11px; color: #999; margin-top: 4px;">
+                                    รีวิว: ${bud.review_count || 0} | คะแนน: ${bud.avg_rating ? bud.avg_rating.toFixed(1) : '0'}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            },
+
             async saveActivity() {
                 const form = document.getElementById('activityForm');
 
@@ -1035,31 +1220,15 @@
                     third_prize_description: document.getElementById('thirdPrizeDescription').value,
                     third_prize_value: parseFloat(document.getElementById('thirdPrizeValue').value) || 0,
 
-                    // เกณฑ์การคัดเลือก
-                    allowed_strain_types: this.getMultiSelectValues('allowedStrainTypes'),
-                    allowed_grow_methods: this.getMultiSelectValues('allowedGrowMethods'),
-                    min_thc: this.getFloatValue('minThc'),
-                    max_thc: this.getFloatValue('maxThc'),
-                    min_cbd: this.getFloatValue('minCbd'),
-                    max_cbd: this.getFloatValue('maxCbd'),
+                    // เกณฑ์การคัดเลือกทั้งหมด
+                    ...this.buildCriteriaFromForm(),
 
                     // น้ำหนักคะแนน
                     thc_weight: parseInt(document.getElementById('thcWeight').value) || 0,
                     cbd_weight: parseInt(document.getElementById('cbdWeight').value) || 0,
                     review_weight: parseInt(document.getElementById('reviewWeight').value) || 0,
                     image_weight: parseInt(document.getElementById('imageWeight').value) || 0,
-                    cert_weight: parseInt(document.getElementById('certWeight').value) || 0,
-
-                    // เกณฑ์พิเศษ
-                    require_certificate: document.getElementById('requireCertificate').checked,
-                    require_min_images: document.getElementById('requireMinImages').checked,
-                    min_image_count: parseInt(document.getElementById('minImageCount').value) || 3,
-                    require_min_reviews: document.getElementById('requireMinReviews').checked,
-                    min_review_count: parseInt(document.getElementById('minReviewCount').value) || 1,
-
-                    // กลิ่นรสและผลกระทบที่ต้องการ
-                    preferred_aromas: document.getElementById('preferredAromas').value,
-                    preferred_effects: document.getElementById('preferredEffects').value
+                    cert_weight: parseInt(document.getElementById('certWeight').value) || 0
                 };
 
                 try {

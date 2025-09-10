@@ -743,6 +743,117 @@
             margin-top: 15px;
         }
 
+        /* Terpenes Custom Styles */
+        .terpenes-simple-container {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid #e9ecef;
+            margin-bottom: 20px;
+        }
+
+        .tab-headers {
+            display: flex;
+            border-bottom: 2px solid #FF8C00;
+            margin-bottom: 15px;
+        }
+
+        .tab-header {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 500;
+            color: #6c757d;
+            transition: all 0.3s ease;
+        }
+
+        .tab-header.active {
+            color: #2c5530;
+            border-bottom-color: #FF8C00;
+        }
+
+        .tab-header:hover {
+            color: #2c5530;
+        }
+
+        .terpene-display-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .terpene-rank-display {
+            flex: 1;
+            text-align: center;
+        }
+
+        .terpene-rank-value {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 8px;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .terpene-rank-value .placeholder {
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        .terpene-percentage-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .terpene-percentage-input {
+            flex: 1;
+        }
+
+        .terpene-percentage-input label {
+            font-size: 0.9em;
+            color: #495057;
+        }
+
+        .terpene-percentage-input input {
+            padding: 8px;
+            font-size: 14px;
+        }
+
+        .terpene-options {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .terpene-checkbox {
+            display: block;
+            margin-bottom: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: color 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terpene-checkbox:hover {
+            color: #FF8C00;
+        }
+
+        .terpene-checkbox input[type="checkbox"] {
+            accent-color: #FF8C00;
+            transform: scale(1.1);
+        }
+
         @media (max-width: 768px) {
             .form-row {
                 flex-direction: column;
@@ -785,6 +896,34 @@
             .column-title {
                 font-size: 1.1em;
                 margin-bottom: 15px;
+            }
+
+            /* Terpenes Responsive */
+            .tab-headers {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .tab-header {
+                width: 100%;
+                text-align: center;
+                border-bottom: none;
+                border-top: 2px solid transparent;
+            }
+
+            .tab-header.active {
+                border-bottom-color: transparent;
+                border-top-color: #FF8C00;
+            }
+
+            .terpene-display-row,
+            .terpene-percentage-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .terpene-percentage-input {
+                width: 100%;
             }
         }
     </style>
@@ -1130,10 +1269,78 @@
                         </div>
                     </div>
 
+                    <!-- Simplified Terpenes Container -->
+                    <div class="terpenes-simple-container">
+                        <!-- Tab Headers -->
+                        <div class="tab-headers">
+                            <button type="button" class="tab-header active" data-tab="terpene-1">Terpene อันดับ 1</button>
+                            <button type="button" class="tab-header" data-tab="terpene-2">Terpene อันดับ 2</button>
+                            <button type="button" class="tab-header" data-tab="terpene-3">Terpene อันดับ 3</button>
+                        </div>
+
+                        <!-- Display Selected Terpenes Row -->
+                        <div class="terpene-display-row">
+                            <div class="terpene-rank-display">
+                                <div class="terpene-rank-value" id="display-terpene-1">
+                                    <span class="placeholder">ยังไม่ระบุ</span>
+                                </div>
+                            </div>
+                            <div class="terpene-rank-display">
+                                <div class="terpene-rank-value" id="display-terpene-2">
+                                    <span class="placeholder">ยังไม่ระบุ</span>
+                                </div>
+                            </div>
+                            <div class="terpene-rank-display">
+                                <div class="terpene-rank-value" id="display-terpene-3">
+                                    <span class="placeholder">ยังไม่ระบุ</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Terpene Percentage Input Row -->
+                        <div class="terpene-percentage-row">
+                            <div class="terpene-percentage-input">
+                                <label for="terpene_1_percentage">% Terpene อันดับ 1</label>
+                                <input type="number" id="terpene_1_percentage" name="terpene_1_percentage" 
+                                       step="0.01" min="0" max="100" placeholder="0.00">
+                            </div>
+                            <div class="terpene-percentage-input">
+                                <label for="terpene_2_percentage">% Terpene อันดับ 2</label>
+                                <input type="number" id="terpene_2_percentage" name="terpene_2_percentage" 
+                                       step="0.01" min="0" max="100" placeholder="0.00">
+                            </div>
+                            <div class="terpene-percentage-input">
+                                <label for="terpene_3_percentage">% Terpene อันดับ 3</label>
+                                <input type="number" id="terpene_3_percentage" name="terpene_3_percentage" 
+                                       step="0.01" min="0" max="100" placeholder="0.00">
+                            </div>
+                        </div>
+
+                        <!-- Tab Content -->
+                        <div class="tab-content active" id="terpene-1-content">
+                        </div>
+
+                        <!-- Hidden inputs for form submission -->
+                        <input type="hidden" id="top_terpenes_1" name="top_terpenes_1">
+                        <input type="hidden" id="top_terpenes_2" name="top_terpenes_2">
+                        <input type="hidden" id="top_terpenes_3" name="top_terpenes_3">
+
+                        <!-- Terpene Options List -->
+                        <div class="terpene-options">
+                            <label class="terpene-checkbox"><input type="checkbox" value="ไมร์ซีน (Myrcene)"> มะม่วง/สมุนไพร - ไมร์ซีน (Myrcene) → ผ่อนคลาย, ง่วง</label>
+                            <label class="terpene-checkbox"><input type="checkbox" value="ลิโมนีน (Limonene)"> ส้ม/เลมอน - ลิโมนีน (Limonene) → อารมณ์ดี, ต้านเครียด</label>
+                            <label class="terpene-checkbox"><input type="checkbox" value="แอลฟา‑ไพนีน (α‑Pinene)"> สน - แอลฟา‑ไพนีน (α‑Pinene) → เปิดปอด, ช่วยโฟกัส</label>
+                            <label class="terpene-checkbox"><input type="checkbox" value="เบตา‑ไพนีน (β‑Pinene)"> โรสแมรี่ - เบตา‑ไพนีน (β‑Pinene) → ต้านอักเสบ</label>
+                            <label class="terpene-checkbox"><input type="checkbox" value="เบตา‑คาริโอฟีลลีน (β‑Caryophyllene)"> พริกไทย/เผ็ด - เบตา‑คาริโอฟีลลีน (β‑Caryophyllene) → บรรเทาปวด, ต้านอักเสบ</label>
+                            <label class="terpene-checkbox"><input type="checkbox" value="ลินาลูล (Linalool)"> ลาเวนเดอร์ - ลินาลูล (Linalool) → คลายกังวล, ช่วยหลับ</label>
+                            <label class="terpene-checkbox"><input type="checkbox" value="ฮิวมูเลน (Humulene)"> ฮ็อปส์/ไม้ - ฮิวมูเลน (Humulene) → ลดอยากอาหาร, ต้านอักเสบ</label>
+                        </div>
+                    </div>
+
                     <div class="form-row">
                         <div class="form-group">
                             <label for="top_terpenes_1">Terpene อันดับ 1</label>
-                            <select id="top_terpenes_1" name="top_terpenes_1">
+                            <select id="top_terpenes_1_select" name="top_terpenes_1_select">
                                 <option value="">เลือก Terpene อันดับ 1</option>
                                 <option value="ไมร์ซีน (Myrcene)">ไมร์ซีน (Myrcene) - มะม่วง/สมุนไพร → ผ่อนคลาย, ง่วง</option>
                                 <option value="ลิโมนีน (Limonene)">ลิโมนีน (Limonene) - ส้ม/เลมอน → อารมณ์ดี, ต้านเครียด</option>
@@ -1144,7 +1351,7 @@
                                 <option value="ฮิวมูเลน (Humulene)">ฮิวมูเลน (Humulene) - ฮ็อปส์/ไม้ → ลดอยากอาหาร, ต้านอักเสบ</option>
                                 <option value="เทอร์พินอลีน (Terpinolene)">เทอร์พินอลีน (Terpinolene) - ดอกไม้/สนหวาน → กระตุ้นเบา, ต้านอนุมูลฯ</option>
                                 <option value="โอซิมีน (Ocimene)">โอซิมีน (Ocimene) - ดอกไม้หวาน → ขยายหลอดลม, ต้านไวรัส</option>
-                                <option value="ยูคาลิปตอล / 1,8‑ซิเนออล (Eucalyptol)">ยูคาลิปตอล / 1,8‑ซิเนออล (Eucalyptol) - เมนทอล/ยูคาลิปตัส → สดชื่น,ต้านจุลชีพ</option>
+                                <option value="ยูคาลิปตอล / 1,8‑ซิเนออล (Eucalyptol)">ยูคาลิปตอล / 1,8‑ซิเนออล (Eucalyptol) - เมนทอล/ยูคาลิปตัส → สดชื่น, ต้านจุลชีพ</option>
                                 <option value="เนโรลิดอล (Nerolidol)">เนโรลิดอล (Nerolidol) - ชาเขียว/ไม้ → ผ่อนคลายกล้ามเนื้อ</option>
                                 <option value="บิซาโบลอล (Bisabolol)">บิซาโบลอล (Bisabolol) - คาโมมายล์ → ปกป้องผิว, ต้านอักเสบ</option>
                                 <option value="ฟาร์นีซีน (Farnesene)">ฟาร์นีซีน (Farnesene) - แอปเปิ้ลเขียว → ต้านแบคทีเรีย</option>
@@ -1156,7 +1363,7 @@
                         </div>
                         <div class="form-group">
                             <label for="top_terpenes_2">Terpene อันดับ 2</label>
-                            <select id="top_terpenes_2" name="top_terpenes_2">
+                            <select id="top_terpenes_2_select" name="top_terpenes_2_select">
                                 <option value="">เลือก Terpene อันดับ 2</option>
                                 <option value="ไมร์ซีน (Myrcene)">ไมร์ซีน (Myrcene) - มะม่วง/สมุนไพร → ผ่อนคลาย, ง่วง</option>
                                 <option value="ลิโมนีน (Limonene)">ลิโมนีน (Limonene) - ส้ม/เลมอน → อารมณ์ดี, ต้านเครียด</option>
@@ -1179,7 +1386,7 @@
                         </div>
                         <div class="form-group">
                             <label for="top_terpenes_3">Terpene อันดับ 3</label>
-                            <select id="top_terpenes_3" name="top_terpenes_3">
+                            <select id="top_terpenes_3_select" name="top_terpenes_3_select">
                                 <option value="">เลือก Terpene อันดับ 3</option>
                                 <option value="ไมร์ซีน (Myrcene)">ไมร์ซีน (Myrcene) - มะม่วง/สมุนไพร → ผ่อนคลาย, ง่วง</option>
                                 <option value="ลิโมนีน (Limonene)">ลิโมนีน (Limonene) - ส้ม/เลมอน → อารมณ์ดี, ต้านเครียด</option>
@@ -1201,6 +1408,7 @@
                             </select>
                         </div>
                     </div>
+
                 </div>
 
                 <!-- Effects & Usage -->
@@ -1372,7 +1580,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Image Management Section -->
                 <div class="form-section">
                     <div class="section-title">
@@ -1488,6 +1696,13 @@
             mentalNegative: [],
             physicalPositive: [],
             physicalNegative: []
+        };
+
+        // Terpene Selection State
+        let selectedTerpenes = {
+            1: { name: '', percentage: '' },
+            2: { name: '', percentage: '' },
+            3: { name: '', percentage: '' }
         };
 
         // Get bud ID from URL parameters
@@ -1699,7 +1914,6 @@
             const fields = [
                 'strain_name_th', 'strain_name_en', 'breeder', 'strain_type',
                 'thc_percentage', 'cbd_percentage', 'grade',
-                'top_terpenes_1', 'top_terpenes_2', 'top_terpenes_3',
                 'recommended_time', 'grow_method', 'harvest_date',
                 'batch_number', 'fertilizer_type', 'flowering_type',
                 'lab_test_name', 'test_type'
@@ -1716,6 +1930,48 @@
             if (budData.aroma_flavor) {
                 selectedFlavors = budData.aroma_flavor.split(', ').filter(f => f.trim());
                 updateSelectedFlavorsDisplay();
+            }
+
+            // Populate terpene data and percentages
+            if (budData.top_terpenes_1) {
+                document.getElementById('top_terpenes_1').value = budData.top_terpenes_1;
+                const displayElement = document.getElementById('display-terpene-1');
+                const terpeneNameMatch = budData.top_terpenes_1.match(/\(([^)]+)\)/);
+                const terpeneName = terpeneNameMatch ? terpeneNameMatch[1] : budData.top_terpenes_1.split(' - ')[0];
+                if (displayElement) {
+                    displayElement.querySelector('.placeholder').textContent = terpeneName;
+                }
+            }
+
+            if (budData.top_terpenes_2) {
+                document.getElementById('top_terpenes_2').value = budData.top_terpenes_2;
+                const displayElement = document.getElementById('display-terpene-2');
+                const terpeneNameMatch = budData.top_terpenes_2.match(/\(([^)]+)\)/);
+                const terpeneName = terpeneNameMatch ? terpeneNameMatch[1] : budData.top_terpenes_2.split(' - ')[0];
+                if (displayElement) {
+                    displayElement.querySelector('.placeholder').textContent = terpeneName;
+                }
+            }
+
+            if (budData.top_terpenes_3) {
+                document.getElementById('top_terpenes_3').value = budData.top_terpenes_3;
+                const displayElement = document.getElementById('display-terpene-3');
+                const terpeneNameMatch = budData.top_terpenes_3.match(/\(([^)]+)\)/);
+                const terpeneName = terpeneNameMatch ? terpeneNameMatch[1] : budData.top_terpenes_3.split(' - ')[0];
+                if (displayElement) {
+                    displayElement.querySelector('.placeholder').textContent = terpeneName;
+                }
+            }
+
+            // Populate terpene percentages
+            if (budData.terpene_1_percentage !== undefined && budData.terpene_1_percentage !== null) {
+                document.getElementById('terpene_1_percentage').value = budData.terpene_1_percentage;
+            }
+            if (budData.terpene_2_percentage !== undefined && budData.terpene_2_percentage !== null) {
+                document.getElementById('terpene_2_percentage').value = budData.terpene_2_percentage;
+            }
+            if (budData.terpene_3_percentage !== undefined && budData.terpene_3_percentage !== null) {
+                document.getElementById('terpene_3_percentage').value = budData.terpene_3_percentage;
             }
 
             // Populate effects
@@ -1868,7 +2124,7 @@
                 current.querySelector('img').src = '';
                 label.style.display = 'block';
                 if (input) input.value = '';
-                
+
                 current.setAttribute('data-deleted', 'true');
                 let deletionInput = document.getElementById(`deleted_certificate_image_${index}`);
                 if (!deletionInput) {
@@ -2011,6 +2267,10 @@
                 delete data.certificate_image_3;
                 delete data.certificate_image_4;
 
+                // Remove the select elements for terpenes, use the hidden inputs instead
+                delete data.top_terpenes_1_select;
+                delete data.top_terpenes_2_select;
+                delete data.top_terpenes_3_select;
 
                 // Keep deletion flags
                 // deleted_image_* and deleted_certificate_image_* fields will be included in data automatically
@@ -2018,6 +2278,16 @@
                 // Convert numeric fields
                 if (data.thc_percentage) data.thc_percentage = parseFloat(data.thc_percentage);
                 if (data.cbd_percentage) data.cbd_percentage = parseFloat(data.cbd_percentage);
+
+                // Convert terpene percentages
+                if (data.terpene_1_percentage) data.terpene_1_percentage = parseFloat(data.terpene_1_percentage);
+                if (data.terpene_2_percentage) data.terpene_2_percentage = parseFloat(data.terpene_2_percentage);
+                if (data.terpene_3_percentage) data.terpene_3_percentage = parseFloat(data.terpene_3_percentage);
+
+                // Assign selected terpene names to hidden inputs
+                data.top_terpenes_1 = selectedTerpenes[1].name;
+                data.top_terpenes_2 = selectedTerpenes[2].name;
+                data.top_terpenes_3 = selectedTerpenes[3].name;
 
                 const response = await fetch(`/api/buds/${currentBudId}`, {
                     method: 'PUT',
@@ -2632,6 +2902,96 @@
             window.effectsClickHandlerAdded = true;
         }
 
+        // Terpene Tab Functionality
+        function initializeTerpeneTabs() {
+            const tabHeaders = document.querySelectorAll('.tab-header');
+            const terpeneCheckboxes = document.querySelectorAll('.terpene-checkbox input[type="checkbox"]');
+            const terpeneOptionsDiv = document.querySelector('.terpene-options');
+
+            // Hide all tab content except the first one
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            document.querySelector('.tab-content.active').style.display = 'block';
+
+            tabHeaders.forEach(header => {
+                header.addEventListener('click', function() {
+                    // Remove 'active' class from all headers and content
+                    tabHeaders.forEach(h => h.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+
+                    // Add 'active' class to the clicked header and show its content
+                    this.classList.add('active');
+                    const tabId = this.getAttribute('data-tab');
+                    document.getElementById(tabId).classList.add('active');
+                    document.getElementById(tabId).style.display = 'block';
+
+                    // Update the displayed terpene name
+                    updateDisplayedTerpeneName();
+                });
+            });
+
+            // Handle terpene checkbox clicks
+            terpeneCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const currentTabId = document.querySelector('.tab-header.active').getAttribute('data-tab');
+                    const terpeneName = this.value;
+
+                    if (this.checked) {
+                        // Uncheck other checkboxes in the same tab
+                        terpeneCheckboxes.forEach(cb => {
+                            if (cb !== this && cb.closest('.tab-content').id === currentTabId) {
+                                cb.checked = false;
+                            }
+                        });
+
+                        // Store the selected terpene name
+                        const terpeneRank = parseInt(currentTabId.replace('terpene-', ''));
+                        selectedTerpenes[terpeneRank].name = terpeneName;
+
+                        // Update the displayed name
+                        updateDisplayedTerpeneName();
+                    } else {
+                        // Clear the selected terpene name if unchecked
+                        const terpeneRank = parseInt(currentTabId.replace('terpene-', ''));
+                        selectedTerpenes[terpeneRank].name = '';
+                        updateDisplayedTerpeneName();
+                    }
+                });
+            });
+
+            // Handle terpene percentage input changes
+            document.querySelectorAll('.terpene-percentage-input input').forEach(input => {
+                input.addEventListener('input', function() {
+                    const terpeneRank = parseInt(this.id.replace('terpene_', '').replace('_percentage', ''));
+                    selectedTerpenes[terpeneRank].percentage = this.value;
+                });
+            });
+
+            // Update hidden inputs when the form is submitted
+            document.getElementById('editBudForm').addEventListener('submit', function() {
+                document.getElementById('top_terpenes_1').value = selectedTerpenes[1].name;
+                document.getElementById('top_terpenes_2').value = selectedTerpenes[2].name;
+                document.getElementById('top_terpenes_3').value = selectedTerpenes[3].name;
+            });
+        }
+
+        function updateDisplayedTerpeneName() {
+            const activeTabId = document.querySelector('.tab-header.active').getAttribute('data-tab');
+            const terpeneRank = parseInt(activeTabId.replace('terpene-', ''));
+            const terpeneName = selectedTerpenes[terpeneRank].name;
+            const displayElement = document.getElementById(`display-${activeTabId}`);
+
+            if (displayElement) {
+                if (terpeneName) {
+                    displayElement.querySelector('.placeholder').textContent = terpeneName;
+                } else {
+                    displayElement.querySelector('.placeholder').textContent = 'ยังไม่ระบุ';
+                }
+            }
+        }
+
         // Prevent multiple initialization
         let isPageInitialized = false;
 
@@ -2662,6 +3022,9 @@
 
                 // Initialize flavor selector
                 initializeFlavorSelector();
+
+                // Initialize terpene tabs
+                initializeTerpeneTabs();
             } catch (error) {
                 console.error('Error initializing page features:', error);
             }

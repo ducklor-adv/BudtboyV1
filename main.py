@@ -5219,7 +5219,7 @@ def admin_settings_maintenance():
 @app.route('/admin/buds')
 def admin_buds():
     """Admin buds management page"""
-if not is_admin():
+    if not is_admin():
         return redirect('/admin_login')
     return render_template('admin_buds.html')
 

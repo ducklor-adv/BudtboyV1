@@ -37,6 +37,53 @@
             will-change: transform;
         }
 
+        .secondary-nav {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-bottom: 1px solid #dee2e6;
+            padding: 10px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            max-width: 100%;
+            overflow-x: auto;
+            padding: 0 10px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 8px 12px;
+            background: white;
+            color: #6c757d;
+            text-decoration: none;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            border: 1px solid #e9ecef;
+            min-width: fit-content;
+        }
+
+        .nav-item:hover {
+            background: #e3f2fd;
+            color: #1976d2;
+            border-color: #1976d2;
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            color: white;
+            border-color: #1976d2;
+        }
+
         .header {
             background: linear-gradient(135deg, #2196F3, #1976D2);
             padding: 15px 20px;
@@ -956,10 +1003,78 @@
         .contact-link.other { background: #f3e5f5; color: #9c27b0; }
         .contact-link.other:hover { background: #9c27b0; color: white; }
 
+        .verification-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-left: 4px solid #ffc107;
+        }
+
+        .verification-card.verified {
+            border-left-color: #28a745;
+            background: linear-gradient(135deg, #f8fff9 0%, #f0f8f0 100%);
+        }
+
+        .verification-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .verification-item {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .verification-item:last-child {
+            margin-bottom: 0;
+        }
+
         @media (max-width: 768px) {
             body {
                 padding: 10px;
                 font-size: 16px;
+            }
+
+            .secondary-nav {
+                position: sticky;
+                top: 0;
+                background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+                border-bottom: 2px solid #dee2e6;
+                padding: 8px 0;
+                z-index: 100;
+            }
+
+            .nav-container {
+                gap: 3px;
+                padding: 0 5px;
+            }
+
+            .nav-item {
+                padding: 6px 10px;
+                font-size: 12px;
+                border-radius: 15px;
+            }
+
+            .verification-card {
+                padding: 15px;
+                margin-bottom: 12px;
+                border-radius: 12px;
+            }
+
+            .verification-title {
+                font-size: 16px;
+                margin-bottom: 8px;
+            }
+
+            .verification-item {
+                font-size: 14px;
+                margin-bottom: 6px;
             }
 
             .container {
@@ -1352,6 +1467,27 @@
             <div style="width: 60px;"></div>
         </div>
 
+        <!-- Secondary Navigation Bar -->
+        <div class="secondary-nav">
+            <div class="nav-container">
+                <a href="#bud-info" class="nav-item active" onclick="scrollToSection('bud-info')">
+                    📊 ข้อมูลดอก
+                </a>
+                <a href="#reviews" class="nav-item" onclick="scrollToSection('reviews')">
+                    📖 รีวิว
+                </a>
+                <a href="#ratings" class="nav-item" onclick="scrollToSection('ratings')">
+                    ⭐ คะแนน
+                </a>
+                <a href="#images" class="nav-item" onclick="scrollToSection('images')">
+                    📸 รูปภาพ
+                </a>
+                <a href="#verification" class="nav-item" onclick="scrollToSection('verification')">
+                    🏆 การตรวจสอบ
+                </a>
+            </div>
+        </div>
+
         <div id="loadingMessage" class="loading">กำลังโหลดข้อมูล...</div>
         <div id="errorMessage" class="error" style="display: none;"></div>
 
@@ -1365,7 +1501,7 @@
 
             <div class="content">
                 <!-- รูปดอก 4 รูป -->
-                <div class="section">
+                <div class="section" id="images">
                     <div class="section-title">📸 รูปดอก</div>
                     <div class="bud-images-display" id="budImagesDisplay">
                         <!-- Bud images will be populated here -->
@@ -1373,15 +1509,23 @@
                 </div>
 
                 <!-- แสดงข้อมูลทั้งหมด -->
-                <div class="section">
+                <div class="section" id="bud-info">
                     <div class="section-title">📊 ข้อมูลดอกทั้งหมด</div>
                     <div id="groupedBudInfo">
                         <!-- Grouped bud info will be populated here -->
                     </div>
                 </div>
 
+                <!-- การตรวจสอบและใบรับรอง -->
+                <div class="section" id="verification">
+                    <div class="section-title">🏆 การตรวจสอบและใบรับรอง</div>
+                    <div id="verificationInfo">
+                        <!-- Verification info will be populated here -->
+                    </div>
+                </div>
+
                 <!-- คะแนนรีวิว -->
-                <div class="section">
+                <div class="section" id="ratings">
                     <div class="section-title">📊 คะแนนรีวิว</div>
                     <div class="rating-display">
                         <div class="stars" id="ratingStars">-</div>
@@ -1391,7 +1535,7 @@
                 </div>
 
                 <!-- รีวิวทั้งหมด -->
-                <div class="section">
+                <div class="section" id="reviews">
                     <div class="section-title">📖 รีวิวทั้งหมด</div>
                     <div id="reviewsContainer">
                         <!-- Reviews will be populated here -->
@@ -1629,6 +1773,13 @@
                     console.log('Bud info displayed successfully');
                 } catch (error) {
                     console.error('Error displaying bud info:', error);
+                }
+
+                try {
+                    displayVerificationInfo(bud);
+                    console.log('Verification info displayed successfully');
+                } catch (error) {
+                    console.error('Error displaying verification info:', error);
                 }
 
                 // Rating calculation with error handling
@@ -2566,6 +2717,61 @@
                     console.warn('Error removing error message:', e);
                 }
             }, 5000);
+        }
+
+        function scrollToSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                // Update active nav item
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                document.querySelector(`[onclick="scrollToSection('${sectionId}')"]`).classList.add('active');
+
+                // Scroll to section
+                section.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start'
+                });
+            }
+        }
+
+        function displayVerificationInfo(bud) {
+            const verificationInfo = document.getElementById('verificationInfo');
+            
+            let verificationHtml = '';
+            
+            // Lab test information
+            if (bud.lab_test_name || bud.test_type) {
+                verificationHtml += `
+                    <div class="verification-card">
+                        <div class="verification-title">🔬 การตรวจสอบในห้องแล็บ</div>
+                        ${bud.lab_test_name ? `<div class="verification-item"><strong>สถานที่ตรวจ:</strong> ${bud.lab_test_name}</div>` : ''}
+                        ${bud.test_type ? `<div class="verification-item"><strong>วิธีการตรวจ:</strong> ${bud.test_type}</div>` : ''}
+                    </div>
+                `;
+            }
+            
+            // License verification
+            if (bud.grower_license_verified) {
+                verificationHtml += `
+                    <div class="verification-card verified">
+                        <div class="verification-title">✅ ผู้ปลูกที่ได้รับการรับรอง</div>
+                        <div class="verification-item">ผู้ปลูกได้รับการตรวจสอบและยืนยันความถูกต้องแล้ว</div>
+                    </div>
+                `;
+            }
+            
+            if (!verificationHtml) {
+                verificationHtml = `
+                    <div class="verification-card">
+                        <div class="verification-title">ℹ️ ข้อมูลการตรวจสอบ</div>
+                        <div class="verification-item">ยังไม่มีข้อมูลการตรวจสอบในห้องแล็บ</div>
+                    </div>
+                `;
+            }
+            
+            verificationInfo.innerHTML = verificationHtml;
         }
     </script>
 </body>

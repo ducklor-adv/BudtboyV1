@@ -1055,6 +1055,16 @@ def create_tables():
             except Exception as e:
                 print(f"Note: test_type column may already exist: {e}")
 
+            # Add certificate image columns if they don't exist
+            for i in range(1, 5):
+                try:
+                    cur.execute(f"ALTER TABLE buds_data ADD COLUMN IF NOT EXISTS certificate_image_{i}_url VARCHAR(500)")
+                    print(f"Added certificate_image_{i}_url column")
+                except psycopg2.errors.DuplicateColumn:
+                    pass  # Column already exists
+                except Exception as e:
+                    print(f"Note: certificate_image_{i}_url column may already exist: {e}")
+
             # Add status column if it doesn't exist (for existing databases)
             try:
                 cur.execute("""
@@ -3141,6 +3151,8 @@ def upload_bud_images(bud_id):
 
             # Handle image uploads
             image_urls = {}
+            
+            # Handle bud images
             for i in range(1, 5):  # image_1 to image_4
                 file_key = f'image_{i}'
                 if file_key in request.files:
@@ -3153,10 +3165,27 @@ def upload_bud_images(bud_id):
                         file.save(file_path)
                         image_urls[f'image_{i}_url'] = file_path
 
+            # Handle certificate images
+            for i in range(1, 5):  # certificate_image_1 to certificate_image_4
+                file_key = f'certificate_image_{i}'
+                if file_key in request.files:
+                    file = request.files[file_key]
+                    if file and file.filename != '' and allowed_file(file.filename):
+                        filename = secure_filename(file.filename)
+                        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_')
+                        filename = f"{timestamp}cert_{bud_id}_{file_key}_{filename}"
+                        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                        file.save(file_path)
+                        image_urls[f'certificate_image_{i}_url'] = file_path
+
             # Update database with image URLs
             if image_urls:
                 # Define allowed field names to prevent SQL injection
-                allowed_fields = {'image_1_url', 'image_2_url', 'image_3_url', 'image_4_url'}
+                allowed_fields = {
+                    'image_1_url', 'image_2_url', 'image_3_url', 'image_4_url',
+                    'certificate_image_1_url', 'certificate_image_2_url', 
+                    'certificate_image_3_url', 'certificate_image_4_url'
+                }
                 update_fields = []
                 update_values = []
                 for field, url in image_urls.items():
@@ -3223,7 +3252,9 @@ def get_bud(bud_id):
                        grower_id, grower_license_verified, fertilizer_type, 
                        flowering_type, image_1_url, image_2_url, image_3_url, image_4_url,
                        created_at, updated_at, created_by,
-                       lab_test_name, test_type
+                       lab_test_name, test_type,
+                       certificate_image_1_url, certificate_image_2_url, 
+                       certificate_image_3_url, certificate_image_4_url
                 FROM buds_data
                 WHERE id = %s AND created_by = %s
             """, (bud_id, user_id))
@@ -3265,7 +3296,11 @@ def get_bud(bud_id):
                 'updated_at': result[29].strftime('%Y-%m-%d %H:%M:%S') if result[29] else None,
                 'created_by': result[30],
                 'lab_test_name': result[31],
-                'test_type': result[32]
+                'test_type': result[32],
+                'certificate_image_1_url': result[33],
+                'certificate_image_2_url': result[34],
+                'certificate_image_3_url': result[35],
+                'certificate_image_4_url': result[36]
             }
 
             cur.close()

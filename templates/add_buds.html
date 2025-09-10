@@ -1000,6 +1000,40 @@
                             <div class="help-text">วิธีการหรือเทคนิคที่ใช้ในการตรวจสอบ</div>
                         </div>
                     </div>
+
+                    <!-- Certificate Images Upload -->
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label>📄 รูปภาพใบรับรอง</label>
+                            <div class="help-text">อัพโหลดรูปภาพใบรับรองการตรวจสอบ (สูงสุด 4 รูป)</div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group half-width">
+                            <label for="certificate_image_1">ใบรับรองที่ 1</label>
+                            <input type="file" id="certificate_image_1" name="certificate_image_1" accept=".png,.jpg,.jpeg">
+                            <div class="help-text">รองรับไฟล์: PNG, JPG, JPEG</div>
+                        </div>
+                        <div class="form-group half-width">
+                            <label for="certificate_image_2">ใบรับรองที่ 2</label>
+                            <input type="file" id="certificate_image_2" name="certificate_image_2" accept=".png,.jpg,.jpeg">
+                            <div class="help-text">รองรับไฟล์: PNG, JPG, JPEG</div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group half-width">
+                            <label for="certificate_image_3">ใบรับรองที่ 3</label>
+                            <input type="file" id="certificate_image_3" name="certificate_image_3" accept=".png,.jpg,.jpeg">
+                            <div class="help-text">รองรับไฟล์: PNG, JPG, JPEG</div>
+                        </div>
+                        <div class="form-group half-width">
+                            <label for="certificate_image_4">ใบรับรองที่ 4</label>
+                            <input type="file" id="certificate_image_4" name="certificate_image_4" accept=".png,.jpg,.jpeg">
+                            <div class="help-text">รองรับไฟล์: PNG, JPG, JPEG</div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Sensory Properties -->
@@ -2135,7 +2169,7 @@
 
             // Separate text data and image files
             for (let [key, value] of formData.entries()) {
-                if (key.startsWith('image_') && value instanceof File && value.size > 0) {
+                if ((key.startsWith('image_') || key.startsWith('certificate_image_')) && value instanceof File && value.size > 0) {
                     imageFiles.append(key, value);
                 } else if (typeof value === 'string' && value.trim() !== '') {
                     // Convert numeric fields

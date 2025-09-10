@@ -1316,102 +1316,71 @@
                         </div>
                     </div>
 
-                    <!-- Terpene Section -->
-                    <div class="form-section">
-                        <div class="section-title">
-                            💧 Terpenes
+                    <!-- Simplified Terpenes Container -->
+                    <div class="terpenes-simple-container">
+                        <!-- Tab Headers -->
+                        <div class="tab-headers">
+                            <button type="button" class="tab-header active" data-tab="terpene-1">Terpene อันดับ 1</button>
+                            <button type="button" class="tab-header" data-tab="terpene-2">Terpene อันดับ 2</button>
+                            <button type="button" class="tab-header" data-tab="terpene-3">Terpene อันดับ 3</button>
                         </div>
-                        <div class="terpenes-simple-container">
-                            <!-- Tab Headers -->
-                            <div class="tab-headers">
-                                <button type="button" class="tab-header active" data-tab="top-terpenes">Top 3 Terpenes</button>
-                                <button type="button" class="tab-header" data-tab="all-terpenes">All Terpenes</button>
-                            </div>
 
-                            <!-- Top 3 Terpenes Tab -->
-                            <div id="top-terpenes-tab" class="tab-content active">
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label for="top_terpenes_1">Terpene อันดับ 1</label>
-                                        <select id="top_terpenes_1" name="top_terpenes_1">
-                                            <option value="">เลือก Terpene อันดับ 1</option>
-                                            <option value="ไมร์ซีน (Myrcene)">ไมร์ซีน (Myrcene) - มะม่วง/สมุนไพร → ผ่อนคลาย, ง่วง</option>
-                                            <option value="ลิโมนีน (Limonene)">ลิโมนีน (Limonene) - ส้ม/เลมอน → อารมณ์ดี, ต้านเครียด</option>
-                                            <option value="แอลฟา‑ไพนีน (α‑Pinene)">แอลฟา‑ไพนีน (α‑Pinene) - สน → เปิดปอด, ช่วยโฟกัส</option>
-                                            <option value="เบตา‑ไพนีน (β‑Pinene)">เบตา‑ไพนีน (β‑Pinene) - โรสแมรี่ → ต้านอักเสบ</option>
-                                            <option value="เบตา‑คาริโอฟีลลีน (β‑Caryophyllene)">เบตา‑คาริโอฟีลลีน (β‑Caryophyllene) - พริกไทย/เผ็ด → บรรเทาปวด, ต้านอักเสบ</option>
-                                            <option value="ลินาลูล (Linalool)">ลินาลูล (Linalool) - ลาเวนเดอร์ → คลายกังวล, ช่วยหลับ</option>
-                                            <option value="ฮิวมูเลน (Humulene)">ฮิวมูเลน (Humulene) - ฮ็อปส์/ไม้ → ลดอยากอาหาร, ต้านอักเสบ</option>
-                                            <option value="เทอร์พินอลีน (Terpinolene)">เทอร์พินอลีน (Terpinolene) - ดอกไม้/สนหวาน → กระตุ้นเบา, ต้านอนุมูลฯ</option>
-                                            <option value="โอซิมีน (Ocimene)">โอซิมีน (Ocimene) - ดอกไม้หวาน → ขยายหลอดลม, ต้านไวรัส</option>
-                                            <option value="ยูคาลิปตอล / 1,8‑ซิเนออล (Eucalyptol)">ยูคาลิปตอล / 1,8‑ซิเนออล (Eucalyptol) - เมนทอล/ยูคาลิปตัส → สดชื่น,ต้านจุลชีพ</option>
-                                            <option value="เนโรลิดอล (Nerolidol)">เนโรลิดอล (Nerolidol) - ชาเขียว/ไม้ → ผ่อนคลายกล้ามเนื้อ</option>
-                                            <option value="บิซาโบลอล (Bisabolol)">บิซาโบลอล (Bisabolol) - คาโมมายล์ → ปกป้องผิว, ต้านอักเสบ</option>
-                                            <option value="ฟาร์นีซีน (Farnesene)">ฟาร์นีซีน (Farnesene) - แอปเปิ้ลเขียว → ต้านแบคทีเรีย</option>
-                                            <option value="แคมฟีน (Camphene)">แคมฟีน (Camphene) - การบูรเบา → ต้านออกซิแดนต์</option>
-                                            <option value="เทอร์พิโนล (Terpineol)">เทอร์พิโนล (Terpineol) - ไม้ขาว/ไพน์หวาน → ช่วยสงบใจ</option>
-                                            <option value="วาลินซีน (Valencene)">วาลินซีน (Valencene) - ส้มวาเลนเซีย → ยับยั้งยุง, อารมณ์ดี</option>
-                                            <option value="เจอราเนียล (Geraniol)">เจอราเนียล (Geraniol) - กุหลาบ → ต้านจุลชีพ</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="top_terpenes_2">Terpene อันดับ 2</label>
-                                        <select id="top_terpenes_2" name="top_terpenes_2">
-                                            <option value="">เลือก Terpene อันดับ 2</option>
-                                            <option value="ไมร์ซีน (Myrcene)">ไมร์ซีน (Myrcene) - มะม่วง/สมุนไพร → ผ่อนคลาย, ง่วง</option>
-                                            <option value="ลิโมนีน (Limonene)">ลิโมนีน (Limonene) - ส้ม/เลมอน → อารมณ์ดี, ต้านเครียด</option>
-                                            <option value="แอลฟา‑ไพนีน (α‑Pinene)">แอลฟา‑ไพนีน (α‑Pinene) - สน → เปิดปอด, ช่วยโฟกัส</option>
-                                            <option value="เบตา‑ไพนีน (β‑Pinene)">เบตา‑ไพนีน (β‑Pinene) - โรสแมรี่ → ต้านอักเสบ</option>
-                                            <option value="เบตา‑คาริโอฟีลลีน (β‑Caryophyllene)">เบตา‑คาริโอฟีลลีน (β‑Caryophyllene) - พริกไทย/เผ็ด → บรรเทาปวด, ต้านอักเสบ</option>
-                                            <option value="ลินาลูล (Linalool)">ลินาลูล (Linalool) - ลาเวนเดอร์ → คลายกังวล, ช่วยหลับ</option>
-                                            <option value="ฮิวมูเลน (Humulene)">ฮิวมูเลน (Humulene) - ฮ็อปส์/ไม้ → ลดอยากอาหาร, ต้านอักเสบ</option>
-                                            <option value="เทอร์พินอลีน (Terpinolene)">เทอร์พินอลีน (Terpinolene) - ดอกไม้/สนหวาน → กระตุ้นเบา, ต้านอนุมูลฯ</option>
-                                            <option value="โอซิมีน (Ocimene)">โอซิมีน (Ocimene) - ดอกไม้หวาน → ขยายหลอดลม, ต้านไวรัส</option>
-                                            <option value="ยูคาลิปตอล / 1,8‑ซิเนออล (Eucalyptol)">ยูคาลิปตอล / 1,8‑ซิเนออล (Eucalyptol) - เมนทอล/ยูคาลิปตัส → สดชื่น, ต้านจุลชีพ</option>
-                                            <option value="เนโรลิดอล (Nerolidol)">เนโรลิดอล (Nerolidol) - ชาเขียว/ไม้ → ผ่อนคลายกล้ามเนื้อ</option>
-                                            <option value="บิซาโบลอล (Bisabolol)">บิซาโบลอล (Bisabolol) - คาโมมายล์ → ปกป้องผิว, ต้านอักเสบ</option>
-                                            <option value="ฟาร์นีซีน (Farnesene)">ฟาร์นีซีน (Farnesene) - แอปเปิ้ลเขียว → ต้านแบคทีเรีย</option>
-                                            <option value="แคมฟีน (Camphene)">แคมฟีน (Camphene) - การบูรเบา → ต้านออกซิแดนต์</option>
-                                            <option value="เทอร์พิโนล (Terpineol)">เทอร์พิโนล (Terpineol) - ไม้ขาว/ไพน์หวาน → ช่วยสงบใจ</option>
-                                            <option value="วาลินซีน (Valencene)">วาลินซีน (Valencene) - ส้มวาเลนเซีย → ยับยั้งยุง, อารมณ์ดี</option>
-                                            <option value="เจอราเนียล (Geraniol)">เจอราเนียล (Geraniol) - กุหลาบ → ต้านจุลชีพ</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="top_terpenes_3">Terpene อันดับ 3</label>
-                                        <select id="top_terpenes_3" name="top_terpenes_3">
-                                            <option value="">เลือก Terpene อันดับ 3</option>
-                                            <option value="ไมร์ซีน (Myrcene)">ไมร์ซีน (Myrcene) - มะม่วง/สมุนไพร → ผ่อนคลาย, ง่วง</option>
-                                            <option value="ลิโมนีน (Limonene)">ลิโมนีน (Limonene) - ส้ม/เลมอน → อารมณ์ดี, ต้านเครียด</option>
-                                            <option value="แอลฟา‑ไพนีน (α‑Pinene)">แอลฟา‑ไพนีน (α‑Pinene) - สน → เปิดปอด, ช่วยโฟกัส</option>
-                                            <option value="เบตา‑ไพนีน (β‑Pinene)">เบตา‑ไพนีน (β‑Pinene) - โรสแมรี่ → ต้านอักเสบ</option>
-                                            <option value="เบตา‑คาริโอฟีลลีน (β‑Caryophyllene)">เบตา‑คาริโอฟีลลีน (β‑Caryophyllene) - พริกไทย/เผ็ด → บรรเทาปวด, ต้านอักเสบ</option>
-                                            <option value="ลินาลูล (Linalool)">ลินาลูล (Linalool) - ลาเวนเดอร์ → คลายกังวล, ช่วยหลับ</option>
-                                            <option value="ฮิวมูเลน (Humulene)">ฮิวมูเลน (Humulene) - ฮ็อปส์/ไม้ → ลดอยากอาหาร, ต้านอักเสบ</option>
-                                            <option value="เทอร์พินอลีน (Terpinolene)">เทอร์พินอลีน (Terpinolene) - ดอกไม้/สนหวาน → กระตุ้นเบา, ต้านอนุมูลฯ</option>
-                                            <option value="โอซิมีน (Ocimene)">โอซิมีน (Ocimene) - ดอกไม้หวาน → ขยายหลอดลม, ต้านไวรัส</option>
-                                            <option value="ยูคาลิปตอล / 1,8‑ซิเนออล (Eucalyptol)">ยูคาลิปตอล / 1,8‑ซิเนออล (Eucalyptol) - เมนทอล/ยูคาลิปตัส → สดชื่น, ต้านจุลชีพ</option>
-                                            <option value="เนโรลิดอล (Nerolidol)">เนโรลิดอล (Nerolidol) - ชาเขียว/ไม้ → ผ่อนคลายกล้ามเนื้อ</option>
-                                            <option value="บิซาโบลอล (Bisabolol)">บิซาโบลอล (Bisabolol) - คาโมมายล์ → ปกป้องผิว, ต้านอักเสบ</option>
-                                            <option value="ฟาร์นีซีน (Farnesene)">ฟาร์นีซีน (Farnesene) - แอปเปิ้ลเขียว → ต้านแบคทีเรีย</option>
-                                            <option value="แคมฟีน (Camphene)">แคมฟีน (Camphene) - การบูรเบา → ต้านออกซิแดนต์</option>
-                                            <option value="เทอร์พิโนล (Terpineol)">เทอร์พิโนล (Terpineol) - ไม้ขาว/ไพน์หวาน → ช่วยสงบใจ</option>
-                                            <option value="วาลินซีน (Valencene)">วาลินซีน (Valencene) - ส้มวาเลนเซีย → ยับยั้งยุง, อารมณ์ดี</option>
-                                            <option value="เจอราเนียล (Geraniol)">เจอราเนียล (Geraniol) - กุหลาบ → ต้านจุลชีพ</option>
-                                        </select>
-                                    </div>
+                        <!-- Display Selected Terpenes Row -->
+                        <div class="terpene-display-row">
+                            <div class="terpene-rank-display">
+                                <div class="terpene-rank-value" id="display-terpene-1">
+                                    <span class="placeholder">ยังไม่ระบุ</span>
                                 </div>
                             </div>
+                            <div class="terpene-rank-display">
+                                <div class="terpene-rank-value" id="display-terpene-2">
+                                    <span class="placeholder">ยังไม่ระบุ</span>
+                                </div>
+                            </div>
+                            <div class="terpene-rank-display">
+                                <div class="terpene-rank-value" id="display-terpene-3">
+                                    <span class="placeholder">ยังไม่ระบุ</span>
+                                </div>
+                            </div>
+                        </div>
 
-                            <!-- All Terpenes Tab -->
-                            <div id="all-terpenes-tab" class="tab-content">
-                                <div class="terpene-percentage-row">
-                                    <!-- Terpene inputs will be dynamically generated here -->
-                                </div>
-                                <div class="terpene-options">
-                                    <!-- Terpene checkboxes will be dynamically generated here -->
-                                </div>
+                        <!-- Terpene Percentage Input Row -->
+                        <div class="terpene-percentage-row">
+                            <div class="terpene-percentage-input">
+                                <label for="terpene_1_percentage">% Terpene อันดับ 1</label>
+                                <input type="number" id="terpene_1_percentage" name="terpene_1_percentage" 
+                                       step="0.01" min="0" max="100" placeholder="0.00">
                             </div>
+                            <div class="terpene-percentage-input">
+                                <label for="terpene_2_percentage">% Terpene อันดับ 2</label>
+                                <input type="number" id="terpene_2_percentage" name="terpene_2_percentage" 
+                                       step="0.01" min="0" max="100" placeholder="0.00">
+                            </div>
+                            <div class="terpene-percentage-input">
+                                <label for="terpene_3_percentage">% Terpene อันดับ 3</label>
+                                <input type="number" id="terpene_3_percentage" name="terpene_3_percentage" 
+                                       step="0.01" min="0" max="100" placeholder="0.00">
+                            </div>
+                        </div>
+
+                        <!-- Tab Content -->
+                        <div class="tab-content active" id="terpene-1-content">
+                        </div>
+
+                        <!-- Hidden inputs for form submission -->
+                        <input type="hidden" id="top_terpenes_1" name="top_terpenes_1">
+                        <input type="hidden" id="top_terpenes_2" name="top_terpenes_2">
+                        <input type="hidden" id="top_terpenes_3" name="top_terpenes_3">
+
+                        <!-- Terpene Options List -->
+                        <div class="terpene-options">
+                            <label class="terpene-checkbox"><input type="checkbox" value="ไมร์ซีน (Myrcene)"> มะม่วง/สมุนไพร - ไมร์ซีน (Myrcene) → ผ่อนคลาย, ง่วง</label>
+                            <label class="terpene-checkbox"><input type="checkbox" value="ลิโมนีน (Limonene)"> ส้ม/เลมอน - ลิโมนีน (Limonene) → อารมณ์ดี, ต้านเครียด</label>
+                            <label class="terpene-checkbox"><input type="checkbox" value="แอลฟา‑ไพนีน (α‑Pinene)"> สน - แอลฟา‑ไพนีน (α‑Pinene) → เปิดปอด, ช่วยโฟกัส</label>
+                            <label class="terpene-checkbox"><input type="checkbox" value="เบตา‑ไพนีน (β‑Pinene)"> โรสแมรี่ - เบตา‑ไพนีน (β‑Pinene) → ต้านอักเสบ</label>
+                            <label class="terpene-checkbox"><input type="checkbox" value="เบตา‑คาริโอฟีลลีน (β‑Caryophyllene)"> พริกไทย/เผ็ด - เบตา‑คาริโอฟีลลีน (β‑Caryophyllene) → บรรเทาปวด, ต้านอักเสบ</label>
+                            <label class="terpene-checkbox"><input type="checkbox" value="ลินาลูล (Linalool)"> ลาเวนเดอร์ - ลินาลูล (Linalool) → คลายกังวล, ช่วยหลับ</label>
+                            <label class="terpene-checkbox"><input type="checkbox" value="ฮิวมูเลน (Humulene)"> ฮ็อปส์/ไม้ - ฮิวมูเลน (Humulene) → ลดอยากอาหาร, ต้านอักเสบ</label>
                         </div>
                     </div>
 
@@ -2870,91 +2839,139 @@
             window.effectsClickHandlerAdded = true;
         }
 
-        // Terpene Tabs Functionality
+        // Simplified Terpene functionality
         function initializeTerpeneTabs() {
             const tabHeaders = document.querySelectorAll('.tab-header');
-            const tabContents = document.querySelectorAll('.tab-content');
+            const checkboxes = document.querySelectorAll('.terpene-checkbox input[type="checkbox"]');
+            let currentTab = 1;
 
-            tabHeaders.forEach(header => {
-                header.addEventListener('click', function() {
-                    // Remove active class from all headers and contents
-                    tabHeaders.forEach(h => h.classList.remove('active'));
-                    tabContents.forEach(c => c.classList.remove('active'));
+            // Function to update tab colors based on selection status
+            function updateTabColors() {
+                for (let i = 1; i <= 3; i++) {
+                    const hiddenInput = document.getElementById(`top_terpenes_${i}`);
+                    const tabHeader = document.querySelector(`[data-tab="terpene-${i}"]`);
 
-                    // Add active class to clicked header and corresponding content
-                    this.classList.add('active');
-                    const targetTab = document.getElementById(this.getAttribute('data-tab'));
-                    if (targetTab) {
-                        targetTab.classList.add('active');
+                    if (hiddenInput && tabHeader) {
+                        if (hiddenInput.value && hiddenInput.value.trim() !== '') {
+                            tabHeader.classList.add('has-selection');
+                        } else {
+                            tabHeader.classList.remove('has-selection');
+                        }
+                    }
+                }
+            }
+
+            // Function to update checkbox display based on current tab
+            function updateCheckboxDisplay() {
+                const currentTabInput = document.getElementById(`top_terpenes_${currentTab}`);
+                const currentSelection = currentTabInput ? currentTabInput.value : '';
+
+                // Update all checkboxes based on current tab selection
+                checkboxes.forEach(checkbox => {
+                    const terpeneCheckbox = checkbox.closest('.terpene-checkbox');
+
+                    if (checkbox.value === currentSelection) {
+                        checkbox.checked = true;
+                        terpeneCheckbox.classList.add('selected');
+                    } else {
+                        checkbox.checked = false;
+                        terpeneCheckbox.classList.remove('selected');
                     }
                 });
+            }
+
+            // Tab switching - update display to show current tab's selection
+            tabHeaders.forEach((header, index) => {
+                header.addEventListener('click', function() {
+                    // Remove active class from all headers
+                    tabHeaders.forEach(h => h.classList.remove('active'));
+                    // Add active class to clicked header
+                    this.classList.add('active');
+                    currentTab = index + 1;
+
+                    // Update checkbox display for current tab
+                    updateCheckboxDisplay();
+                });
             });
+
+            // Handle checkbox changes - radio button behavior
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const terpeneValue = this.value;
+                    const terpeneNameMatch = terpeneValue.match(/\(([^)]+)\)/);
+                    const terpeneName = terpeneNameMatch ? terpeneNameMatch[1] : terpeneValue.split(' - ')[0];
+
+                    if (this.checked) {
+                        // Clear other selections in current tab (radio button behavior)
+                        checkboxes.forEach(otherCheckbox => {
+                            if (otherCheckbox !== this) {
+                                otherCheckbox.checked = false;
+                                otherCheckbox.closest('.terpene-checkbox').classList.remove('selected');
+                            }
+                        });
+
+                        // Update the current tab's hidden input and display
+                        const hiddenInput = document.getElementById(`top_terpenes_${currentTab}`);
+                        const displayElement = document.getElementById(`display-terpene-${currentTab}`);
+
+                        if (hiddenInput && displayElement) {
+                            hiddenInput.value = terpeneValue;
+                            displayElement.querySelector('.placeholder').textContent = terpeneName;
+                        }
+
+                        // Mark this checkbox as selected
+                        this.closest('.terpene-checkbox').classList.add('selected');
+                    } else {
+                        // If unchecked, clear from current tab only
+                        const hiddenInput = document.getElementById(`top_terpenes_${currentTab}`);
+                        const displayElement = document.getElementById(`display-terpene-${currentTab}`);
+
+                        if (hiddenInput && hiddenInput.value === terpeneValue) {
+                            hiddenInput.value = '';
+                            if (displayElement) {
+                                displayElement.querySelector('.placeholder').textContent = 'ยังไม่ได้เลือก';
+                            }
+                        }
+
+                        // Remove selected class
+                        this.closest('.terpene-checkbox').classList.remove('selected');
+                    }
+
+                    // Update tab colors after any change
+                    updateTabColors();
+                });
+            });
+
+            // Initialize display for first tab
+            updateCheckboxDisplay();
+            updateTabColors();
         }
 
         // Function to load terpene data into the UI
         function loadTerpeneData(budData) {
-            const allTerpenesTab = document.getElementById('all-terpenes-tab');
-            if (!allTerpenesTab) return;
-
-            const terpenePercentageRow = allTerpenesTab.querySelector('.terpene-percentage-row');
-            const terpeneOptions = allTerpenesTab.querySelector('.terpene-options');
-
-            if (!terpenePercentageRow || !terpeneOptions) return;
-
-            // Clear existing content
-            terpenePercentageRow.innerHTML = '';
-            terpeneOptions.innerHTML = '';
-
-            // Populate percentage inputs and checkboxes
-            terpeneData.forEach((terpene, index) => {
-                // Top 3 Terpenes (only populate if data exists)
-                if (index < 3) {
-                    const selectElement = document.getElementById(`top_terpenes_${index + 1}`);
-                    if (selectElement && budData[`top_terpenes_${index + 1}`]) {
-                        selectElement.value = budData[`top_terpenes_${index + 1}`];
+            // Load existing top terpenes and percentages
+            for (let i = 1; i <= 3; i++) {
+                const hiddenInput = document.getElementById(`top_terpenes_${i}`);
+                const displayElement = document.getElementById(`display-terpene-${i}`);
+                const percentageInput = document.getElementById(`terpene_${i}_percentage`);
+                
+                if (hiddenInput && budData[`top_terpenes_${i}`]) {
+                    hiddenInput.value = budData[`top_terpenes_${i}`];
+                    
+                    if (displayElement) {
+                        const terpeneNameMatch = budData[`top_terpenes_${i}`].match(/\(([^)]+)\)/);
+                        const terpeneName = terpeneNameMatch ? terpeneNameMatch[1] : budData[`top_terpenes_${i}`].split(' - ')[0];
+                        displayElement.querySelector('.placeholder').textContent = terpeneName;
                     }
                 }
-
-                // All Terpenes Tab (for percentage input and checkboxes)
-                const percentageInputHtml = `
-                    <div class="terpene-percentage-input">
-                        <label for="terpene_${index}_percentage">${terpene.name}</label>
-                        <input type="number" id="terpene_${index}_percentage" name="terpene_${index}_percentage" 
-                               placeholder="%" min="0" max="100" step="0.1"
-                               value="${budData[`terpene_${index}_percentage`] || ''}">
-                    </div>
-                `;
-                terpenePercentageRow.innerHTML += percentageInputHtml;
-
-                const checkboxHtml = `
-                    <div class="terpene-checkbox ${budData[`terpene_${index}_selected`] ? 'selected' : ''}">
-                        <input type="checkbox" id="terpene_${index}_checkbox" name="terpene_${index}_checkbox" 
-                               data-terpene-name="${terpene.name}"
-                               ${budData[`terpene_${index}_selected`] ? 'checked' : ''}>
-                        <span>${terpene.name}</span>
-                    </div>
-                `;
-                terpeneOptions.innerHTML += checkboxHtml;
-            });
-
-            // Add event listeners to the dynamically created checkboxes
-            terpeneOptions.querySelectorAll('.terpene-checkbox').forEach((checkboxDiv, index) => {
-                const checkbox = checkboxDiv.querySelector('input[type="checkbox"]');
-                checkbox.addEventListener('change', function() {
-                    updateTerpeneSelectionDisplay(checkboxDiv, this.checked, terpeneData[index].name);
-                });
-
-                // If there's pre-selected data, ensure the display is updated
-                if (this.checked) {
-                    updateTerpeneSelectionDisplay(checkboxDiv, true, terpeneData[index].name);
+                
+                if (percentageInput && budData[`terpene_${i}_percentage`]) {
+                    percentageInput.value = budData[`terpene_${i}_percentage`];
                 }
-            });
-        }
-
-        // Helper function to update the display for terpene selections
-        function updateTerpeneSelectionDisplay(checkboxDiv, isSelected, terpeneName) {
-            checkboxDiv.classList.toggle('selected', isSelected);
-            // You might want to update a hidden input field here as well if needed for submission
+            }
+            
+            // Update tab colors and display after loading data
+            initializeTerpeneTabs();
         }
 
 

@@ -3151,7 +3151,7 @@ def upload_bud_images(bud_id):
 
             # Handle image uploads
             image_urls = {}
-            
+
             # Handle bud images
             for i in range(1, 5):  # image_1 to image_4
                 file_key = f'image_{i}'
@@ -3222,8 +3222,8 @@ def upload_bud_images(bud_id):
     else:
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
-@app.route('/api/buds/<int:bud_id>', methods=['GET'])
-def get_bud(bud_id):
+@app.route('/api/buds/<int:bud_id>/detail', methods=['GET'])
+def get_bud_detail(bud_id):
     """Get individual bud data for editing"""
     if not is_authenticated():
         return jsonify({'error': 'Unauthorized'}), 401
@@ -3237,75 +3237,1208 @@ def get_bud(bud_id):
         print(f"Returning cached data for bud {bud_id}")
         return jsonify(cached_data)
 
+    conn = None
+    cur = None
+    try:
+        print(f"Loading bud detail for ID: {bud_id}, User: {user_id}")
+        conn = get_db_connection()
+        if not conn:
+            print("Failed to get database connection")
+            return jsonify({'error': 'Database connection failed'}), 500
+
+        cur = conn.cursor()
+
+        # Query to get bud data for the current user
+        cur.execute("""
+            SELECT id, strain_name_th, strain_name_en, breeder, strain_type,
+                   thc_percentage, cbd_percentage, grade, aroma_flavor,
+                   top_terpenes_1, top_terpenes_2, top_terpenes_3,
+                   mental_effects_positive, mental_effects_negative,
+                   physical_effects_positive, physical_effects_negative,
+                   recommended_time, grow_method, harvest_date, batch_number,
+                   grower_id, grower_license_verified, fertilizer_type, 
+                   flowering_type, image_1_url, image_2_url, image_3_url, image_4_url,
+                   created_at, updated_at, created_by,
+                   lab_test_name, test_type
+            FROM buds_data
+            WHERE id = %s AND created_by = %s
+        """, (bud_id, user_id))
+
+        result = cur.fetchone()
+        print(f"Query result: {result is not None}")
+
+        if not result:
+            print(f"No bud found with ID {bud_id} for user {user_id}")
+            return jsonify({'error': 'ไม่พบข้อมูลดอกหรือไม่มีสิทธิ์เข้าถึง'}), 404
+
+        bud_data = {
+            'id': result[0],
+            'strain_name_th': result[1] or '',
+            'strain_name_en': result[2] or '',
+            'breeder': result[3] or '',
+            'strain_type': result[4] or '',
+            'thc_percentage': float(result[5]) if result[5] else None,
+            'cbd_percentage': float(result[6]) if result[6] else None,
+            'grade': result[7] or '',
+            'aroma_flavor': result[8] or '',
+            'top_terpenes_1': result[9] or '',
+            'top_terpenes_2': result[10] or '',
+            'top_terpenes_3': result[11] or '',
+            'mental_effects_positive': result[12] or '',
+            'mental_effects_negative': result[13] or '',
+            'physical_effects_positive': result[14] or '',
+            'physical_effects_negative': result[15] or '',
+            'recommended_time': result[16] or '',
+            'grow_method': result[17] or '',
+            'harvest_date': result[18].strftime('%Y-%m-%d') if result[18] else '',
+            'batch_number': result[19] or '',
+            'grower_id': result[20],
+            'grower_license_verified': result[21] or False,
+            'fertilizer_type': result[22] or '',
+            'flowering_type': result[23] or '',
+            'image_1_url': result[24] or '',
+            'image_2_url': result[25] or '',
+            'image_3_url': result[26] or '',
+            'image_4_url': result[27] or '',
+            'created_at': result[28].strftime('%Y-%m-%d %H:%M:%S') if result[28] else '',
+            'updated_at': result[29].strftime('%Y-%m-%d %H:%M:%S') if result[29] else '',
+            'created_by': result[30],
+            'lab_test_name': result[31] or '',
+            'test_type': result[32] or ''
+        }
+
+        print(f"Successfully loaded bud data: {bud_data['strain_name_en']}")
+
+        # Cache for 2 minutes
+        set_cache(cache_key, bud_data)
+
+        return jsonify(bud_data)
+
+    except psycopg2.OperationalError as e:
+        print(f"Database operational error in get_bud_detail: {e}")
+        return jsonify({'error': 'เกิดข้อผิดพลาดในการเชื่อมต่อฐานข้อมูล กรุณาลองใหม่อีกครั้ง'}), 500
+    except Exception as e:
+        print(f"Error in get_bud_detail for bud {bud_id}: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': f'เกิดข้อผิดพลาดในการโหลดข้อมูล: {str(e)}'}), 500
+    finally:
+        if cur:
+            try:
+                cur.close()
+            except:
+                pass
+        if conn:
+            return_db_connection(conn)
+
+@app.route('/add-review')
+def add_review_page():
+    """Add review page"""
+    if 'user_id' not in session:
+        return redirect('/auth')
+    return render_template('add_review.html')
+
+@app.route('/edit-review')
+def edit_review_page():
+    """Edit review page"""
+    if 'user_id' not in session:
+        return redirect('/auth')
+    return render_template('edit_review.html')
+
+@app.route('/bud-reviews')
+def bud_reviews_page():
+    # Check if user is logged in
+    if 'user_id' not in session:
+        return redirect('/auth')
+    return render_template('bud_reviews.html')
+
+@app.route('/report')
+def report_page():
+    # Check if user is logged in
+    if 'user_id' not in session:
+        return redirect('/auth')
+    return render_template('report.html')
+
+@app.route('/bud-report/')
+@app.route('/bud-report/<int:bud_id>')
+@app.route('/bud-report')
+@app.route('/bud-report/<int:bud_id>')
+def bud_report_page(bud_id=None):
+    # Check if user is logged in
+    if 'user_id' not in session:
+        return redirect('/auth')
+
+    # Handle query parameter for id
+    if bud_id is None:
+        bud_id = request.args.get('id')
+        if bud_id:
+            try:
+                bud_id = int(bud_id)
+            except (ValueError, TypeError):
+                bud_id = None
+
+    return render_template('bud_report.html', bud_id=bud_id)
+
+@app.route('/search-tool')
+def search_tool_page():
+    # Check if user is logged in
+    if 'user_id' not in session:
+        return redirect('/auth')
+    if not is_approved():
+        return redirect('/profile?not_approved=1')
+    return render_template('search_tool.html')
+
+@app.route('/friends')
+def friends_page():
+    # Check if user is logged in
+    if 'user_id' not in session:
+        return redirect('/auth')
+    if not is_approved():
+        return redirect('/profile?not_approved=1')
+    return render_template('friends.html')
+
+@app.route('/my-reviews')
+def my_reviews_page():
+    # Check if user is logged in
+    if 'user_id' not in session:
+        return redirect('/auth')
+    if not is_approved():
+        return redirect('/profile?not_approved=1')
+    return render_template('my_reviews.html')
+
+@app.route('/friends-reviews')
+def friends_reviews_page():
+    # Check if user is logged in
+    if 'user_id' not in session:
+        return redirect('/auth')
+    if not is_approved():
+        return redirect('/profile?not_approved=1')
+    return render_template('friends_reviews.html')
+
+@app.route('/activities')
+def activities_page():
+    # Check if user is logged in
+    if 'user_id' not in session:
+        return redirect('/auth')
+    if not is_approved():
+        return redirect('/profile?not_approved=1')
+    return render_template('activities.html')
+
+@app.route('/api/activities', methods=['GET'])
+def get_activities():
+    """Get all activities"""
+    if not is_authenticated():
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("""
+                SELECT a.id, a.name, a.description, a.start_registration_date, a.end_registration_date,
+                       a.judging_criteria, a.max_participants, 
+                       a.first_prize_description, a.first_prize_value, a.first_prize_image,
+                       a.second_prize_description, a.second_prize_value, a.second_prize_image,
+                       a.third_prize_description, a.third_prize_value, a.third_prize_image,
+                       a.status, a.created_at,
+                       COUNT(ap.id) as participant_count
+                FROM activities a
+                LEFT JOIN activity_participants ap ON a.id = ap.activity_id
+                GROUP BY a.id, a.name, a.description, a.start_registration_date, a.end_registration_date,
+                         a.judging_criteria, a.max_participants,
+                         a.first_prize_description, a.first_prize_value, a.first_prize_image,
+                         a.second_prize_description, a.second_prize_value, a.second_prize_image,
+                         a.third_prize_description, a.third_prize_value, a.third_prize_image,
+                         a.status, a.created_at
+                ORDER BY a.created_at DESC
+            """)
+
+            activities = []
+            for row in cur.fetchall():
+                activities.append({
+                    'id': row[0],
+                    'name': row[1],
+                    'description': row[2],
+                    'start_registration_date': row[3].strftime('%Y-%m-%d %H:%M:%S') if row[3] else None,
+                    'end_registration_date': row[4].strftime('%Y-%m-%d %H:%M:%S') if row[4] else None,
+                    'judging_criteria': row[5],
+                    'max_participants': row[6],
+                    'first_prize_description': row[7],
+                    'first_prize_value': float(row[8]) if row[8] else 0,
+                    'first_prize_image': row[9],
+                    'second_prize_description': row[10],
+                    'second_prize_value': float(row[11]) if row[11] else 0,
+                    'second_prize_image': row[12],
+                    'third_prize_description': row[13],
+                    'third_prize_value': float(row[14]) if row[14] else 0,
+                    'third_prize_image': row[15],
+                    'status': row[16],
+                    'created_at': row[17].strftime('%Y-%m-%d %H:%M:%S') if row[17] else None,
+                    'participant_count': row[18]
+                })
+
+            return jsonify({'activities': activities})
+
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+        finally:
+            cur.close()
+            return_db_connection(conn)
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+@app.route('/api/activities/<int:activity_id>/participants', methods=['GET'])
+def get_activity_participants(activity_id):
+    """Get participants for specific activity"""
+    if not is_authenticated():
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("""
+                SELECT ap.id, ap.submission_description, ap.submission_images, ap.rank, ap.prize_amount,
+                       ap.registered_at, u.username, u.profile_image_url,
+                       b.strain_name_en, b.strain_name_th, b.image_1_url, b.image_2_url, b.image_3_url, b.image_4_url
+                FROM activity_participants ap
+                JOIN users u ON ap.user_id = u.id
+                JOIN buds_data b ON ap.bud_id = b.id
+                WHERE ap.activity_id = %s
+                ORDER BY ap.rank ASC NULLS LAST, ap.registered_at ASC
+            """, (activity_id,))
+
+            participants = []
+            for row in cur.fetchall():
+                participants.append({
+                    'id': row[0],
+                    'submission_description': row[1],
+                    'submission_images': row[2] if row[2] else [],
+                    'rank': row[3],
+                    'prize_amount': float(row[4]) if row[4] else 0,
+                    'registered_at': row[5].strftime('%Y-%m-%d %H:%M:%S') if row[5] else None,
+                    'username': row[6],
+                    'profile_image_url': row[7],
+                    'strain_name_en': row[8],
+                    'strain_name_th': row[9],
+                    'bud_images': [row[10], row[11], row[12], row[13]]
+                })
+
+            return jsonify({'participants': participants})
+
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+        finally:
+            cur.close()
+            return_db_connection(conn)
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+@app.route('/api/admin/activities', methods=['POST'])
+def admin_create_activity():
+    """Admin create new activity"""
+    if not is_admin():
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    data = request.get_json()
+
+    if not data.get('name'):
+        return jsonify({'error': 'กรุณากรอกชื่อกิจกรรม'}), 400
+
     conn = get_db_connection()
     if conn:
         try:
             cur = conn.cursor()
 
             cur.execute("""
-                SELECT id, strain_name_th, strain_name_en, breeder, strain_type,
-                       thc_percentage, cbd_percentage, grade, aroma_flavor,
-                       top_terpenes_1, top_terpenes_2, top_terpenes_3,
-                       mental_effects_positive, mental_effects_negative,
-                       physical_effects_positive, physical_effects_negative,
-                       recommended_time, grow_method, harvest_date, batch_number,
-                       grower_id, grower_license_verified, fertilizer_type, 
-                       flowering_type, image_1_url, image_2_url, image_3_url, image_4_url,
-                       created_at, updated_at, created_by,
-                       lab_test_name, test_type,
-                       certificate_image_1_url, certificate_image_2_url, 
-                       certificate_image_3_url, certificate_image_4_url
-                FROM buds_data
-                WHERE id = %s AND created_by = %s
-            """, (bud_id, user_id))
+                INSERT INTO activities (
+                    name, description, start_registration_date, end_registration_date,
+                    judging_criteria, max_participants, status,
+                    first_prize_description, first_prize_value, first_prize_image,
+                    second_prize_description, second_prize_value, second_prize_image,
+                    third_prize_description, third_prize_value, third_prize_image
+                ) VALUES (
+                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+                ) RETURNING id
+            """, (
+                data.get('name'),
+                data.get('description'),
+                data.get('start_registration_date'),
+                data.get('end_registration_date'),
+                data.get('judging_criteria'),
+                data.get('max_participants', 0),
+                data.get('status', 'upcoming'),
+                data.get('first_prize_description'),
+                data.get('first_prize_value', 0),
+                data.get('first_prize_image'),
+                data.get('second_prize_description'),
+                data.get('second_prize_value', 0),
+                data.get('second_prize_image'),
+                data.get('third_prize_description'),
+                data.get('third_prize_value', 0),
+                data.get('third_prize_image')
+            ))
 
+            activity_id = cur.fetchone()[0]
+            conn.commit()
+
+            return jsonify({
+                'success': True,
+                'message': 'สร้างกิจกรรมสำเร็จ',
+                'activity_id': activity_id
+            }), 201
+
+        except Exception as e:
+            conn.rollback()
+            return jsonify({'error': str(e)}), 500
+        finally:
+            cur.close()
+            return_db_connection(conn)
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+@app.route('/api/activities/<int:activity_id>/join', methods=['POST'])
+def join_activity(activity_id):
+    """Join an activity with a bud"""
+    if not is_authenticated():
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    user_id = session['user_id']
+    data = request.get_json()
+    bud_id = data.get('bud_id')
+    submission_description = data.get('submission_description', '')
+
+    if not bud_id:
+        return jsonify({'error': 'กรุณาเลือกดอกที่ต้องการส่งเข้าประกวด'}), 400
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+
+            # Check if activity exists and is open for registration
+            cur.execute("""
+                SELECT id, name, status, max_participants, end_registration_date
+                FROM activities 
+                WHERE id = %s
+            """, (activity_id,))
+
+            activity = cur.fetchone()
+            if not activity:
+                return jsonify({'error': 'ไม่พบกิจกรรมนี้'}), 404
+
+            if activity[2] != 'registration_open':
+                return jsonify({'error': 'กิจกรรมนี้ไม่เปิดรับสมัครแล้ว'}), 400
+
+            if activity[4] and activity[4] < datetime.now():
+                return jsonify({'error': 'หมดเวลาการสมัครแล้ว'}), 400
+
+            # Check if user owns the bud
+            cur.execute("SELECT id FROM buds_data WHERE id = %s AND created_by = %s", (bud_id, user_id))
+            if not cur.fetchone():
+                return jsonify({'error': 'ไม่พบดอกนี้หรือคุณไม่ใช่เจ้าของ'}), 403
+
+            # Check if already joined with this bud
+            cur.execute("""
+                SELECT id FROM activity_participants 
+                WHERE activity_id = %s AND user_id = %s AND bud_id = %s
+            """, (activity_id, user_id, bud_id))
+
+            if cur.fetchone():
+                return jsonify({'error': 'คุณได้ส่งดอกนี้เข้าร่วมกิจกรรมแล้ว'}), 400
+
+            # Check participant limit
+            if activity[3] > 0:  # max_participants
+                cur.execute("SELECT COUNT(*) FROM activity_participants WHERE activity_id = %s", (activity_id,))
+                current_count = cur.fetchone()[0]
+                if current_count >= activity[3]:
+                    return jsonify({'error': 'กิจกรรมนี้เต็มแล้ว'}), 400
+
+            # Join activity
+            cur.execute("""
+                INSERT INTO activity_participants (activity_id, user_id, bud_id, submission_description)
+                VALUES (%s, %s, %s, %s)
+                RETURNING id
+            """, (activity_id, user_id, bud_id, submission_description))
+
+            participant_id = cur.fetchone()[0]
+            conn.commit()
+
+            return jsonify({
+                'success': True,
+                'message': f'เข้าร่วมกิจกรรม "{activity[1]}" สำเร็จ',
+                'participant_id': participant_id
+            })
+
+        except Exception as e:
+            conn.rollback()
+            return jsonify({'error': str(e)}), 500
+        finally:
+            cur.close()
+            return_db_connection(conn)
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+
+
+@app.route('/api/admin/activities/<int:activity_id>', methods=['PUT'])
+def admin_update_activity(activity_id):
+    """Admin update activity"""
+    if not is_admin():
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    data = request.get_json()
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+
+            # Check if activity exists
+            cur.execute("SELECT id FROM activities WHERE id = %s", (activity_id,))
+            if not cur.fetchone():
+                return jsonify({'error': 'ไม่พบกิจกรรมนี้'}), 404
+
+            cur.execute("""
+                UPDATE activities SET
+                    name = %s, description = %s, start_registration_date = %s,
+                    end_registration_date = %s, judging_criteria = %s,
+                    max_participants = %s, status = %s,
+                    first_prize_description = %s, first_prize_value = %s, first_prize_image = %s,
+                    second_prize_description = %s, second_prize_value = %s, second_prize_image = %s,
+                    third_prize_description = %s, third_prize_value = %s, third_prize_image = %s,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id = %s
+            """, (
+                data.get('name'),
+                data.get('description'),
+                data.get('start_registration_date'),
+                data.get('end_registration_date'),
+                data.get('judging_criteria'),
+                data.get('max_participants', 0),
+                data.get('status'),
+                data.get('first_prize_description'),
+                data.get('first_prize_value', 0),
+                data.get('first_prize_image'),
+                data.get('second_prize_description'),
+                data.get('second_prize_value', 0),
+                data.get('second_prize_image'),
+                data.get('third_prize_description'),
+                data.get('third_prize_value', 0),
+                data.get('third_prize_image'),
+                activity_id
+            ))
+
+            conn.commit()
+
+            return jsonify({
+                'success': True,
+                'message': 'อัพเดทกิจกรรมสำเร็จ'
+            })
+
+        except Exception as e:
+            conn.rollback()
+            return jsonify({'error': str(e)}), 500
+        finally:
+            cur.close()
+            return_db_connection(conn)
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+@app.route('/api/admin/activities/<int:activity_id>', methods=['DELETE'])
+def admin_delete_activity(activity_id):
+    """Admin delete activity"""
+    if not is_admin():
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+
+            # Check if activity exists
+            cur.execute("SELECT name FROM activities WHERE id = %s", (activity_id,))
+            activity = cur.fetchone()
+            if not activity:
+                return jsonify({'error': 'ไม่พบกิจกรรมนี้'}), 404
+
+            # Delete activity (CASCADE will handle participants)
+            cur.execute("DELETE FROM activities WHERE id = %s", (activity_id,))
+            conn.commit()
+
+            return jsonify({
+                'success': True,
+                'message': f'ลบกิจกรรม "{activity[0]}" สำเร็จ'
+            })
+
+        except Exception as e:
+            conn.rollback()
+            return jsonify({'error': str(e)}), 500
+        finally:
+            cur.close()
+            return_db_connection(conn)
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+@app.route('/activities/<int:activity_id>/participants')
+def activity_participants_page(activity_id):
+    """Activity participants page"""
+    if 'user_id' not in session:
+        return redirect('/auth')
+    if not is_approved():
+        return redirect('/profile?not_approved=1')
+    return render_template('activity_participants.html', activity_id=activity_id)
+
+@app.route('/activities/<int:activity_id>/join')
+def activity_join_page(activity_id):
+    """Activity join page"""
+    if 'user_id' not in session:
+        return redirect('/auth')
+    if not is_approved():
+        return redirect('/profile?not_approved=1')
+    return render_template('activity_join.html', activity_id=activity_id)
+
+
+
+def get_registration_mode():
+    """Get current registration mode from admin settings"""
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = get_db_connection().cursor() # Corrected to use get_db_connection()
+            cur.execute("""
+                SELECT setting_value FROM admin_settings 
+                WHERE setting_key = 'registrationMode'
+            """)
             result = cur.fetchone()
-            if not result:
-                return jsonify({'error': 'ไม่พบข้อมูลดอกหรือไม่มีสิทธิ์เข้าถึง'}), 404
+            cur.close()
+            return_db_connection(conn)
 
-            bud_data = {
-                'id': result[0],
-                'strain_name_th': result[1],
-                'strain_name_en': result[2],
-                'breeder': result[3],
-                'strain_type': result[4],
-                'thc_percentage': float(result[5]) if result[5] else None,
-                'cbd_percentage': float(result[6]) if result[6] else None,
-                'grade': result[7],
-                'aroma_flavor': result[8],
-                'top_terpenes_1': result[9],
-                'top_terpenes_2': result[10],
-                'top_terpenes_3': result[11],
-                'mental_effects_positive': result[12],
-                'mental_effects_negative': result[13],
-                'physical_effects_positive': result[14],
-                'physical_effects_negative': result[15],
-                'recommended_time': result[16],
-                'grow_method': result[17],
-                'harvest_date': result[18].strftime('%Y-%m-%d') if result[18] else None,
-                'batch_number': result[19],
-                'grower_id': result[20],
-                'grower_license_verified': result[21],
-                'fertilizer_type': result[22],
-                'flowering_type': result[23],
-                'image_1_url': result[24],
-                'image_2_url': result[25],
-                'image_3_url': result[26],
-                'image_4_url': result[27],
-                'created_at': result[28].strftime('%Y-%m-%d %H:%M:%S') if result[28] else None,
-                'updated_at': result[29].strftime('%Y-%m-%d %H:%M:%S') if result[29] else None,
-                'created_by': result[30],
-                'lab_test_name': result[31],
-                'test_type': result[32],
-                'certificate_image_1_url': result[33],
-                'certificate_image_2_url': result[34],
-                'certificate_image_3_url': result[35],
-                'certificate_image_4_url': result[36]
-            }
+            if result:
+                return result[0]
+            else:
+                # Default to public registration
+                return 'public'
+        except:
+            if conn:
+                return_db_connection(conn)
+            return 'public'
+    return 'public'
+
+def is_admin():
+    """Check if current user is admin"""
+    # Check if user has admin session
+    admin_logged_in = session.get('admin_logged_in', False)
+    admin_token = session.get('admin_token')
+    admin_name = session.get('admin_name')
+
+    print(f"Admin check - logged_in: {admin_logged_in}, has_token: {bool(admin_token)}, admin_name: {admin_name}")
+
+    if not admin_logged_in or not admin_token:
+        return False
+
+    # For default admin, check if admin_name is admin999 OR if no admin_name but valid token
+    if admin_name == 'admin999' or (not admin_name and admin_logged_in and admin_token):
+        return True
+
+    # For database admins, verify token
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("""
+                SELECT admin_name FROM admin_accounts 
+                WHERE session_token = %s AND token_expires > NOW() AND is_active = TRUE
+            """, (admin_token,))
+            result = cur.fetchone()
+            cur.close()
+            return_db_connection(conn)
+            return result is not None
+        except:
+            if conn:
+                return_db_connection(conn)
+            return False
+    return False
+
+def create_admin_account(admin_name, password, created_by_user_id=None):
+    """Create new admin account securely"""
+    # Validate password strength
+    is_valid, message = validate_password_strength(password)
+    if not is_valid:
+        return False, message
+
+    # Hash password securely
+    password_hash = hash_password(password)
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+
+            # Check if admin already exists
+            cur.execute("SELECT id FROM admin_accounts WHERE admin_name = %s", (admin_name,))
+            if cur.fetchone():
+                return False, "ชื่อ Admin นี้มีอยู่แล้ว"
+
+            # Insert new admin
+            cur.execute("""
+                INSERT INTO admin_accounts (admin_name, password_hash, created_by)
+                VALUES (%s, %s, %s)
+                RETURNING id
+            """, (admin_name, password_hash, created_by_user_id))
+
+            admin_id = cur.fetchone()[0]
+            conn.commit()
+
+            # Log the creation
+            log_admin_activity(admin_name, 'ADMIN_CREATED', True, 
+                             details='New admin account created: {admin_name}')
 
             cur.close()
             return_db_connection(conn)
-            return jsonify(bud_data)
+            return True, f"สร้าง Admin account '{admin_name}' สำเร็จ"
+
+        except Exception as e:
+            conn.rollback()
+            cur.close()
+            return_db_connection(conn)
+            return False, f"เกิดข้อผิดพลาด: {str(e)}"
+    return False, "เชื่อมต่อฐานข้อมูลไม่ได้"
+
+def verify_admin_login(admin_name, password, ip_address=None, user_agent=None):
+    """Verify admin login with security measures"""
+    import secrets
+    import time
+    from datetime import datetime, timedelta
+
+    # Check for default admin first
+    master_password = os.environ.get('ADMIN_MASTER_PASSWORD', 'Admin123!@#')
+    if admin_name == "admin999" and password == master_password:
+        # Generate session token for default admin
+        session_token = secrets.token_urlsafe(32)
+
+        # Log successful login
+        log_admin_activity(admin_name, 'LOGIN_SUCCESS', True, ip_address, user_agent, 'Default admin login')
+        print(f"Default admin login successful: {admin_name}")
+
+        return True, "เข้าสู่ระบบ Admin สำเร็จ", session_token
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+
+            # Check if admin exists in database
+            cur.execute("""
+                SELECT admin_name, password_hash, login_attempts, locked_until FROM admin_accounts 
+                WHERE admin_name = %s
+            """, (admin_name,))
+
+            admin_record = cur.fetchone()
+
+            if admin_record:
+                stored_admin_name, stored_password_hash, attempts, locked_until = admin_record
+
+                # Check if account is locked
+                if locked_until and locked_until > datetime.now():
+                    log_admin_activity(admin_name, 'LOGIN_BLOCKED', False, ip_address, user_agent,
+                                     'Account locked due to multiple failed attempts')
+                    return False, "บัญชี Admin ถูกล็อค เนื่องจากใส่รหัสผ่านผิดหลายครั้ง", None
+
+                # Verify password
+                if verify_password(password, stored_password_hash):
+                    # Generate session token
+                    session_token = secrets.token_urlsafe(32)
+                    token_expires = datetime.now() + timedelta(hours=2)  # 2 hour session
+
+                    # Update admin record
+                    cur.execute("""
+                        UPDATE admin_accounts SET 
+                            session_token = %s,
+                            token_expires = %s,
+                            last_login = NOW(),
+                            login_attempts = 0,
+                            locked_until = NULL
+                        WHERE admin_name = %s
+                    """, (session_token, token_expires, admin_name))
+
+                    conn.commit()
+
+                    # Log successful login
+                    log_admin_activity(admin_name, 'LOGIN_SUCCESS', True, ip_address, user_agent)
+
+                    cur.close()
+                    return_db_connection(conn)
+                    return True, f"เข้าสู่ระบบ Admin สำเร็จ", session_token
+                else:
+                    # Increment failed attempts
+                    cur.execute("""
+                        UPDATE admin_accounts SET 
+                            login_attempts = login_attempts + 1,
+                            locked_until = CASE 
+                                WHEN login_attempts + 1 >= 5 THEN NOW() + INTERVAL '30 minutes'
+                                ELSE NULL 
+                            END
+                        WHERE admin_name = %s
+                    """, (admin_name,))
+
+                    conn.commit()
+
+                    # Log failed login
+                    log_admin_activity(admin_name, 'LOGIN_FAILED', False, ip_address, user_agent,
+                                     'Invalid password')
+
+                    cur.close()
+                    return_db_connection(conn)
+                    return False, "รหัสผ่าน Admin ไม่ถูกต้อง", None
+            else:
+                # Admin not found
+                log_admin_activity(admin_name, 'LOGIN_FAILED', False, ip_address, user_agent,
+                                 'Admin account not found')
+
+                cur.close()
+                return_db_connection(conn)
+                return False, "ไม่พบบัญชี Admin นี้", None
+
+        except Exception as e:
+            conn.rollback()
+            cur.close()
+            return_db_connection(conn)
+            return False, f"เกิดข้อผิดพลาด: {str(e)}", None
+
+    return False, "เชื่อมต่อฐานข้อมูลไม่ได้", None
+
+def log_admin_activity(admin_name, action, success=True, ip_address=None, user_agent=None, details=None):
+    """Log admin activity for security tracking"""
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("""
+                INSERT INTO admin_activity_logs (admin_name, action, ip_address, user_agent, success, details)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, (admin_name, action, ip_address, user_agent, success, details))
+            conn.commit()
+            cur.close()
+            return_db_connection(conn)
+        except:
+            if conn:
+                return_db_connection(conn)
+
+@app.route('/api/verify_captcha', methods=['POST'])
+def verify_captcha():
+    """Verify reCAPTCHA token"""
+    data = request.get_json()
+    captcha_token = data.get('token')
+
+    if not captcha_token:
+        return jsonify({'success': False, 'error': 'ไม่พบ CAPTCHA token'}), 400
+
+    # For production, you would verify with Google reCAPTCHA API:
+    # secret_key = os.environ.get('RECAPTCHA_SECRET_KEY')
+    # verify_url = 'https://www.google.com/recaptcha/api/siteverify'
+    # response = requests.post(verify_url, data={
+    #     'secret': secret_key,
+    #     'response': captcha_token,
+    #     'remoteip': request.environ.get('REMOTE_ADDR')
+    # })
+    # result = response.json()
+
+    # For demo purposes, we'll accept any non-empty token
+    if captcha_token:
+        session['captcha_verified'] = True
+        return jsonify({
+            'success': True,
+            'message': 'CAPTCHA verified successfully'
+        })
+    else:
+        return jsonify({
+            'success': False,
+            'error': 'CAPTCHA verification failed'
+        }), 400
+
+@app.route('/fallback_login', methods=['POST'])
+def fallback_login():
+    """Fallback login for preview mode"""
+    if not FALLBACK_AUTH_ENABLED:
+        return jsonify({'success': False, 'error': 'Fallback authentication is disabled'}), 403
+
+    data = request.get_json()
+    email = data.get('email')
+    password = data.get('password')
+
+    if not email or not password:
+        return jsonify({'success': False, 'error': 'กรุณากรอกอีเมลและรหัสผ่าน'}), 400
+
+    # Special fallback accounts for development
+    fallback_accounts = {
+        'dev@budtboy.com': 'dev1123',
+        'test@budtboy.com': 'test123',
+        'admin@budtboy.com': 'admin123'
+    }
+
+    if email in fallback_accounts and password == fallback_accounts[email]:
+        # Create temporary session for fallback user
+        session['user_id'] = 999  # Special fallback user ID
+        session['username'] = email.split('@')[0].title()
+        session['email'] = email
+        session['fallback_mode'] = True
+
+        return jsonify({
+            'success': True,
+            'message': f'เข้าสู่ระบบสำเร็จ (Preview Mode)',
+            'redirect': '/profile'
+        })
+    else:
+        # Try regular database authentication
+        conn = get_db_connection()
+        if conn:
+            try:
+                cur = conn.cursor()
+                cur.execute("""
+                    SELECT id, username, email, password_hash
+                    FROM users 
+                    WHERE email = %s
+                """, (email,))
+
+                user = cur.fetchone()
+                if user and verify_password(password, user[3]):
+                    session['user_id'] = user[0]
+                    session['username'] = user[1]
+                    session['email'] = user[2]
+                    session['fallback_mode'] = True
+
+                    return jsonify({
+                        'success': True,
+                        'message': f'เข้าสู่ระบบสำเร็จ ยินดีต้อนรับ {user[1]}!',
+                        'redirect': '/profile'
+                    })
+                else:
+                    return jsonify({
+                        'success': False,
+                        'error': 'อีเมลหรือรหัสผ่านไม่ถูกต้อง'
+                    }), 400
+
+            except Exception as e:
+                return jsonify({'success': False, 'error': str(e)}), 500
+            finally:
+                cur.close()
+                return_db_connection(conn)
+
+        return jsonify({'success': False, 'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+@app.route('/fallback_signup', methods=['POST'])
+def fallback_signup():
+    """Fallback signup for preview mode"""
+    if not FALLBACK_AUTH_ENABLED:
+        return jsonify({'success': False, 'error': 'Fallback authentication is disabled'}), 403
+
+    data = request.get_json()
+    username = data.get('username')
+    email = data.get('email')
+    password = data.get('password')
+
+    if not username or not email or not password:
+        return jsonify({'success': False, 'error': 'กรุณากรอกข้อมูลให้ครบถ้วน'}), 400
+
+    # Validate password strength
+    is_valid, message = validate_password_strength(password)
+    if not is_valid:
+        return jsonify({'success': False, 'error': message}), 400
+
+    # Hash password securely
+    password_hash = hash_password(password)
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+
+            # Check if user exists
+            cur.execute("SELECT id FROM users WHERE username = %s OR email = %s", (username, email))
+            if cur.fetchone():
+                return jsonify({
+                    'success': False,
+                    'error': 'ชื่อผู้ใช้หรืออีเมลนี้ถูกใช้แล้ว'
+                }), 400
+
+            # Generate referral code
+            import secrets
+            new_referral_code = secrets.token_urlsafe(8)
+
+            # Create user
+            cur.execute("""
+                INSERT INTO users (username, email, password_hash, is_consumer, is_verified, referral_code, is_approved)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                RETURNING id
+            """, (username, email, password_hash, True, True, new_referral_code, True))
+
+            user_id = cur.fetchone()[0]
+            conn.commit()
+
+            # Auto login
+            session['user_id'] = user_id
+            session['username'] = username
+            session['email'] = email
+            session['fallback_mode'] = True
+
+            return jsonify({
+                'success': True,
+                'message': f'สมัครสมาชิกสำเร็จ! ยินดีต้อนรับ {username} (Preview Mode)',
+                'redirect': '/profile'
+            })
+
+        except Exception as e:
+            conn.rollback()
+            return jsonify({'success': False, 'error': str(e)}), 500
+        finally:
+            cur.close()
+            return_db_connection(conn)
+    else:
+        return jsonify({'success': False, 'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+def log_user_activity(user_id, username, action, resource_type=None, resource_id=None, 
+                     old_data=None, new_data=None, success=True, details=None, request_obj=None):
+    """Log user activity for tracking data changes"""
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+
+            # Get IP and User Agent from request if provided
+            ip_address = None
+            user_agent = None
+            if request_obj:
+                ip_address = request_obj.environ.get('HTTP_X_FORWARDED_FOR', request_obj.environ.get('REMOTE_ADDR'))
+                user_agent = request_obj.headers.get('User-Agent')
+
+            # Convert data to JSON if provided
+            import json
+            old_data_json = json.dumps(old_data) if old_data else None
+            new_data_json = json.dumps(new_data) if new_data else None
+
+            cur.execute("""
+                INSERT INTO user_activity_logs (user_id, username, action, resource_type, resource_id,
+                                               ip_address, user_agent, old_data, new_data, success, details)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (user_id, username, action, resource_type, resource_id, 
+                  ip_address, user_agent, old_data_json, new_data_json, success, details))
+            conn.commit()
+            cur.close()
+            return_db_connection(conn)
+        except Exception as e:
+            print(f"Error logging user activity: {e}")
+            if conn:
+                return_db_connection(conn)
+
+# Decorator for admin routes
+def admin_required(func):
+    from functools import wraps
+    @wraps(func)
+    def decorated_view(**kwargs):
+        if not is_admin():
+            # Optionally redirect to a forbidden page or return an error
+            return redirect('/profile?no_admin=1')
+        return func(**kwargs)
+    return decorated_view
+
+@app.route('/admin_login')
+def admin_login_page():
+    """Admin login page"""
+    return render_template('admin_login.html')
+
+@app.route('/admin_login', methods=['POST'])
+def admin_login():
+    """Handle admin login"""
+    data = request.get_json()
+    admin_name = data.get('admin_name', 'admin999')  # Default to admin999
+    password = data.get('password')
+
+    if not admin_name or not password:
+        return jsonify({'success': False, 'error': 'กรุณากรอกชื่อ Admin และรหัสผ่าน'}), 400
+
+    # Get client info for security logging
+    ip_address = request.environ.get('HTTP_X_FORWARDED_FOR', request.environ.get('REMOTE_ADDR'))
+    user_agent = request.headers.get('User-Agent')
+
+    success, message, session_token = verify_admin_login(admin_name, password, ip_address, user_agent)
+
+    if success:
+        # Set admin session
+        session['admin_token'] = session_token
+        session['admin_logged_in'] = True
+        session['admin_name'] = admin_name  # Always set admin name to session
+
+        print(f"Admin login successful: {admin_name}, token: {session_token[:10]}...")
+
+        return jsonify({
+            'success': True,
+            'message': message,
+            'redirect': '/admin'
+        })
+    else:
+        print(f"Admin login failed: {message}")
+        return jsonify({
+            'success': False,
+            'error': message
+        }), 400
+
+@app.route('/admin_logout')
+def admin_logout():
+    """Admin logout"""
+    admin_token = session.get('admin_token')
+    if admin_token:
+        # Clear token from database
+        conn = get_db_connection()
+        if conn:
+            try:
+                cur = conn.cursor()
+                cur.execute("""
+                    UPDATE admin_accounts 
+                    SET session_token = NULL, token_expires = NULL 
+                    WHERE session_token = %s
+                """, (admin_token,))
+                conn.commit()
+                cur.close()
+                return_db_connection(conn)
+            except:
+                if conn:
+                    return_db_connection(conn)
+
+        # Log logout
+        log_admin_activity("admin", 'LOGOUT', True, 
+                         request.environ.get('REMOTE_ADDR'),
+                         request.headers.get('User-Agent'))
+
+    # Clear admin session
+    session.pop('admin_token', None)
+    session.pop('admin_logged_in', None)
+
+    return redirect('/admin_login')
+
+@app.route('/admin')
+def admin_dashboard():
+    """Admin dashboard page"""
+    if not is_admin():
+        return redirect('/admin_login')
+
+    # Log admin access
+    log_admin_activity("admin", 'DASHBOARD_ACCESS', True,
+                     request.environ.get('REMOTE_ADDR'),
+                     request.headers.get('User-Agent'))
+
+    return render_template('admin.html')
+
+@app.route('/admin/users')
+def admin_users():
+    """Admin users management page"""
+    if not is_admin():
+        return redirect('/admin_login')
+    return render_template('admin_users.html')
+
+# Admin settings routes
+@app.route('/admin/settings')
+def admin_settings():
+    if not is_admin():
+        return redirect('/admin_login')
+    return render_template('admin_settings.html')
+
+@app.route('/admin/settings/general')
+def admin_settings_general():
+    if not is_admin():
+        return redirect('/admin_login')
+    return render_template('admin_settings_general.html')
+
+@app.route('/admin/settings/auth-images')
+def admin_settings_auth_images():
+    if not is_admin():
+        return redirect('/admin_login')
+    return render_template('admin_settings_auth_images.html')
+
+@app.route('/admin/settings/users')
+def admin_settings_users():
+    if not is_admin():
+        return redirect('/admin_login')
+    return render_template('admin_settings_users.html')
+
+@app.route('/admin/settings/content')
+def admin_settings_content():
+    if not is_admin():
+        return redirect('/admin_login')
+    return render_template('admin_settings_content.html')
+
+@app.route('/admin/settings/security')
+def admin_settings_security():
+    if not is_admin():
+        return redirect('/admin_login')
+    return render_template('admin_settings_security.html')
+
+@app.route('/admin/settings/maintenance')
+def admin_settings_maintenance():
+    if not is_admin():
+        return redirect('/admin_login')
+    return render_template('admin_settings_maintenance.html')
+
+@app.route('/admin/buds')
+def admin_buds():
+    """Admin buds management page"""
+    if not is_admin():
+        return redirect('/admin_login')
+    return render_template('admin_buds.html')
+
+@app.route('/admin/reviews')
+def admin_reviews():
+    """Admin reviews management page"""
+    if not is_admin():
+        return redirect('/admin_login')
+    return render_template('admin_reviews.html')
+
+@app.route('/api/admin/stats')
+def get_admin_stats():
+    """Get admin dashboard statistics"""
+    if not is_admin():
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+
+            # Get total users
+            cur.execute("SELECT COUNT(*) FROM users")
+            total_users = cur.fetchone()[0]
+
+            # Get pending users
+            cur.execute("SELECT COUNT(*) FROM users WHERE is_approved = FALSE")
+            pending_users = cur.fetchone()[0]
+
+            # Get total buds
+            cur.execute("SELECT COUNT(*) FROM buds_data")
+            total_buds = cur.fetchone()[0]
+
+            # Get total reviews
+            cur.execute("SELECT COUNT(*) FROM reviews")
+            total_reviews = cur.fetchone()[0]
+
+            # Get total activities
+            cur.execute("SELECT COUNT(*) FROM activities")
+            total_activities = cur.fetchone()[0]
+
+            # Get active activities
+            cur.execute("SELECT COUNT(*) FROM activities WHERE status IN ('registration_open', 'judging')")
+            active_activities = cur.fetchone()[0]
+
+            cur.close()
+            return_db_connection(conn)
+
+            return jsonify({
+                'total_users': total_users,
+                'pending_users': pending_users,
+                'total_buds': total_buds,
+                'total_reviews': total_reviews,
+                'total_activities': total_activities,
+                'active_activities': active_activities
+            })
 
         except Exception as e:
             return jsonify({'error': str(e)}), 500
@@ -3316,6 +4449,491 @@ def get_bud(bud_id):
                 return_db_connection(conn)
     else:
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+@app.route('/api/admin/pending_users')
+# @admin_required # Commented out to allow access for testing purposes - uncomment for production
+def get_pending_users():
+    """Get list of users pending approval"""
+    if not is_admin():
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            # Using RealDictCursor to get results as dictionaries
+            cur = conn.cursor(cursor_factory=RealDictCursor)
+
+            # Get pending users with referrer information
+            cur.execute("""
+                SELECT u.id, u.username, u.email, u.profile_image_url, u.created_at,
+                       u.referred_by, r.username as referred_by_username, u.is_approved
+                FROM users u
+                LEFT JOIN users r ON u.referred_by = r.id
+                WHERE u.is_approved = FALSE
+                ORDER BY u.created_at DESC
+            """)
+
+            pending_users = cur.fetchall()
+
+            # Format datetime and profile image URL
+            users_list = []
+            for user in pending_users:
+                user_dict = dict(user)
+                if user_dict['created_at']:
+                    user_dict['created_at'] = user_dict['created_at'].isoformat()
+                if user_dict['approved_at']:
+                    user_dict['approved_at'] = user_dict['approved_at'].isoformat()
+
+                # Format profile image URL correctly
+                profile_image_url = None
+                if user_dict.get('profile_image_url'):
+                    if user_dict['profile_image_url'].startswith('/uploads/'):
+                        profile_image_url = user_dict['profile_image_url']
+                    elif user_dict['profile_image_url'].startswith('uploads/'):
+                        profile_image_url = f'/{user_dict["profile_image_url"]}'
+                    else:
+                        profile_image_url = f'/uploads/{user_dict["profile_image_url"].split("/")[-1]}'
+                user_dict['profile_image_url'] = profile_image_url
+
+                users_list.append(user_dict)
+
+            return jsonify({'users': users_list})
+
+        except Exception as e:
+            print(f"Error getting pending users: {e}")
+            return jsonify({'error': str(e)}), 500
+        finally:
+            if cur:
+                cur.close()
+            if conn:
+                return_db_connection(conn)
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+@app.route('/api/admin/approve_user', methods=['POST'])
+# @admin_required # Commented out for testing
+def admin_approve_user():
+    """Admin approve a pending user"""
+    if not is_admin():
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    data = request.get_json()
+    user_id_to_approve = data.get('user_id')
+
+    if not user_id_to_approve:
+        return jsonify({'error': 'ไม่พบ user_id ที่จะอนุมัติ'}), 400
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+
+            # Check if user exists and is pending
+            cur.execute("""
+                SELECT id, username, is_approved 
+                FROM users 
+                WHERE id = %s
+            """, (user_id_to_approve,))
+
+            user_to_approve = cur.fetchone()
+            if not user_to_approve:
+                return jsonify({'error': 'ไม่พบผู้ใช้ที่ต้องอนุมัติ'}), 404
+
+            if user_to_approve[2]:  # is_approved
+                return jsonify({'error': 'ผู้ใช้นี้ได้รับการอนุมัติแล้ว'}), 400
+
+            # Approve the user
+            admin_id = session.get('user_id') # Get current logged-in user ID
+            if not admin_id: # If admin logged in without user_id (e.g. default admin)
+                admin_id = None # Or handle as appropriate, e.g., use a placeholder admin ID
+
+            cur.execute("""
+                UPDATE users 
+                SET is_approved = TRUE, approved_at = CURRENT_TIMESTAMP, approved_by = %s
+                WHERE id = %s
+            """, (admin_id, user_id_to_approve))
+
+            conn.commit()
+            cur.close()
+            return_db_connection(conn)
+
+            return jsonify({
+                'success': True,
+                'message': f'อนุมัติผู้ใช้ {user_to_approve[1]} เรียบร้อยแล้ว'
+            })
+
+        except Exception as e:
+            conn.rollback()
+            return jsonify({'error': str(e)}), 500
+        finally:
+            if cur:
+                cur.close()
+            if conn:
+                return_db_connection(conn)
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+@app.route('/api/admin/reject_user', methods=['POST'])
+# @admin_required # Commented out for testing
+def admin_reject_user():
+    """Admin reject a pending user (delete from system)"""
+    if not is_admin():
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    data = request.get_json()
+    user_id_to_reject = data.get('user_id')
+
+    if not user_id_to_reject:
+        return jsonify({'error': 'ไม่พบ user_id ที่จะปฏิเสธ'}), 400
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+
+            # Check if user exists and is pending
+            cur.execute("""
+                SELECT id, username, is_approved 
+                FROM users 
+                WHERE id = %s
+            """, (user_id_to_reject,))
+
+            user_to_reject = cur.fetchone()
+            if not user_to_reject:
+                return jsonify({'error': 'ไม่พบผู้ใช้ที่ต้องปฏิเสธ'}), 404
+
+            if user_to_reject[2]:  # is_approved
+                return jsonify({'error': 'ไม่สามารถปฏิเสธผู้ใช้ที่อนุมัติแล้วได้'}), 400
+
+            # Delete the user (CASCADE will handle related records)
+            cur.execute("DELETE FROM users WHERE id = %s", (user_id_to_reject,))
+
+            conn.commit()
+            cur.close()
+            return_db_connection(conn)
+
+            return jsonify({
+                'success': True,
+                'message': f'ปฏิเสธและลบผู้ใช้ {user_to_reject[1]} เรียบร้อยแล้ว'
+            })
+
+        except Exception as e:
+            conn.rollback()
+            return jsonify({'error': str(e)}), 500
+        finally:
+            if cur:
+                cur.close()
+            if conn:
+                return_db_connection(conn)
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+@app.route('/api/admin/users')
+# @admin_required # Commented out for testing
+def get_admin_users():
+    """Get all users for admin management"""
+    if not is_admin():
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+
+            cur.execute("""
+                SELECT id, username, email, is_grower, is_budtender, is_consumer,
+                       birth_year, profile_image_url, is_verified, is_approved,
+                       created_at, approved_at, referred_by,
+                       ref.username as referred_by_username
+                FROM users u
+                LEFT JOIN users ref ON u.referred_by = ref.id
+                ORDER BY u.is_approved ASC, u.created_at DESC
+            """)
+
+            users = []
+            for row in cur.fetchall():
+                user_data = {
+                    'id': row[0],
+                    'username': row[1],
+                    'email': row[2],
+                    'is_grower': row[3],
+                    'is_budtender': row[4],
+                    'is_consumer': row[5],
+                    'birth_year': row[6],
+                    'profile_image_url': row[7],
+                    'is_verified': row[8],
+                    'is_approved': row[9],
+                    'created_at': row[10].strftime('%Y-%m-%d %H:%M:%S') if row[10] else None,
+                    'approved_at': row[11].strftime('%Y-%m-%d %H:%M:%S') if row[11] else None,
+                    'referred_by': row[12],
+                    'referred_by_username': row[13]
+                }
+                users.append(user_data)
+
+            cur.close()
+            return_db_connection(conn)
+
+            return jsonify({'users': users})
+
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+        finally:
+            if cur:
+                cur.close()
+            if conn:
+                return_db_connection(conn)
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+@app.route('/api/search-buds', methods=['POST'])
+def search_buds():
+    """Search buds based on criteria"""
+    if not is_authenticated():
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    data = request.get_json()
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+
+            # Build dynamic query with safe SQL composition
+            conditions = []
+            params = {}
+
+            base_query = """
+                SELECT b.id, b.strain_name_en, b.strain_name_th, b.breeder, b.strain_type,
+                       b.thc_percentage, b.cbd_percentage, b.grade, b.aroma_flavor,
+                       b.recommended_time, b.grow_method, b.created_at,
+                       COALESCE(AVG(r.overall_rating), 0) as avg_rating,
+                       COUNT(r.id) as review_count,
+                       b.lab_test_name, b.test_type
+                FROM buds_data b
+                LEFT JOIN reviews r ON b.id = r.bud_reference_id
+                WHERE 1=1
+            """
+
+            # Add search conditions
+            if data.get('strain_name_en'):
+                conditions.append("AND b.strain_name_en ILIKE %(strain_name_en)s")
+                params['strain_name_en'] = f"%{data['strain_name_en']}%"
+
+            if data.get('strain_name_th'):
+                conditions.append("AND b.strain_name_th ILIKE %(strain_name_th)s")
+                params['strain_name_th'] = f"%{data['strain_name_th']}%"
+
+            if data.get('breeder'):
+                conditions.append("AND b.breeder ILIKE %(breeder)s")
+                params['breeder'] = f"%{data['breeder']}%"
+
+            if data.get('strain_type'):
+                conditions.append("AND b.strain_type = %(strain_type)s")
+                params['strain_type'] = data['strain_type']
+
+            if data.get('grade'):
+                conditions.append("AND b.grade = %(grade)s")
+                params['grade'] = data['grade']
+
+            if data.get('recommended_time'):
+                conditions.append("AND b.recommended_time = %(recommended_time)s")
+                params['recommended_time'] = data['recommended_time']
+
+            if data.get('grow_method'):
+                conditions.append("AND b.grow_method = %(grow_method)s")
+                params['grow_method'] = data['grow_method']
+
+            # THC range
+            if data.get('thc_min'):
+                conditions.append("AND b.thc_percentage >= %(thc_min)s")
+                params['thc_min'] = float(data['thc_min'])
+
+            if data.get('thc_max'):
+                conditions.append("AND b.thc_percentage <= %(thc_max)s")
+                params['thc_max'] = float(data['thc_max'])
+
+            # CBD range
+            if data.get('cbd_min'):
+                conditions.append("AND b.cbd_percentage >= %(cbd_min)s")
+                params['cbd_min'] = float(data['cbd_min'])
+
+            if data.get('cbd_max'):
+                conditions.append("AND b.cbd_percentage <= %(cbd_max)s")
+                params['cbd_max'] = float(data['cbd_max'])
+
+            # Aroma/flavor search
+            if data.get('aroma_flavor'):
+                flavors = [f.strip() for f in data['aroma_flavor'].split(',')]
+                flavor_conditions = []
+                for i, flavor in enumerate(flavors):
+                    if flavor:
+                        param_name = f'flavor_{i}'
+                        flavor_conditions.append(f"b.aroma_flavor ILIKE %({param_name})s")
+                        params[param_name] = f"%{flavor}%"
+                if flavor_conditions:
+                    or_clause = "AND (" + " OR ".join(flavor_conditions) + ")"
+                    conditions.append(or_clause)
+
+            # Complete query with explicit structure
+            query_parts = [base_query]
+            query_parts.extend(conditions)
+            query_parts.append("""
+                GROUP BY b.id, b.strain_name_en, b.strain_name_th, b.breeder, b.strain_type,
+                         b.thc_percentage, b.cbd_percentage, b.grade, b.aroma_flavor,
+                         b.recommended_time, b.grow_method, b.created_at,
+                         b.lab_test_name, b.test_type
+                ORDER BY avg_rating DESC, b.created_at DESC
+                LIMIT 50
+            """)
+            full_query = ' '.join(query_parts)
+
+            cur.execute(full_query, params)
+            results = cur.fetchall()
+
+            buds = []
+            for row in results:
+                buds.append({
+                    'id': row[0],
+                    'strain_name_en': row[1],
+                    'strain_name_th': row[2],
+                    'breeder': row[3],
+                    'strain_type': row[4],
+                    'thc_percentage': float(row[5]) if row[5] else None,
+                    'cbd_percentage': float(row[6]) if row[6] else None,
+                    'grade': row[7],
+                    'aroma_flavor': row[8],
+                    'recommended_time': row[9],
+                    'grow_method': row[10],
+                    'created_at': row[11].strftime('%Y-%m-%d') if row[11] else None,
+                    'avg_rating': float(row[12]) if row[12] else 0,
+                    'review_count': row[13],
+                    'lab_test_name': row[14],
+                    'test_type': row[15]
+                })
+
+            cur.close()
+            return_db_connection(conn)
+
+            return jsonify({'success': True, 'buds': buds})
+
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+        finally:
+            if cur:
+                cur.close()
+            if conn:
+                return_db_connection(conn)
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+@app.route('/api/buds/<int:bud_id>/detail', methods=['GET'])
+def get_bud_detail(bud_id):
+    """Get individual bud data for editing"""
+    if not is_authenticated():
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    user_id = session['user_id']
+    cache_key = f"bud_detail_{bud_id}_{user_id}"
+
+    # Check cache first
+    cached_data = get_cache(cache_key)
+    if cached_data:
+        print(f"Returning cached data for bud {bud_id}")
+        return jsonify(cached_data)
+
+    conn = None
+    cur = None
+    try:
+        print(f"Loading bud detail for ID: {bud_id}, User: {user_id}")
+        conn = get_db_connection()
+        if not conn:
+            print("Failed to get database connection")
+            return jsonify({'error': 'Database connection failed'}), 500
+
+        cur = conn.cursor()
+
+        # Query to get bud data for the current user
+        cur.execute("""
+            SELECT id, strain_name_th, strain_name_en, breeder, strain_type,
+                   thc_percentage, cbd_percentage, grade, aroma_flavor,
+                   top_terpenes_1, top_terpenes_2, top_terpenes_3,
+                   mental_effects_positive, mental_effects_negative,
+                   physical_effects_positive, physical_effects_negative,
+                   recommended_time, grow_method, harvest_date, batch_number,
+                   grower_id, grower_license_verified, fertilizer_type, 
+                   flowering_type, image_1_url, image_2_url, image_3_url, image_4_url,
+                   created_at, updated_at, created_by,
+                   lab_test_name, test_type
+            FROM buds_data
+            WHERE id = %s AND created_by = %s
+        """, (bud_id, user_id))
+
+        result = cur.fetchone()
+        print(f"Query result: {result is not None}")
+
+        if not result:
+            print(f"No bud found with ID {bud_id} for user {user_id}")
+            return jsonify({'error': 'ไม่พบข้อมูลดอกหรือไม่มีสิทธิ์เข้าถึง'}), 404
+
+        bud_data = {
+            'id': result[0],
+            'strain_name_th': result[1] or '',
+            'strain_name_en': result[2] or '',
+            'breeder': result[3] or '',
+            'strain_type': result[4] or '',
+            'thc_percentage': float(result[5]) if result[5] else None,
+            'cbd_percentage': float(result[6]) if result[6] else None,
+            'grade': result[7] or '',
+            'aroma_flavor': result[8] or '',
+            'top_terpenes_1': result[9] or '',
+            'top_terpenes_2': result[10] or '',
+            'top_terpenes_3': result[11] or '',
+            'mental_effects_positive': result[12] or '',
+            'mental_effects_negative': result[13] or '',
+            'physical_effects_positive': result[14] or '',
+            'physical_effects_negative': result[15] or '',
+            'recommended_time': result[16] or '',
+            'grow_method': result[17] or '',
+            'harvest_date': result[18].strftime('%Y-%m-%d') if result[18] else '',
+            'batch_number': result[19] or '',
+            'grower_id': result[20],
+            'grower_license_verified': result[21] or False,
+            'fertilizer_type': result[22] or '',
+            'flowering_type': result[23] or '',
+            'image_1_url': result[24] or '',
+            'image_2_url': result[25] or '',
+            'image_3_url': result[26] or '',
+            'image_4_url': result[27] or '',
+            'created_at': result[28].strftime('%Y-%m-%d %H:%M:%S') if result[28] else '',
+            'updated_at': result[29].strftime('%Y-%m-%d %H:%M:%S') if result[29] else '',
+            'created_by': result[30],
+            'lab_test_name': result[31] or '',
+            'test_type': result[32] or ''
+        }
+
+        print(f"Successfully loaded bud data: {bud_data['strain_name_en']}")
+
+        # Cache for 2 minutes
+        set_cache(cache_key, bud_data)
+
+        return jsonify(bud_data)
+
+    except psycopg2.OperationalError as e:
+        print(f"Database operational error in get_bud_detail: {e}")
+        return jsonify({'error': 'เกิดข้อผิดพลาดในการเชื่อมต่อฐานข้อมูล กรุณาลองใหม่อีกครั้ง'}), 500
+    except Exception as e:
+        print(f"Error in get_bud_detail for bud {bud_id}: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': f'เกิดข้อผิดพลาดในการโหลดข้อมูล: {str(e)}'}), 500
+    finally:
+        if cur:
+            try:
+                cur.close()
+            except:
+                pass
+        if conn:
+            return_db_connection(conn)
 
 @app.route('/api/buds/<int:bud_id>/status', methods=['PUT'])
 def update_bud_status(bud_id):
@@ -3847,7 +5465,7 @@ def get_review(review_id):
                 'review_images': result[7] if result[7] else [],
                 'created_at': result[8].strftime('%Y-%m-%d %H:%M:%S') if result[8] else None,
                 'updated_at': result[9].strftime('%Y-%m-%d %H:%M:%S') if result[9] else None,
-                'bud_reference_id': result[10],
+                'video_review_url': result[10],
                 'strain_name_en': result[11],
                 'strain_name_th': result[12],
                 'breeder': result[13]
@@ -3871,7 +5489,7 @@ def get_review(review_id):
 def update_review(review_id):
     """Update existing review"""
     if 'user_id' not in session:
-        return jsonify({'error': 'ไม่ได้เข้าสู่ระบบ'}), 401
+        return jsonify({'error: 'ไม่ได้เข้าสู่ระบบ'}), 401
 
     data = request.get_json()
     user_id = session['user_id']
@@ -4111,7 +5729,7 @@ def get_buds_for_review():
     else:
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
-@app.route('/api/buds/<int:bud_id>/info')
+@app.route('/api/buds/<int:bud_id>/info', methods=['GET'])
 def get_bud_info(bud_id):
     """Get detailed bud information with grower details"""
     if not is_authenticated():
@@ -4129,7 +5747,8 @@ def get_bud_info(bud_id):
     conn = None
     cur = None
     try:
-        print(f"Loading bud detail for ID: {bud_id}, User: {session.get('user_id')}")
+        print(f"Loading bud detail for ID: {bud_id}, User: {session.get('user_id', 'N/A')}")
+
         conn = get_db_connection()
         if not conn:
             print("Failed to get database connection")
@@ -4186,7 +5805,7 @@ def get_bud_info(bud_id):
             print(f"No bud found with ID {bud_id}")
             return jsonify({
                 'success': False,
-                'error': f'ไม่พบข้อมูลดอก ID: {bud_id}'
+                'error': f'ไม่พบข้อมูล Bud ID: {bud_id}'
             }), 404
 
         bud_info = {
@@ -4237,13 +5856,11 @@ def get_bud_info(bud_id):
 
         print(f"Successfully loaded bud data: {bud_info['strain_name_en']}")
 
-        # Cache for 2 minutes
-        set_cache(cache_key, bud_info)
+        # Cache for 5 minutes
+        response_data = {'success': True, 'bud': bud_info}
+        set_cache(cache_key, response_data)
 
-        return jsonify({
-            'success': True,
-            'bud': bud_info
-        })
+        return jsonify(response_data)
 
     except psycopg2.OperationalError as e:
         print(f"Database operational error in get_bud_info: {e}")
@@ -5201,7 +6818,7 @@ def admin_login():
         session['admin_name'] = admin_name  # Always set admin name to session
 
         print(f"Admin login successful: {admin_name}, token: {session_token[:10]}...")
-        
+
         return jsonify({
             'success': True,
             'message': message,
@@ -5615,838 +7232,6 @@ def get_admin_users():
                 return_db_connection(conn)
     else:
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
-
-@app.route('/api/search-buds', methods=['POST'])
-def search_buds():
-    """Search buds based on criteria"""
-    if not is_authenticated():
-        return jsonify({'error': 'Unauthorized'}), 401
-
-    data = request.get_json()
-
-    conn = get_db_connection()
-    if conn:
-        try:
-            cur = conn.cursor()
-
-            # Build dynamic query with safe SQL composition
-            conditions = []
-            params = {}
-
-            base_query = """
-                SELECT b.id, b.strain_name_en, b.strain_name_th, b.breeder, b.strain_type,
-                       b.thc_percentage, b.cbd_percentage, b.grade, b.aroma_flavor,
-                       b.recommended_time, b.grow_method, b.created_at,
-                       COALESCE(AVG(r.overall_rating), 0) as avg_rating,
-                       COUNT(r.id) as review_count,
-                       b.lab_test_name, b.test_type
-                FROM buds_data b
-                LEFT JOIN reviews r ON b.id = r.bud_reference_id
-                WHERE 1=1
-            """
-
-            # Add search conditions
-            if data.get('strain_name_en'):
-                conditions.append("AND b.strain_name_en ILIKE %(strain_name_en)s")
-                params['strain_name_en'] = f"%{data['strain_name_en']}%"
-
-            if data.get('strain_name_th'):
-                conditions.append("AND b.strain_name_th ILIKE %(strain_name_th)s")
-                params['strain_name_th'] = f"%{data['strain_name_th']}%"
-
-            if data.get('breeder'):
-                conditions.append("AND b.breeder ILIKE %(breeder)s")
-                params['breeder'] = f"%{data['breeder']}%"
-
-            if data.get('strain_type'):
-                conditions.append("AND b.strain_type = %(strain_type)s")
-                params['strain_type'] = data['strain_type']
-
-            if data.get('grade'):
-                conditions.append("AND b.grade = %(grade)s")
-                params['grade'] = data['grade']
-
-            if data.get('recommended_time'):
-                conditions.append("AND b.recommended_time = %(recommended_time)s")
-                params['recommended_time'] = data['recommended_time']
-
-            if data.get('grow_method'):
-                conditions.append("AND b.grow_method = %(grow_method)s")
-                params['grow_method'] = data['grow_method']
-
-            # THC range
-            if data.get('thc_min'):
-                conditions.append("AND b.thc_percentage >= %(thc_min)s")
-                params['thc_min'] = float(data['thc_min'])
-
-            if data.get('thc_max'):
-                conditions.append("AND b.thc_percentage <= %(thc_max)s")
-                params['thc_max'] = float(data['thc_max'])
-
-            # CBD range
-            if data.get('cbd_min'):
-                conditions.append("AND b.cbd_percentage >= %(cbd_min)s")
-                params['cbd_min'] = float(data['cbd_min'])
-
-            if data.get('cbd_max'):
-                conditions.append("AND b.cbd_percentage <= %(cbd_max)s")
-                params['cbd_max'] = float(data['cbd_max'])
-
-            # Aroma/flavor search
-            if data.get('aroma_flavor'):
-                flavors = [f.strip() for f in data['aroma_flavor'].split(',')]
-                flavor_conditions = []
-                for i, flavor in enumerate(flavors):
-                    if flavor:
-                        param_name = f'flavor_{i}'
-                        flavor_conditions.append(f"b.aroma_flavor ILIKE %({param_name})s")
-                        params[param_name] = f"%{flavor}%"
-                if flavor_conditions:
-                    or_clause = "AND (" + " OR ".join(flavor_conditions) + ")"
-                    conditions.append(or_clause)
-
-            # Complete query with explicit structure
-            query_parts = [base_query]
-            query_parts.extend(conditions)
-            query_parts.append("""
-                GROUP BY b.id, b.strain_name_en, b.strain_name_th, b.breeder, b.strain_type,
-                         b.thc_percentage, b.cbd_percentage, b.grade, b.aroma_flavor,
-                         b.recommended_time, b.grow_method, b.created_at,
-                         b.lab_test_name, b.test_type
-                ORDER BY avg_rating DESC, b.created_at DESC
-                LIMIT 50
-            """)
-            full_query = ' '.join(query_parts)
-
-            cur.execute(full_query, params)
-            results = cur.fetchall()
-
-            buds = []
-            for row in results:
-                buds.append({
-                    'id': row[0],
-                    'strain_name_en': row[1],
-                    'strain_name_th': row[2],
-                    'breeder': row[3],
-                    'strain_type': row[4],
-                    'thc_percentage': float(row[5]) if row[5] else None,
-                    'cbd_percentage': float(row[6]) if row[6] else None,
-                    'grade': row[7],
-                    'aroma_flavor': row[8],
-                    'recommended_time': row[9],
-                    'grow_method': row[10],
-                    'created_at': row[11].strftime('%Y-%m-%d') if row[11] else None,
-                    'avg_rating': float(row[12]) if row[12] else 0,
-                    'review_count': row[13],
-                    'lab_test_name': row[14],
-                    'test_type': row[15]
-                })
-
-            cur.close()
-            return_db_connection(conn)
-
-            return jsonify({'success': True, 'buds': buds})
-
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
-        finally:
-            if cur:
-                cur.close()
-            if conn:
-                return_db_connection(conn)
-    else:
-        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
-
-@app.route('/api/buds/<int:bud_id>/detail', methods=['GET'])
-def get_bud_detail(bud_id):
-    """Get individual bud data for editing (renamed route to avoid conflict)"""
-    if not is_authenticated():
-        return jsonify({'error': 'Unauthorized'}), 401
-
-    user_id = session['user_id']
-    cache_key = f"bud_detail_{bud_id}_{user_id}"
-
-    # Check cache first
-    cached_data = get_cache(cache_key)
-    if cached_data:
-        print(f"Returning cached data for bud {bud_id}")
-        return jsonify(cached_data)
-
-    conn = None
-    cur = None
-    try:
-        print(f"Loading bud detail for ID: {bud_id}, User: {user_id}")
-
-        conn = get_db_connection()
-        if not conn:
-            print("Failed to get database connection")
-            return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
-
-        cur = conn.cursor()
-
-        # Query to get bud data for the current user
-        cur.execute("""
-            SELECT id, strain_name_th, strain_name_en, breeder, strain_type,
-                   thc_percentage, cbd_percentage, grade, aroma_flavor,
-                   top_terpenes_1, top_terpenes_2, top_terpenes_3,
-                   mental_effects_positive, mental_effects_negative,
-                   physical_effects_positive, physical_effects_negative,
-                   recommended_time, grow_method, harvest_date, batch_number,
-                   grower_id, grower_license_verified, fertilizer_type, 
-                   flowering_type, image_1_url, image_2_url, image_3_url, image_4_url,
-                   created_at, updated_at, created_by,
-                   lab_test_name, test_type
-            FROM buds_data
-            WHERE id = %s AND created_by = %s
-        """, (bud_id, user_id))
-
-        result = cur.fetchone()
-        print(f"Query result: {result is not None}")
-
-        if not result:
-            print(f"No bud found with ID {bud_id} for user {user_id}")
-            return jsonify({'error': 'ไม่พบข้อมูลดอกหรือไม่มีสิทธิ์เข้าถึง'}), 404
-
-        bud_data = {
-            'id': result[0],
-            'strain_name_th': result[1] or '',
-            'strain_name_en': result[2] or '',
-            'breeder': result[3] or '',
-            'strain_type': result[4] or '',
-            'thc_percentage': float(result[5]) if result[5] else None,
-            'cbd_percentage': float(result[6]) if result[6] else None,
-            'grade': result[7] or '',
-            'aroma_flavor': result[8] or '',
-            'top_terpenes_1': result[9] or '',
-            'top_terpenes_2': result[10] or '',
-            'top_terpenes_3': result[11] or '',
-            'mental_effects_positive': result[12] or '',
-            'mental_effects_negative': result[13] or '',
-            'physical_effects_positive': result[14] or '',
-            'physical_effects_negative': result[15] or '',
-            'recommended_time': result[16] or '',
-            'grow_method': result[17] or '',
-            'harvest_date': result[18].strftime('%Y-%m-%d') if result[18] else '',
-            'batch_number': result[19] or '',
-            'grower_id': result[20],
-            'grower_license_verified': result[21] or False,
-            'fertilizer_type': result[22] or '',
-            'flowering_type': result[23] or '',
-            'image_1_url': result[24] or '',
-            'image_2_url': result[25] or '',
-            'image_3_url': result[26] or '',
-            'image_4_url': result[27] or '',
-            'created_at': result[28].strftime('%Y-%m-%d %H:%M:%S') if result[28] else '',
-            'updated_at': result[29].strftime('%Y-%m-%d %H:%M:%S') if result[29] else '',
-            'created_by': result[30],
-            'lab_test_name': result[31] or '',
-            'test_type': result[32] or ''
-        }
-
-        print(f"Successfully loaded bud data: {bud_data['strain_name_en']}")
-
-        # Cache for 2 minutes (shorter cache for edit operations)
-        set_cache(cache_key, bud_data)
-
-        return jsonify(bud_data)
-
-    except psycopg2.OperationalError as e:
-        print(f"Database operational error in get_bud_detail: {e}")
-        return jsonify({'error': 'เกิดข้อผิดพลาดในการเชื่อมต่อฐานข้อมูล กรุณาลองใหม่อีกครั้ง'}), 500
-    except Exception as e:
-        print(f"Error in get_bud_detail for bud {bud_id}: {e}")
-        import traceback
-        traceback.print_exc()
-        return jsonify({'error': f'เกิดข้อผิดพลาดในการโหลดข้อมูล: {str(e)}'}), 500
-    finally:
-        if cur:
-            try:
-                cur.close()
-            except:
-                pass
-        if conn:
-            return_db_connection(conn)
-
-@app.route('/api/upload-images', methods=['POST'])
-def upload_images():
-    """Upload multiple images for reviews"""
-    if 'user_id' not in session:
-        return jsonify({'error': 'ไม่ได้เข้าสู่ระบบ'}), 401
-
-    try:
-        uploaded_urls = []
-
-        # Process up to 4 images
-        for i in range(4):
-            file_key = f'image_{i}'
-            if file_key in request.files:
-                file = request.files[file_key]
-                if file and file.filename != '' and allowed_file(file.filename):
-                    filename = secure_filename(file.filename)
-                    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_')
-                    filename = f"{timestamp}review_{session['user_id']}_{filename}"
-                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                    file.save(file_path)
-                    uploaded_urls.append(f'/uploads/{filename}')
-
-        return jsonify({
-            'success': True,
-            'message': f'อัปโหลดรูปภาพสำเร็จ ({len(uploaded_urls)} รูป)',
-            'image_urls': uploaded_urls
-        })
-
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/upload_prize_image', methods=['POST'])
-def upload_prize_image():
-    """Upload prize image for activities"""
-    if not is_admin():
-        return jsonify({'error': 'Unauthorized'}), 401
-
-    if 'prize_image' not in request.files:
-        return jsonify({'error': 'ไม่พบไฟล์รูปภาพ'}), 400
-
-    file = request.files['prize_image']
-    prize_position = request.form.get('prize_position', '1')
-
-    if file.filename == '':
-        return jsonify({'error': 'ไม่ได้เลือกไฟล์'}), 400
-
-    if file and allowed_file(file.filename):
-        try:
-            filename = secure_filename(file.filename)
-            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_')
-            filename = f"{timestamp}prize_{prize_position}_{filename}"
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(file_path)
-
-            return jsonify({
-                'success': True,
-                'message': 'อัปโหลดรูปภาพรางวัลสำเร็จ',
-                'image_url': f'/uploads/{filename}'
-            })
-
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
-    else:
-        return jsonify({'error': 'ประเภทไฟล์ไม่ถูกต้อง กรุณาเลือกไฟล์ภาพ'}), 400
-
-@app.route('/api/upload_profile_image', methods=['POST'])
-def upload_profile_image():
-    """Upload profile image"""
-    if 'user_id' not in session:
-        return jsonify({'error': 'ไม่ได้เข้าสู่ระบบ'}), 401
-
-    user_id = session['user_id']
-
-    if 'profile_image' not in request.files:
-        return jsonify({'error': 'ไม่พบไฟล์รูปภาพ'}), 400
-
-    file = request.files['profile_image']
-
-    if file.filename == '':
-        return jsonify({'error': 'ไม่ได้เลือกไฟล์'}), 400
-
-    if file and allowed_file(file.filename):
-        try:
-            filename = secure_filename(file.filename)
-            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_')
-            filename = f"{timestamp}profile_{user_id}_{filename}"
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(file_path)
-
-            # Update database with new profile image URL
-            conn = get_db_connection()
-            if conn:
-                cur = conn.cursor()
-                profile_image_url = f'/uploads/{filename}'
-
-                cur.execute("""
-                    UPDATE users SET profile_image_url = %s WHERE id = %s
-                """, (profile_image_url, user_id))
-
-                conn.commit()
-
-                # Clear cache for this user
-                clear_cache_pattern(f"profile_{user_id}")
-
-                cur.close()
-                return_db_connection(conn)
-
-                return jsonify({
-                    'success': True,
-                    'message': 'อัปโหลดรูปโปรไฟล์สำเร็จ',
-                    'profile_image_url': profile_image_url
-                })
-            else:
-                return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
-
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
-    else:
-        return jsonify({'error': 'ประเภทไฟล์ไม่ถูกต้อง กรุณาเลือกไฟล์ภาพ'}), 400
-
-@app.route('/users')
-def list_users():
-    conn = get_db_connection()
-    if conn:
-        try:
-            cur = conn.cursor()
-            cur.execute("""
-                SELECT id, username, email, is_grower, is_budtender, is_consumer, 
-                       birth_year, created_at, is_verified, grow_license_file_url, profile_image_url 
-                FROM users ORDER BY created_at DESC
-            """)
-            users = cur.fetchall()
-
-            users_list = []
-            for user in users:
-                users_list.append({
-                    'id': user[0],
-                    'username': user[1],
-                    'email': user[2],
-                    'is_grower': user[3],
-                    'is_budtender': user[4],
-                    'is_consumer': user[5],
-                    'birth_year': user[6],
-                    'created_at': user[7].strftime('%Y-%m-%d %H:%M:%S') if user[7] else None,
-                    'is_verified': user[8],
-                    'grow_license_file_url': user[9],
-                    'profile_image_url': user[10]
-                })
-
-            return jsonify(users_list)
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
-        finally:
-            cur.close()
-            return_db_connection(conn)
-    else:
-        return jsonify({'error': 'Database connection failed'}), 500
-
-@app.route('/register_user', methods=['POST'])
-def register_user():
-    # Handle license file upload
-    license_file_url = None
-    if 'grow_license_file' in request.files:
-        file = request.files['grow_license_file']
-        if file and file.filename != '' and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            # Add timestamp to filename to avoid conflicts
-            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_')
-            filename = timestamp + filename
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(file_path)
-            license_file_url = file_path
-
-    # Handle profile image upload
-    profile_image_url = None
-    if 'profile_image' in request.files:
-        file = request.files['profile_image']
-        if file and file.filename != '' and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            # Add timestamp to filename to avoid conflicts
-            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_')
-            filename = timestamp + 'profile_' + filename
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(file_path)
-            profile_image_url = file_path
-
-    # Get form data
-    username = request.form.get('username')
-    email = request.form.get('email')
-    password = request.form.get('password')
-    birth_year = request.form.get('birth_year')
-    is_grower = 'is_grower' in request.form
-    is_budtender = 'is_budtender' in request.form
-    is_consumer = 'is_consumer' in request.form
-
-    # Validate password strength
-    is_valid, message = validate_password_strength(password)
-    if not is_valid:
-        return jsonify({'success': False, 'error': message}), 400
-
-    # Secure password hashing
-    password_hash = hash_password(password)
-
-    conn = get_db_connection()
-    if conn:
-        try:
-            cur = conn.cursor()
-
-            # Check if username or email already exists
-            cur.execute("SELECT id FROM users WHERE username = %s OR email = %s", (username, email))
-            existing_user = cur.fetchone()
-
-            if existing_user:
-                return jsonify({
-                    'success': False, 
-                    'error': 'ชื่อผู้ใช้หรืออีเมลนี้ถูกใช้ไปแล้ว'
-                }), 400
-
-            # Insert user
-            cur.execute("""
-                INSERT INTO users (username, email, password_hash, is_grower, grow_license_file_url, 
-                                 is_budtender, is_consumer, birth_year, profile_image_url, is_verified)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                RETURNING id
-            """, (
-                username, email, password_hash, is_grower, license_file_url,
-                is_budtender, is_consumer,
-                int(birth_year) if birth_year else None,
-                profile_image_url,
-                False  # Not verified initially
-            ))
-
-            user_id = cur.fetchone()[0]
-
-            # Generate verification token
-            token = generate_verification_token()
-            expires_at = datetime.now() + timedelta(hours=24)
-
-            cur.execute("""
-                INSERT INTO email_verifications (user_id, token, expires_at)
-                VALUES (%s, %s, %s)
-            """, (user_id, token, expires_at))
-
-            conn.commit()
-
-            # Send verification email
-            if send_verification_email(email, username, token):
-                return jsonify({
-                    'success': True,
-                    'message': 'ลงทะเบียนสำเร็จ! กรุณาตรวจสอบอีเมลเพื่อยืนยันการลงทะเบียน',
-                    'user_id': user_id
-                }), 201
-            else:
-                return jsonify({
-                    'success': True,
-                    'message': 'ลงทะเบียนสำเร็จ แต่ไม่สามารถส่งอีเมลยืนยันได้',
-                    'user_id': user_id
-                }), 201
-
-        except Exception as e:
-            conn.rollback()
-            return jsonify({'success': False, 'error': str(e)}), 500
-        finally:
-            cur.close()
-            return_db_connection(conn)
-    else:
-        return jsonify({'success': False, 'error': 'Database connection failed'}), 500
-
-@app.route('/api/registration_mode', methods=['GET'])
-def get_registration_mode_api():
-    """Get current registration mode setting"""
-    try:
-        mode = get_registration_mode()
-        return jsonify({
-            'success': True,
-            'mode': mode,
-            'is_public': mode == 'public',
-            'is_referral_only': mode == 'referral_only'
-        })
-    except Exception as e:
-        return jsonify({
-            'success': False,
-            'error': str(e),
-            'mode': 'public'  # Default fallback
-        }), 500
-
-@app.route('/api/pending_friends_count', methods=['GET'])
-def get_pending_friends_count():
-    """Get count of pending friends for approval notification"""
-    if 'user_id' not in session:
-        return jsonify({'pending_count': 0, 'not_logged_in': True}), 200
-
-    user_id = session['user_id']
-    cache_key = f"pending_friends_{user_id}"
-
-    # Check cache first with short TTL
-    cached_data = get_cache(cache_key, SHORT_CACHE_TTL)
-    if cached_data:
-        return jsonify(cached_data)
-
-    conn = None
-    cur = None
-    try:
-        conn = get_db_connection()
-        if not conn:
-            return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
-
-        cur = conn.cursor()
-
-        # Count pending friends
-        cur.execute("""
-            SELECT COUNT(*) FROM users 
-            WHERE referred_by = %s AND is_approved = FALSE
-        """, (user_id,))
-
-        pending_count = cur.fetchone()[0]
-
-        result = {'pending_count': pending_count}
-
-        # Cache the result
-        set_cache(cache_key, result, SHORT_CACHE_TTL)
-
-        return jsonify(result)
-
-    except Exception as e:
-        print(f"Error in get_pending_friends_count: {e}")
-        return jsonify({'error': str(e)}), 500
-    finally:
-        if cur:
-            try:
-                cur.close()
-            except:
-                pass
-        if conn:
-            return_db_connection(conn)
-
-@app.route('/api/approve_user', methods=['POST'])
-def approve_user():
-    """Approve a pending user"""
-    if 'user_id' not in session:
-        return jsonify({'error': 'ไม่ได้เข้าสู่ระบบ'}), 401
-
-    approver_id = session['user_id']
-    data = request.get_json()
-    user_id_to_approve = data.get('user_id')
-
-    if not user_id_to_approve:
-        return jsonify({'error': 'ไม่พบ user_id ที่จะอนุมัติ'}), 400
-
-    conn = get_db_connection()
-    if conn:
-        try:
-            cur = conn.cursor()
-
-            # Check if the user to approve was referred by the approver
-            cur.execute("""
-                SELECT id, username, referred_by, is_approved 
-                FROM users 
-                WHERE id = %s AND referred_by = %s
-            """, (user_id_to_approve, approver_id))
-
-            user_to_approve = cur.fetchone()
-            if not user_to_approve:
-                return jsonify({'error': 'ไม่พบผู้ใช้ที่ต้องอนุมัติหรือไม่ใช่คนที่คุณชวน'}), 404
-
-            if user_to_approve[3]:  # is_approved
-                return jsonify({'error': 'ผู้ใช้นี้ได้รับการอนุมัติแล้ว'}), 400
-
-            # Approve the user
-            admin_id = session.get('user_id') # Get current logged-in user ID
-            if not admin_id: # If admin logged in without user_id (e.g. default admin)
-                admin_id = None # Or handle as appropriate, e.g., use a placeholder admin ID
-
-            cur.execute("""
-                UPDATE users 
-                SET is_approved = TRUE, approved_at = CURRENT_TIMESTAMP, approved_by = %s
-                WHERE id = %s
-            """, (admin_id, user_id_to_approve))
-
-            conn.commit()
-            cur.close()
-            return_db_connection(conn)
-
-            return jsonify({
-                'success': True,
-                'message': f'อนุมัติผู้ใช้ {user_to_approve[1]} เรียบร้อยแล้ว'
-            })
-
-        except Exception as e:
-            conn.rollback()
-            return jsonify({'error': str(e)}), 500
-        finally:
-            if cur:
-                cur.close()
-            if conn:
-                return_db_connection(conn)
-    else:
-        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
-
-@app.route('/api/friends_reviews')
-def get_friends_reviews():
-    """Get reviews related to user's buds (excluding user's own reviews)"""
-    if not is_authenticated():
-        return jsonify({'error': 'Unauthorized'}), 401
-
-    user_id = session.get('user_id')
-    cache_key = f"friends_reviews_{user_id}"
-
-    # Check cache first
-    cached_data = get_cache(cache_key)
-    if cached_data:
-        return jsonify({'reviews': cached_data})
-
-    conn = None
-    cur = None
-    try:
-        conn = get_db_connection()
-        if not conn:
-            print("Failed to get database connection")
-            return jsonify({'error': 'Database connection failed', 'reviews': []}), 500
-
-        cur = conn.cursor()
-
-        # Get reviews for buds created by the current user, but not reviews written by the current user
-        cur.execute("""
-            SELECT r.id, r.overall_rating, r.short_summary, r.full_review_content, 
-                   r.aroma_rating, r.selected_effects, r.aroma_flavors, r.review_images,
-                   r.created_at, r.updated_at, r.video_review_url,
-                   b.strain_name_en, b.strain_name_th, b.breeder,
-                   u.username as reviewer_name, u.profile_image_url as reviewer_profile_image,
-                   r.bud_reference_id
-            FROM reviews r
-            JOIN buds_data b ON r.bud_reference_id = b.id
-            JOIN users u ON r.reviewer_id = u.id
-            WHERE b.created_by = %s AND r.reviewer_id != %s
-            ORDER BY r.created_at DESC
-            LIMIT 50
-        """, (user_id, user_id))
-
-        print(f"Debug: Query executed for user_id {user_id} (friends reviews)")
-
-        reviews = []
-        for row in cur.fetchall():
-            # Format profile image URL correctly
-            reviewer_profile_image = None
-            if row[15]:  # reviewer_profile_image
-                if row[15].startswith('/uploads/'):
-                    reviewer_profile_image = row[15]
-                elif row[15].startswith('uploads/'):
-                    reviewer_profile_image = f'/{row[15]}'
-                else:
-                    reviewer_profile_image = f'/uploads/{row[15].split("/")[-1]}'
-
-            review_data = {
-                'id': row[0],
-                'overall_rating': row[1],
-                'short_summary': row[2],
-                'full_review_content': row[3],
-                'aroma_rating': row[4],
-                'selected_effects': row[5] if row[5] else [],
-                'aroma_flavors': row[6] if row[6] else [],
-                'review_images': row[7] if row[7] else [],
-                'created_at': row[8].strftime('%Y-%m-%d %H:%M:%S') if row[8] else None,
-                'updated_at': row[9].strftime('%Y-%m-%d %H:%M:%S') if row[9] else None,
-                'video_review_url': row[10],
-                'strain_name_en': row[11],
-                'strain_name_th': row[12],
-                'breeder': row[13],
-                'reviewer_name': row[14],
-                'reviewer_profile_image': reviewer_profile_image,
-                'bud_reference_id': row[16]  # Add bud reference ID from reviews table
-            }
-
-            reviews.append(review_data)
-
-        # Cache for 2 minutes
-        set_cache(cache_key, reviews)
-
-        return jsonify({'reviews': reviews})
-
-    except psycopg2.OperationalError as e:
-        print(f"Database operational error in get_friends_reviews: {e}")
-        return jsonify({'error': 'Database connection lost', 'reviews': []}), 500
-    except Exception as e:
-        print(f"Error in get_friends_reviews: {e}")
-        return jsonify({'error': 'Internal server error', 'reviews': []}), 500
-    finally:
-        if cur:
-            try:
-                cur.close()
-            except:
-                pass
-        if conn:
-            return_db_connection(conn)
-
-@app.route('/api/friends', methods=['GET'])
-def get_friends():
-    """Get list of users who signed up through referral link"""
-    if 'user_id' not in session:
-        return jsonify({'error': 'ไม่ได้เข้าสู่ระบบ'}), 401
-
-    user_id = session['user_id']
-
-    conn = get_db_connection()
-    if conn:
-        try:
-            cur = conn.cursor()
-
-            # Get friends (users referred by current user)
-            cur.execute("""
-                SELECT u.id, u.username, u.email, u.profile_image_url, 
-                       u.created_at, u.is_verified, u.is_approved, u.approved_at
-                FROM users u
-                WHERE u.referred_by = %s
-                ORDER BY u.is_approved ASC, u.created_at DESC
-            """, (user_id,))
-
-            friends = []
-            pending_count = 0
-
-            for row in cur.fetchall():
-                # Format profile image URL correctly
-                profile_image_url = None
-                if row[3]:
-                    if row[3].startswith('/uploads/'):
-                        profile_image_url = row[3]
-                    elif row[3].startswith('uploads/'):
-                        profile_image_url = f'/{row[3]}'
-                    else:
-                        profile_image_url = f'/uploads/{row[3].split("/")[-1]}'
-
-                is_approved = row[6]
-                if not is_approved:
-                    pending_count += 1
-
-                friends.append({
-                    'id': row[0],
-                    'username': row[1],
-                    'email': row[2],
-                    'profile_image_url': profile_image_url,
-                    'created_at': row[4].strftime('%Y-%m-%d %H:%M:%S') if row[4] else None,
-                    'is_verified': row[5],
-                    'is_approved': is_approved,
-                    'approved_at': row[7].strftime('%Y-%m-%d %H:%M:%S') if row[7] else None
-                })
-
-            # Get current user's referral code
-            cur.execute("SELECT referral_code FROM users WHERE id = %s", (user_id,))
-            result = cur.fetchone()
-            referral_code = result[0] if result else None
-
-            # If no referral code exists, generate one
-            if not referral_code:
-                import secrets
-                referral_code = secrets.token_urlsafe(8)
-                cur.execute("UPDATE users SET referral_code = %s WHERE id = %s", (referral_code, user_id))
-                conn.commit()
-
-            cur.close()
-            return_db_connection(conn)
-
-            return jsonify({
-                'friends': friends,
-                'referral_code': referral_code,
-                'total_friends': len(friends),
-                'pending_friends': pending_count
-            })
-
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
-        finally:
-            if cur:
-                cur.close()
-            if conn:
-                return_db_connection(conn)
-    else:
-        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
-
-# Admin routes
-# These routes are protected by the admin_required decorator
 
 @app.route('/api/admin/settings', methods=['POST'])
 def save_admin_settings():

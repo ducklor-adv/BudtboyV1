@@ -1701,13 +1701,21 @@
                         throw new Error('ไม่ได้รับข้อมูลจากเซิร์ฟเวอร์');
                     }
                     
-                    if (!budData.success) {
+                    // ตรวจสอบโครงสร้างข้อมูล - อาจมีข้อมูลดอกโดยตรงหรือใน .bud
+                    let bud = budData.bud || budData;
+                    
+                    // ถ้าไม่มี success field หรือมีแต่เป็น true ให้ผ่าน
+                    if (budData.hasOwnProperty('success') && !budData.success) {
                         throw new Error(budData.error || 'API ส่งกลับสถานะไม่สำเร็จ');
                     }
                     
-                    if (!budData.bud) {
+                    // ตรวจสอบว่ามีข้อมูลดอกหรือไม่
+                    if (!bud || (typeof bud !== 'object') || !bud.id) {
                         throw new Error('ไม่พบข้อมูลดอกในการตอบกลับ');
                     }
+                    
+                    // อัพเดต budData.bud เพื่อให้ส่วนอื่นใช้งานได้
+                    budData.bud = bud;
 
                     const bud = budData.bud;
                     console.log('Grower name from API:', bud.grower_name);
@@ -1782,7 +1790,9 @@
                                 <div style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">${errorMessage}</div>
                                 <div style="font-size: 14px; color: #666; margin-bottom: 15px;">Bud ID: ${budId || 'N/A'}</div>
                                 <div style="font-size: 12px; color: #999; margin-bottom: 15px;">พยายาม ${retryCount + 1} ครั้ง</div>
+                                <div style="font-size: 12px; color: #999; margin-bottom: 15px;">Debug: API Response Structure อาจไม่ตรงกับที่คาดหวัง</div>
                                 <button onclick="retryLoad()" style="background: #4CAF50; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 14px;">🔄 ลองใหม่</button>
+                                <button onclick="debugResponse()" style="background: #2196F3; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 14px; margin-left: 10px;">🔍 Debug</button>
                             </div>
                         `;
                         break;
@@ -1806,6 +1816,29 @@
             document.getElementById('loadingMessage').style.display = 'block';
             document.getElementById('budContent').style.display = 'none';
             initializePage();
+        }
+
+        // ฟังก์ชันสำหรับ debug API response
+        async function debugResponse() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const budId = urlParams.get('id');
+            
+            try {
+                const response = await fetch(`/api/buds/${budId}/info?debug=1`);
+                const data = await response.json();
+                
+                console.log('Debug API Response:', data);
+                console.log('Response keys:', Object.keys(data));
+                console.log('Has success property:', data.hasOwnProperty('success'));
+                console.log('Success value:', data.success);
+                console.log('Has bud property:', data.hasOwnProperty('bud'));
+                console.log('Bud data:', data.bud);
+                
+                alert(`Debug Info:\nStatus: ${response.status}\nHas success: ${data.hasOwnProperty('success')}\nSuccess value: ${data.success}\nHas bud: ${data.hasOwnProperty('bud')}\nBud ID: ${data.bud?.id || 'N/A'}\n\nCheck console for full details`);
+            } catch (error) {
+                console.error('Debug error:', error);
+                alert('Debug failed: ' + error.message);
+            }
         }
 
         function displayBudReport(bud, reviews) {

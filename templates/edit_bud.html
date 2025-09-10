@@ -1,9 +1,8 @@
-
 <!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, relevant=device-width, initial-scale=1.0">
     <title>แก้ไขข้อมูลดอก - Cannabis App</title>
     <style>
         * {
@@ -892,6 +891,115 @@
                     </div>
                 </div>
 
+                <!-- Certificate Information -->
+                <div class="form-section">
+                    <div class="section-title">
+                        🏆 ใบรับรอง (Certificate)
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="lab_test_name">Lab test (ชื่อสถานที่ตรวจ)</label>
+                            <input type="text" id="lab_test_name" name="lab_test_name" placeholder="เช่น Cannabis Testing Lab, Green Lab Thailand">
+                            <div class="help-text">ชื่อห้องปฏิบัติการหรือสถานที่ที่ทำการตรวจสอบ</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="test_type">Test type (วิธีการตรวจ)</label>
+                            <input type="text" id="test_type" name="test_type" placeholder="เช่น HPLC, GC-MS, LC-MS/MS">
+                            <div class="help-text">วิธีการหรือเทคนิคที่ใช้ในการตรวจสอบ</div>
+                        </div>
+                    </div>
+
+                    <!-- Image Management Section -->
+                    <div class="image-upload-section">
+                        <p class="help-text">จัดการรูปภาพใบรับรอง (สูงสุด 4 รูป, ขนาดไม่เกิน 16MB ต่อรูป)</p>
+
+                        <div class="image-upload-grid">
+                            <div class="image-upload-item">
+                                <label for="certificate_image_1" class="upload-label">
+                                    <div class="upload-placeholder">
+                                        <span class="upload-icon">📷</span>
+                                        <span class="upload-text">รูปที่ 1</span>
+                                    </div>
+                                </label>
+                                <input type="file" id="certificate_image_1" name="certificate_image_1" accept="image/*" style="display: none;">
+                                <div class="image-preview" id="certificate_preview_1" style="display: none;">
+                                    <img src="" alt="Preview">
+                                    <button type="button" class="remove-image-btn" onclick="removeCertificateImage(1)">×</button>
+                                </div>
+                                <div class="current-image" id="current_certificate_1" style="display: none;">
+                                    <img src="" alt="Current Image">
+                                    <button type="button" class="remove-image-btn" onclick="removeCurrentCertificateImage(1)">×</button>
+                                    <button type="button" class="replace-image-btn" onclick="replaceCurrentCertificateImage(1)">🔄</button>
+                                </div>
+                            </div>
+
+                            <div class="image-upload-item">
+                                <label for="certificate_image_2" class="upload-label">
+                                    <div class="upload-placeholder">
+                                        <span class="upload-icon">📷</span>
+                                        <span class="upload-text">รูปที่ 2</span>
+                                    </div>
+                                </label>
+                                <input type="file" id="certificate_image_2" name="certificate_image_2" accept="image/*" style="display: none;">
+                                <div class="image-preview" id="certificate_preview_2" style="display: none;">
+                                    <img src="" alt="Preview">
+                                    <button type="button" class="remove-image-btn" onclick="removeCertificateImage(2)">×</button>
+                                </div>
+                                <div class="current-image" id="current_certificate_2" style="display: none;">
+                                    <img src="" alt="Current Image">
+                                    <button type="button" class="remove-image-btn" onclick="removeCurrentCertificateImage(2)">×</button>
+                                    <button type="button" class="replace-image-btn" onclick="replaceCurrentCertificateImage(2)">🔄</button>
+                                </div>
+                            </div>
+
+                            <div class="image-upload-item">
+                                <label for="certificate_image_3" class="upload-label">
+                                    <div class="upload-placeholder">
+                                        <span class="upload-icon">📷</span>
+                                        <span class="upload-text">รูปที่ 3</span>
+                                    </div>
+                                </label>
+                                <input type="file" id="certificate_image_3" name="certificate_image_3" accept="image/*" style="display: none;">
+                                <div class="image-preview" id="certificate_preview_3" style="display: none;">
+                                    <img src="" alt="Preview">
+                                    <button type="button" class="remove-image-btn" onclick="removeCertificateImage(3)">×</button>
+                                </div>
+                                <div class="current-image" id="current_certificate_3" style="display: none;">
+                                    <img src="" alt="Current Image">
+                                    <button type="button" class="remove-image-btn" onclick="removeCurrentCertificateImage(3)">×</button>
+                                    <button type="button" class="replace-image-btn" onclick="replaceCurrentCertificateImage(3)">🔄</button>
+                                </div>
+                            </div>
+
+                            <div class="image-upload-item">
+                                <label for="certificate_image_4" class="upload-label">
+                                    <div class="upload-placeholder">
+                                        <span class="upload-icon">📷</span>
+                                        <span class="upload-text">รูปที่ 4</span>
+                                    </div>
+                                </label>
+                                <input type="file" id="certificate_image_4" name="certificate_image_4" accept="image/*" style="display: none;">
+                                <div class="image-preview" id="certificate_preview_4" style="display: none;">
+                                    <img src="" alt="Preview">
+                                    <button type="button" class="remove-image-btn" onclick="removeCertificateImage(4)">×</button>
+                                </div>
+                                <div class="current-image" id="current_certificate_4" style="display: none;">
+                                    <img src="" alt="Current Image">
+                                    <button type="button" class="remove-image-btn" onclick="removeCurrentCertificateImage(4)">×</button>
+                                    <button type="button" class="replace-image-btn" onclick="replaceCurrentCertificateImage(4)">🔄</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="upload-actions">
+                            <button type="button" id="clearAllCertificateImagesBtn" class="btn btn-secondary" onclick="clearAllCertificateImages()">
+                                🗑️ ล้างรูปใบรับรองทั้งหมด
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Sensory Properties -->
                 <div class="form-section">
                     <div class="section-title">
@@ -1105,7 +1213,7 @@
                         <!-- Mental Effects Column -->
                         <div class="effects-column">
                             <h3 class="column-title">🧠 ผลกระทบต่อจิตใจ</h3>
-                            
+
                             <!-- Mental Positive Effects -->
                             <div class="form-group effects-selector">
                                 <label>😊 ผลกระทบเชิงบวก</label>
@@ -1156,7 +1264,7 @@
                         <!-- Physical Effects Column -->
                         <div class="effects-column">
                             <h3 class="column-title">💪 ผลกระทบทางร่างกาย</h3>
-                            
+
                             <!-- Physical Positive Effects -->
                             <div class="form-group effects-selector">
                                 <label>💪 ผลกระทบเชิงบวก</label>
@@ -1218,6 +1326,53 @@
                     </div>
                 </div>
 
+                <!-- Growing Information -->
+                <div class="form-section">
+                    <div class="section-title">
+                        🌱 ข้อมูลการปลูก
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="grow_method">วิธีการปลูก</label>
+                            <select id="grow_method" name="grow_method">
+                                <option value="">เลือกวิธีการปลูก</option>
+                                <option value="Indoor">Indoor</option>
+                                <option value="Outdoor">Outdoor</option>
+                                <option value="Greenhouse">Greenhouse</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="fertilizer_type">ประเภทปุ่ย</label>
+                            <select id="fertilizer_type" name="fertilizer_type">
+                                <option value="">เลือกประเภทปุ่ย</option>
+                                <option value="Organic">Organic</option>
+                                <option value="Chemical">Chemical</option>
+                                <option value="Mixed">Mixed</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="flowering_type">ประเภทการออกดอก</label>
+                            <select id="flowering_type" name="flowering_type">
+                                <option value="">เลือกประเภท</option>
+                                <option value="Photoperiod">Photoperiod</option>
+                                <option value="Autoflower">Autoflower</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="harvest_date">วันที่เก็บเกี่ยว</label>
+                            <input type="date" id="harvest_date" name="harvest_date">
+                        </div>
+                        <div class="form-group">
+                            <label for="batch_number">หมายเลข Batch</label>
+                            <input type="text" id="batch_number" name="batch_number">
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- Image Management Section -->
                 <div class="form-section">
                     <div class="section-title">
@@ -1225,7 +1380,7 @@
                     </div>
                     <div class="image-upload-section">
                         <p class="help-text">จัดการรูปภาพดอก (สูงสุด 4 รูป, ขนาดไม่เกิน 16MB ต่อรูป) - กดลบรูปเดิมหรือเพิ่มรูปใหม่ได้</p>
-                        
+
                         <div class="image-upload-grid">
                             <div class="image-upload-item">
                                 <label for="image_1" class="upload-label">
@@ -1308,73 +1463,6 @@
                             <button type="button" id="clearAllImagesBtn" class="btn btn-secondary" onclick="clearAllImages()">
                                 🗑️ ล้างรูปทั้งหมด
                             </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Certificate Information -->
-                <div class="form-section">
-                    <div class="section-title">
-                        🏆 ใบรับรอง (Certificate)
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="lab_test_name">Lab test (ชื่อสถานที่ตรวจ)</label>
-                            <input type="text" id="lab_test_name" name="lab_test_name" placeholder="เช่น Cannabis Testing Lab, Green Lab Thailand">
-                            <div class="help-text">ชื่อห้องปฏิบัติการหรือสถานที่ที่ทำการตรวจสอบ</div>
-                        </div>
-                        <div class="form-group">
-                            <label for="test_type">Test type (วิธีการตรวจ)</label>
-                            <input type="text" id="test_type" name="test_type" placeholder="เช่น HPLC, GC-MS, LC-MS/MS">
-                            <div class="help-text">วิธีการหรือเทคนิคที่ใช้ในการตรวจสอบ</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Growing Information -->
-                <div class="form-section">
-                    <div class="section-title">
-                        🌱 ข้อมูลการปลูก
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="grow_method">วิธีการปลูก</label>
-                            <select id="grow_method" name="grow_method">
-                                <option value="">เลือกวิธีการปลูก</option>
-                                <option value="Indoor">Indoor</option>
-                                <option value="Outdoor">Outdoor</option>
-                                <option value="Greenhouse">Greenhouse</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="fertilizer_type">ประเภทปุ่ย</label>
-                            <select id="fertilizer_type" name="fertilizer_type">
-                                <option value="">เลือกประเภทปุ่ย</option>
-                                <option value="Organic">Organic</option>
-                                <option value="Chemical">Chemical</option>
-                                <option value="Mixed">Mixed</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="flowering_type">ประเภทการออกดอก</label>
-                            <select id="flowering_type" name="flowering_type">
-                                <option value="">เลือกประเภท</option>
-                                <option value="Photoperiod">Photoperiod</option>
-                                <option value="Autoflower">Autoflower</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="harvest_date">วันที่เก็บเกี่ยว</label>
-                            <input type="date" id="harvest_date" name="harvest_date">
-                        </div>
-                        <div class="form-group">
-                            <label for="batch_number">หมายเลข Batch</label>
-                            <input type="text" id="batch_number" name="batch_number">
                         </div>
                     </div>
                 </div>
@@ -1519,6 +1607,7 @@
                 console.log('Bud data loaded successfully:', budData.strain_name_en);
                 populateForm(budData);
                 loadCurrentImages(budData);
+                loadCurrentCertificateImages(budData);
                 showForm();
 
             } catch (error) {
@@ -1543,7 +1632,7 @@
             const label = document.querySelector(`label[for="image_${index}"]`);
             const preview = document.getElementById(`preview_${index}`);
             const current = document.getElementById(`current_${index}`);
-            
+
             if (label && current) {
                 label.style.display = 'none';
                 if (preview) preview.style.display = 'none';
@@ -1556,18 +1645,18 @@
             const label = document.querySelector(`label[for="image_${index}"]`);
             const current = document.getElementById(`current_${index}`);
             const input = document.getElementById(`image_${index}`);
-            
+
             if (label && current) {
                 current.style.display = 'none';
                 current.querySelector('img').src = '';
                 label.style.display = 'block';
-                
+
                 // Clear any new file selection too
                 if (input) input.value = '';
-                
+
                 // Mark for deletion - create hidden input to track deletion
                 current.setAttribute('data-deleted', 'true');
-                
+
                 // Add hidden field to form to indicate deletion
                 let deletionInput = document.getElementById(`deleted_image_${index}`);
                 if (!deletionInput) {
@@ -1589,13 +1678,13 @@
                 if (current) {
                     current.removeAttribute('data-deleted');
                 }
-                
+
                 // Remove deletion input if exists
                 const deletionInput = document.getElementById(`deleted_image_${index}`);
                 if (deletionInput) {
                     deletionInput.remove();
                 }
-                
+
                 input.click();
             }
         }
@@ -1651,7 +1740,7 @@
             }
         }
 
-        // Image handling functions
+        // Image handling functions for bud images
         function initializeImageUpload() {
             for (let i = 1; i <= 4; i++) {
                 const input = document.getElementById(`image_${i}`);
@@ -1690,7 +1779,7 @@
             const label = document.querySelector(`label[for="image_${index}"]`);
             const preview = document.getElementById(`preview_${index}`);
             const current = document.getElementById(`current_${index}`);
-            
+
             if (label && preview) {
                 label.style.display = 'none';
                 if (current) current.style.display = 'none';
@@ -1704,7 +1793,7 @@
             const label = document.querySelector(`label[for="image_${index}"]`);
             const preview = document.getElementById(`preview_${index}`);
             const current = document.getElementById(`current_${index}`);
-            
+
             if (input) input.value = '';
             if (label) label.style.display = 'block';
             if (preview) {
@@ -1724,15 +1813,155 @@
             }
         }
 
+        // Image handling functions for certificate images
+        function initializeCertificateImageUpload() {
+            for (let i = 1; i <= 4; i++) {
+                const input = document.getElementById(`certificate_image_${i}`);
+                if (input) {
+                    input.addEventListener('change', function(e) {
+                        handleCertificateImageSelect(i, e.target.files[0]);
+                    });
+                }
+            }
+        }
+
+        function handleCertificateImageSelect(index, file) {
+            if (!file) return;
+
+            if (!file.type.startsWith('image/')) {
+                showAlert('กรุณาเลือกไฟล์รูปภาพเท่านั้น', 'error');
+                return;
+            }
+
+            if (file.size > 16 * 1024 * 1024) {
+                showAlert('ขนาดไฟล์ต้องไม่เกิน 16MB', 'error');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                showCertificateImagePreview(index, e.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function showCertificateImagePreview(index, src) {
+            const label = document.querySelector(`label[for="certificate_image_${index}"]`);
+            const preview = document.getElementById(`certificate_preview_${index}`);
+            const current = document.getElementById(`current_certificate_${index}`);
+
+            if (label && preview) {
+                label.style.display = 'none';
+                if (current) current.style.display = 'none';
+                preview.style.display = 'block';
+                preview.querySelector('img').src = src;
+            }
+        }
+
+        function removeCurrentCertificateImage(index) {
+            const label = document.querySelector(`label[for="certificate_image_${index}"]`);
+            const current = document.getElementById(`current_certificate_${index}`);
+            const input = document.getElementById(`certificate_image_${index}`);
+
+            if (label && current) {
+                current.style.display = 'none';
+                current.querySelector('img').src = '';
+                label.style.display = 'block';
+                if (input) input.value = '';
+                
+                current.setAttribute('data-deleted', 'true');
+                let deletionInput = document.getElementById(`deleted_certificate_image_${index}`);
+                if (!deletionInput) {
+                    deletionInput = document.createElement('input');
+                    deletionInput.type = 'hidden';
+                    deletionInput.id = `deleted_certificate_image_${index}`;
+                    deletionInput.name = `deleted_certificate_image_${index}`;
+                    document.getElementById('editBudForm').appendChild(deletionInput);
+                }
+                deletionInput.value = 'true';
+            }
+        }
+
+        function replaceCurrentCertificateImage(index) {
+            const input = document.getElementById(`certificate_image_${index}`);
+            if (input) {
+                const current = document.getElementById(`current_certificate_${index}`);
+                if (current) {
+                    current.removeAttribute('data-deleted');
+                }
+                const deletionInput = document.getElementById(`deleted_certificate_image_${index}`);
+                if (deletionInput) {
+                    deletionInput.remove();
+                }
+                input.click();
+            }
+        }
+
+        function removeCertificateImage(index) {
+            const input = document.getElementById(`certificate_image_${index}`);
+            const label = document.querySelector(`label[for="certificate_image_${index}"]`);
+            const preview = document.getElementById(`certificate_preview_${index}`);
+            const current = document.getElementById(`current_certificate_${index}`);
+
+            if (input) input.value = '';
+            if (label) label.style.display = 'block';
+            if (preview) {
+                preview.style.display = 'none';
+                preview.querySelector('img').src = '';
+            }
+            if (current) {
+                current.style.display = 'none';
+                current.querySelector('img').src = '';
+            }
+        }
+
+        function clearAllCertificateImages() {
+            for (let i = 1; i <= 4; i++) {
+                removeCertificateImage(i);
+                removeCurrentCertificateImage(i);
+            }
+        }
+
+        function loadCurrentCertificateImages(budData) {
+            for (let i = 1; i <= 4; i++) {
+                const imageUrl = budData[`certificate_image_${i}_url`];
+                if (imageUrl) {
+                    showCurrentCertificateImage(i, imageUrl);
+                }
+            }
+        }
+
+        function showCurrentCertificateImage(index, imageUrl) {
+            const label = document.querySelector(`label[for="certificate_image_${index}"]`);
+            const preview = document.getElementById(`certificate_preview_${index}`);
+            const current = document.getElementById(`current_certificate_${index}`);
+
+            if (label && current) {
+                label.style.display = 'none';
+                if (preview) preview.style.display = 'none';
+                current.style.display = 'block';
+                current.querySelector('img').src = imageUrl;
+            }
+        }
+
         async function uploadImages() {
             const formData = new FormData();
             let hasImages = false;
 
-            // Add image files to form data
+            // Add bud image files to form data
             for (let i = 1; i <= 4; i++) {
                 const input = document.getElementById(`image_${i}`);
                 if (input && input.files[0]) {
                     formData.append(`image_${i}`, input.files[0]);
+                    hasImages = true;
+                }
+            }
+
+            // Add certificate image files to form data
+            for (let i = 1; i <= 4; i++) {
+                const input = document.getElementById(`certificate_image_${i}`);
+                if (input && input.files[0]) {
+                    formData.append(`certificate_image_${i}`, input.files[0]);
                     hasImages = true;
                 }
             }
@@ -1777,9 +2006,14 @@
                 delete data.image_2;
                 delete data.image_3;
                 delete data.image_4;
+                delete data.certificate_image_1;
+                delete data.certificate_image_2;
+                delete data.certificate_image_3;
+                delete data.certificate_image_4;
+
 
                 // Keep deletion flags
-                // deleted_image_* fields will be included in data automatically
+                // deleted_image_* and deleted_certificate_image_* fields will be included in data automatically
 
                 // Convert numeric fields
                 if (data.thc_percentage) data.thc_percentage = parseFloat(data.thc_percentage);
@@ -1829,18 +2063,23 @@
         window.clearAllImages = clearAllImages;
         window.removeCurrentImage = removeCurrentImage;
         window.replaceCurrentImage = replaceCurrentImage;
+        window.removeCertificateImage = removeCertificateImage;
+        window.clearAllCertificateImages = clearAllCertificateImages;
+        window.removeCurrentCertificateImage = removeCurrentCertificateImage;
+        window.replaceCurrentCertificateImage = replaceCurrentCertificateImage;
+
 
         function retryLoadBud() {
             // Reset loading state before retry
             isLoading = false;
             currentBudId = null;
-            
+
             // Clear form to force reload
             const form = document.getElementById('editBudForm');
             if (form) {
                 form.reset();
             }
-            
+
             loadBudData();
         }
 
@@ -2019,7 +2258,7 @@
         function initializeBreederAutocomplete(inputId, suggestionsId, apiUrl) {
             const input = document.getElementById(inputId);
             const suggestionsContainer = document.getElementById(suggestionsId);
-            
+
             if (!input || !suggestionsContainer) return;
 
             let currentSelection = -1;
@@ -2234,7 +2473,7 @@
             effectsSelectors.forEach(selector => {
                 const selectedDiv = document.getElementById(selector.selectedId);
                 const hiddenInput = document.getElementById(selector.hiddenId);
-                
+
                 if (selectedDiv && hiddenInput) {
                     initializeEffectSelector(selector);
                 }
@@ -2244,11 +2483,11 @@
         function initializeEffectSelector(config) {
             const selectedDiv = document.getElementById(config.selectedId);
             const hiddenInput = document.getElementById(config.hiddenId);
-            
+
             if (!selectedDiv || !hiddenInput) return;
 
             const categoriesDiv = selectedDiv.nextElementSibling.nextElementSibling;
-            
+
             if (!categoriesDiv) return;
 
             const effectButtons = categoriesDiv.querySelectorAll('.effect-btn');
@@ -2365,11 +2604,11 @@
                 // Update button states
                 const isNegative = effectType.includes('negative');
                 const selector = isNegative ? '.effect-btn.negative' : '.effect-btn:not(.negative)';
-                
+
                 const container = document.getElementById(effectType.includes('mental') ? 
                     (effectType.includes('positive') ? 'selected-mental-positive' : 'selected-mental-negative') :
                     (effectType.includes('positive') ? 'selected-physical-positive' : 'selected-physical-negative'));
-                
+
                 if (container) {
                     const categoriesDiv = container.nextElementSibling.nextElementSibling;
                     if (categoriesDiv) {
@@ -2402,7 +2641,7 @@
                 console.log('Page already initialized, skipping...');
                 return;
             }
-            
+
             console.log('Edit bud page initialized');
             isPageInitialized = true;
 
@@ -2417,7 +2656,12 @@
                 initializeBreederAutocomplete('breeder', 'breeder-suggestions', '/api/breeders/search');
                 initializeFlavorSelector();
                 initializeEffectsSelectors();
+                // Initialize image upload
                 initializeImageUpload();
+                initializeCertificateImageUpload();
+
+                // Initialize flavor selector
+                initializeFlavorSelector();
             } catch (error) {
                 console.error('Error initializing page features:', error);
             }

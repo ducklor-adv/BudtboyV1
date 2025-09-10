@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -423,6 +422,42 @@
                 padding: 20px;
             }
         }
+        .form-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid #4CAF50;
+        }
+
+        .form-section h3 {
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-control[multiple] {
+            height: auto;
+            min-height: 80px;
+        }
+
+        .form-text {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 4px;
+            font-style: italic;
+        }
+
+        input[readonly] {
+            background-color: #f8f9fa !important;
+            font-weight: 600;
+        }
+
+        #totalWeight {
+            text-align: center;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -523,75 +558,193 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">เกณฑ์การตัดสิน</label>
-                    <textarea id="judgingCriteria" class="form-control" rows="3" placeholder="เช่น ความสวยงาม ขนาด กลิ่น รส"></textarea>
+                    <label class="form-label">เกณฑ์การตัดสิน *</label>
+                    <textarea id="judgingCriteria" class="form-control" rows="3" placeholder="เช่น THC สูงสุด, CBD สูงสุด, กลิ่นรสเด่น..." required></textarea>
                 </div>
 
-                <div class="form-group">
-                    <h3 style="margin-top: 30px; color: #2c3e50;">🏆 รางวัล</h3>
-                    <p style="color: #666; font-size: 14px;">กำหนดรางวัลพร้อมคำอธิบาย มูลค่า และรูปภาพ</p>
+                <!-- เกณฑ์การคัดเลือก -->
+                <div class="form-section">
+                    <h3 style="color: #2c5530; margin-bottom: 15px;">🎯 เกณฑ์การคัดเลือก</h3>
+
+                    <!-- ประเภทดอกที่รับสมัคร -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">ประเภทดอกที่รับสมัคร</label>
+                            <select id="allowedStrainTypes" class="form-control">
+                                <option value="">ทุกประเภท</option>
+                                <option value="Indica">Indica</option>
+                                <option value="Sativa">Sativa</option>
+                                <option value="Hybrid">Hybrid</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">วิธีการปลูกที่รับสมัคร</label>
+                            <select id="allowedGrowMethods" class="form-control">
+                                <option value="">ทุกวิธี</option>
+                                <option value="Indoor">Indoor</option>
+                                <option value="Outdoor">Outdoor</option>
+                                <option value="Greenhouse">Greenhouse</option>
+                                <option value="Hydroponic">Hydroponic</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- เกรดและประเภทปุ่ย -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">เกรดที่รับสมัคร</label>
+                            <select id="allowedGrades" class="form-control">
+                                <option value="">ทุกเกรด</option>
+                                <option value="A+">A+</option>
+                                <option value="A">A</option>
+                                <option value="B+">B+</option>
+                                <option value="B">B</option>
+                                <option value="C">C</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">ประเภทปุ่ยที่รับสมัคร</label>
+                            <select id="allowedFertilizerTypes" class="form-control">
+                                <option value="">ทุกประเภท</option>
+                                <option value="Organic">Organic</option>
+                                <option value="Chemical">Chemical</option>
+                                <option value="Mixed">Mixed</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- เวลาแนะนำและประเภทการออกดอก -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">เวลาที่แนะนำ</label>
+                            <select id="allowedRecommendedTimes" class="form-control">
+                                <option value="">ทุกเวลา</option>
+                                <option value="กลางวัน">กลางวัน</option>
+                                <option value="กลางคืน">กลางคืน</option>
+                                <option value="ตลอดวัน">ตลอดวัน</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">ประเภทการออกดอก</label>
+                            <select id="allowedFloweringTypes" class="form-control">
+                                <option value="">ทุกประเภท</option>
+                                <option value="Photoperiod">Photoperiod</option>
+                                <option value="Autoflower">Autoflower</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Terpenes ที่ต้องการ -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Terpenes หลักที่ต้องการ</label>
+                            <select id="preferredTerpenes" class="form-control">
+                                <option value="">ทุกประเภท</option>
+                                <option value="Myrcene">Myrcene</option>
+                                <option value="Limonene">Limonene</option>
+                                <option value="Pinene">Pinene</option>
+                                <option value="Linalool">Linalool</option>
+                                <option value="Caryophyllene">Caryophyllene</option>
+                                <option value="Humulene">Humulene</option>
+                                <option value="Terpinolene">Terpinolene</option>
+                                <option value="Ocimene">Ocimene</option>
+                                <option value="Bisabolol">Bisabolol</option>
+                                <option value="Camphene">Camphene</option>
+                                <option value="Eucalyptol">Eucalyptol</option>
+                                <option value="Geraniol">Geraniol</option>
+                                <option value="Nerolidol">Nerolidol</option>
+                                <option value="Valencene">Valencene</option>
+                                <option value="Borneol">Borneol</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">สถานะดอกที่รับสมัคร</label>
+                            <select id="allowedStatus" class="form-control">
+                                <option value="available">ยังเหลือ</option>
+                                <option value="sold_out">หมดแล้ว</option>
+                                <option value="">ทุกสถานะ</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- เกณฑ์ THC/CBD -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">THC ขั้นต่ำ (%)</label>
+                            <input type="number" id="minThc" class="form-control" step="0.01" min="0" max="100">
+                            <small class="form-text">ว่างเปล่า = ไม่จำกัด</small>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">THC สูงสุด (%)</label>
+                            <input type="number" id="maxThc" class="form-control" step="0.01" min="0" max="100">
+                            <small class="form-text">ว่างเปล่า = ไม่จำกัด</small>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">CBD ขั้นต่ำ (%)</label>
+                            <input type="number" id="minCbd" class="form-control" step="0.01" min="0" max="100">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">CBD สูงสุด (%)</label>
+                            <input type="number" id="maxCbd" class="form-control" step="0.01" min="0" max="100">
+                        </div>
+                    </div>
+
+                    <!-- เกณฑ์พิเศษ -->
+                    <div class="form-group">
+                        <label class="form-label">เกณฑ์พิเศษ</label>
+                        <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px;">
+                            <label style="display: flex; align-items: center; gap: 5px;">
+                                <input type="checkbox" id="requireCertificate" style="margin: 0;">
+                                <span>ต้องมีใบรับรองการตรวจสอบ</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 5px;">
+                                <input type="checkbox" id="requireMinImages" style="margin: 0;">
+                                <span>ต้องมีรูปภาพอย่างน้อย</span>
+                                <input type="number" id="minImageCount" style="width: 60px; margin-left: 5px;" min="1" max="4" value="3">
+                                <span>รูป</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 5px;">
+                                <input type="checkbox" id="requireMinReviews" style="margin: 0;">
+                                <span>ต้องมีรีวิวอย่างน้อย</span>
+                                <input type="number" id="minReviewCount" style="width: 60px; margin-left: 5px;" min="1" value="1">
+                                <span>รีวิว</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- กลิ่นรสที่ต้องการ -->
+                    <div class="form-group">
+                        <label class="form-label">กลิ่นรสที่ให้คะแนนพิเศษ</label>
+                        <input type="text" id="preferredAromas" class="form-control" placeholder="เช่น เลมอน, ส้ม, มิ้นต์ (คั่นด้วยเครื่องหมายจุลภาค)">
+                        <small class="form-text">ดอกที่มีกลิ่นรสเหล่านี้จะได้คะแนนพิเศษ</small>
+                    </div>
+
+                    <!-- ผลกระทบที่ต้องการ -->
+                    <div class="form-group">
+                        <label class="form-label">ผลกระทบที่ให้คะแนนพิเศษ</label>
+                        <input type="text" id="preferredEffects" class="form-control" placeholder="เช่น ผ่อนคลาย, สร้างสรรค์, หลับง่าย (คั่นด้วยเครื่องหมายจุลภาค)">
+                        <small class="form-text">ดอกที่มีผลกระทบเหล่านี้จะได้คะแนนพิเศษ</small>
+                    </div>
                 </div>
 
-                <!-- รางวัลที่ 1 -->
-                <div style="border: 2px solid #e9ecef; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
-                    <h4 style="color: #2c3e50; margin-bottom: 15px;">🥇 รางวัลที่ 1</h4>
-                    
-                    <div class="form-group">
-                        <label class="form-label">คำอธิบายรางวัล</label>
-                        <input type="text" id="firstPrizeDescription" class="form-control" placeholder="เช่น เงินสด, iPhone 15 Pro, รางวัลพิเศษ">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">มูลค่า (บาท)</label>
-                        <input type="number" id="firstPrizeValue" class="form-control" min="0" value="0">
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">รูปภาพรางวัล</label>
-                        <input type="file" id="firstPrizeImage" class="form-control" accept="image/*">
-                        <div id="firstPrizeImagePreview" style="margin-top: 10px;"></div>
-                    </div>
-                </div>
-
-                <!-- รางวัลที่ 2 -->
-                <div style="border: 2px solid #e9ecef; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
-                    <h4 style="color: #2c3e50; margin-bottom: 15px;">🥈 รางวัลที่ 2</h4>
-                    
-                    <div class="form-group">
-                        <label class="form-label">คำอธิบายรางวัล</label>
-                        <input type="text" id="secondPrizeDescription" class="form-control" placeholder="เช่น เงินสด, iPad Air, รางวัลพิเศษ">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">มูลค่า (บาท)</label>
-                        <input type="number" id="secondPrizeValue" class="form-control" min="0" value="0">
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">รูปภาพรางวัล</label>
-                        <input type="file" id="secondPrizeImage" class="form-control" accept="image/*">
-                        <div id="secondPrizeImagePreview" style="margin-top: 10px;"></div>
-                    </div>
-                </div>
-
-                <!-- รางวัลที่ 3 -->
-                <div style="border: 2px solid #e9ecef; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
-                    <h4 style="color: #2c3e50; margin-bottom: 15px;">🥉 รางวัลที่ 3</h4>
-                    
-                    <div class="form-group">
-                        <label class="form-label">คำอธิบายรางวัล</label>
-                        <input type="text" id="thirdPrizeDescription" class="form-control" placeholder="เช่น เงินสด, AirPods Pro, รางวัลพิเศษ">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">มูลค่า (บาท)</label>
-                        <input type="number" id="thirdPrizeValue" class="form-control" min="0" value="0">
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">รูปภาพรางวัล</label>
-                        <input type="file" id="thirdPrizeImage" class="form-control" accept="image/*">
-                        <div id="thirdPrizeImagePreview" style="margin-top: 10px;"></div>
+                <!-- ตัวอย่างดอกที่เข้าเกณฑ์ -->
+                <div class="form-section" style="background: #f8f9fa; border-left: 4px solid #17a2b8;">
+                    <h3 style="color: #17a2b8; margin-bottom: 15px;">🔍 ตัวอย่างดอกที่เข้าเกณฑ์</h3>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="AdminActivities.previewEligibleBuds()" style="margin-bottom: 15px;">
+                        🔍 ดูดอกที่เข้าเกณฑ์
+                    </button>
+                    <div id="eligibleBudsPreview" style="display: none;">
+                        <div style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px; padding: 15px; background: white;">
+                            <div id="eligibleBudsList">
+                                <!-- ดอกที่เข้าเกณฑ์จะแสดงที่นี่ -->
+                            </div>
+                        </div>
+                        <div style="margin-top: 10px; font-size: 14px; color: #666;">
+                            <strong>รวม: <span id="eligibleBudsCount">0</span> ดอก</strong> ที่เข้าเกณฑ์การประกวด
+                        </div>
                     </div>
                 </div>
 
@@ -608,27 +761,27 @@
     <!-- Bottom Navigation -->
     <nav class="bottom-nav">
         <a href="/admin" class="nav-tab">
-            <span class="nav-icon">📊</span>
+            <span class="nav-icon" style="color: #4CAF50;">📊</span>
             <span class="nav-label">ภาพรวม</span>
         </a>
         <a href="/admin/users" class="nav-tab">
-            <span class="nav-icon">👥</span>
+            <span class="nav-icon" style="color: #4CAF50;">👥</span>
             <span class="nav-label">ผู้ใช้</span>
         </a>
         <a href="/admin/buds" class="nav-tab">
-            <span class="nav-icon">🌿</span>
+            <span class="nav-icon" style="color: #4CAF50;">🌿</span>
             <span class="nav-label">สายพันธุ์</span>
         </a>
         <a href="/admin/reviews" class="nav-tab">
-            <span class="nav-icon">⭐</span>
+            <span class="nav-icon" style="color: #4CAF50;">⭐</span>
             <span class="nav-label">รีวิว</span>
         </a>
         <a href="/admin/activities" class="nav-tab active">
-            <span class="nav-icon">🎉</span>
+            <span class="nav-icon" style="color: #4CAF50;">🏆</span>
             <span class="nav-label">กิจกรรม</span>
         </a>
         <a href="/admin/settings" class="nav-tab">
-            <span class="nav-icon">⚙️</span>
+            <span class="nav-icon" style="color: #4CAF50;">⚙️</span>
             <span class="nav-label">ตั้งค่า</span>
         </a>
     </nav>
@@ -650,27 +803,38 @@
 
             setupEventListeners() {
                 // Search functionality
-                document.getElementById('searchInput').addEventListener('input', (e) => {
-                    this.filterActivities(e.target.value);
-                });
+                const searchInput = document.getElementById('searchInput');
+                if (searchInput) {
+                    searchInput.addEventListener('input', (e) => {
+                        this.filterActivities(e.target.value);
+                    });
+                }
 
-                // Activity form submission
-                document.getElementById('activityForm').addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    this.handleFormSubmit();
-                });
+                // Modal form submission
+                const activityForm = document.getElementById('activityForm');
+                if (activityForm) {
+                    activityForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.saveActivity();
+                    });
+                }
 
-                // Prize image preview handlers
-                ['first', 'second', 'third'].forEach(position => {
-                    const fileInput = document.getElementById(`${position}PrizeImage`);
-                    const previewDiv = document.getElementById(`${position}PrizeImagePreview`);
-                    
-                    if (fileInput && previewDiv) {
-                        fileInput.addEventListener('change', (e) => {
-                            this.handleImagePreview(e.target, previewDiv);
-                        });
-                    }
-                });
+                // เกณฑ์พิเศษ event listeners
+                const requireMinImages = document.getElementById('requireMinImages');
+                const minImageCount = document.getElementById('minImageCount');
+                if (requireMinImages && minImageCount) {
+                    requireMinImages.addEventListener('change', () => {
+                        minImageCount.disabled = !requireMinImages.checked;
+                    });
+                }
+
+                const requireMinReviews = document.getElementById('requireMinReviews');
+                const minReviewCount = document.getElementById('minReviewCount');
+                if (requireMinReviews && minReviewCount) {
+                    requireMinReviews.addEventListener('change', () => {
+                        minReviewCount.disabled = !requireMinReviews.checked;
+                    });
+                }
             },
 
             handleImagePreview(input, previewDiv) {
@@ -793,7 +957,7 @@
                 document.getElementById('maxParticipants').value = activity.max_participants || 0;
                 document.getElementById('activityStatus').value = activity.status;
                 document.getElementById('judgingCriteria').value = activity.judging_criteria || '';
-                
+
                 // Fill prize data with new structure
                 document.getElementById('firstPrizeDescription').value = activity.first_prize_description || '';
                 document.getElementById('firstPrizeValue').value = activity.first_prize_value || 0;
@@ -824,6 +988,39 @@
                              alt="Third Prize Image">
                     `;
                 }
+
+                // Fill new criteria fields
+                const setSelectValue = (id, value) => {
+                    const select = document.getElementById(id);
+                    if (select && value) {
+                        select.value = value;
+                    }
+                };
+
+                setSelectValue('allowedStrainTypes', activity.allowed_strain_types);
+                setSelectValue('allowedGrowMethods', activity.allowed_grow_methods);
+                setSelectValue('allowedGrades', activity.allowed_grades);
+                setSelectValue('allowedFertilizerTypes', activity.allowed_fertilizer_types);
+                setSelectValue('allowedRecommendedTimes', activity.allowed_recommended_times);
+                setSelectValue('allowedFloweringTypes', activity.allowed_flowering_types);
+                setSelectValue('preferredTerpenes', activity.preferred_terpenes);
+                setSelectValue('allowedStatus', activity.allowed_status);
+                document.getElementById('minThc').value = activity.min_thc !== null ? activity.min_thc : '';
+                document.getElementById('maxThc').value = activity.max_thc !== null ? activity.max_thc : '';
+                document.getElementById('minCbd').value = activity.min_cbd !== null ? activity.min_cbd : '';
+                document.getElementById('maxCbd').value = activity.max_cbd !== null ? activity.max_cbd : '';
+
+                document.getElementById('requireCertificate').checked = activity.require_certificate || false;
+                document.getElementById('requireMinImages').checked = activity.require_min_images || false;
+                document.getElementById('minImageCount').value = activity.min_image_count || 3;
+                document.getElementById('requireMinReviews').checked = activity.require_min_reviews || false;
+                document.getElementById('minReviewCount').value = activity.min_review_count || 1;
+                document.getElementById('preferredAromas').value = activity.preferred_aromas || '';
+                document.getElementById('preferredEffects').value = activity.preferred_effects || '';
+
+                // Enable/disable dependent fields
+                if (document.getElementById('minImageCount')) document.getElementById('minImageCount').disabled = !activity.require_min_images;
+                if (document.getElementById('minReviewCount')) document.getElementById('minReviewCount').disabled = !activity.require_min_reviews;
 
                 // Update modal title and button
                 document.getElementById('modalTitle').textContent = 'แก้ไขกิจกรรม';
@@ -857,8 +1054,92 @@
                 }
             },
 
-            async handleFormSubmit() {
-                const formData = {
+            async previewEligibleBuds() {
+                const criteria = this.buildCriteriaFromForm();
+                
+                try {
+                    const response = await fetch('/api/admin/preview_eligible_buds', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(criteria)
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        this.displayEligibleBuds(data.buds || []);
+                        document.getElementById('eligibleBudsPreview').style.display = 'block';
+                    } else {
+                        const error = await response.json();
+                        this.showMessage(error.error || 'เกิดข้อผิดพลาด', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error previewing eligible buds:', error);
+                    this.showMessage('เกิดข้อผิดพลาดในการดูตัวอย่าง', 'error');
+                }
+            },
+
+            buildCriteriaFromForm() {
+                return {
+                    allowed_strain_types: this.getSingleSelectValue('allowedStrainTypes'),
+                    allowed_grow_methods: this.getSingleSelectValue('allowedGrowMethods'),
+                    allowed_grades: this.getSingleSelectValue('allowedGrades'),
+                    allowed_fertilizer_types: this.getSingleSelectValue('allowedFertilizerTypes'),
+                    allowed_recommended_times: this.getSingleSelectValue('allowedRecommendedTimes'),
+                    allowed_flowering_types: this.getSingleSelectValue('allowedFloweringTypes'),
+                    preferred_terpenes: this.getSingleSelectValue('preferredTerpenes'),
+                    allowed_status: this.getSingleSelectValue('allowedStatus'),
+                    min_thc: this.getFloatValue('minThc'),
+                    max_thc: this.getFloatValue('maxThc'),
+                    min_cbd: this.getFloatValue('minCbd'),
+                    max_cbd: this.getFloatValue('maxCbd'),
+                    require_certificate: document.getElementById('requireCertificate').checked,
+                    require_min_images: document.getElementById('requireMinImages').checked,
+                    min_image_count: parseInt(document.getElementById('minImageCount').value) || 3,
+                    require_min_reviews: document.getElementById('requireMinReviews').checked,
+                    min_review_count: parseInt(document.getElementById('minReviewCount').value) || 1,
+                    preferred_aromas: document.getElementById('preferredAromas').value,
+                    preferred_effects: document.getElementById('preferredEffects').value
+                };
+            },
+
+            displayEligibleBuds(buds) {
+                const container = document.getElementById('eligibleBudsList');
+                const countElement = document.getElementById('eligibleBudsCount');
+                
+                countElement.textContent = buds.length;
+
+                if (buds.length === 0) {
+                    container.innerHTML = '<div style="text-align: center; color: #666; padding: 20px;">ไม่มีดอกที่เข้าเกณฑ์การประกวด</div>';
+                    return;
+                }
+
+                container.innerHTML = buds.map(bud => `
+                    <div style="border: 1px solid #eee; border-radius: 8px; padding: 10px; margin-bottom: 10px; background: #f9f9f9;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong>${bud.strain_name_en || 'ไม่ระบุ'}</strong>
+                                ${bud.strain_name_th ? `<br><small style="color: #666;">${bud.strain_name_th}</small>` : ''}
+                                <br><small style="color: #999;">ID: ${bud.id} | ${bud.strain_type || 'ไม่ระบุ'} | ${bud.grade || 'ไม่ระบุ'}</small>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 12px; color: #666;">
+                                    THC: ${bud.thc_percentage ? bud.thc_percentage.toFixed(1) + '%' : '-'}<br>
+                                    CBD: ${bud.cbd_percentage ? bud.cbd_percentage.toFixed(1) + '%' : '-'}
+                                </div>
+                                <div style="font-size: 11px; color: #999; margin-top: 4px;">
+                                    รีวิว: ${bud.review_count || 0} | คะแนน: ${bud.avg_rating ? bud.avg_rating.toFixed(1) : '0'}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            },
+
+            async saveActivity() {
+                const form = document.getElementById('activityForm');
+
+                // เก็บข้อมูลพื้นฐาน
+                const data = {
                     name: document.getElementById('activityName').value,
                     description: document.getElementById('activityDescription').value,
                     start_registration_date: document.getElementById('startDate').value,
@@ -866,26 +1147,30 @@
                     max_participants: parseInt(document.getElementById('maxParticipants').value) || 0,
                     status: document.getElementById('activityStatus').value,
                     judging_criteria: document.getElementById('judgingCriteria').value,
+
+                    // Prize information
                     first_prize_description: document.getElementById('firstPrizeDescription').value,
                     first_prize_value: parseFloat(document.getElementById('firstPrizeValue').value) || 0,
                     second_prize_description: document.getElementById('secondPrizeDescription').value,
                     second_prize_value: parseFloat(document.getElementById('secondPrizeValue').value) || 0,
                     third_prize_description: document.getElementById('thirdPrizeDescription').value,
-                    third_prize_value: parseFloat(document.getElementById('thirdPrizeValue').value) || 0
+                    third_prize_value: parseFloat(document.getElementById('thirdPrizeValue').value) || 0,
+
+                    // เกณฑ์การคัดเลือกทั้งหมด
+                    ...this.buildCriteriaFromForm()
                 };
 
-                // Handle image uploads
-                await this.uploadPrizeImages(formData);
-
                 try {
-                    const isEdit = this.state.currentEditId !== null;
-                    const url = isEdit ? `/api/admin/activities/${this.state.currentEditId}` : '/api/admin/activities';
-                    const method = isEdit ? 'PUT' : 'POST';
+                    const url = this.state.currentEditId ? 
+                        `/api/admin/activities/${this.state.currentEditId}` : 
+                        '/api/admin/activities';
+
+                    const method = this.state.currentEditId ? 'PUT' : 'POST';
 
                     const response = await fetch(url, {
                         method: method,
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(formData)
+                        body: JSON.stringify(data)
                     });
 
                     const result = await response.json();
@@ -901,6 +1186,17 @@
                     console.error('Error saving activity:', error);
                     this.showMessage('เกิดข้อผิดพลาดในการบันทึกกิจกรรม', 'error');
                 }
+            },
+
+            // ฟังก์ชันช่วยเหลือ
+            getSingleSelectValue(elementId) {
+                const select = document.getElementById(elementId);
+                return select.value || '';
+            },
+
+            getFloatValue(elementId) {
+                const value = document.getElementById(elementId).value;
+                return value ? parseFloat(value) : null;
             },
 
             getStatusText(status) {
@@ -943,7 +1239,7 @@
 
             async uploadPrizeImages(formData) {
                 const imageUploadPromises = [];
-                
+
                 // Upload prize images
                 for (let i = 1; i <= 3; i++) {
                     const fileInput = document.getElementById(`${i === 1 ? 'first' : i === 2 ? 'second' : 'third'}PrizeImage`);
@@ -1006,10 +1302,16 @@
                 document.getElementById('activityModal').style.display = 'none';
                 document.getElementById('activityForm').reset();
                 this.state.currentEditId = null;
-                
+
                 // Reset modal title and button
                 document.getElementById('modalTitle').textContent = 'สร้างกิจกรรมใหม่';
                 document.getElementById('submitButtonText').textContent = 'สร้างกิจกรรม';
+                // Reset image previews and disabled states
+                document.getElementById('firstPrizeImagePreview').innerHTML = '';
+                document.getElementById('secondPrizeImagePreview').innerHTML = '';
+                document.getElementById('thirdPrizeImagePreview').innerHTML = '';
+                document.getElementById('minImageCount').disabled = false;
+                document.getElementById('minReviewCount').disabled = false;
             }
         };
 

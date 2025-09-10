@@ -1209,12 +1209,38 @@ def create_tables():
                     first_prize_amount DECIMAL(10,2) DEFAULT 0,
                     second_prize_amount DECIMAL(10,2) DEFAULT 0,
                     third_prize_amount DECIMAL(10,2) DEFAULT 0,
+                    first_prize_name VARCHAR(255),
+                    second_prize_name VARCHAR(255),
+                    third_prize_name VARCHAR(255),
+                    first_prize_image VARCHAR(500),
+                    second_prize_image VARCHAR(500),
+                    third_prize_image VARCHAR(500),
+                    first_prize_value DECIMAL(10,2) DEFAULT 0,
+                    second_prize_value DECIMAL(10,2) DEFAULT 0,
+                    third_prize_value DECIMAL(10,2) DEFAULT 0,
                     status VARCHAR(20) CHECK (status IN ('upcoming', 'registration_open', 'registration_closed', 'judging', 'completed')) DEFAULT 'upcoming',
                     created_by INTEGER REFERENCES users(id),
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
             """)
+
+            # Add new prize columns if they don't exist (for existing databases)
+            try:
+                cur.execute("""
+                    ALTER TABLE activities 
+                    ADD COLUMN IF NOT EXISTS first_prize_name VARCHAR(255),
+                    ADD COLUMN IF NOT EXISTS second_prize_name VARCHAR(255),
+                    ADD COLUMN IF NOT EXISTS third_prize_name VARCHAR(255),
+                    ADD COLUMN IF NOT EXISTS first_prize_image VARCHAR(500),
+                    ADD COLUMN IF NOT EXISTS second_prize_image VARCHAR(500),
+                    ADD COLUMN IF NOT EXISTS third_prize_image VARCHAR(500),
+                    ADD COLUMN IF NOT EXISTS first_prize_value DECIMAL(10,2) DEFAULT 0,
+                    ADD COLUMN IF NOT EXISTS second_prize_value DECIMAL(10,2) DEFAULT 0,
+                    ADD COLUMN IF NOT EXISTS third_prize_value DECIMAL(10,2) DEFAULT 0;
+                """)
+            except Exception as e:
+                print(f"Note: Prize columns may already exist: {e}")
 
             # Create activity participants table
             cur.execute("""
@@ -4126,12 +4152,18 @@ def get_activities():
                 SELECT a.id, a.name, a.description, a.start_registration_date, a.end_registration_date,
                        a.judging_criteria, a.max_participants, a.first_prize_amount, a.second_prize_amount,
                        a.third_prize_amount, a.status, a.created_at,
+                       a.first_prize_name, a.second_prize_name, a.third_prize_name,
+                       a.first_prize_image, a.second_prize_image, a.third_prize_image,
+                       a.first_prize_value, a.second_prize_value, a.third_prize_value,
                        COUNT(ap.id) as participant_count
                 FROM activities a
                 LEFT JOIN activity_participants ap ON a.id = ap.activity_id
                 GROUP BY a.id, a.name, a.description, a.start_registration_date, a.end_registration_date,
                          a.judging_criteria, a.max_participants, a.first_prize_amount, a.second_prize_amount,
-                         a.third_prize_amount, a.status, a.created_at
+                         a.third_prize_amount, a.status, a.created_at,
+                         a.first_prize_name, a.second_prize_name, a.third_prize_name,
+                         a.first_prize_image, a.second_prize_image, a.third_prize_image,
+                         a.first_prize_value, a.second_prize_value, a.third_prize_value
                 ORDER BY a.created_at DESC
             """)
 
@@ -4150,7 +4182,16 @@ def get_activities():
                     'third_prize_amount': float(row[9]) if row[9] else 0,
                     'status': row[10],
                     'created_at': row[11].strftime('%Y-%m-%d %H:%M:%S') if row[11] else None,
-                    'participant_count': row[12]
+                    'first_prize_name': row[12],
+                    'second_prize_name': row[13],
+                    'third_prize_name': row[14],
+                    'first_prize_image': row[15],
+                    'second_prize_image': row[16],
+                    'third_prize_image': row[17],
+                    'first_prize_value': float(row[18]) if row[18] else 0,
+                    'second_prize_value': float(row[19]) if row[19] else 0,
+                    'third_prize_value': float(row[20]) if row[20] else 0,
+                    'participant_count': row[21]
                 })
 
             return jsonify({'activities': activities})
@@ -4203,6 +4244,74 @@ def get_activity_participants(activity_id):
             return jsonify({'participants': participants})
 
         except Exception as e:
+            return jsonify({'error': str(e)}), 500
+        finally:
+            cur.close()
+            return_db_connection(conn)
+    else:
+        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+@app.route('/api/admin/activities', methods=['POST'])
+def admin_create_activity():
+    """Admin create new activity"""
+    if not is_admin():
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    data = request.get_json()
+
+    if not data.get('name'):
+        return jsonify({'error': 'กรุณากรอกชื่อกิจกรรม'}), 400
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+
+            cur.execute("""
+                INSERT INTO activities (
+                    name, description, start_registration_date, end_registration_date,
+                    judging_criteria, max_participants, first_prize_amount,
+                    second_prize_amount, third_prize_amount, status,
+                    first_prize_name, second_prize_name, third_prize_name,
+                    first_prize_image, second_prize_image, third_prize_image,
+                    first_prize_value, second_prize_value, third_prize_value
+                ) VALUES (
+                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                    %s, %s, %s, %s, %s, %s, %s, %s, %s
+                ) RETURNING id
+            """, (
+                data.get('name'),
+                data.get('description'),
+                data.get('start_registration_date'),
+                data.get('end_registration_date'),
+                data.get('judging_criteria'),
+                data.get('max_participants', 0),
+                data.get('first_prize_amount', 0),
+                data.get('second_prize_amount', 0),
+                data.get('third_prize_amount', 0),
+                data.get('status', 'upcoming'),
+                data.get('first_prize_name'),
+                data.get('second_prize_name'),
+                data.get('third_prize_name'),
+                data.get('first_prize_image'),
+                data.get('second_prize_image'),
+                data.get('third_prize_image'),
+                data.get('first_prize_value', 0),
+                data.get('second_prize_value', 0),
+                data.get('third_prize_value', 0)
+            ))
+
+            activity_id = cur.fetchone()[0]
+            conn.commit()
+
+            return jsonify({
+                'success': True,
+                'message': 'สร้างกิจกรรมสำเร็จ',
+                'activity_id': activity_id
+            }), 201
+
+        except Exception as e:
+            conn.rollback()
             return jsonify({'error': str(e)}), 500
         finally:
             cur.close()
@@ -4318,7 +4427,11 @@ def admin_update_activity(activity_id):
                     end_registration_date = %s, judging_criteria = %s,
                     max_participants = %s, first_prize_amount = %s,
                     second_prize_amount = %s, third_prize_amount = %s,
-                    status = %s, updated_at = CURRENT_TIMESTAMP
+                    status = %s, first_prize_name = %s, second_prize_name = %s,
+                    third_prize_name = %s, first_prize_image = %s,
+                    second_prize_image = %s, third_prize_image = %s,
+                    first_prize_value = %s, second_prize_value = %s,
+                    third_prize_value = %s, updated_at = CURRENT_TIMESTAMP
                 WHERE id = %s
             """, (
                 data.get('name'),
@@ -4331,6 +4444,15 @@ def admin_update_activity(activity_id):
                 data.get('second_prize_amount', 0),
                 data.get('third_prize_amount', 0),
                 data.get('status'),
+                data.get('first_prize_name'),
+                data.get('second_prize_name'),
+                data.get('third_prize_name'),
+                data.get('first_prize_image'),
+                data.get('second_prize_image'),
+                data.get('third_prize_image'),
+                data.get('first_prize_value', 0),
+                data.get('second_prize_value', 0),
+                data.get('third_prize_value', 0),
                 activity_id
             ))
 
@@ -5544,6 +5666,40 @@ def upload_images():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@app.route('/api/upload_prize_image', methods=['POST'])
+def upload_prize_image():
+    """Upload prize image for activities"""
+    if not is_admin():
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    if 'prize_image' not in request.files:
+        return jsonify({'error': 'ไม่พบไฟล์รูปภาพ'}), 400
+
+    file = request.files['prize_image']
+    prize_position = request.form.get('prize_position', '1')
+
+    if file.filename == '':
+        return jsonify({'error': 'ไม่ได้เลือกไฟล์'}), 400
+
+    if file and allowed_file(file.filename):
+        try:
+            filename = secure_filename(file.filename)
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_')
+            filename = f"{timestamp}prize_{prize_position}_{filename}"
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(file_path)
+
+            return jsonify({
+                'success': True,
+                'message': 'อัปโหลดรูปภาพรางวัลสำเร็จ',
+                'image_url': f'/uploads/{filename}'
+            })
+
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+    else:
+        return jsonify({'error': 'ประเภทไฟล์ไม่ถูกต้อง กรุณาเลือกไฟล์ภาพ'}), 400
 
 @app.route('/api/upload_profile_image', methods=['POST'])
 def upload_profile_image():

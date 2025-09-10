@@ -543,6 +543,62 @@
                     <input type="number" id="thirdPrize" class="form-control" min="0" value="0">
                 </div>
 
+                <div class="form-group">
+                    <h3 style="margin-top: 30px; color: #2c3e50;">🏆 รางวัลสิ่งของ</h3>
+                    <p style="color: #666; font-size: 14px;">กำหนดรางวัลเป็นสิ่งของพร้อมรูปภาพและมูลค่า</p>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">ชื่อรางวัลที่ 1</label>
+                        <input type="text" id="firstPrizeName" class="form-control" placeholder="เช่น iPhone 15 Pro">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">มูลค่ารางวัลที่ 1 (บาท)</label>
+                        <input type="number" id="firstPrizeValue" class="form-control" min="0" value="0">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">รูปภาพรางวัลที่ 1</label>
+                    <input type="file" id="firstPrizeImage" class="form-control" accept="image/*">
+                    <div id="firstPrizeImagePreview" style="margin-top: 10px;"></div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">ชื่อรางวัลที่ 2</label>
+                        <input type="text" id="secondPrizeName" class="form-control" placeholder="เช่น iPad Air">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">มูลค่ารางวัลที่ 2 (บาท)</label>
+                        <input type="number" id="secondPrizeValue" class="form-control" min="0" value="0">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">รูปภาพรางวัลที่ 2</label>
+                    <input type="file" id="secondPrizeImage" class="form-control" accept="image/*">
+                    <div id="secondPrizeImagePreview" style="margin-top: 10px;"></div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">ชื่อรางวัลที่ 3</label>
+                        <input type="text" id="thirdPrizeName" class="form-control" placeholder="เช่น AirPods Pro">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">มูลค่ารางวัลที่ 3 (บาท)</label>
+                        <input type="number" id="thirdPrizeValue" class="form-control" min="0" value="0">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">รูปภาพรางวัลที่ 3</label>
+                    <input type="file" id="thirdPrizeImage" class="form-control" accept="image/*">
+                    <div id="thirdPrizeImagePreview" style="margin-top: 10px;"></div>
+                </div>
+
                 <div style="text-align: right; margin-top: 30px;">
                     <button type="button" class="btn btn-secondary" onclick="closeModal()">ยกเลิก</button>
                     <button type="submit" class="btn btn-primary" style="margin-left: 10px;">
@@ -607,6 +663,34 @@
                     e.preventDefault();
                     this.handleFormSubmit();
                 });
+
+                // Prize image preview handlers
+                ['first', 'second', 'third'].forEach(position => {
+                    const fileInput = document.getElementById(`${position}PrizeImage`);
+                    const previewDiv = document.getElementById(`${position}PrizeImagePreview`);
+                    
+                    if (fileInput && previewDiv) {
+                        fileInput.addEventListener('change', (e) => {
+                            this.handleImagePreview(e.target, previewDiv);
+                        });
+                    }
+                });
+            },
+
+            handleImagePreview(input, previewDiv) {
+                if (input.files && input.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        previewDiv.innerHTML = `
+                            <img src="${e.target.result}" 
+                                 style="max-width: 200px; max-height: 150px; border-radius: 8px; border: 1px solid #ddd;"
+                                 alt="Prize Image Preview">
+                        `;
+                    };
+                    reader.readAsDataURL(input.files[0]);
+                } else {
+                    previewDiv.innerHTML = '';
+                }
             },
 
             async loadActivities() {
@@ -760,8 +844,17 @@
                     judging_criteria: document.getElementById('judgingCriteria').value,
                     first_prize_amount: parseFloat(document.getElementById('firstPrize').value) || 0,
                     second_prize_amount: parseFloat(document.getElementById('secondPrize').value) || 0,
-                    third_prize_amount: parseFloat(document.getElementById('thirdPrize').value) || 0
+                    third_prize_amount: parseFloat(document.getElementById('thirdPrize').value) || 0,
+                    first_prize_name: document.getElementById('firstPrizeName').value,
+                    second_prize_name: document.getElementById('secondPrizeName').value,
+                    third_prize_name: document.getElementById('thirdPrizeName').value,
+                    first_prize_value: parseFloat(document.getElementById('firstPrizeValue').value) || 0,
+                    second_prize_value: parseFloat(document.getElementById('secondPrizeValue').value) || 0,
+                    third_prize_value: parseFloat(document.getElementById('thirdPrizeValue').value) || 0
                 };
+
+                // Handle image uploads
+                await this.uploadPrizeImages(formData);
 
                 try {
                     const isEdit = this.state.currentEditId !== null;
@@ -825,6 +918,35 @@
                     style: 'currency',
                     currency: 'THB'
                 }).format(total);
+            },
+
+            async uploadPrizeImages(formData) {
+                const imageUploadPromises = [];
+                
+                // Upload prize images
+                for (let i = 1; i <= 3; i++) {
+                    const fileInput = document.getElementById(`${i === 1 ? 'first' : i === 2 ? 'second' : 'third'}PrizeImage`);
+                    if (fileInput.files[0]) {
+                        const uploadFormData = new FormData();
+                        uploadFormData.append('prize_image', fileInput.files[0]);
+                        uploadFormData.append('prize_position', i);
+
+                        imageUploadPromises.push(
+                            fetch('/api/upload_prize_image', {
+                                method: 'POST',
+                                body: uploadFormData
+                            }).then(response => response.json())
+                            .then(result => {
+                                if (result.success) {
+                                    formData[`${i === 1 ? 'first' : i === 2 ? 'second' : 'third'}_prize_image`] = result.image_url;
+                                }
+                            })
+                        );
+                    }
+                }
+
+                // Wait for all uploads to complete
+                await Promise.all(imageUploadPromises);
             },
 
             showLoading() {

@@ -1040,16 +1040,20 @@ def create_tables():
 
             # Add certificate columns if they don't exist
             try:
-                cur.execute("ALTER TABLE buds_data ADD COLUMN lab_test_name VARCHAR(255)")
+                cur.execute("ALTER TABLE buds_data ADD COLUMN IF NOT EXISTS lab_test_name VARCHAR(255)")
                 print("Added lab_test_name column")
             except psycopg2.errors.DuplicateColumn:
                 pass  # Column already exists
+            except Exception as e:
+                print(f"Note: lab_test_name column may already exist: {e}")
 
             try:
-                cur.execute("ALTER TABLE buds_data ADD COLUMN test_type VARCHAR(255)")
+                cur.execute("ALTER TABLE buds_data ADD COLUMN IF NOT EXISTS test_type VARCHAR(255)")
                 print("Added test_type column")
             except psycopg2.errors.DuplicateColumn:
                 pass  # Column already exists
+            except Exception as e:
+                print(f"Note: test_type column may already exist: {e}")
 
             # Add status column if it doesn't exist (for existing databases)
             try:
@@ -1659,15 +1663,35 @@ def get_user_buds():
         cur = conn.cursor()
 
         # Optimized query with better performance - separate review stats
+        # Check if certificate columns exist first
         cur.execute("""
-            SELECT b.id, b.strain_name_en, b.strain_name_th, b.breeder, b.thc_percentage, 
-                   b.cbd_percentage, b.strain_type, b.created_at, b.image_1_url, b.status,
-                   b.lab_test_name, b.test_type
-            FROM buds_data b
-            WHERE b.created_by = %s 
-            ORDER BY b.created_at DESC
-            LIMIT 50
-        """, (user_id,))
+            SELECT column_name FROM information_schema.columns 
+            WHERE table_name='buds_data' AND column_name IN ('lab_test_name', 'test_type')
+        """)
+        existing_columns = [row[0] for row in cur.fetchall()]
+        has_lab_test = 'lab_test_name' in existing_columns
+        has_test_type = 'test_type' in existing_columns
+        
+        if has_lab_test and has_test_type:
+            cur.execute("""
+                SELECT b.id, b.strain_name_en, b.strain_name_th, b.breeder, b.thc_percentage, 
+                       b.cbd_percentage, b.strain_type, b.created_at, b.image_1_url, b.status,
+                       b.lab_test_name, b.test_type
+                FROM buds_data b
+                WHERE b.created_by = %s 
+                ORDER BY b.created_at DESC
+                LIMIT 50
+            """, (user_id,))
+        else:
+            cur.execute("""
+                SELECT b.id, b.strain_name_en, b.strain_name_th, b.breeder, b.thc_percentage, 
+                       b.cbd_percentage, b.strain_type, b.created_at, b.image_1_url, b.status,
+                       NULL as lab_test_name, NULL as test_type
+                FROM buds_data b
+                WHERE b.created_by = %s 
+                ORDER BY b.created_at DESC
+                LIMIT 50
+            """, (user_id,))
 
         bud_rows = cur.fetchall()
 
@@ -3909,7 +3933,21 @@ def get_all_buds_report():
         conn = get_db_connection()
         cur = conn.cursor()
 
+        # Check if certificate columns exist first
         cur.execute("""
+            SELECT column_name FROM information_schema.columns 
+            WHERE table_name='buds_data' AND column_name IN ('lab_test_name', 'test_type')
+        """)
+        existing_columns = [row[0] for row in cur.fetchall()]
+        has_lab_test = 'lab_test_name' in existing_columns
+        has_test_type = 'test_type' in existing_columns
+        
+        if has_lab_test and has_test_type:
+            lab_test_select = "b.lab_test_name, b.test_type"
+        else:
+            lab_test_select = "NULL as lab_test_name, NULL as test_type"
+            
+        cur.execute(f"""
             SELECT b.id, b.strain_name_en, b.strain_name_th, b.breeder, b.strain_type,
                    b.thc_percentage, b.cbd_percentage, b.grade, b.aroma_flavor,
                    b.top_terpenes_1, b.top_terpenes_2, b.top_terpenes_3,
@@ -3922,7 +3960,7 @@ def get_all_buds_report():
                    COALESCE(u_grower.is_grower, u_creator.is_grower, false) as is_grower,
                    COALESCE(AVG(r.overall_rating), 0) as avg_rating,
                    COUNT(r.id) as review_count,
-                   b.lab_test_name, b.test_type
+                   {lab_test_select}
             FROM buds_data b
             LEFT JOIN users u_grower ON b.grower_id = u_grower.id
             LEFT JOIN users u_creator ON b.created_by = u_creator.id

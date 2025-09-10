@@ -562,30 +562,32 @@
                     <textarea id="judgingCriteria" class="form-control" rows="3" placeholder="เช่น THC สูงสุด, CBD สูงสุด, กลิ่นรสเด่น..." required></textarea>
                 </div>
 
-                <!-- เกณฑ์การคัดเลือก -->
+                <!-- เกณฑ์การคัดเลือกและให้คะแนน -->
                 <div class="form-section">
-                    <h3 style="color: #2c5530; margin-bottom: 15px;">🎯 เกณฑ์การคัดเลือก</h3>
+                    <h3 style="color: #2c5530; margin-bottom: 15px;">🎯 เกณฑ์การคัดเลือกและให้คะแนน</h3>
 
                     <!-- ประเภทดอกที่รับสมัคร -->
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label">ประเภทดอกที่รับสมัคร</label>
-                            <select id="allowedStrainTypes" class="form-control">
+                            <select id="allowedStrainTypes" class="form-control" multiple>
                                 <option value="">ทุกประเภท</option>
                                 <option value="Indica">Indica</option>
                                 <option value="Sativa">Sativa</option>
                                 <option value="Hybrid">Hybrid</option>
                             </select>
+                            <small class="form-text">กด Ctrl/Cmd เพื่อเลือกหลายประเภท</small>
                         </div>
                         <div class="form-group">
                             <label class="form-label">วิธีการปลูกที่รับสมัคร</label>
-                            <select id="allowedGrowMethods" class="form-control">
+                            <select id="allowedGrowMethods" class="form-control" multiple>
                                 <option value="">ทุกวิธี</option>
                                 <option value="Indoor">Indoor</option>
                                 <option value="Outdoor">Outdoor</option>
                                 <option value="Greenhouse">Greenhouse</option>
                                 <option value="Hydroponic">Hydroponic</option>
                             </select>
+                            <small class="form-text">กด Ctrl/Cmd เพื่อเลือกหลายวิธี</small>
                         </div>
                     </div>
 
@@ -593,7 +595,7 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label">เกรดที่รับสมัคร</label>
-                            <select id="allowedGrades" class="form-control">
+                            <select id="allowedGrades" class="form-control" multiple>
                                 <option value="">ทุกเกรด</option>
                                 <option value="A+">A+</option>
                                 <option value="A">A</option>
@@ -601,15 +603,17 @@
                                 <option value="B">B</option>
                                 <option value="C">C</option>
                             </select>
+                            <small class="form-text">กด Ctrl/Cmd เพื่อเลือกหลายเกรด</small>
                         </div>
                         <div class="form-group">
                             <label class="form-label">ประเภทปุ่ยที่รับสมัคร</label>
-                            <select id="allowedFertilizerTypes" class="form-control">
+                            <select id="allowedFertilizerTypes" class="form-control" multiple>
                                 <option value="">ทุกประเภท</option>
                                 <option value="Organic">Organic</option>
                                 <option value="Chemical">Chemical</option>
                                 <option value="Mixed">Mixed</option>
                             </select>
+                            <small class="form-text">กด Ctrl/Cmd เพื่อเลือกหลายประเภท</small>
                         </div>
                     </div>
 
@@ -617,20 +621,22 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label">เวลาที่แนะนำ</label>
-                            <select id="allowedRecommendedTimes" class="form-control">
+                            <select id="allowedRecommendedTimes" class="form-control" multiple>
                                 <option value="">ทุกเวลา</option>
                                 <option value="กลางวัน">กลางวัน</option>
                                 <option value="กลางคืน">กลางคืน</option>
                                 <option value="ตลอดวัน">ตลอดวัน</option>
                             </select>
+                            <small class="form-text">กด Ctrl/Cmd เพื่อเลือกหลายเวลา</small>
                         </div>
                         <div class="form-group">
                             <label class="form-label">ประเภทการออกดอก</label>
-                            <select id="allowedFloweringTypes" class="form-control">
+                            <select id="allowedFloweringTypes" class="form-control" multiple>
                                 <option value="">ทุกประเภท</option>
                                 <option value="Photoperiod">Photoperiod</option>
                                 <option value="Autoflower">Autoflower</option>
                             </select>
+                            <small class="form-text">กด Ctrl/Cmd เพื่อเลือกหลายประเภท</small>
                         </div>
                     </div>
 
@@ -638,7 +644,7 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label">Terpenes หลักที่ต้องการ</label>
-                            <select id="preferredTerpenes" class="form-control">
+                            <select id="preferredTerpenes" class="form-control" multiple>
                                 <option value="">ทุกประเภท</option>
                                 <option value="Myrcene">Myrcene</option>
                                 <option value="Limonene">Limonene</option>
@@ -656,14 +662,15 @@
                                 <option value="Valencene">Valencene</option>
                                 <option value="Borneol">Borneol</option>
                             </select>
+                            <small class="form-text">เลือก Terpenes ที่ต้องการให้คะแนนพิเศษ</small>
                         </div>
                         <div class="form-group">
                             <label class="form-label">สถานะดอกที่รับสมัคร</label>
-                            <select id="allowedStatus" class="form-control">
-                                <option value="available">ยังเหลือ</option>
+                            <select id="allowedStatus" class="form-control" multiple>
+                                <option value="available" selected>ยังเหลือ</option>
                                 <option value="sold_out">หมดแล้ว</option>
-                                <option value="">ทุกสถานะ</option>
                             </select>
+                            <small class="form-text">สถานะของดอกที่รับเข้าประกวด</small>
                         </div>
                     </div>
 
@@ -689,6 +696,44 @@
                         <div class="form-group">
                             <label class="form-label">CBD สูงสุด (%)</label>
                             <input type="number" id="maxCbd" class="form-control" step="0.01" min="0" max="100">
+                        </div>
+                    </div>
+
+                    <!-- เกณฑ์การให้คะแนน -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">น้ำหนักคะแนน THC (%)</label>
+                            <input type="number" id="thcWeight" class="form-control" min="0" max="100" value="25">
+                            <small class="form-text">เปอร์เซ็นต์ของคะแนนรวม</small>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">น้ำหนักคะแนน CBD (%)</label>
+                            <input type="number" id="cbdWeight" class="form-control" min="0" max="100" value="15">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">น้ำหนักคะแนนรีวิว (%)</label>
+                            <input type="number" id="reviewWeight" class="form-control" min="0" max="100" value="30">
+                            <small class="form-text">คะแนนเฉลี่ยจากรีวิว</small>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">น้ำหนักคะแนนภาพถ่าย (%)</label>
+                            <input type="number" id="imageWeight" class="form-control" min="0" max="100" value="20">
+                            <small class="form-text">คุณภาพและจำนวนรูปภาพ</small>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">น้ำหนักคะแนนใบรับรอง (%)</label>
+                            <input type="number" id="certWeight" class="form-control" min="0" max="100" value="10">
+                            <small class="form-text">การมีใบรับรองการตรวจสอบ</small>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">คะแนนรวมต้องเท่ากับ</label>
+                            <input type="text" id="totalWeight" class="form-control" value="100%" readonly style="background: #f8f9fa;">
                         </div>
                     </div>
 
@@ -761,27 +806,27 @@
     <!-- Bottom Navigation -->
     <nav class="bottom-nav">
         <a href="/admin" class="nav-tab">
-            <span class="nav-icon">📈</span>
+            <span class="nav-icon">📊</span>
             <span class="nav-label">ภาพรวม</span>
         </a>
         <a href="/admin/users" class="nav-tab">
-            <span class="nav-icon">👤</span>
+            <span class="nav-icon">👥</span>
             <span class="nav-label">ผู้ใช้</span>
         </a>
         <a href="/admin/buds" class="nav-tab">
-            <span class="nav-icon">🌱</span>
+            <span class="nav-icon">🌿</span>
             <span class="nav-label">สายพันธุ์</span>
         </a>
         <a href="/admin/reviews" class="nav-tab">
-            <span class="nav-icon">💭</span>
+            <span class="nav-icon">⭐</span>
             <span class="nav-label">รีวิว</span>
         </a>
         <a href="/admin/activities" class="nav-tab active">
-            <span class="nav-icon">🏆</span>
+            <span class="nav-icon">🎉</span>
             <span class="nav-label">กิจกรรม</span>
         </a>
         <a href="/admin/settings" class="nav-tab">
-            <span class="nav-icon">⚙</span>
+            <span class="nav-icon">⚙️</span>
             <span class="nav-label">ตั้งค่า</span>
         </a>
     </nav>
@@ -818,6 +863,15 @@
                         this.saveActivity();
                     });
                 }
+
+                // น้ำหนักคะแนน event listeners
+                const weightInputs = ['thcWeight', 'cbdWeight', 'reviewWeight', 'imageWeight', 'certWeight'];
+                weightInputs.forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.addEventListener('input', () => this.updateWeightTotal());
+                    }
+                });
 
                 // เกณฑ์พิเศษ event listeners
                 const requireMinImages = document.getElementById('requireMinImages');
@@ -993,22 +1047,24 @@
                 const setSelectValue = (id, value) => {
                     const select = document.getElementById(id);
                     if (select && value) {
-                        select.value = value;
+                        value.split(',').forEach(v => {
+                            const option = select.querySelector(`option[value="${v}"]`);
+                            if (option) option.selected = true;
+                        });
                     }
                 };
 
                 setSelectValue('allowedStrainTypes', activity.allowed_strain_types);
                 setSelectValue('allowedGrowMethods', activity.allowed_grow_methods);
-                setSelectValue('allowedGrades', activity.allowed_grades);
-                setSelectValue('allowedFertilizerTypes', activity.allowed_fertilizer_types);
-                setSelectValue('allowedRecommendedTimes', activity.allowed_recommended_times);
-                setSelectValue('allowedFloweringTypes', activity.allowed_flowering_types);
-                setSelectValue('preferredTerpenes', activity.preferred_terpenes);
-                setSelectValue('allowedStatus', activity.allowed_status);
                 document.getElementById('minThc').value = activity.min_thc !== null ? activity.min_thc : '';
                 document.getElementById('maxThc').value = activity.max_thc !== null ? activity.max_thc : '';
                 document.getElementById('minCbd').value = activity.min_cbd !== null ? activity.min_cbd : '';
                 document.getElementById('maxCbd').value = activity.max_cbd !== null ? activity.max_cbd : '';
+                document.getElementById('thcWeight').value = activity.thc_weight || 0;
+                document.getElementById('cbdWeight').value = activity.cbd_weight || 0;
+                document.getElementById('reviewWeight').value = activity.review_weight || 0;
+                document.getElementById('imageWeight').value = activity.image_weight || 0;
+                document.getElementById('certWeight').value = activity.cert_weight || 0;
 
                 document.getElementById('requireCertificate').checked = activity.require_certificate || false;
                 document.getElementById('requireMinImages').checked = activity.require_min_images || false;
@@ -1018,6 +1074,8 @@
                 document.getElementById('preferredAromas').value = activity.preferred_aromas || '';
                 document.getElementById('preferredEffects').value = activity.preferred_effects || '';
 
+                // Update weight total display
+                this.updateWeightTotal();
                 // Enable/disable dependent fields
                 if (document.getElementById('minImageCount')) document.getElementById('minImageCount').disabled = !activity.require_min_images;
                 if (document.getElementById('minReviewCount')) document.getElementById('minReviewCount').disabled = !activity.require_min_reviews;
@@ -1080,14 +1138,14 @@
 
             buildCriteriaFromForm() {
                 return {
-                    allowed_strain_types: this.getSingleSelectValue('allowedStrainTypes'),
-                    allowed_grow_methods: this.getSingleSelectValue('allowedGrowMethods'),
-                    allowed_grades: this.getSingleSelectValue('allowedGrades'),
-                    allowed_fertilizer_types: this.getSingleSelectValue('allowedFertilizerTypes'),
-                    allowed_recommended_times: this.getSingleSelectValue('allowedRecommendedTimes'),
-                    allowed_flowering_types: this.getSingleSelectValue('allowedFloweringTypes'),
-                    preferred_terpenes: this.getSingleSelectValue('preferredTerpenes'),
-                    allowed_status: this.getSingleSelectValue('allowedStatus'),
+                    allowed_strain_types: this.getMultiSelectValues('allowedStrainTypes'),
+                    allowed_grow_methods: this.getMultiSelectValues('allowedGrowMethods'),
+                    allowed_grades: this.getMultiSelectValues('allowedGrades'),
+                    allowed_fertilizer_types: this.getMultiSelectValues('allowedFertilizerTypes'),
+                    allowed_recommended_times: this.getMultiSelectValues('allowedRecommendedTimes'),
+                    allowed_flowering_types: this.getMultiSelectValues('allowedFloweringTypes'),
+                    preferred_terpenes: this.getMultiSelectValues('preferredTerpenes'),
+                    allowed_status: this.getMultiSelectValues('allowedStatus'),
                     min_thc: this.getFloatValue('minThc'),
                     max_thc: this.getFloatValue('maxThc'),
                     min_cbd: this.getFloatValue('minCbd'),
@@ -1138,6 +1196,12 @@
             async saveActivity() {
                 const form = document.getElementById('activityForm');
 
+                // ตรวจสอบน้ำหนักคะแนนรวม
+                if (!this.validateWeights()) {
+                    this.showMessage('น้ำหนักคะแนนรวมต้องเท่ากับ 100%', 'error');
+                    return;
+                }
+
                 // เก็บข้อมูลพื้นฐาน
                 const data = {
                     name: document.getElementById('activityName').value,
@@ -1157,7 +1221,14 @@
                     third_prize_value: parseFloat(document.getElementById('thirdPrizeValue').value) || 0,
 
                     // เกณฑ์การคัดเลือกทั้งหมด
-                    ...this.buildCriteriaFromForm()
+                    ...this.buildCriteriaFromForm(),
+
+                    // น้ำหนักคะแนน
+                    thc_weight: parseInt(document.getElementById('thcWeight').value) || 0,
+                    cbd_weight: parseInt(document.getElementById('cbdWeight').value) || 0,
+                    review_weight: parseInt(document.getElementById('reviewWeight').value) || 0,
+                    image_weight: parseInt(document.getElementById('imageWeight').value) || 0,
+                    cert_weight: parseInt(document.getElementById('certWeight').value) || 0
                 };
 
                 try {
@@ -1189,14 +1260,44 @@
             },
 
             // ฟังก์ชันช่วยเหลือ
-            getSingleSelectValue(elementId) {
+            getMultiSelectValues(elementId) {
                 const select = document.getElementById(elementId);
-                return select.value || '';
+                const selected = [];
+                for (let option of select.selectedOptions) {
+                    selected.push(option.value);
+                }
+                return selected.join(',');
             },
 
             getFloatValue(elementId) {
                 const value = document.getElementById(elementId).value;
                 return value ? parseFloat(value) : null;
+            },
+
+            validateWeights() {
+                const weights = ['thcWeight', 'cbdWeight', 'reviewWeight', 'imageWeight', 'certWeight'];
+                let total = 0;
+
+                weights.forEach(id => {
+                    const value = parseInt(document.getElementById(id).value) || 0;
+                    total += value;
+                });
+
+                return total === 100;
+            },
+
+            updateWeightTotal() {
+                const weights = ['thcWeight', 'cbdWeight', 'reviewWeight', 'imageWeight', 'certWeight'];
+                let total = 0;
+
+                weights.forEach(id => {
+                    const value = parseInt(document.getElementById(id).value) || 0;
+                    total += value;
+                });
+
+                const totalElement = document.getElementById('totalWeight');
+                totalElement.value = total + '%';
+                totalElement.style.color = total === 100 ? '#28a745' : '#dc3545';
             },
 
             getStatusText(status) {
@@ -1312,6 +1413,7 @@
                 document.getElementById('thirdPrizeImagePreview').innerHTML = '';
                 document.getElementById('minImageCount').disabled = false;
                 document.getElementById('minReviewCount').disabled = false;
+                this.updateWeightTotal(); // Reset total weight display
             }
         };
 
@@ -1321,6 +1423,9 @@
             document.getElementById('activityForm').reset();
             document.getElementById('modalTitle').textContent = 'สร้างกิจกรรมใหม่';
             document.getElementById('submitButtonText').textContent = 'สร้างกิจกรรม';
+            // Reset weight total display
+            document.getElementById('totalWeight').value = '100%';
+            document.getElementById('totalWeight').style.color = '#6c757d';
             document.getElementById('activityModal').style.display = 'block';
         }
 

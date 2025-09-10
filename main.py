@@ -23,7 +23,7 @@ def is_production():
     current_host = os.environ.get('REPL_SLUG', '')
     deployment_env = os.environ.get('REPLIT_DEPLOYMENT', '')
     request_host = os.environ.get('HTTP_HOST', '')
-    
+
     # Check multiple indicators for production
     is_prod = (
         'budtboy.replit.app' in deployment_env or 
@@ -31,7 +31,7 @@ def is_production():
         'budtboy.replit.app' in request_host or
         current_host == 'budtboy'
     )
-    
+
     print(f"🔍 Production check - REPL_SLUG: {current_host}, REPLIT_DEPLOYMENT: {deployment_env}, HTTP_HOST: {request_host}")
     return is_prod
 
@@ -994,7 +994,7 @@ def create_tables():
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS buds_data (
                     id SERIAL PRIMARY KEY,
-                    strain_name_th VARCHAR(255) NOT NULL,
+                    strain_name_th VARCHAR(255),
                     strain_name_en VARCHAR(255) NOT NULL,
                     breeder VARCHAR(255),
                     strain_type VARCHAR(50) CHECK (strain_type IN ('Indica', 'Sativa', 'Hybrid')),
@@ -1018,27 +1018,38 @@ def create_tables():
                     fertilizer_type VARCHAR(20) CHECK (fertilizer_type IN ('Organic', 'Chemical', 'Mixed')),
                     flowering_type VARCHAR(20) CHECK (flowering_type IN ('Photoperiod', 'Autoflower')),
                     status VARCHAR(20) CHECK (status IN ('available', 'sold_out')) DEFAULT 'available',
+                    lab_test_name VARCHAR(255),
+                    test_type VARCHAR(255),
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    created_by INTEGER REFERENCES users(id),
                     image_1_url VARCHAR(500),
                     image_2_url VARCHAR(500),
                     image_3_url VARCHAR(500),
-                    image_4_url VARCHAR(500),
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    created_by INTEGER REFERENCES users(id)
+                    image_4_url VARCHAR(500)
                 );
             """)
 
             # Add image columns if they don't exist (for existing databases)
+            for i in range(1, 5):
+                try:
+                    cur.execute(f"ALTER TABLE buds_data ADD COLUMN image_{i}_url VARCHAR(500)")
+                    print(f"Added image_{i}_url column")
+                except psycopg2.errors.DuplicateColumn:
+                    pass  # Column already exists
+
+            # Add certificate columns if they don't exist
             try:
-                cur.execute("""
-                    ALTER TABLE buds_data 
-                    ADD COLUMN IF NOT EXISTS image_1_url VARCHAR(500),
-                    ADD COLUMN IF NOT EXISTS image_2_url VARCHAR(500),
-                    ADD COLUMN IF NOT EXISTS image_3_url VARCHAR(500),
-                    ADD COLUMN IF NOT EXISTS image_4_url VARCHAR(500);
-                """)
-            except Exception as e:
-                print(f"Note: Image columns may already exist: {e}")
+                cur.execute("ALTER TABLE buds_data ADD COLUMN lab_test_name VARCHAR(255)")
+                print("Added lab_test_name column")
+            except psycopg2.errors.DuplicateColumn:
+                pass  # Column already exists
+
+            try:
+                cur.execute("ALTER TABLE buds_data ADD COLUMN test_type VARCHAR(255)")
+                print("Added test_type column")
+            except psycopg2.errors.DuplicateColumn:
+                pass  # Column already exists
 
             # Add status column if it doesn't exist (for existing databases)
             try:
@@ -1231,7 +1242,7 @@ def create_tables():
                     ADD COLUMN IF NOT EXISTS second_prize_description TEXT,
                     ADD COLUMN IF NOT EXISTS third_prize_description TEXT;
                 """)
-                
+
                 # Keep existing columns for backward compatibility but rename them internally
                 cur.execute("""
                     ALTER TABLE activities 
@@ -1242,7 +1253,7 @@ def create_tables():
                     ADD COLUMN IF NOT EXISTS second_prize_value DECIMAL(10,2) DEFAULT 0,
                     ADD COLUMN IF NOT EXISTS third_prize_value DECIMAL(10,2) DEFAULT 0;
                 """)
-                
+
                 # Migrate data from old columns to new format if needed
                 cur.execute("""
                     UPDATE activities 
@@ -1251,7 +1262,7 @@ def create_tables():
                         third_prize_description = COALESCE(third_prize_name, third_prize_amount::TEXT)
                     WHERE first_prize_description IS NULL;
                 """)
-                
+
                 # Copy old prize values if new ones are not set
                 cur.execute("""
                     UPDATE activities 
@@ -1260,7 +1271,7 @@ def create_tables():
                         third_prize_value = COALESCE(third_prize_value, third_prize_amount)
                     WHERE first_prize_value = 0 AND first_prize_amount > 0;
                 """)
-                
+
             except Exception as e:
                 print(f"Note: Prize columns may already exist: {e}")
 
@@ -1338,7 +1349,7 @@ def create_tables():
                                     'บรรเทาปวด, คลายกล้าม', 'ปากแห้ง',
                                     'ตลอดวัน', 'Indoor', '2024-12-01',
                                     f'BD2024-{i+1:03d}', user_id, True,
-                                    'Organic', 'Photoperiod', user_id
+                                    'Organic', 'Photoperiod', None, None, user_id, 'available'
                                 ),
                                 # User's second bud
                                 (
@@ -1349,7 +1360,7 @@ def create_tables():
                                     'บรรเทาปวด, หลับง่าย', 'ตาแดง, ปากแห้ง',
                                     'กลางคืน', 'Indoor', '2024-11-15',
                                     f'OG2024-{i+1:03d}', user_id, True,
-                                    'Chemical', 'Photoperiod', user_id
+                                    'Chemical', 'Photoperiod', None, None, user_id, 'active'
                                 ),
                                 # User's third bud  
                                 (
@@ -1360,7 +1371,7 @@ def create_tables():
                                     'ต้านอักเสบ, สดชื่น', 'ตาแห้ง',
                                     'กลางวัน', 'Greenhouse', '2024-10-20',
                                     f'WW2024-{i+1:03d}', user_id, True,
-                                    'Organic', 'Photoperiod', user_id
+                                    'Organic', 'Photoperiod', None, None, user_id, 'available'
                                 )
                             ])
 
@@ -1374,10 +1385,11 @@ def create_tables():
                                 physical_effects_positive, physical_effects_negative,
                                 recommended_time, grow_method, harvest_date,
                                 batch_number, grower_id, grower_license_verified,
-                                fertilizer_type, flowering_type, created_by
+                                fertilizer_type, flowering_type, lab_test_name, test_type,
+                                created_by, status
                             ) VALUES (
                                 %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+                                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
                             )
                         """, sample_buds)
 
@@ -1397,9 +1409,6 @@ def create_tables():
             print("Tables created successfully")
         except Exception as e:
             print(f"Error creating tables: {e}")
-        except Exception as e:
-                print(f"Error adding sample bud data: {e}")
-
         finally:
             cur.close()
             return_db_connection(conn)
@@ -1652,7 +1661,8 @@ def get_user_buds():
         # Optimized query with better performance - separate review stats
         cur.execute("""
             SELECT b.id, b.strain_name_en, b.strain_name_th, b.breeder, b.thc_percentage, 
-                   b.cbd_percentage, b.strain_type, b.created_at, b.image_1_url, b.status
+                   b.cbd_percentage, b.strain_type, b.created_at, b.image_1_url, b.status,
+                   b.lab_test_name, b.test_type
             FROM buds_data b
             WHERE b.created_by = %s 
             ORDER BY b.created_at DESC
@@ -1698,7 +1708,9 @@ def get_user_buds():
                 'image_1_url': f'/uploads/{row[8].split("/")[-1]}' if row[8] else None,
                 'status': row[9] or 'available',
                 'avg_rating': stats['avg_rating'],
-                'review_count': stats['review_count']
+                'review_count': stats['review_count'],
+                'lab_test_name': row[10],
+                'test_type': row[11]
             })
 
         # Cache for activity-specific time
@@ -2232,57 +2244,48 @@ def signin():
     # Block OAuth in preview mode only
     if FALLBACK_AUTH_ENABLED and is_preview():
         return redirect('/auth?error=oauth_disabled_preview')
-    
+
     if not oauth_flow:
         return redirect('/auth?error=oauth_not_configured')
 
-    # Check for CAPTCHA token in session or URL
-    captcha_token = request.args.get('captcha_token') or session.get('captcha_verified')
-    
-    if not captcha_token:
+    # Check if CAPTCHA and age verification are completed
+    captcha_verified = session.get('captcha_verified', False)
+    age_verified = session.get('age_verified', False)
+
+    if not captcha_verified:
         return redirect('/auth?error=captcha_required')
 
-    # Check for age verification
-    age_verified = request.args.get('age_verified') or session.get('age_verified')
-    
     if not age_verified:
         return redirect('/auth?error=age_required')
-
-    # Store verifications in session
-    if captcha_token:
-        session['captcha_verified'] = True
-    
-    if age_verified:
-        session['age_verified'] = True
 
     try:
         # Check if we have valid credentials
         if not GOOGLE_OAUTH_CONFIG["web"]["client_id"]:
             return redirect('/auth?error=missing_client_id')
-        
+
         if not GOOGLE_OAUTH_CONFIG["web"]["client_secret"]:
             return redirect('/auth?error=missing_client_secret')
-        
+
         # Always use production URL for OAuth callback to avoid redirect issues
         redirect_uri = 'https://budtboy.replit.app/oauth2callback'
         oauth_flow.redirect_uri = redirect_uri
-        
+
         print(f"🔧 OAuth redirect URI set to: {redirect_uri}")
         print(f"🌐 Current request host: {request.host}")
         print(f"🔑 Environment: {'Production' if is_production() else 'Preview'}")
-        
+
         # Generate authorization URL with proper parameters
         authorization_url, state = oauth_flow.authorization_url(
             access_type='offline',
             include_granted_scopes='true',
             prompt='select_account'  # Force account selection
         )
-        
+
         session['state'] = state
         print(f"✅ Generated authorization URL: {authorization_url}")
-        
+
         return redirect(authorization_url)
-        
+
     except Exception as e:
         print(f"❌ Error in signin: {e}")
         return redirect(f'/auth?error=oauth_error&message={str(e)}')
@@ -2302,33 +2305,32 @@ def oauth2callback():
         # Always use production URL for OAuth callback
         redirect_uri = 'https://budtboy.replit.app/oauth2callback'
         oauth_flow.redirect_uri = redirect_uri
-        
+
         # Construct callback URL properly - ensure HTTPS
         callback_url = request.url
         if callback_url.startswith('http://'):
             callback_url = callback_url.replace('http://', 'https://')
-        
+
         # Handle reverse proxy headers
         if request.headers.get('X-Forwarded-Proto') == 'https':
             callback_url = callback_url.replace('http://', 'https://')
-            
+
         # Ensure callback URL uses production domain
         if 'pike.replit.dev' in callback_url:
             callback_url = callback_url.replace(request.host, 'budtboy.replit.app')
-        
+
         print(f"🔧 OAuth callback URL: {callback_url}")
         print(f"🔧 OAuth redirect URI: {redirect_uri}")
         print(f"🌐 Request host: {request.host}")
         print(f"🔑 Environment: {'Production' if is_production() else 'Preview'}")
-        
+
         # Exchange authorization code for access token
         oauth_flow.fetch_token(authorization_response=callback_url)
 
         # Get user info from Google
-        credentials = oauth_flow.credentials
         user_info_response = requests.get(
             'https://www.googleapis.com/oauth2/v1/userinfo',
-            headers={'Authorization': f'Bearer {credentials.token}'}
+            headers={'Authorization': f'Bearer {oauth_flow.credentials.token}'}
         )
 
         if user_info_response.status_code != 200:
@@ -2360,7 +2362,7 @@ def oauth2callback():
                     session['user_id'] = user_id
                     session['username'] = username
                     session['email'] = email
-                    
+
                     # Clear verification session data
                     session.pop('captcha_verified', None)
                     session.pop('age_verified', None)
@@ -2369,7 +2371,7 @@ def oauth2callback():
                     print(f"✅ Existing user logged in: {username}")
                     cur.close()
                     return_db_connection(conn)
-                    
+
                     return redirect('/profile')
                 else:
                     # Create new user
@@ -2403,7 +2405,7 @@ def oauth2callback():
                     session['user_id'] = user_id
                     session['username'] = username
                     session['email'] = email
-                    
+
                     # Clear verification session data
                     session.pop('captcha_verified', None)
                     session.pop('age_verified', None)
@@ -2412,7 +2414,7 @@ def oauth2callback():
                     print(f"✅ New user created and logged in: {username}")
                     cur.close()
                     return_db_connection(conn)
-                    
+
                     return redirect('/profile')
 
             except Exception as e:
@@ -2760,46 +2762,113 @@ def add_bud():
         try:
             cur = conn.cursor()
 
-            cur.execute("""
-                INSERT INTO buds_data (
-                    strain_name_th, strain_name_en, breeder, strain_type,
-                    thc_percentage, cbd_percentage, grade, aroma_flavor,
-                    top_terpenes_1, top_terpenes_2, top_terpenes_3,
-                    mental_effects_positive, mental_effects_negative,
-                    physical_effects_positive, physical_effects_negative,
-                    recommended_time, grow_method, harvest_date,
-                    batch_number, grower_id, grower_license_verified,
-                    fertilizer_type, flowering_type, created_by
-                ) VALUES (
-                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
-                ) RETURNING id
-            """, (
-                data.get('strain_name_th'),
-                data.get('strain_name_en'),
-                data.get('breeder'),
-                data.get('strain_type'),
-                data.get('thc_percentage'),
-                data.get('cbd_percentage'),
-                data.get('grade'),
-                data.get('aroma_flavor'),
-                data.get('top_terpenes_1'),
-                data.get('top_terpenes_2'),
-                data.get('top_terpenes_3'),
-                data.get('mental_effects_positive'),
-                data.get('mental_effects_negative'),
-                data.get('physical_effects_positive'),
-                data.get('physical_effects_negative'),
-                data.get('recommended_time'),
-                data.get('grow_method'),
-                data.get('harvest_date'),
-                data.get('batch_number'),
+            # Process potential constraint fields
+            strain_type = data.get('strain_type')
+            if strain_type:
+                strain_type = strain_type.strip()
+                if strain_type not in ['Indica', 'Sativa', 'Hybrid']:
+                    strain_type = None
+            else:
+                strain_type = None
+
+            thc_percentage = data.get('thc_percentage')
+            if thc_percentage and str(thc_percentage).strip():
+                try:
+                    thc_percentage = float(thc_percentage)
+                except (ValueError, TypeError):
+                    thc_percentage = None
+            else:
+                thc_percentage = None
+
+            cbd_percentage = data.get('cbd_percentage')
+            if cbd_percentage and str(cbd_percentage).strip():
+                try:
+                    cbd_percentage = float(cbd_percentage)
+                except (ValueError, TypeError):
+                    cbd_percentage = None
+            else:
+                cbd_percentage = None
+
+            grade = data.get('grade')
+            if grade:
+                grade = grade.strip()
+                if grade not in ['A+', 'A', 'B+', 'B', 'C']:
+                    grade = None
+            else:
+                grade = None
+
+            recommended_time = data.get('recommended_time')
+            if recommended_time:
+                recommended_time = recommended_time.strip()
+                if recommended_time not in ['กลางวัน', 'กลางคืน', 'ตลอดวัน']:
+                    recommended_time = None
+            else:
+                recommended_time = None
+
+            grow_method = data.get('grow_method')
+            if grow_method:
+                grow_method = grow_method.strip()
+                if grow_method not in ['Indoor', 'Outdoor', 'Greenhouse', 'Hydroponic']:
+                    grow_method = None
+            else:
+                grow_method = None
+
+            fertilizer_type = data.get('fertilizer_type')
+            if fertilizer_type:
+                fertilizer_type = fertilizer_type.strip()
+                if fertilizer_type not in ['Organic', 'Chemical', 'Mixed']:
+                    fertilizer_type = None
+            else:
+                fertilizer_type = None
+
+            flowering_type = data.get('flowering_type')
+            if flowering_type:
+                flowering_type = flowering_type.strip()
+                if flowering_type not in ['Photoperiod', 'Autoflower']:
+                    flowering_type = None
+            else:
+                flowering_type = None
+            
+            # Certificate fields
+            lab_test_name = data.get('lab_test_name')
+            test_type = data.get('test_type')
+
+
+            # Construct the INSERT query dynamically
+            query_fields = [
+                'strain_name_th', 'strain_name_en', 'breeder', 'strain_type',
+                'thc_percentage', 'cbd_percentage', 'grade', 'aroma_flavor',
+                'top_terpenes_1', 'top_terpenes_2', 'top_terpenes_3',
+                'mental_effects_positive', 'mental_effects_negative',
+                'physical_effects_positive', 'physical_effects_negative',
+                'recommended_time', 'grow_method', 'harvest_date', 'batch_number',
+                'grower_id', 'grower_license_verified', 'fertilizer_type', 'flowering_type',
+                'lab_test_name', 'test_type',
+                'created_by', 'status'
+            ]
+            
+            values = [
+                data.get('strain_name_th'), data.get('strain_name_en'), 
+                data.get('breeder'), strain_type,
+                thc_percentage, cbd_percentage, grade, data.get('aroma_flavor'),
+                data.get('top_terpenes_1'), data.get('top_terpenes_2'), data.get('top_terpenes_3'),
+                data.get('mental_effects_positive'), data.get('mental_effects_negative'),
+                data.get('physical_effects_positive'), data.get('physical_effects_negative'),
+                data.get('recommended_time'), grow_method, data.get('harvest_date'), data.get('batch_number'),
                 data.get('grower_id'),
                 data.get('grower_license_verified', False),
-                data.get('fertilizer_type'),
-                data.get('flowering_type'),
-                user_id
-            ))
+                fertilizer_type, flowering_type,
+                lab_test_name, test_type,
+                user_id, 'active'
+            ]
+
+            # Build the SQL query
+            query = sql.SQL("INSERT INTO buds_data ({}) VALUES ({}) RETURNING id").format(
+                sql.SQL(', ').join(map(sql.Identifier, query_fields)),
+                sql.SQL(', ').join(sql.Placeholder() * len(query_fields))
+            )
+
+            cur.execute(query, values)
 
             bud_id = cur.fetchone()[0]
             conn.commit()
@@ -2867,6 +2936,7 @@ def update_bud(bud_id):
             sql.SQL("recommended_time = %s"), sql.SQL("grow_method = %s"), sql.SQL("harvest_date = %s"),
             sql.SQL("batch_number = %s"), sql.SQL("grower_id = %s"), sql.SQL("grower_license_verified = %s"),
             sql.SQL("fertilizer_type = %s"), sql.SQL("flowering_type = %s"),
+            sql.SQL("lab_test_name = %s"), sql.SQL("test_type = %s"),
             sql.SQL("updated_at = CURRENT_TIMESTAMP")
         ]
 
@@ -2961,7 +3031,9 @@ def update_bud(bud_id):
             data.get('grower_id'),
             data.get('grower_license_verified', False),
             fertilizer_type,
-            flowering_type
+            flowering_type,
+            data.get('lab_test_name'),
+            data.get('test_type')
         ]
 
         # Add image deletion updates with whitelist validation
@@ -3119,8 +3191,10 @@ def get_bud(bud_id):
                        recommended_time, grow_method, harvest_date, batch_number,
                        grower_id, grower_license_verified, fertilizer_type, 
                        flowering_type, image_1_url, image_2_url, image_3_url, image_4_url,
-                       created_at, updated_at, created_by
-                FROM buds_data WHERE id = %s AND created_by = %s
+                       created_at, updated_at, created_by,
+                       lab_test_name, test_type
+                FROM buds_data
+                WHERE id = %s AND created_by = %s
             """, (bud_id, user_id))
 
             result = cur.fetchone()
@@ -3158,7 +3232,9 @@ def get_bud(bud_id):
                 'image_4_url': result[27],
                 'created_at': result[28].strftime('%Y-%m-%d %H:%M:%S') if result[28] else None,
                 'updated_at': result[29].strftime('%Y-%m-%d %H:%M:%S') if result[29] else None,
-                'created_by': result[30]
+                'created_by': result[30],
+                'lab_test_name': result[31],
+                'test_type': result[32]
             }
 
             cur.close()
@@ -3306,7 +3382,7 @@ def add_strain():
 
             # Insert new strain
             cur.execute("""
-                INSERT INTO strain_names (name_en, name_th, is_popular)
+                INSERT INTO strain_names (name_en, name_name_th, is_popular)
                 VALUES (%s, %s, %s)
                 RETURNING id
             """, (name_en, name_th if name_th else None, is_popular))
@@ -3845,7 +3921,8 @@ def get_all_buds_report():
                    COALESCE(u_grower.username, u_creator.username, 'บัดท์บอย') as grower_name, 
                    COALESCE(u_grower.is_grower, u_creator.is_grower, false) as is_grower,
                    COALESCE(AVG(r.overall_rating), 0) as avg_rating,
-                   COUNT(r.id) as review_count
+                   COUNT(r.id) as review_count,
+                   b.lab_test_name, b.test_type
             FROM buds_data b
             LEFT JOIN users u_grower ON b.grower_id = u_grower.id
             LEFT JOIN users u_creator ON b.created_by = u_creator.id
@@ -3858,7 +3935,8 @@ def get_all_buds_report():
                      b.recommended_time, b.grow_method, b.harvest_date, b.batch_number,
                      b.grower_id, b.grower_license_verified, b.fertilizer_type, 
                      b.flowering_type, b.status, b.created_at, b.updated_at, b.created_by,
-                     u_grower.username, u_grower.is_grower, u_creator.username, u_creator.is_grower
+                     u_grower.username, u_grower.is_grower, u_creator.username, u_creator.is_grower,
+                     b.lab_test_name, b.test_type
             ORDER BY b.created_at DESC
         """)
 
@@ -3896,7 +3974,9 @@ def get_all_buds_report():
                 'grower_name': row[28],
                 'is_grower': row[29],
                 'avg_rating': float(row[30]) if row[30] else 0,
-                'review_count': row[31]
+                'review_count': row[31],
+                'lab_test_name': row[32],
+                'test_type': row[33]
             })
 
         return jsonify({'buds': buds})
@@ -3918,7 +3998,7 @@ def get_buds_for_review():
             cur = conn.cursor()
             cur.execute("""
                 SELECT id, strain_name_en, strain_name_th, breeder, strain_type,
-                       thc_percentage, cbd_percentage, created_at
+                       thc_percentage, cbd_percentage, created_at, lab_test_name, test_type
                 FROM buds_data 
                 ORDER BY created_at DESC
             """)
@@ -3933,7 +4013,9 @@ def get_buds_for_review():
                     'strain_type': row[4],
                     'thc_percentage': float(row[5]) if row[5] else None,
                     'cbd_percentage': float(row[6]) if row[6] else None,
-                    'created_at': row[7].strftime('%Y-%m-%d') if row[7] else None
+                    'created_at': row[7].strftime('%Y-%m-%d') if row[7] else None,
+                    'lab_test_name': row[8],
+                    'test_type': row[9]
                 })
 
             cur.close()
@@ -3955,117 +4037,135 @@ def get_bud_info(bud_id):
     if not is_authenticated():
         return jsonify({'error': 'Unauthorized'}), 401
 
-    # Clear any existing cache for this bud
-    clear_cache_pattern(f"bud_info_{bud_id}")
-    clear_cache_pattern(f"bud_detail_{bud_id}")
+    user_id = session['user_id']
+    cache_key = f"bud_info_{bud_id}_{user_id}"
 
-    conn = get_db_connection()
-    if conn:
-        try:
-            cur = conn.cursor()
-            cur.execute("""
-                SELECT b.id, b.strain_name_en, b.strain_name_th, b.breeder, 
-                       b.strain_type, b.thc_percentage, b.cbd_percentage, 
-                       b.grade, b.aroma_flavor, b.top_terpenes_1, b.top_terpenes_2, b.top_terpenes_3,
-                       b.mental_effects_positive, b.mental_effects_negative,
-                       b.physical_effects_positive, b.physical_effects_negative,
-                       b.recommended_time, b.grow_method, b.harvest_date, b.batch_number,
-                       b.grower_id, b.grower_license_verified, b.fertilizer_type, 
-                       b.flowering_type, b.image_1_url, b.image_2_url, b.image_3_url, b.image_4_url,
-                       b.created_at, b.updated_at, b.created_by,
-                       COALESCE(u_grower.username, u_creator.username, 'บัดท์บอย') as grower_name, 
-                       COALESCE(u_grower.is_grower, u_creator.is_grower, false) as is_grower, 
-                       COALESCE(u_grower.profile_image_url, u_creator.profile_image_url) as grower_profile_image,
-                       COALESCE(u_grower.contact_facebook, u_creator.contact_facebook) as grower_contact_facebook,
-                       COALESCE(u_grower.contact_line, u_creator.contact_line) as grower_contact_line,
-                       COALESCE(u_grower.contact_instagram, u_creator.contact_instagram) as grower_contact_instagram,
-                       COALESCE(u_grower.contact_twitter, u_creator.contact_twitter) as grower_contact_twitter,
-                       COALESCE(u_grower.contact_telegram, u_creator.contact_telegram) as grower_contact_telegram,
-                       COALESCE(u_grower.contact_phone, u_creator.contact_phone) as grower_contact_phone,
-                       COALESCE(u_grower.contact_other, u_creator.contact_other) as grower_contact_other
-                FROM buds_data b
-                LEFT JOIN users u_grower ON b.grower_id = u_grower.id
-                LEFT JOIN users u_creator ON b.created_by = u_creator.id
-                WHERE b.id = %s
-            """, (bud_id,))
+    # Check cache first
+    cached_data = get_cache(cache_key)
+    if cached_data:
+        print(f"Returning cached data for bud {bud_id}")
+        return jsonify(cached_data)
 
-            result = cur.fetchone()
-            if not result:
-                return jsonify({
-                    'success': False,
-                    'error': f'ไม่พบข้อมูลดอก ID: {bud_id}'
-                }), 404
+    conn = None
+    cur = None
+    try:
+        print(f"Loading bud detail for ID: {bud_id}, User: {user_id}")
 
-            # Log the actual database result
-            print(f"Database result for bud {bud_id}: grower_name = {result[31]}")
+        conn = get_db_connection()
+        if not conn:
+            print("Failed to get database connection")
+            return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
-            bud_info = {
-                'id': result[0],
-                'strain_name_en': result[1],
-                'strain_name_th': result[2],
-                'breeder': result[3],
-                'strain_type': result[4],
-                'thc_percentage': float(result[5]) if result[5] else None,
-                'cbd_percentage': float(result[6]) if result[6] else None,
-                'grade': result[7],
-                'aroma_flavor': result[8],
-                'top_terpenes_1': result[9],
-                'top_terpenes_2': result[10],
-                'top_terpenes_3': result[11],
-                'mental_effects_positive': result[12],
-                'mental_effects_negative': result[13],
-                'physical_effects_positive': result[14],
-                'physical_effects_negative': result[15],
-                'recommended_time': result[16],
-                'grow_method': result[17],
-                'harvest_date': result[18].strftime('%Y-%m-%d') if result[18] else None,
-                'batch_number': result[19],
-                'grower_id': result[20],
-                'grower_license_verified': result[21],
-                'fertilizer_type': result[22],
-                'flowering_type': result[23],
-                'image_1_url': result[24],
-                'image_2_url': result[25],
-                'image_3_url': result[26],
-                'image_4_url': result[27],
-                'created_at': result[28].strftime('%Y-%m-%d %H:%M:%S') if result[28] else None,
-                'updated_at': result[29].strftime('%Y-%m-%d %H:%M:%S') if result[29] else None,
-                'created_by': result[30],
-                'grower_name': result[31],
-                'is_grower': result[32],
-                'grower_profile_image': result[33],
-                'grower_contact_facebook': result[34],
-                'grower_contact_line': result[35],
-                'grower_contact_instagram': result[36],
-                'grower_contact_twitter': result[37],
-                'grower_contact_telegram': result[38],
-                'grower_contact_phone': result[39],
-                'grower_contact_other': result[40]
-            }
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT b.id, b.strain_name_en, b.strain_name_th, b.breeder, 
+                   b.strain_type, b.thc_percentage, b.cbd_percentage, 
+                   b.grade, b.aroma_flavor, b.top_terpenes_1, b.top_terpenes_2, b.top_terpenes_3,
+                   b.mental_effects_positive, b.mental_effects_negative,
+                   b.physical_effects_positive, b.physical_effects_negative,
+                   b.recommended_time, b.grow_method, b.harvest_date, b.batch_number,
+                   b.grower_id, b.grower_license_verified, b.fertilizer_type, 
+                   b.flowering_type, b.image_1_url, b.image_2_url, b.image_3_url, b.image_4_url,
+                   b.created_at, b.updated_at, b.created_by,
+                   COALESCE(u_grower.username, u_creator.username, 'บัดท์บอย') as grower_name, 
+                   COALESCE(u_grower.is_grower, u_creator.is_grower, false) as is_grower, 
+                   COALESCE(u_grower.profile_image_url, u_creator.profile_image_url) as grower_profile_image,
+                   COALESCE(u_grower.contact_facebook, u_creator.contact_facebook) as grower_contact_facebook,
+                   COALESCE(u_grower.contact_line, u_creator.contact_line) as grower_contact_line,
+                   COALESCE(u_grower.contact_instagram, u_creator.contact_instagram) as grower_contact_instagram,
+                   COALESCE(u_grower.contact_twitter, u_creator.contact_twitter) as grower_contact_twitter,
+                   COALESCE(u_grower.contact_telegram, u_creator.contact_telegram) as grower_contact_telegram,
+                   COALESCE(u_grower.contact_phone, u_creator.contact_phone) as grower_contact_phone,
+                   COALESCE(u_grower.contact_other, u_creator.contact_other) as grower_contact_other,
+                   b.lab_test_name, b.test_type
+            FROM buds_data b
+            LEFT JOIN users u_grower ON b.grower_id = u_grower.id
+            LEFT JOIN users u_creator ON b.created_by = u_creator.id
+            WHERE b.id = %s
+        """, (bud_id,))
 
-            cur.close()
-            return_db_connection(conn)
+        result = cur.fetchone()
+        print(f"Query result: {result is not None}")
 
-            return jsonify({
-                'success': True,
-                'bud': bud_info
-            })
-
-        except Exception as e:
+        if not result:
+            print(f"No bud found with ID {bud_id}")
             return jsonify({
                 'success': False,
-                'error': f'เกิดข้อผิดพลาดในการตรวจสอบ: {str(e)}'
-            }), 500
-        finally:
-            if cur:
-                cur.close()
-            if conn:
-                return_db_connection(conn)
-    else:
+                'error': f'ไม่พบข้อมูลดอก ID: {bud_id}'
+            }), 404
+
+        bud_info = {
+            'id': result[0],
+            'strain_name_en': result[1],
+            'strain_name_th': result[2],
+            'breeder': result[3],
+            'strain_type': result[4],
+            'thc_percentage': float(result[5]) if result[5] else None,
+            'cbd_percentage': float(result[6]) if result[6] else None,
+            'grade': result[7],
+            'aroma_flavor': result[8],
+            'top_terpenes_1': result[9],
+            'top_terpenes_2': result[10],
+            'top_terpenes_3': result[11],
+            'mental_effects_positive': result[12],
+            'mental_effects_negative': result[13],
+            'physical_effects_positive': result[14],
+            'physical_effects_negative': result[15],
+            'recommended_time': result[16],
+            'grow_method': result[17],
+            'harvest_date': result[18].strftime('%Y-%m-%d') if result[18] else None,
+            'batch_number': result[19],
+            'grower_id': result[20],
+            'grower_license_verified': result[21],
+            'fertilizer_type': result[22],
+            'flowering_type': result[23],
+            'image_1_url': result[24],
+            'image_2_url': result[25],
+            'image_3_url': result[26],
+            'image_4_url': result[27],
+            'created_at': result[28].strftime('%Y-%m-%d %H:%M:%S') if result[28] else None,
+            'updated_at': result[29].strftime('%Y-%m-%d %H:%M:%S') if result[29] else None,
+            'created_by': result[30],
+            'grower_name': result[31],
+            'is_grower': result[32],
+            'grower_profile_image': result[33],
+            'grower_contact_facebook': result[34],
+            'grower_contact_line': result[35],
+            'grower_contact_instagram': result[36],
+            'grower_contact_twitter': result[37],
+            'grower_contact_telegram': result[38],
+            'grower_contact_phone': result[39],
+            'grower_contact_other': result[40],
+            'lab_test_name': result[41],
+            'test_type': result[42]
+        }
+
+        print(f"Successfully loaded bud data: {bud_info['strain_name_en']}")
+
+        # Cache for 2 minutes
+        set_cache(cache_key, bud_info)
+
         return jsonify({
-            'success': False,
-            'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'
-        }), 500
+            'success': True,
+            'bud': bud_info
+        })
+
+    except psycopg2.OperationalError as e:
+        print(f"Database operational error in get_bud_info: {e}")
+        return jsonify({'error': 'เกิดข้อผิดพลาดในการเชื่อมต่อฐานข้อมูล กรุณาลองใหม่อีกครั้ง'}), 500
+    except Exception as e:
+        print(f"Error in get_bud_info for bud {bud_id}: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': f'เกิดข้อผิดพลาดในการโหลดข้อมูล: {str(e)}'}), 500
+    finally:
+        if cur:
+            try:
+                cur.close()
+            except:
+                pass
+        if conn:
+            return_db_connection(conn)
 
 @app.route('/add-review')
 def add_review_page():
@@ -4358,7 +4458,7 @@ def join_activity(activity_id):
                 FROM activities 
                 WHERE id = %s
             """, (activity_id,))
-            
+
             activity = cur.fetchone()
             if not activity:
                 return jsonify({'error': 'ไม่พบกิจกรรมนี้'}), 404
@@ -4379,7 +4479,7 @@ def join_activity(activity_id):
                 SELECT id FROM activity_participants 
                 WHERE activity_id = %s AND user_id = %s AND bud_id = %s
             """, (activity_id, user_id, bud_id))
-            
+
             if cur.fetchone():
                 return jsonify({'error': 'คุณได้ส่งดอกนี้เข้าร่วมกิจกรรมแล้ว'}), 400
 
@@ -4766,10 +4866,10 @@ def verify_captcha():
     """Verify reCAPTCHA token"""
     data = request.get_json()
     captcha_token = data.get('token')
-    
+
     if not captcha_token:
         return jsonify({'success': False, 'error': 'ไม่พบ CAPTCHA token'}), 400
-    
+
     # For production, you would verify with Google reCAPTCHA API:
     # secret_key = os.environ.get('RECAPTCHA_SECRET_KEY')
     # verify_url = 'https://www.google.com/recaptcha/api/siteverify'
@@ -4779,7 +4879,7 @@ def verify_captcha():
     #     'remoteip': request.environ.get('REMOTE_ADDR')
     # })
     # result = response.json()
-    
+
     # For demo purposes, we'll accept any non-empty token
     if captcha_token:
         session['captcha_verified'] = True
@@ -4798,28 +4898,28 @@ def fallback_login():
     """Fallback login for preview mode"""
     if not FALLBACK_AUTH_ENABLED:
         return jsonify({'success': False, 'error': 'Fallback authentication is disabled'}), 403
-    
+
     data = request.get_json()
     email = data.get('email')
     password = data.get('password')
-    
+
     if not email or not password:
         return jsonify({'success': False, 'error': 'กรุณากรอกอีเมลและรหัสผ่าน'}), 400
-    
+
     # Special fallback accounts for development
     fallback_accounts = {
-        'dev@budtboy.com': 'dev123',
+        'dev@budtboy.com': 'dev1123',
         'test@budtboy.com': 'test123',
         'admin@budtboy.com': 'admin123'
     }
-    
+
     if email in fallback_accounts and password == fallback_accounts[email]:
         # Create temporary session for fallback user
         session['user_id'] = 999  # Special fallback user ID
         session['username'] = email.split('@')[0].title()
         session['email'] = email
         session['fallback_mode'] = True
-        
+
         return jsonify({
             'success': True,
             'message': f'เข้าสู่ระบบสำเร็จ (Preview Mode)',
@@ -4836,14 +4936,14 @@ def fallback_login():
                     FROM users 
                     WHERE email = %s
                 """, (email,))
-                
+
                 user = cur.fetchone()
                 if user and verify_password(password, user[3]):
                     session['user_id'] = user[0]
                     session['username'] = user[1]
                     session['email'] = user[2]
                     session['fallback_mode'] = True
-                    
+
                     return jsonify({
                         'success': True,
                         'message': f'เข้าสู่ระบบสำเร็จ ยินดีต้อนรับ {user[1]}!',
@@ -4854,13 +4954,13 @@ def fallback_login():
                         'success': False,
                         'error': 'อีเมลหรือรหัสผ่านไม่ถูกต้อง'
                     }), 400
-                    
+
             except Exception as e:
                 return jsonify({'success': False, 'error': str(e)}), 500
             finally:
                 cur.close()
                 return_db_connection(conn)
-        
+
         return jsonify({'success': False, 'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
 @app.route('/fallback_signup', methods=['POST'])
@@ -4868,28 +4968,28 @@ def fallback_signup():
     """Fallback signup for preview mode"""
     if not FALLBACK_AUTH_ENABLED:
         return jsonify({'success': False, 'error': 'Fallback authentication is disabled'}), 403
-    
+
     data = request.get_json()
     username = data.get('username')
     email = data.get('email')
     password = data.get('password')
-    
+
     if not username or not email or not password:
         return jsonify({'success': False, 'error': 'กรุณากรอกข้อมูลให้ครบถ้วน'}), 400
-    
+
     # Validate password strength
     is_valid, message = validate_password_strength(password)
     if not is_valid:
         return jsonify({'success': False, 'error': message}), 400
-    
+
     # Hash password securely
     password_hash = hash_password(password)
-    
+
     conn = get_db_connection()
     if conn:
         try:
             cur = conn.cursor()
-            
+
             # Check if user exists
             cur.execute("SELECT id FROM users WHERE username = %s OR email = %s", (username, email))
             if cur.fetchone():
@@ -4897,33 +4997,33 @@ def fallback_signup():
                     'success': False,
                     'error': 'ชื่อผู้ใช้หรืออีเมลนี้ถูกใช้แล้ว'
                 }), 400
-            
+
             # Generate referral code
             import secrets
             new_referral_code = secrets.token_urlsafe(8)
-            
+
             # Create user
             cur.execute("""
                 INSERT INTO users (username, email, password_hash, is_consumer, is_verified, referral_code, is_approved)
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
                 RETURNING id
             """, (username, email, password_hash, True, True, new_referral_code, True))
-            
+
             user_id = cur.fetchone()[0]
             conn.commit()
-            
+
             # Auto login
             session['user_id'] = user_id
             session['username'] = username
             session['email'] = email
             session['fallback_mode'] = True
-            
+
             return jsonify({
                 'success': True,
                 'message': f'สมัครสมาชิกสำเร็จ! ยินดีต้อนรับ {username} (Preview Mode)',
                 'redirect': '/profile'
             })
-            
+
         except Exception as e:
             conn.rollback()
             return jsonify({'success': False, 'error': str(e)}), 500
@@ -5443,7 +5543,8 @@ def search_buds():
                        b.thc_percentage, b.cbd_percentage, b.grade, b.aroma_flavor,
                        b.recommended_time, b.grow_method, b.created_at,
                        COALESCE(AVG(r.overall_rating), 0) as avg_rating,
-                       COUNT(r.id) as review_count
+                       COUNT(r.id) as review_count,
+                       b.lab_test_name, b.test_type
                 FROM buds_data b
                 LEFT JOIN reviews r ON b.id = r.bud_reference_id
                 WHERE 1=1
@@ -5515,7 +5616,8 @@ def search_buds():
             query_parts.append("""
                 GROUP BY b.id, b.strain_name_en, b.strain_name_th, b.breeder, b.strain_type,
                          b.thc_percentage, b.cbd_percentage, b.grade, b.aroma_flavor,
-                         b.recommended_time, b.grow_method, b.created_at
+                         b.recommended_time, b.grow_method, b.created_at,
+                         b.lab_test_name, b.test_type
                 ORDER BY avg_rating DESC, b.created_at DESC
                 LIMIT 50
             """)
@@ -5540,7 +5642,9 @@ def search_buds():
                     'grow_method': row[10],
                     'created_at': row[11].strftime('%Y-%m-%d') if row[11] else None,
                     'avg_rating': float(row[12]) if row[12] else 0,
-                    'review_count': row[13]
+                    'review_count': row[13],
+                    'lab_test_name': row[14],
+                    'test_type': row[15]
                 })
 
             cur.close()
@@ -5595,7 +5699,8 @@ def get_bud_detail(bud_id):
                    recommended_time, grow_method, harvest_date, batch_number,
                    grower_id, grower_license_verified, fertilizer_type, 
                    flowering_type, image_1_url, image_2_url, image_3_url, image_4_url,
-                   created_at, updated_at, created_by
+                   created_at, updated_at, created_by,
+                   lab_test_name, test_type
             FROM buds_data
             WHERE id = %s AND created_by = %s
         """, (bud_id, user_id))
@@ -5638,7 +5743,9 @@ def get_bud_detail(bud_id):
             'image_4_url': result[27] or '',
             'created_at': result[28].strftime('%Y-%m-%d %H:%M:%S') if result[28] else '',
             'updated_at': result[29].strftime('%Y-%m-%d %H:%M:%S') if result[29] else '',
-            'created_by': result[30]
+            'created_by': result[30],
+            'lab_test_name': result[31] or '',
+            'test_type': result[32] or ''
         }
 
         print(f"Successfully loaded bud data: {bud_data['strain_name_en']}")
@@ -6289,7 +6396,7 @@ def save_admin_settings():
                 # For admin-only sessions, use a default admin user ID or None
                 admin_id = None
 
-            saved_count = saved_count = 0
+            saved_count = 0
 
             # บันทึกการตั้งค่าแต่ละรายการ
             for key, value in data.items():
@@ -6539,7 +6646,7 @@ def create_new_admin():
 
     if success:
         # Log admin creation
-        log_admin_activity("admin", 'ADMIN_ACCOUNT_CREATED', True,
+        log_admin_activity(admin_name, 'ADMIN_ACCOUNT_CREATED', True,
                          request.environ.get('REMOTE_ADDR'),
                          request.headers.get('User-Agent'),
                          f'Created admin: {admin_name}')
@@ -6654,16 +6761,16 @@ def admin_create_sample_data():
             sample_buds = [
                 ('บลูดรีม', 'Blue Dream', 'Barney\'s Farm', 'Hybrid', 18.5, 1.2, 'A+', 'หวาน, เบอร์รี่, ซิตรัส',
                  'Myrcene', 'Limonene', 'Pinene', 'ผ่อนคลาย, สร้างสรรค์, สุขใจ', '', 'บรรเทาปวด, คลายกล้าม', 'ปากแห้ง',
-                 'ตลอดวัน', 'Indoor', '2024-12-01', 'BD2024-001', sample_user_id, True, 'Organic', 'Photoperiod', sample_user_id),
+                 'ตลอดวัน', 'Indoor', '2024-12-01', 'BD2024-001', sample_user_id, True, 'Organic', 'Photoperiod', None, None, sample_user_id, 'available'),
                 ('โอจี คัช', 'OG Kush', 'DNA Genetics', 'Indica', 22.3, 0.8, 'A', 'ดิน, สน, เผ็ด',
                  'Myrcene', 'Caryophyllene', 'Limonene', 'ผ่อนคลาย, หลับง่าย', 'ง่วงหนัก', 'บรรเทาปวด, หลับง่าย', 'ตาแดง, ปากแห้ง',
-                 'กลางคืน', 'Indoor', '2024-11-15', 'OG2024-001', sample_user_id, True, 'Chemical', 'Photoperiod', sample_user_id),
+                 'กลางคืน', 'Indoor', '2024-11-15', 'OG2024-001', sample_user_id, True, 'Chemical', 'Photoperiod', None, None, sample_user_id, 'active'),
                 ('ไวท์ วิโดว์', 'White Widow', 'Green House Seed Company', 'Hybrid', 20.1, 1.5, 'A+', 'หวาน, ดอกไม้, มินต์',
                  'Pinene', 'Myrcene', 'Limonene', 'ตื่นตัว, โฟกัส, เบิกบาน', '', 'ต้านอักเสบ, สดชื่น', 'ตาแห้ง',
-                 'กลางวัน', 'Greenhouse', '2024-10-20', 'WW2024-001', sample_user_id, True, 'Organic', 'Photoperiod', sample_user_id),
+                 'กลางวัน', 'Greenhouse', '2024-10-20', 'WW2024-001', sample_user_id, True, 'Organic', 'Photoperiod', None, None, sample_user_id, 'available'),
                 ('บลูดรีม 2', 'Blue Dream', 'DNA Genetics', 'Hybrid', 19.2, 2.0, 'B+', 'กาแฟ, สตรอว์เบอร์รี่, บัตเตอร์',
                  'Myrcene', 'Limonene', 'Caryophyllene', 'ผ่อนคลาย, สร้างสรรค์', '', 'บรรเทาปวด, คลายกล้าม', 'ปากแห้ง',
-                 'ตลอดวัน', 'Indoor', '2025-07-16', '', sample_user_id, True, 'Organic', 'Photoperiod', sample_user_id)
+                 'ตลอดวัน', 'Indoor', '2025-07-16', '', sample_user_id, True, 'Organic', 'Photoperiod', None, None, sample_user_id, 'active')
             ]
 
             cur.executemany("""
@@ -6675,10 +6782,11 @@ def admin_create_sample_data():
                     physical_effects_positive, physical_effects_negative,
                     recommended_time, grow_method, harvest_date,
                     batch_number, grower_id, grower_license_verified,
-                    fertilizer_type, flowering_type, created_by
+                    fertilizer_type, flowering_type, lab_test_name, test_type,
+                    created_by, status
                 ) VALUES (
                     %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
                 )
             """, sample_buds)
 

@@ -1036,6 +1036,32 @@
         }
 
         @media (max-width: 768px) {
+            .video-modal {
+                padding-top: 20px;
+            }
+
+            .video-container {
+                max-width: 95%;
+                max-height: 85%;
+                margin-top: 10vh;
+            }
+
+            .video-container iframe {
+                width: 90vw;
+                height: 50.6vw; /* 16:9 aspect ratio */
+                min-height: 200px;
+                max-height: 70vh;
+            }
+
+            .modal-close {
+                top: 10px;
+                right: 20px;
+                font-size: 35px;
+                z-index: 10000;
+            }
+        }
+
+        @media (max-width: 768px) {
             body {
                 padding: 10px;
                 font-size: 16px;
@@ -1197,7 +1223,7 @@
                 padding: 20px;
                 margin-bottom: 0;
                 border-left: 5px solid #27ae60;
-                background: linear-gradient(135deg, #f8fff9 0%, #f0f8f0 100%);
+                background: linear-gradient(135deg, #f8fff9 0%, #f0f0f0 100%);
             }
 
             .info-group-title {
@@ -1513,14 +1539,6 @@
                     <div class="section-title">📊 ข้อมูลดอกทั้งหมด</div>
                     <div id="groupedBudInfo">
                         <!-- Grouped bud info will be populated here -->
-                    </div>
-                </div>
-
-                <!-- การตรวจสอบและใบรับรอง -->
-                <div class="section" id="verification">
-                    <div class="section-title">🏆 การตรวจสอบและใบรับรอง</div>
-                    <div id="verificationInfo">
-                        <!-- Verification info will be populated here -->
                     </div>
                 </div>
 
@@ -2203,6 +2221,15 @@
                     ]
                 },
                 {
+                    title: '💭 ผลกระทบและการใช้งาน',
+                    items: [
+                        { label: 'ผลกระทบทางจิต (บวก)', value: bud.mental_effects_positive || 'ไม่มีข้อมูล' },
+                        { label: 'ผลกระทบทางจิต (ลบ)', value: bud.mental_effects_negative || 'ไม่มีข้อมูล' },
+                        { label: 'ผลกระทบทางกาย (บวก)', value: bud.physical_effects_positive || 'ไม่มีข้อมูล' },
+                        { label: 'ผลกระทบทางกาย (ลบ)', value: bud.physical_effects_negative || 'ไม่มีข้อมูล' }
+                    ]
+                },
+                {
                     title: '🏆 ใบรับรอง (Certificate)',
                     items: [
                         { label: 'Lab test', value: bud.lab_test_name },
@@ -2738,9 +2765,9 @@
 
         function displayVerificationInfo(bud) {
             const verificationInfo = document.getElementById('verificationInfo');
-            
+
             let verificationHtml = '';
-            
+
             // Lab test information
             if (bud.lab_test_name || bud.test_type) {
                 verificationHtml += `
@@ -2751,7 +2778,7 @@
                     </div>
                 `;
             }
-            
+
             // License verification
             if (bud.grower_license_verified) {
                 verificationHtml += `
@@ -2761,7 +2788,7 @@
                     </div>
                 `;
             }
-            
+
             if (!verificationHtml) {
                 verificationHtml = `
                     <div class="verification-card">
@@ -2770,7 +2797,7 @@
                     </div>
                 `;
             }
-            
+
             verificationInfo.innerHTML = verificationHtml;
         }
     </script>

@@ -1206,18 +1206,15 @@ def create_tables():
                     end_registration_date TIMESTAMP NOT NULL,
                     judging_criteria TEXT,
                     max_participants INTEGER DEFAULT 0,
-                    first_prize_amount DECIMAL(10,2) DEFAULT 0,
-                    second_prize_amount DECIMAL(10,2) DEFAULT 0,
-                    third_prize_amount DECIMAL(10,2) DEFAULT 0,
-                    first_prize_name VARCHAR(255),
-                    second_prize_name VARCHAR(255),
-                    third_prize_name VARCHAR(255),
-                    first_prize_image VARCHAR(500),
-                    second_prize_image VARCHAR(500),
-                    third_prize_image VARCHAR(500),
+                    first_prize_description TEXT,
                     first_prize_value DECIMAL(10,2) DEFAULT 0,
+                    first_prize_image VARCHAR(500),
+                    second_prize_description TEXT,
                     second_prize_value DECIMAL(10,2) DEFAULT 0,
+                    second_prize_image VARCHAR(500),
+                    third_prize_description TEXT,
                     third_prize_value DECIMAL(10,2) DEFAULT 0,
+                    third_prize_image VARCHAR(500),
                     status VARCHAR(20) CHECK (status IN ('upcoming', 'registration_open', 'registration_closed', 'judging', 'completed')) DEFAULT 'upcoming',
                     created_by INTEGER REFERENCES users(id),
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -1227,11 +1224,17 @@ def create_tables():
 
             # Add new prize columns if they don't exist (for existing databases)
             try:
+                # First, add the new description columns
                 cur.execute("""
                     ALTER TABLE activities 
-                    ADD COLUMN IF NOT EXISTS first_prize_name VARCHAR(255),
-                    ADD COLUMN IF NOT EXISTS second_prize_name VARCHAR(255),
-                    ADD COLUMN IF NOT EXISTS third_prize_name VARCHAR(255),
+                    ADD COLUMN IF NOT EXISTS first_prize_description TEXT,
+                    ADD COLUMN IF NOT EXISTS second_prize_description TEXT,
+                    ADD COLUMN IF NOT EXISTS third_prize_description TEXT;
+                """)
+                
+                # Keep existing columns for backward compatibility but rename them internally
+                cur.execute("""
+                    ALTER TABLE activities 
                     ADD COLUMN IF NOT EXISTS first_prize_image VARCHAR(500),
                     ADD COLUMN IF NOT EXISTS second_prize_image VARCHAR(500),
                     ADD COLUMN IF NOT EXISTS third_prize_image VARCHAR(500),
@@ -1239,6 +1242,25 @@ def create_tables():
                     ADD COLUMN IF NOT EXISTS second_prize_value DECIMAL(10,2) DEFAULT 0,
                     ADD COLUMN IF NOT EXISTS third_prize_value DECIMAL(10,2) DEFAULT 0;
                 """)
+                
+                # Migrate data from old columns to new format if needed
+                cur.execute("""
+                    UPDATE activities 
+                    SET first_prize_description = COALESCE(first_prize_name, first_prize_amount::TEXT),
+                        second_prize_description = COALESCE(second_prize_name, second_prize_amount::TEXT),
+                        third_prize_description = COALESCE(third_prize_name, third_prize_amount::TEXT)
+                    WHERE first_prize_description IS NULL;
+                """)
+                
+                # Copy old prize values if new ones are not set
+                cur.execute("""
+                    UPDATE activities 
+                    SET first_prize_value = COALESCE(first_prize_value, first_prize_amount),
+                        second_prize_value = COALESCE(second_prize_value, second_prize_amount),
+                        third_prize_value = COALESCE(third_prize_value, third_prize_amount)
+                    WHERE first_prize_value = 0 AND first_prize_amount > 0;
+                """)
+                
             except Exception as e:
                 print(f"Note: Prize columns may already exist: {e}")
 
@@ -4150,20 +4172,20 @@ def get_activities():
             cur = conn.cursor()
             cur.execute("""
                 SELECT a.id, a.name, a.description, a.start_registration_date, a.end_registration_date,
-                       a.judging_criteria, a.max_participants, a.first_prize_amount, a.second_prize_amount,
-                       a.third_prize_amount, a.status, a.created_at,
-                       a.first_prize_name, a.second_prize_name, a.third_prize_name,
-                       a.first_prize_image, a.second_prize_image, a.third_prize_image,
-                       a.first_prize_value, a.second_prize_value, a.third_prize_value,
+                       a.judging_criteria, a.max_participants, 
+                       a.first_prize_description, a.first_prize_value, a.first_prize_image,
+                       a.second_prize_description, a.second_prize_value, a.second_prize_image,
+                       a.third_prize_description, a.third_prize_value, a.third_prize_image,
+                       a.status, a.created_at,
                        COUNT(ap.id) as participant_count
                 FROM activities a
                 LEFT JOIN activity_participants ap ON a.id = ap.activity_id
                 GROUP BY a.id, a.name, a.description, a.start_registration_date, a.end_registration_date,
-                         a.judging_criteria, a.max_participants, a.first_prize_amount, a.second_prize_amount,
-                         a.third_prize_amount, a.status, a.created_at,
-                         a.first_prize_name, a.second_prize_name, a.third_prize_name,
-                         a.first_prize_image, a.second_prize_image, a.third_prize_image,
-                         a.first_prize_value, a.second_prize_value, a.third_prize_value
+                         a.judging_criteria, a.max_participants,
+                         a.first_prize_description, a.first_prize_value, a.first_prize_image,
+                         a.second_prize_description, a.second_prize_value, a.second_prize_image,
+                         a.third_prize_description, a.third_prize_value, a.third_prize_image,
+                         a.status, a.created_at
                 ORDER BY a.created_at DESC
             """)
 
@@ -4177,21 +4199,18 @@ def get_activities():
                     'end_registration_date': row[4].strftime('%Y-%m-%d %H:%M:%S') if row[4] else None,
                     'judging_criteria': row[5],
                     'max_participants': row[6],
-                    'first_prize_amount': float(row[7]) if row[7] else 0,
-                    'second_prize_amount': float(row[8]) if row[8] else 0,
-                    'third_prize_amount': float(row[9]) if row[9] else 0,
-                    'status': row[10],
-                    'created_at': row[11].strftime('%Y-%m-%d %H:%M:%S') if row[11] else None,
-                    'first_prize_name': row[12],
-                    'second_prize_name': row[13],
-                    'third_prize_name': row[14],
-                    'first_prize_image': row[15],
-                    'second_prize_image': row[16],
-                    'third_prize_image': row[17],
-                    'first_prize_value': float(row[18]) if row[18] else 0,
-                    'second_prize_value': float(row[19]) if row[19] else 0,
-                    'third_prize_value': float(row[20]) if row[20] else 0,
-                    'participant_count': row[21]
+                    'first_prize_description': row[7],
+                    'first_prize_value': float(row[8]) if row[8] else 0,
+                    'first_prize_image': row[9],
+                    'second_prize_description': row[10],
+                    'second_prize_value': float(row[11]) if row[11] else 0,
+                    'second_prize_image': row[12],
+                    'third_prize_description': row[13],
+                    'third_prize_value': float(row[14]) if row[14] else 0,
+                    'third_prize_image': row[15],
+                    'status': row[16],
+                    'created_at': row[17].strftime('%Y-%m-%d %H:%M:%S') if row[17] else None,
+                    'participant_count': row[18]
                 })
 
             return jsonify({'activities': activities})
@@ -4270,14 +4289,12 @@ def admin_create_activity():
             cur.execute("""
                 INSERT INTO activities (
                     name, description, start_registration_date, end_registration_date,
-                    judging_criteria, max_participants, first_prize_amount,
-                    second_prize_amount, third_prize_amount, status,
-                    first_prize_name, second_prize_name, third_prize_name,
-                    first_prize_image, second_prize_image, third_prize_image,
-                    first_prize_value, second_prize_value, third_prize_value
+                    judging_criteria, max_participants, status,
+                    first_prize_description, first_prize_value, first_prize_image,
+                    second_prize_description, second_prize_value, second_prize_image,
+                    third_prize_description, third_prize_value, third_prize_image
                 ) VALUES (
-                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                    %s, %s, %s, %s, %s, %s, %s, %s, %s
+                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
                 ) RETURNING id
             """, (
                 data.get('name'),
@@ -4286,19 +4303,16 @@ def admin_create_activity():
                 data.get('end_registration_date'),
                 data.get('judging_criteria'),
                 data.get('max_participants', 0),
-                data.get('first_prize_amount', 0),
-                data.get('second_prize_amount', 0),
-                data.get('third_prize_amount', 0),
                 data.get('status', 'upcoming'),
-                data.get('first_prize_name'),
-                data.get('second_prize_name'),
-                data.get('third_prize_name'),
-                data.get('first_prize_image'),
-                data.get('second_prize_image'),
-                data.get('third_prize_image'),
+                data.get('first_prize_description'),
                 data.get('first_prize_value', 0),
+                data.get('first_prize_image'),
+                data.get('second_prize_description'),
                 data.get('second_prize_value', 0),
-                data.get('third_prize_value', 0)
+                data.get('second_prize_image'),
+                data.get('third_prize_description'),
+                data.get('third_prize_value', 0),
+                data.get('third_prize_image')
             ))
 
             activity_id = cur.fetchone()[0]
@@ -4425,13 +4439,11 @@ def admin_update_activity(activity_id):
                 UPDATE activities SET
                     name = %s, description = %s, start_registration_date = %s,
                     end_registration_date = %s, judging_criteria = %s,
-                    max_participants = %s, first_prize_amount = %s,
-                    second_prize_amount = %s, third_prize_amount = %s,
-                    status = %s, first_prize_name = %s, second_prize_name = %s,
-                    third_prize_name = %s, first_prize_image = %s,
-                    second_prize_image = %s, third_prize_image = %s,
-                    first_prize_value = %s, second_prize_value = %s,
-                    third_prize_value = %s, updated_at = CURRENT_TIMESTAMP
+                    max_participants = %s, status = %s,
+                    first_prize_description = %s, first_prize_value = %s, first_prize_image = %s,
+                    second_prize_description = %s, second_prize_value = %s, second_prize_image = %s,
+                    third_prize_description = %s, third_prize_value = %s, third_prize_image = %s,
+                    updated_at = CURRENT_TIMESTAMP
                 WHERE id = %s
             """, (
                 data.get('name'),
@@ -4440,19 +4452,16 @@ def admin_update_activity(activity_id):
                 data.get('end_registration_date'),
                 data.get('judging_criteria'),
                 data.get('max_participants', 0),
-                data.get('first_prize_amount', 0),
-                data.get('second_prize_amount', 0),
-                data.get('third_prize_amount', 0),
                 data.get('status'),
-                data.get('first_prize_name'),
-                data.get('second_prize_name'),
-                data.get('third_prize_name'),
-                data.get('first_prize_image'),
-                data.get('second_prize_image'),
-                data.get('third_prize_image'),
+                data.get('first_prize_description'),
                 data.get('first_prize_value', 0),
+                data.get('first_prize_image'),
+                data.get('second_prize_description'),
                 data.get('second_prize_value', 0),
+                data.get('second_prize_image'),
+                data.get('third_prize_description'),
                 data.get('third_prize_value', 0),
+                data.get('third_prize_image'),
                 activity_id
             ))
 
@@ -4506,6 +4515,43 @@ def admin_delete_activity(activity_id):
             return_db_connection(conn)
     else:
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+
+@app.route('/api/upload_prize_image', methods=['POST'])
+def upload_prize_image():
+    """Upload prize image for activities"""
+    if not is_admin():
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    if 'prize_image' not in request.files:
+        return jsonify({'error': 'ไม่พบไฟล์รูปภาพ'}), 400
+
+    file = request.files['prize_image']
+    if file.filename == '':
+        return jsonify({'error': 'ไม่ได้เลือกไฟล์'}), 400
+
+    if file and allowed_file(file.filename):
+        try:
+            # Create secure filename
+            filename = secure_filename(file.filename)
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_')
+            prize_position = request.form.get('prize_position', '1')
+            filename = f"{timestamp}prize_{prize_position}_{filename}"
+            
+            # Save file
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(file_path)
+            
+            # Return the file path for database storage
+            return jsonify({
+                'success': True,
+                'image_url': f'/uploads/{filename}',
+                'message': 'อัพโหลดรูปภาพสำเร็จ'
+            })
+            
+        except Exception as e:
+            return jsonify({'error': f'เกิดข้อผิดพลาดในการอัพโหลด: {str(e)}'}), 500
+    else:
+        return jsonify({'error': 'ไฟล์ไม่ถูกต้อง (รองรับเฉพาะ jpg, jpeg, png, pdf)'}), 400
 
 def get_registration_mode():
     """Get current registration mode from admin settings"""

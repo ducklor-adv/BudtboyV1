@@ -421,28 +421,28 @@
                         </div>
                     </div>
 
-                    ${(activity.first_prize_amount > 0 || activity.second_prize_amount > 0 || activity.third_prize_amount > 0 || 
-                       activity.first_prize_name || activity.second_prize_name || activity.third_prize_name) ? `
+                    ${(activity.first_prize_value > 0 || activity.second_prize_value > 0 || activity.third_prize_value > 0 || 
+                       activity.first_prize_description || activity.second_prize_description || activity.third_prize_description) ? `
                         <div class="prizes">
                             <div class="prizes-title">🏆 รางวัล</div>
                             <div class="prize-list">
                                 <div class="prize-item">
                                     <div class="prize-medal">🥇</div>
                                     ${activity.first_prize_image ? `<img src="${activity.first_prize_image}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px; margin: 5px 0;" alt="รางวัลที่ 1">` : ''}
-                                    <div class="prize-name">${activity.first_prize_name || 'รางวัลที่ 1'}</div>
-                                    <div class="prize-amount">${activity.first_prize_name ? formatMoney(activity.first_prize_value) : formatMoney(activity.first_prize_amount)}</div>
+                                    <div class="prize-name">${activity.first_prize_description || 'รางวัลที่ 1'}</div>
+                                    <div class="prize-amount">${formatMoney(activity.first_prize_value)}</div>
                                 </div>
                                 <div class="prize-item">
                                     <div class="prize-medal">🥈</div>
                                     ${activity.second_prize_image ? `<img src="${activity.second_prize_image}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px; margin: 5px 0;" alt="รางวัลที่ 2">` : ''}
-                                    <div class="prize-name">${activity.second_prize_name || 'รางวัลที่ 2'}</div>
-                                    <div class="prize-amount">${activity.second_prize_name ? formatMoney(activity.second_prize_value) : formatMoney(activity.second_prize_amount)}</div>
+                                    <div class="prize-name">${activity.second_prize_description || 'รางวัลที่ 2'}</div>
+                                    <div class="prize-amount">${formatMoney(activity.second_prize_value)}</div>
                                 </div>
                                 <div class="prize-item">
                                     <div class="prize-medal">🥉</div>
                                     ${activity.third_prize_image ? `<img src="${activity.third_prize_image}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px; margin: 5px 0;" alt="รางวัลที่ 3">` : ''}
-                                    <div class="prize-name">${activity.third_prize_name || 'รางวัลที่ 3'}</div>
-                                    <div class="prize-amount">${activity.third_prize_name ? formatMoney(activity.third_prize_value) : formatMoney(activity.third_prize_amount)}</div>
+                                    <div class="prize-name">${activity.third_prize_description || 'รางวัลที่ 3'}</div>
+                                    <div class="prize-amount">${formatMoney(activity.third_prize_value)}</div>
                                 </div>
                             </div>
                         </div>

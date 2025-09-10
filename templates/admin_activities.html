@@ -527,76 +527,72 @@
                     <textarea id="judgingCriteria" class="form-control" rows="3" placeholder="เช่น ความสวยงาม ขนาด กลิ่น รส"></textarea>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">รางวัลที่ 1 (บาท)</label>
-                        <input type="number" id="firstPrize" class="form-control" min="0" value="0">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">รางวัลที่ 2 (บาท)</label>
-                        <input type="number" id="secondPrize" class="form-control" min="0" value="0">
-                    </div>
-                </div>
-
                 <div class="form-group">
-                    <label class="form-label">รางวัลที่ 3 (บาท)</label>
-                    <input type="number" id="thirdPrize" class="form-control" min="0" value="0">
+                    <h3 style="margin-top: 30px; color: #2c3e50;">🏆 รางวัล</h3>
+                    <p style="color: #666; font-size: 14px;">กำหนดรางวัลพร้อมคำอธิบาย มูลค่า และรูปภาพ</p>
                 </div>
 
-                <div class="form-group">
-                    <h3 style="margin-top: 30px; color: #2c3e50;">🏆 รางวัลสิ่งของ</h3>
-                    <p style="color: #666; font-size: 14px;">กำหนดรางวัลเป็นสิ่งของพร้อมรูปภาพและมูลค่า</p>
-                </div>
-
-                <div class="form-row">
+                <!-- รางวัลที่ 1 -->
+                <div style="border: 2px solid #e9ecef; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
+                    <h4 style="color: #2c3e50; margin-bottom: 15px;">🥇 รางวัลที่ 1</h4>
+                    
                     <div class="form-group">
-                        <label class="form-label">ชื่อรางวัลที่ 1</label>
-                        <input type="text" id="firstPrizeName" class="form-control" placeholder="เช่น iPhone 15 Pro">
+                        <label class="form-label">คำอธิบายรางวัล</label>
+                        <input type="text" id="firstPrizeDescription" class="form-control" placeholder="เช่น เงินสด, iPhone 15 Pro, รางวัลพิเศษ">
                     </div>
+                    
                     <div class="form-group">
-                        <label class="form-label">มูลค่ารางวัลที่ 1 (บาท)</label>
+                        <label class="form-label">มูลค่า (บาท)</label>
                         <input type="number" id="firstPrizeValue" class="form-control" min="0" value="0">
                     </div>
-                </div>
 
-                <div class="form-group">
-                    <label class="form-label">รูปภาพรางวัลที่ 1</label>
-                    <input type="file" id="firstPrizeImage" class="form-control" accept="image/*">
-                    <div id="firstPrizeImagePreview" style="margin-top: 10px;"></div>
-                </div>
-
-                <div class="form-row">
                     <div class="form-group">
-                        <label class="form-label">ชื่อรางวัลที่ 2</label>
-                        <input type="text" id="secondPrizeName" class="form-control" placeholder="เช่น iPad Air">
+                        <label class="form-label">รูปภาพรางวัล</label>
+                        <input type="file" id="firstPrizeImage" class="form-control" accept="image/*">
+                        <div id="firstPrizeImagePreview" style="margin-top: 10px;"></div>
                     </div>
+                </div>
+
+                <!-- รางวัลที่ 2 -->
+                <div style="border: 2px solid #e9ecef; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
+                    <h4 style="color: #2c3e50; margin-bottom: 15px;">🥈 รางวัลที่ 2</h4>
+                    
                     <div class="form-group">
-                        <label class="form-label">มูลค่ารางวัลที่ 2 (บาท)</label>
+                        <label class="form-label">คำอธิบายรางวัล</label>
+                        <input type="text" id="secondPrizeDescription" class="form-control" placeholder="เช่น เงินสด, iPad Air, รางวัลพิเศษ">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">มูลค่า (บาท)</label>
                         <input type="number" id="secondPrizeValue" class="form-control" min="0" value="0">
                     </div>
-                </div>
 
-                <div class="form-group">
-                    <label class="form-label">รูปภาพรางวัลที่ 2</label>
-                    <input type="file" id="secondPrizeImage" class="form-control" accept="image/*">
-                    <div id="secondPrizeImagePreview" style="margin-top: 10px;"></div>
-                </div>
-
-                <div class="form-row">
                     <div class="form-group">
-                        <label class="form-label">ชื่อรางวัลที่ 3</label>
-                        <input type="text" id="thirdPrizeName" class="form-control" placeholder="เช่น AirPods Pro">
+                        <label class="form-label">รูปภาพรางวัล</label>
+                        <input type="file" id="secondPrizeImage" class="form-control" accept="image/*">
+                        <div id="secondPrizeImagePreview" style="margin-top: 10px;"></div>
                     </div>
+                </div>
+
+                <!-- รางวัลที่ 3 -->
+                <div style="border: 2px solid #e9ecef; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
+                    <h4 style="color: #2c3e50; margin-bottom: 15px;">🥉 รางวัลที่ 3</h4>
+                    
                     <div class="form-group">
-                        <label class="form-label">มูลค่ารางวัลที่ 3 (บาท)</label>
+                        <label class="form-label">คำอธิบายรางวัล</label>
+                        <input type="text" id="thirdPrizeDescription" class="form-control" placeholder="เช่น เงินสด, AirPods Pro, รางวัลพิเศษ">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">มูลค่า (บาท)</label>
                         <input type="number" id="thirdPrizeValue" class="form-control" min="0" value="0">
                     </div>
-                </div>
 
-                <div class="form-group">
-                    <label class="form-label">รูปภาพรางวัลที่ 3</label>
-                    <input type="file" id="thirdPrizeImage" class="form-control" accept="image/*">
-                    <div id="thirdPrizeImagePreview" style="margin-top: 10px;"></div>
+                    <div class="form-group">
+                        <label class="form-label">รูปภาพรางวัล</label>
+                        <input type="file" id="thirdPrizeImage" class="form-control" accept="image/*">
+                        <div id="thirdPrizeImagePreview" style="margin-top: 10px;"></div>
+                    </div>
                 </div>
 
                 <div style="text-align: right; margin-top: 30px;">
@@ -753,7 +749,7 @@
                             ${activity.participant_count}${activity.max_participants > 0 ? `/${activity.max_participants}` : ''} คน
                         </td>
                         <td>
-                            ${this.formatTotalPrize(activity.first_prize_amount, activity.second_prize_amount, activity.third_prize_amount)}
+                            ${this.formatTotalPrize(activity)}
                         </td>
                         <td>
                             <div class="action-buttons">
@@ -797,9 +793,37 @@
                 document.getElementById('maxParticipants').value = activity.max_participants || 0;
                 document.getElementById('activityStatus').value = activity.status;
                 document.getElementById('judgingCriteria').value = activity.judging_criteria || '';
-                document.getElementById('firstPrize').value = activity.first_prize_amount || 0;
-                document.getElementById('secondPrize').value = activity.second_prize_amount || 0;
-                document.getElementById('thirdPrize').value = activity.third_prize_amount || 0;
+                
+                // Fill prize data with new structure
+                document.getElementById('firstPrizeDescription').value = activity.first_prize_description || '';
+                document.getElementById('firstPrizeValue').value = activity.first_prize_value || 0;
+                document.getElementById('secondPrizeDescription').value = activity.second_prize_description || '';
+                document.getElementById('secondPrizeValue').value = activity.second_prize_value || 0;
+                document.getElementById('thirdPrizeDescription').value = activity.third_prize_description || '';
+                document.getElementById('thirdPrizeValue').value = activity.third_prize_value || 0;
+
+                // Show existing images if any
+                if (activity.first_prize_image) {
+                    document.getElementById('firstPrizeImagePreview').innerHTML = `
+                        <img src="${activity.first_prize_image}" 
+                             style="max-width: 200px; max-height: 150px; border-radius: 8px; border: 1px solid #ddd;"
+                             alt="First Prize Image">
+                    `;
+                }
+                if (activity.second_prize_image) {
+                    document.getElementById('secondPrizeImagePreview').innerHTML = `
+                        <img src="${activity.second_prize_image}" 
+                             style="max-width: 200px; max-height: 150px; border-radius: 8px; border: 1px solid #ddd;"
+                             alt="Second Prize Image">
+                    `;
+                }
+                if (activity.third_prize_image) {
+                    document.getElementById('thirdPrizeImagePreview').innerHTML = `
+                        <img src="${activity.third_prize_image}" 
+                             style="max-width: 200px; max-height: 150px; border-radius: 8px; border: 1px solid #ddd;"
+                             alt="Third Prize Image">
+                    `;
+                }
 
                 // Update modal title and button
                 document.getElementById('modalTitle').textContent = 'แก้ไขกิจกรรม';
@@ -842,14 +866,11 @@
                     max_participants: parseInt(document.getElementById('maxParticipants').value) || 0,
                     status: document.getElementById('activityStatus').value,
                     judging_criteria: document.getElementById('judgingCriteria').value,
-                    first_prize_amount: parseFloat(document.getElementById('firstPrize').value) || 0,
-                    second_prize_amount: parseFloat(document.getElementById('secondPrize').value) || 0,
-                    third_prize_amount: parseFloat(document.getElementById('thirdPrize').value) || 0,
-                    first_prize_name: document.getElementById('firstPrizeName').value,
-                    second_prize_name: document.getElementById('secondPrizeName').value,
-                    third_prize_name: document.getElementById('thirdPrizeName').value,
+                    first_prize_description: document.getElementById('firstPrizeDescription').value,
                     first_prize_value: parseFloat(document.getElementById('firstPrizeValue').value) || 0,
+                    second_prize_description: document.getElementById('secondPrizeDescription').value,
                     second_prize_value: parseFloat(document.getElementById('secondPrizeValue').value) || 0,
+                    third_prize_description: document.getElementById('thirdPrizeDescription').value,
                     third_prize_value: parseFloat(document.getElementById('thirdPrizeValue').value) || 0
                 };
 
@@ -911,8 +932,8 @@
                 return date.toISOString().slice(0, 16);
             },
 
-            formatTotalPrize(first, second, third) {
-                const total = (first || 0) + (second || 0) + (third || 0);
+            formatTotalPrize(activity) {
+                const total = (activity.first_prize_value || 0) + (activity.second_prize_value || 0) + (activity.third_prize_value || 0);
                 if (total === 0) return '-';
                 return new Intl.NumberFormat('th-TH', {
                     style: 'currency',

@@ -688,7 +688,7 @@
             }
         }
 
-        
+
 
         /* Simplified Terpene Styles */
         .terpenes-simple-container {
@@ -745,6 +745,7 @@
             background: #45a049;
         }
 
+        /* Terpene Display Row Styles */
         .terpene-display-row {
             display: flex;
             gap: 0;
@@ -787,6 +788,42 @@
             width: 100%;
         }
 
+        /* Terpene Percentage Input Row Styles */
+        .terpene-percentage-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .terpene-percentage-input {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .terpene-percentage-input label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #2c5530;
+            margin-bottom: 5px;
+            text-align: center;
+        }
+
+        .terpene-percentage-input input {
+            padding: 8px 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 14px;
+            text-align: center;
+            transition: border-color 0.3s ease;
+        }
+
+        .terpene-percentage-input input:focus {
+            outline: none;
+            border-color: #FF8C00;
+        }
+
+        /* Terpene Options List Styles */
         .terpene-options {
             max-height: 300px;
             overflow-y: auto;
@@ -888,6 +925,11 @@
 
             .terpene-options {
                 max-height: 250px;
+            }
+
+            .terpene-display-row,
+            .terpene-percentage-row {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -1192,6 +1234,29 @@
                                     <span class="placeholder">ยังไม่ระบุ</span>
                                 </div>
                             </div>
+                        </div>
+
+                        <!-- Terpene Percentage Input Row -->
+                        <div class="terpene-percentage-row">
+                            <div class="terpene-percentage-input">
+                                <label for="terpene_1_percentage">% Terpene อันดับ 1</label>
+                                <input type="number" id="terpene_1_percentage" name="terpene_1_percentage" 
+                                       step="0.01" min="0" max="100" placeholder="0.00">
+                            </div>
+                            <div class="terpene-percentage-input">
+                                <label for="terpene_2_percentage">% Terpene อันดับ 2</label>
+                                <input type="number" id="terpene_2_percentage" name="terpene_2_percentage" 
+                                       step="0.01" min="0" max="100" placeholder="0.00">
+                            </div>
+                            <div class="terpene-percentage-input">
+                                <label for="terpene_3_percentage">% Terpene อันดับ 3</label>
+                                <input type="number" id="terpene_3_percentage" name="terpene_3_percentage" 
+                                       step="0.01" min="0" max="100" placeholder="0.00">
+                            </div>
+                        </div>
+
+                        <!-- Tab Content -->
+                        <div class="tab-content active" id="terpene-1-content">
                         </div>
 
                         <!-- Hidden inputs for form submission -->
@@ -1808,7 +1873,7 @@
                 for (let i = 1; i <= 3; i++) {
                     const hiddenInput = document.getElementById(`top_terpenes_${i}`);
                     const tabHeader = document.querySelector(`[data-tab="terpene-${i}"]`);
-                    
+
                     if (hiddenInput && tabHeader) {
                         if (hiddenInput.value && hiddenInput.value.trim() !== '') {
                             tabHeader.classList.add('has-selection');
@@ -1827,7 +1892,7 @@
                 // Update all checkboxes based on current tab selection
                 checkboxes.forEach(checkbox => {
                     const terpeneCheckbox = checkbox.closest('.terpene-checkbox');
-                    
+
                     if (checkbox.value === currentSelection) {
                         checkbox.checked = true;
                         terpeneCheckbox.classList.add('selected');
@@ -1846,7 +1911,7 @@
                     // Add active class to clicked header
                     this.classList.add('active');
                     currentTab = index + 1;
-                    
+
                     // Update checkbox display for current tab
                     updateCheckboxDisplay();
                 });
@@ -1871,7 +1936,7 @@
                         // Update the current tab's hidden input and display
                         const hiddenInput = document.getElementById(`top_terpenes_${currentTab}`);
                         const displayElement = document.getElementById(`display-terpene-${currentTab}`);
-                        
+
                         if (hiddenInput && displayElement) {
                             hiddenInput.value = terpeneValue;
                             displayElement.querySelector('.placeholder').textContent = terpeneName;
@@ -1883,7 +1948,7 @@
                         // If unchecked, clear from current tab only
                         const hiddenInput = document.getElementById(`top_terpenes_${currentTab}`);
                         const displayElement = document.getElementById(`display-terpene-${currentTab}`);
-                        
+
                         if (hiddenInput && hiddenInput.value === terpeneValue) {
                             hiddenInput.value = '';
                             if (displayElement) {
@@ -2019,7 +2084,7 @@
                 // Check if elements exist before initializing
                 const selectedDiv = document.getElementById(selector.selectedId);
                 const hiddenInput = document.getElementById(selector.hiddenId);
-                
+
                 if (selectedDiv && hiddenInput) {
                     initializeEffectSelector(selector);
                 }
@@ -2029,7 +2094,7 @@
         function initializeEffectSelector(config) {
             const selectedDiv = document.getElementById(config.selectedId);
             const hiddenInput = document.getElementById(config.hiddenId);
-            
+
             // Check if elements exist
             if (!selectedDiv || !hiddenInput) {
                 console.warn(`Effects selector elements not found for ${config.selectedId}`);
@@ -2037,7 +2102,7 @@
             }
 
             const categoriesDiv = selectedDiv.nextElementSibling.nextElementSibling; // Skip hidden textarea
-            
+
             // Check if categories div exists
             if (!categoriesDiv) {
                 console.warn(`Categories div not found for ${config.selectedId}`);

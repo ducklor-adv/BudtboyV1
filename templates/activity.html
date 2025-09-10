@@ -1188,6 +1188,8 @@
             border-radius: 8px;
             flex: 1;
             max-width: 120px;
+            text-decoration: none;
+            color: #666;
         }
 
         .nav-tab:hover {
@@ -1312,21 +1314,21 @@
 
         <!-- Bottom Navigation Bar -->
         <div class="bottom-nav">
-            <a href="/activity" class="nav-tab active" style="text-decoration: none; color: inherit;">
-                <div class="nav-icon">📊</div>
-                <div class="nav-label">รายการของคุณ</div>
-            </a>
+            <button class="nav-tab active" onclick="switchTab('myBuds')">
+                <div class="nav-icon">🌿</div>
+                <div class="nav-label">ดอกของคุณ</div>
+            </button>
+            <button class="nav-tab" onclick="switchTab('myReviews')">
+                <div class="nav-icon">⭐</div>
+                <div class="nav-label">รีวิวโดยคุณ</div>
+            </button>
+            <button class="nav-tab" onclick="switchTab('friendsReviews')">
+                <div class="nav-icon">👥</div>
+                <div class="nav-label">รีวิวจากเพื่อนๆ</div>
+            </button>
             <a href="/search-tool" class="nav-tab" style="text-decoration: none; color: inherit;">
                 <div class="nav-icon">🔍</div>
                 <div class="nav-label">ค้นหา</div>
-            </a>
-            <a href="/report" class="nav-tab" style="text-decoration: none; color: inherit;">
-                <div class="nav-icon">📈</div>
-                <div class="nav-label">รายการทั้งหมด</div>
-            </a>
-            <a href="/activities" class="nav-tab" style="text-decoration: none; color: inherit;">
-                <div class="nav-icon">🎉</div>
-                <div class="nav-label">กิจกรรม</div>
             </a>
             <a href="/profile" class="nav-tab" style="text-decoration: none; color: inherit;">
                 <div class="nav-icon">👤</div>
@@ -1945,9 +1947,17 @@
 
         // Tab switching function
         function switchTab(tabName) {
-            // Update active tab
-            document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
-            event.target.closest('.nav-tab').classList.add('active');
+            // Update active tab - only for buttons, not links
+            document.querySelectorAll('.nav-tab button, .nav-tab:not(a)').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Find and activate the clicked tab
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                if (tab.onclick && tab.onclick.toString().includes(tabName)) {
+                    tab.classList.add('active');
+                }
+            });
 
             // Hide all sections
             document.getElementById('myBudsSection').style.display = 'none';

@@ -1033,7 +1033,7 @@ def create_tables():
             # Add image columns if they don't exist (for existing databases)
             for i in range(1, 5):
                 try:
-                    cur.execute(f"ALTER TABLE buds_data ADD COLUMN image_{i}_url VARCHAR(500)")
+                    cur.execute(f"ALTER TABLE buds_data ADD COLUMN IF NOT EXISTS image_{i}_url VARCHAR(500)")
                     print(f"Added image_{i}_url column")
                 except psycopg2.errors.DuplicateColumn:
                     pass  # Column already exists
@@ -1497,7 +1497,7 @@ def validate_password_strength(password):
     if not (has_upper and has_lower and has_digit):
         return False, "รหัสผ่านต้องมีตัวอักษรพิมพ์ใหญ่ พิมพ์เล็ก และตัวเลข"
 
-    return True, "รหัสผ่านปลอดภัย"
+    return True, "รหัสผ่านปลอดภัย
 
 def send_verification_email(email, username, token):
     try:
@@ -1671,7 +1671,7 @@ def get_user_buds():
         existing_columns = [row[0] for row in cur.fetchall()]
         has_lab_test = 'lab_test_name' in existing_columns
         has_test_type = 'test_type' in existing_columns
-        
+
         if has_lab_test and has_test_type:
             cur.execute("""
                 SELECT b.id, b.strain_name_en, b.strain_name_th, b.breeder, b.thc_percentage, 
@@ -2852,7 +2852,7 @@ def add_bud():
                     flowering_type = None
             else:
                 flowering_type = None
-            
+
             # Certificate fields
             lab_test_name = data.get('lab_test_name')
             test_type = data.get('test_type')
@@ -2870,7 +2870,7 @@ def add_bud():
                 'lab_test_name', 'test_type',
                 'created_by', 'status'
             ]
-            
+
             values = [
                 data.get('strain_name_th'), data.get('strain_name_en'), 
                 data.get('breeder'), strain_type,
@@ -3196,10 +3196,17 @@ def upload_bud_images(bud_id):
 @app.route('/api/buds/<int:bud_id>', methods=['GET'])
 def get_bud(bud_id):
     """Get individual bud data for editing"""
-    if 'user_id' not in session:
-        return jsonify({'error': 'ไม่ได้เข้าสู่ระบบ'}), 401
+    if not is_authenticated():
+        return jsonify({'error': 'Unauthorized'}), 401
 
     user_id = session['user_id']
+    cache_key = f"bud_detail_{bud_id}_{user_id}"
+
+    # Check cache first
+    cached_data = get_cache(cache_key)
+    if cached_data:
+        print(f"Returning cached data for bud {bud_id}")
+        return jsonify(cached_data)
 
     conn = get_db_connection()
     if conn:
@@ -3941,12 +3948,12 @@ def get_all_buds_report():
         existing_columns = [row[0] for row in cur.fetchall()]
         has_lab_test = 'lab_test_name' in existing_columns
         has_test_type = 'test_type' in existing_columns
-        
+
         if has_lab_test and has_test_type:
             lab_test_select = "b.lab_test_name, b.test_type"
         else:
             lab_test_select = "NULL as lab_test_name, NULL as test_type"
-            
+
         cur.execute(f"""
             SELECT b.id, b.strain_name_en, b.strain_name_th, b.breeder, b.strain_type,
                    b.thc_percentage, b.cbd_percentage, b.grade, b.aroma_flavor,
@@ -4071,11 +4078,11 @@ def get_buds_for_review():
 
 @app.route('/api/buds/<int:bud_id>/info')
 def get_bud_info(bud_id):
-    """Get detailed bud information including grower info"""
+    """Get detailed bud information with grower details"""
     if not is_authenticated():
         return jsonify({'error': 'Unauthorized'}), 401
 
-    user_id = session['user_id']
+    user_id = session.get('user_id')
     cache_key = f"bud_info_{bud_id}_{user_id}"
 
     # Check cache first
@@ -4087,35 +4094,50 @@ def get_bud_info(bud_id):
     conn = None
     cur = None
     try:
-        print(f"Loading bud detail for ID: {bud_id}, User: {user_id}")
-
+        print(f"Loading bud detail for ID: {bud_id}, User: {session.get('user_id')}")
         conn = get_db_connection()
         if not conn:
             print("Failed to get database connection")
-            return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+            return jsonify({'error': 'Database connection failed'}), 500
 
         cur = conn.cursor()
+
+        # Check if certificate columns exist first
         cur.execute("""
-            SELECT b.id, b.strain_name_en, b.strain_name_th, b.breeder, 
-                   b.strain_type, b.thc_percentage, b.cbd_percentage, 
-                   b.grade, b.aroma_flavor, b.top_terpenes_1, b.top_terpenes_2, b.top_terpenes_3,
+            SELECT column_name FROM information_schema.columns 
+            WHERE table_name='buds_data' AND column_name IN ('lab_test_name', 'test_type')
+        """)
+        existing_columns = [row[0] for row in cur.fetchall()]
+        has_lab_test = 'lab_test_name' in existing_columns
+        has_test_type = 'test_type' in existing_columns
+
+        # Build query based on available columns
+        if has_lab_test and has_test_type:
+            lab_test_select = "b.lab_test_name, b.test_type"
+        else:
+            lab_test_select = "NULL as lab_test_name, NULL as test_type"
+
+        # Get detailed bud info with grower contact information
+        cur.execute(f"""
+            SELECT b.id, b.strain_name_en, b.strain_name_th, b.breeder, b.strain_type,
+                   b.thc_percentage, b.cbd_percentage, b.grade, b.aroma_flavor,
+                   b.top_terpenes_1, b.top_terpenes_2, b.top_terpenes_3,
                    b.mental_effects_positive, b.mental_effects_negative,
                    b.physical_effects_positive, b.physical_effects_negative,
                    b.recommended_time, b.grow_method, b.harvest_date, b.batch_number,
                    b.grower_id, b.grower_license_verified, b.fertilizer_type, 
-                   b.flowering_type, b.image_1_url, b.image_2_url, b.image_3_url, b.image_4_url,
-                   b.created_at, b.updated_at, b.created_by,
-                   COALESCE(u_grower.username, u_creator.username, 'บัดท์บอย') as grower_name, 
-                   COALESCE(u_grower.is_grower, u_creator.is_grower, false) as is_grower, 
-                   COALESCE(u_grower.profile_image_url, u_creator.profile_image_url) as grower_profile_image,
-                   COALESCE(u_grower.contact_facebook, u_creator.contact_facebook) as grower_contact_facebook,
-                   COALESCE(u_grower.contact_line, u_creator.contact_line) as grower_contact_line,
-                   COALESCE(u_grower.contact_instagram, u_creator.contact_instagram) as grower_contact_instagram,
-                   COALESCE(u_grower.contact_twitter, u_creator.contact_twitter) as grower_contact_twitter,
-                   COALESCE(u_grower.contact_telegram, u_creator.contact_telegram) as grower_contact_telegram,
-                   COALESCE(u_grower.contact_phone, u_creator.contact_phone) as grower_contact_phone,
-                   COALESCE(u_grower.contact_other, u_creator.contact_other) as grower_contact_other,
-                   b.lab_test_name, b.test_type
+                   b.flowering_type, b.status, b.created_at, b.updated_at, b.created_by,
+                   b.image_1_url, b.image_2_url, b.image_3_url, b.image_4_url,
+                   {lab_test_select},
+                   COALESCE(u_grower.username, u_creator.username, 'บัดท์บอย') as grower_name,
+                   u_grower.profile_image_url as grower_profile_image,
+                   u_grower.contact_facebook as grower_contact_facebook,
+                   u_grower.contact_line as grower_contact_line,
+                   u_grower.contact_instagram as grower_contact_instagram,
+                   u_grower.contact_twitter as grower_contact_twitter,
+                   u_grower.contact_telegram as grower_contact_telegram,
+                   u_grower.contact_phone as grower_contact_phone,
+                   u_grower.contact_other as grower_contact_other
             FROM buds_data b
             LEFT JOIN users u_grower ON b.grower_id = u_grower.id
             LEFT JOIN users u_creator ON b.created_by = u_creator.id
@@ -4157,25 +4179,25 @@ def get_bud_info(bud_id):
             'grower_license_verified': result[21],
             'fertilizer_type': result[22],
             'flowering_type': result[23],
-            'image_1_url': result[24],
-            'image_2_url': result[25],
-            'image_3_url': result[26],
-            'image_4_url': result[27],
-            'created_at': result[28].strftime('%Y-%m-%d %H:%M:%S') if result[28] else None,
-            'updated_at': result[29].strftime('%Y-%m-%d %H:%M:%S') if result[29] else None,
-            'created_by': result[30],
-            'grower_name': result[31],
-            'is_grower': result[32],
-            'grower_profile_image': result[33],
-            'grower_contact_facebook': result[34],
-            'grower_contact_line': result[35],
-            'grower_contact_instagram': result[36],
-            'grower_contact_twitter': result[37],
-            'grower_contact_telegram': result[38],
-            'grower_contact_phone': result[39],
-            'grower_contact_other': result[40],
-            'lab_test_name': result[41],
-            'test_type': result[42]
+            'status': result[24] or 'available',
+            'created_at': result[25].strftime('%Y-%m-%d %H:%M:%S') if result[25] else None,
+            'updated_at': result[26].strftime('%Y-%m-%d %H:%M:%S') if result[26] else None,
+            'created_by': result[27],
+            'image_1_url': result[28],
+            'image_2_url': result[29],
+            'image_3_url': result[30],
+            'image_4_url': result[31],
+            'lab_test_name': result[32],
+            'test_type': result[33],
+            'grower_name': result[34],
+            'grower_profile_image': result[35],
+            'grower_contact_facebook': result[36],
+            'grower_contact_line': result[37],
+            'grower_contact_instagram': result[38],
+            'grower_contact_twitter': result[39],
+            'grower_contact_telegram': result[40],
+            'grower_contact_phone': result[41],
+            'grower_contact_other': result[42]
         }
 
         print(f"Successfully loaded bud data: {bud_info['strain_name_en']}")
@@ -4233,8 +4255,8 @@ def report_page():
         return redirect('/auth')
     return render_template('report.html')
 
-@app.route('/bud_report/')
-@app.route('/bud_report/<int:bud_id>')
+@app.route('/bud-report/')
+@app.route('/bud-report/<int:bud_id>')
 @app.route('/bud-report')
 @app.route('/bud-report/<int:bud_id>')
 def bud_report_page(bud_id=None):
@@ -4765,8 +4787,8 @@ def create_admin_account(admin_name, password, created_by_user_id=None):
             conn.commit()
 
             # Log the creation
-            log_admin_activity(admin_name, 'ADMIN_CREATED', success=True, 
-                             details=f'New admin account created: {admin_name}')
+            log_admin_activity(admin_name, 'ADMIN_CREATED', True, 
+                             details='New admin account created: {admin_name}')
 
             cur.close()
             return_db_connection(conn)
@@ -5143,9 +5165,7 @@ def admin_login():
         session['admin_logged_in'] = True
         session['admin_name'] = admin_name  # Always set admin name to session
 
-        print(f"Admin login successful: {admin_name}, token: {session_token[:10]}...")
-
-        return jsonify({
+        print(f"Admin login successful: {admin_name}, token: {session_token[:10]}...")        return jsonify({
             'success': True,
             'message': message,
             'redirect': '/admin'
@@ -6760,8 +6780,6 @@ def admin_get_activities():
             return_db_connection(conn)
     else:
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
-
-
 
 @app.route('/api/admin/create_sample_data', methods=['POST'])
 def admin_create_sample_data():

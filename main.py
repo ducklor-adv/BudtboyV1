@@ -5034,14 +5034,6 @@ def admin_reviews():
         return redirect('/admin_login')
     return render_template('admin_reviews.html')
 
-@app.route('/admin/activities')
-def admin_activities():
-    """Admin activities management page"""
-    if not is_admin():
-        return redirect('/admin_login')
-    return render_template('admin_activities.html')
-
-
 @app.route('/api/admin/stats')
 def get_admin_stats():
     """Get admin dashboard statistics"""

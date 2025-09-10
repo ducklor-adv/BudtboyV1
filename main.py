@@ -4516,42 +4516,7 @@ def admin_delete_activity(activity_id):
     else:
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
-@app.route('/api/upload_prize_image', methods=['POST'])
-def upload_prize_image():
-    """Upload prize image for activities"""
-    if not is_admin():
-        return jsonify({'error': 'Unauthorized'}), 401
 
-    if 'prize_image' not in request.files:
-        return jsonify({'error': 'ไม่พบไฟล์รูปภาพ'}), 400
-
-    file = request.files['prize_image']
-    if file.filename == '':
-        return jsonify({'error': 'ไม่ได้เลือกไฟล์'}), 400
-
-    if file and allowed_file(file.filename):
-        try:
-            # Create secure filename
-            filename = secure_filename(file.filename)
-            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_')
-            prize_position = request.form.get('prize_position', '1')
-            filename = f"{timestamp}prize_{prize_position}_{filename}"
-            
-            # Save file
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(file_path)
-            
-            # Return the file path for database storage
-            return jsonify({
-                'success': True,
-                'image_url': f'/uploads/{filename}',
-                'message': 'อัพโหลดรูปภาพสำเร็จ'
-            })
-            
-        except Exception as e:
-            return jsonify({'error': f'เกิดข้อผิดพลาดในการอัพโหลด: {str(e)}'}), 500
-    else:
-        return jsonify({'error': 'ไฟล์ไม่ถูกต้อง (รองรับเฉพาะ jpg, jpeg, png, pdf)'}), 400
 
 def get_registration_mode():
     """Get current registration mode from admin settings"""

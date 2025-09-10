@@ -1560,6 +1560,14 @@
                     </div>
                 </div>
 
+                <!-- การตรวจสอบและใบรับรอง -->
+                <div class="section" id="verification">
+                    <div class="section-title">🏆 การตรวจสอบและใบรับรอง</div>
+                    <div id="verificationInfo">
+                        <!-- Verification info will be populated here -->
+                    </div>
+                </div>
+
                 <div class="actions">
                     <a href="#" class="action-btn" id="writeReviewBtn">⭐ เขียนรีวิว</a>
                     <button type="button" class="action-btn secondary" onclick="captureAsImage()">📸 บันทึกเป็นรูปภาพ</button>
@@ -1589,6 +1597,7 @@
         // ป้องกันการโหลดซ้ำในมือถือ
         let isLoading = false;
         let loadAttempted = false;
+        let reviews = []; // Declare reviews globally to be accessible in expandContent
 
         function initializePage() {
             // ตรวจสอบว่าโหลดแล้วหรือยัง
@@ -1670,18 +1679,19 @@
                 console.log('Grower name from API:', bud.grower_name);
 
                 // Load reviews with error handling
-                let reviews = [];
                 try {
                     console.log('Loading reviews...');
                     const reviewsResponse = await fetch(`/api/reviews?bud_id=${budId}`);
                     if (reviewsResponse.ok) {
-                        reviews = await reviewsResponse.json();
+                        reviews = await reviewsResponse.json(); // Assign to global reviews variable
                         console.log('Reviews loaded:', reviews.length, 'reviews');
                     } else {
                         console.warn('Failed to load reviews:', reviewsResponse.status);
+                        reviews = []; // Ensure reviews is an empty array on failure
                     }
                 } catch (reviewError) {
                     console.warn('Error loading reviews:', reviewError);
+                    reviews = []; // Ensure reviews is an empty array on error
                     // Continue without reviews
                 }
 
@@ -1740,11 +1750,6 @@
             try {
                 console.log('Displaying bud report for:', bud);
                 console.log('Grower name received:', bud.grower_name);
-
-                // Validate bud data
-                if (!bud || typeof bud !== 'object') {
-                    throw new Error('Invalid bud data');
-                }
 
                 // Basic info with error handling
                 const budNameEl = document.getElementById('budName');
@@ -2027,10 +2032,10 @@
             }
         }
 
-        function displayReviews(reviews) {
+        function displayReviews(reviewsData) { // Renamed parameter to avoid conflict with global 'reviews'
             const reviewsContainer = document.getElementById('reviewsContainer');
 
-            if (reviews.length === 0) {
+            if (reviewsData.length === 0) {
                 reviewsContainer.innerHTML = `
                     <div class="empty-reviews">
                         <div style="font-size: 32px; margin-bottom: 10px;">📝</div>
@@ -2041,7 +2046,7 @@
                 return;
             }
 
-            const reviewsHtml = reviews.map(review => {
+            const reviewsHtml = reviewsData.map(review => {
                 const createdDate = formatDate(review.created_at);
                 const updatedDate = review.updated_at && review.updated_at !== review.created_at ? 
                     ` (แก้ไขล่าสุด: ${formatDate(review.updated_at)})` : '';
@@ -2789,6 +2794,7 @@
                 `;
             }
 
+            // Fallback if no verification info is present
             if (!verificationHtml) {
                 verificationHtml = `
                     <div class="verification-card">

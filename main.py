@@ -1497,7 +1497,7 @@ def validate_password_strength(password):
     if not (has_upper and has_lower and has_digit):
         return False, "รหัสผ่านต้องมีตัวอักษรพิมพ์ใหญ่ พิมพ์เล็ก และตัวเลข"
 
-    return True, "รหัสผ่านปลอดภัย
+    return True, "รหัสผ่านปลอดภัย"
 
 def send_verification_email(email, username, token):
     try:

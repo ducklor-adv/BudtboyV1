@@ -844,6 +844,44 @@
                 margin-bottom: 10px !important;
             }
         }
+
+        /* บังคับหัวข้อไม่ให้ตัดบรรทัด */
+        .section-title {
+            display: flex !important;
+            align-items: center !important;
+            gap: 12px !important;
+            flex-wrap: nowrap !important;     /* สำคัญ: ไม่ให้ขึ้นบรรทัดใหม่ */
+        }
+
+        /* ให้โหลดยืด/หดได้ โดยไม่ดันลงบรรทัด */
+        .section-title #ratingsContainer {
+            display: flex !important;
+            min-width: 0 !important;          /* อนุญาตให้หดตัวได้ใน Flex */
+            flex: 0 1 auto !important;        /* หดได้เมื่อพื้นที่ไม่พอ */
+        }
+
+        /* คุมขนาดภายในให้กะทัดรัด */
+        .section-title .rating-row {
+            gap: 8px !important;
+            padding: 0 !important;
+            background: transparent !important;
+            margin: 0 !important;
+            border-radius: 0 !important;
+            white-space: nowrap !important;
+        }
+
+        /* ถ้าหน้าจอเล็กมาก ให้ยอมตัดส่วน "จาก x รีวิว" ออกเพื่อไม่ให้หลุดบรรทัด */
+        @media (max-width: 420px) {
+            .section-title .rating-count { 
+                display: none !important; 
+            }
+            .section-title .rating-score { 
+                font-size: 24px !important;   /* ลดนิดหน่อย */
+            }
+            .section-title .rating-stars { 
+                font-size: 18px !important; 
+            }
+        }
     </style>
 </head>
 <body>

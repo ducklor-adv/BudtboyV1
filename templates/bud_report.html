@@ -930,7 +930,7 @@
                 </div>
 
                 <div class="section-title">📊 ข้อมูลดอก</div>
-                
+
                 <div class="info-grid">
                     <!-- Basic Info -->
                     <div class="info-card">
@@ -1136,6 +1136,9 @@
                 document.getElementById('loadingState').style.display = 'none';
                 document.getElementById('bud-info').classList.add('active');
 
+                // Pre-load reviews data for faster section switching
+                console.log('Pre-loading reviews data...');
+                loadReviews();
 
             } catch (error) {
                 console.error('Error loading bud data:', error);

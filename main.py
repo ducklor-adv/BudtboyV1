@@ -4273,35 +4273,35 @@ def get_bud_info(bud_id):
             }), 404
 
         # Helper function to format date safely
-            def format_date_safely(date_value, format_type='date'):
-                if not date_value:
-                    return None
-                try:
-                    # If it's already a string, return as is for date fields
-                    if isinstance(date_value, str):
-                        if format_type == 'datetime':
-                            # Try to parse and reformat if needed
-                            from datetime import datetime
-                            try:
-                                parsed_date = datetime.strptime(date_value, '%Y-%m-%d %H:%M:%S')
-                                return parsed_date.strftime('%Y-%m-%d %H:%M:%S')
-                            except:
-                                return date_value
-                        else:
-                            # For date fields, return as is if it's already a string
+        def format_date_safely(date_value, format_type='date'):
+            if not date_value:
+                return None
+            try:
+                # If it's already a string, return as is for date fields
+                if isinstance(date_value, str):
+                    if format_type == 'datetime':
+                        # Try to parse and reformat if needed
+                        from datetime import datetime
+                        try:
+                            parsed_date = datetime.strptime(date_value, '%Y-%m-%d %H:%M:%S')
+                            return parsed_date.strftime('%Y-%m-%d %H:%M:%S')
+                        except:
                             return date_value
-                    # If it's a datetime object, format it
-                    elif hasattr(date_value, 'strftime'):
-                        if format_type == 'datetime':
-                            return date_value.strftime('%Y-%m-%d %H:%M:%S')
-                        else:
-                            return date_value.strftime('%Y-%m-%d')
-                    return str(date_value) if date_value else None
-                except Exception as e:
-                    print(f"Date formatting error: {e}, value: {date_value}")
-                    return str(date_value) if date_value else None
+                    else:
+                        # For date fields, return as is if it's already a string
+                        return date_value
+                # If it's a datetime object, format it
+                elif hasattr(date_value, 'strftime'):
+                    if format_type == 'datetime':
+                        return date_value.strftime('%Y-%m-%d %H:%M:%S')
+                    else:
+                        return date_value.strftime('%Y-%m-%d')
+                return str(date_value) if date_value else None
+            except Exception as e:
+                print(f"Date formatting error: {e}, value: {date_value}")
+                return str(date_value) if date_value else None
 
-            bud_info = {
+        bud_info = {
             'id': result[0],
             'strain_name_en': result[1],
             'strain_name_th': result[2],

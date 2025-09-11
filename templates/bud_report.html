@@ -728,10 +728,12 @@
             <a href="/activity" class="back-btn">← กลับ</a>
             <div class="header-title">
                 <div class="header-content">
-                    <img src="/uploads/20250727_055943_review_1_budtboy1_V2.png" alt="โลโก้" class="grower-logo">
+                    <img id="growerProfileImage" src="/uploads/20250727_055943_review_1_budtboy1_V2.png" alt="Grower Profile" class="grower-logo">
                     <div class="header-text">
                         <div class="header-main" id="headerStrainName">กำลังโหลด...</div>
-                        <div class="header-sub">Grade <span id="headerStrainGrade">-</span></div>
+                        <div class="header-sub">
+                            Growed by <span id="headerGrowerName">-</span> | Grade <span id="headerStrainGrade">-</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -970,6 +972,18 @@
             // Update header
             document.getElementById('headerStrainName').textContent = budData.strain_name_en || budData.strain_name_th || 'ไม่มีชื่อ';
             document.getElementById('headerStrainGrade').textContent = budData.grade || '-';
+            document.getElementById('headerGrowerName').textContent = budData.grower_name || 'ไม่ระบุ';
+
+            // Update grower profile image
+            const growerProfileImg = document.getElementById('growerProfileImage');
+            if (budData.grower_profile_image) {
+                growerProfileImg.src = budData.grower_profile_image.startsWith('/') ? budData.grower_profile_image : `/${budData.grower_profile_image}`;
+                growerProfileImg.alt = `${budData.grower_name || 'Grower'} Profile`;
+            } else {
+                // Use default image if no grower profile image
+                growerProfileImg.src = "/uploads/20250727_055943_review_1_budtboy1_V2.png";
+                growerProfileImg.alt = "Default Grower Profile";
+            }
 
             // Update basic info
             document.getElementById('strainNameEn').textContent = budData.strain_name_en || '-';

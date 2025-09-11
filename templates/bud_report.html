@@ -18,7 +18,7 @@
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 500px;
             margin: 0 auto;
             background: white;
             border-radius: 20px;
@@ -26,10 +26,31 @@
             overflow: hidden;
         }
 
-        .header {
-            background: linear-gradient(135deg, #4CAF50, #45a049);
-            color: white;
+        /* Strain Name Section */
+        .strain-name-section {
+            background: #f5f5f5;
             padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .strain-name {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+            margin: 0 0 10px 0;
+        }
+
+        .strain-subtitle {
+            font-size: 16px;
+            color: #666;
+            margin: 0;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            color: white;
+            padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -541,12 +562,10 @@
         .effects-list {
             background: white;
             border-radius: 8px;
-            padding: 8px 12px;
-            margin-top: 5px;
-            line-height: 1.6;
-            font-size: 16px;
-            margin-bottom: 0;
-            white-space: pre-line;
+            padding: 5px 10px;
+            margin-top: 3px;
+            line-height: 1.2;
+            font-size: 14px;
         }
 
         .effects-grid {
@@ -844,11 +863,17 @@
 
             <!-- Main Content -->
             <div id="mainContent" class="bud-info-section">
+                <!-- Strain Name Section -->
+                <div class="strain-name-section">
+                    <h1 class="strain-name" id="mainStrainName">Afghan Kush</h1>
+                    <p class="strain-subtitle" id="strainSubtitle">Grade: <span id="strainGrade">B+</span></p>
+                </div>
+
                 <!-- Bud Info Section -->
                 <div id="bud-info-content" class="section">
-                    <!-- Images Section - Moved to top -->
+                    <!-- Images Section -->
                     <div class="images-section">
-                        <div class="section-title">📸 รูปภาพดอก</div>
+                        <div class="section-title">🌿 ภาพดอก</div>
                         <div class="images-grid" id="budImages">
                             <!-- Images will be loaded here -->
                         </div>

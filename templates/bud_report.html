@@ -291,32 +291,27 @@
             color: #4CAF50;
         }
 
+        .effects-block {
+            margin: 2px 0;
+            padding: 0;
+        }
+
+        .effects-block strong {
+            display: inline-block;
+            margin-right: 5px;
+            font-size: 13px;
+            color: #2c5530;
+        }
+
         .effects-list {
-            background: white;
-            border-radius: 2px;
-            padding: 2px 2px;
-            margin-top: 0px;
-            line-height: 0.5;
-            font-size: 12px;
-            margin-bottom: 0;
-            white-space: pre-line;
+            display: inline;
+            background: transparent;
+            border: none;
+            padding: 0;
+            margin: 0;
+            font-size: 13px;
+            line-height: 1.3;
             color: #555;
-        }
-
-        .effects-grid {
-            gap: 1px;
-        }
-
-        .effects-card {
-            margin-bottom: 0px;
-            padding-bottom: 0px;
-        }
-
-        .effects-card h3 {
-            margin-bottom: 0px;
-            margin-top: 0px;
-            font-size: 1em;
-            padding-bottom: 2px;
         }
 
         /* Reviews Styles */
@@ -903,301 +898,104 @@
             }
         }
 
-        /* Effects block compact styling */
-        .effects-block{
-            margin: 1px 0 !important;
+        /* Compact layout rules */
+        .section-title {
+            margin: 5px 0;
+            padding-bottom: 4px;
         }
 
-        /* Mobile responsive - even tighter spacing for info cards */
+        .section {
+            margin-bottom: 6px;
+        }
+
+        .info-grid {
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .info-card {
+            padding: 5px 12px;
+        }
+
+        .info-card h3 {
+            margin-bottom: 6px;
+        }
+
+        .info-item {
+            margin-bottom: 6px;
+            padding-bottom: 4px;
+        }
+
+        .images-grid {
+            margin-top: 8px;
+            gap: 6px;
+        }
+
+        .rating-row {
+            margin-bottom: 6px;
+            padding: 10px 12px;
+        }
+
+        .review-card {
+            padding: 16px;
+            margin-bottom: 10px;
+        }
+
+        /* Mobile responsive */
         @media (max-width: 500px) {
-            .info-grid {
-                gap: 8px !important;
-                margin-bottom: 8px !important;
+            .section-title { 
+                margin: 5px 0; 
+                padding-bottom: 3px; 
             }
-            .info-card h3 {
-                margin-bottom: 6px !important;
+            .section { 
+                margin-bottom: 4px; 
             }
-            .info-item {
-                margin-bottom: 6px !important;
-                padding-bottom: 4px !important;
+            .info-grid { 
+                gap: 6px; 
+                margin-bottom: 6px; 
+            }
+            .info-card { 
+                padding: 5px 10px; 
+            }
+            .info-card h3 { 
+                margin-bottom: 4px; 
+            }
+            .info-item { 
+                margin-bottom: 4px; 
+                padding-bottom: 3px; 
+            }
+            .images-grid { 
+                margin-top: 6px; 
+                gap: 4px; 
+            }
+            .review-card { 
+                padding: 12px; 
+                margin-bottom: 8px; 
             }
         }
 
-        /* --- Compact overrides (final) --- */
-        .section-title{
-          margin-top:5px !important;      /* กำหนด top margin */
-          margin-bottom:5px !important;   /* ลดลงเหลือ 5px */
-          padding-bottom:4px !important;
+        /* Clean effects styling */
+        .container .content .effects-block {
+            margin: 2px 0;
+            padding: 0;
         }
 
-        /* ระยะระหว่างบล็อกแต่ละ section */
-        .section{
-          margin-bottom:6px !important;
+        .container .content .effects-block strong {
+            display: inline-block;
+            margin-right: 5px;
+            font-size: 13px;
+            color: #2c5530;
         }
 
-        /* กริดการ์ดข้อมูลให้แน่นขึ้น */
-        .info-grid{
-          gap:8px !important;             /* เดิม 10 */
-          margin-bottom:8px !important;   /* เดิม 10/12 */
-        }
-
-        /* การ์ดภายในบางลง: ลด padding ด้านบน/ล่าง */
-        .info-card{
-          padding:5px 12px !important;   /* ลด top/bottom เหลือ 5px, left/right คง 12px */
-        }
-
-        /* หัวข้อย่อยของการ์ดให้ชิดลง */
-        .info-card h3{
-          margin-bottom:6px !important;   /* เดิม 8 */
-        }
-
-        /* แถวข้อมูลภในการ์ดให้ชิดลง */
-        .info-item{
-          margin-bottom:6px !important;   /* เดิม 8 */
-          padding-bottom:4px !important;  /* เดิม 6 */
-        }
-
-        /* ส่วนรูปภาพใต้หัวข้อ "ภาพดอก" ลดช่องไฟ */
-        .images-grid{
-          margin-top:8px !important;      /* เดิม 20 */
-          gap:6px !important;
-        }
-
-        /* แถวคะแนนรวมอย่าเว้นล่างมาก */
-        .rating-row{
-          margin-bottom:6px !important;   /* เดิม 8/20 ในบางที่ */
-          padding:10px 12px !important;   /* เดิม 15 20 */
-        }
-
-        /* การ์ดรีวิวแน่นขึ้น */
-        .review-card{
-          padding:16px !important;        /* เดิม 25 */
-          margin-bottom:10px !important;  /* เดิม 20/12 */
-        }
-
-        /* บล็อกผลกระทบ (ที่เดิมมี inline style มาก่อน) */
-        .effects-block{
-          margin-top:1px !important;      /* ลดเหลือ 1px */
-          margin-bottom: 1px !important;  /* ลดเหลือ 1px */
-        }
-
-        /* มือถือให้ยิ่งชิดขึ้นอีกเล็กน้อย */
-        @media (max-width:500px){
-          .section-title{ margin-top:5px !important; margin-bottom:5px !important; padding-bottom:3px !important; }
-          .section{ margin-bottom:4px !important; }
-          .info-grid{ gap:6px !important; margin-bottom:6px !important; }
-          .info-card{ padding:5px 10px !important; }
-          .info-card h3{ margin-bottom:4px !important; }
-          .info-item{ margin-bottom:4px !important; padding-bottom:3px !important; }
-          .images-grid{ margin-top:6px !important; gap:4px !important; }
-          .review-card{ padding:12px !important; margin-bottom:8px !important; }
-        }
-
-        .effects-list {
-            background: white;
-            border-radius: 2px;
-            padding: 2px 2px;
-            margin-top: 0px;
-            line-height: 0.5;
-            font-size: 12px;
-            margin-bottom: 0;
-            white-space: pre-line;
-        }
-
-        .effects-grid {
-            gap: 1px;
-        }
-
-        .effects-card {
-            margin-bottom: 0px;
-            padding-bottom: 0px;
-        }
-
-        .effects-card h3 {
-            margin-bottom: 0px;
-            margin-top: 0px;
-            font-size: 1em;
-            padding-bottom: 2px;
-        }
-
-        /* ---------- FORCE COMPACT LAYOUT (place at bottom of <style>) ---------- */
-
-        /* เจาะจงระดับสูงขึ้นด้วย .container เพื่อเพิ่ม specificity */
-        .container .content .section {
-          margin-bottom: 6px !important;
-          padding-bottom: 0 !important;
-        }
-
-        /* หัวข้อ (title) ให้ชิดขึ้น */
-        .container .content .section .section-title {
-          display:flex !important;
-          align-items:center !important;
-          gap:10px !important;
-          margin-bottom:6px !important;
-          padding-bottom:4px !important;
-          flex-wrap:nowrap !important;
-        }
-
-        /* การ์ดภายในให้พอดี ไม่เว้นเยอะ */
-        .container .content .info-card {
-          padding:10px 12px !important;    /* ลดจาก 18 */
-          margin-bottom:6px !important;
-        }
-
-        /* แถวข้อมูลภายในการ์ด */
-        .container .content .info-card .info-item {
-          margin-bottom:6px !important;
-          padding-bottom:6px !important;
-          border-bottom-width:1px !important;
-        }
-
-        /* กล่องผลกระทบที่คุณวงไว้ */
-        .container .content .effects-list,
-        .container .content .effects-block,
-        .container .content .effects-list > * {
-          margin-top:6px !important;
-          margin-bottom:6px !important;
-          padding:8px 10px !important;     /* ลด padding ให้ชิด */
-          line-height:1.35 !important;
-          font-size:14px !important;
-        }
-
-        /* ถ้ามี <p> หรือ span ภายใน ให้น้อยค่า margin ของ element เหล่านั้น */
-        .container .content .effects-list p,
-        .container .content .effects-list span,
-        .container .content .effects-list div {
-          margin:0 !important;
-          padding:0 !important;
-        }
-
-        /* ภาพ/กริดด้านบนให้ชิดขึ้น (ถ้าทำให้หัวข้อดูห่าง) */
-        .container .content .images-grid {
-          margin-top:8px !important;
-          gap:6px !important;
-        }
-
-        /* รีวิวการ์ดแน่นขึ้น */
-        .container .content .review-card {
-          padding:12px !important;
-          margin-bottom:8px !important;
-        }
-
-        /* ถ้าใช้ Bootstrap หรือคลาส .row/.col ให้ override width/block ที่อาจบังคับ */
-        .container .content .info-card,
         .container .content .effects-list {
-          display:block !important;
-          width:auto !important;
-          max-width:100% !important;
-        }
-
-        /* Mobile tweaks */
-        @media (max-width: 500px) {
-          .container .content .section { margin-bottom:4px !important; }
-          .container .content .info-card { padding:8px 10px !important; }
-          .container .content .effects-list { padding:6px 8px !important; line-height:1.3 !important; }
-          .container .content .section .section-title { gap:8px !important; margin-bottom:4px !important; }
-        }
-
-        /* ---------- ULTIMATE FORCE OVERRIDE - MAXIMUM SPECIFICITY ---------- */
-        
-        /* ใช้ attribute selectors และ multiple classes เพื่อ specificity สูงสุด */
-        [class*="container"] [class*="content"] [class*="section"],
-        html body div[class*="container"] div[class*="content"] div[class*="section"],
-        .container.container.container .content.content.content .section.section.section {
-          margin: 0px 0px 1px 0px !important;
-          padding: 0px !important;
-        }
-
-        /* Effects - บังคับให้ระยะห่างเป็น 0 */
-        [class*="container"] [class*="content"] [class*="effects"],
-        html body div[class*="container"] div[class*="content"] div[class*="effects"],
-        .container .content .effects-list,
-        .container .content .effects-block,
-        .effects-list.effects-list,
-        .effects-block.effects-block {
-          margin: 0px !important;
-          padding: 0px 2px !important;
-          line-height: 1.1 !important;
-          font-size: 12px !important;
-          background: transparent !important;
-        }
-
-        /* Info cards - บังคับให้แน่นสุด */
-        [class*="container"] [class*="content"] [class*="info-card"],
-        html body div[class*="container"] div[class*="content"] div[class*="info-card"],
-        .info-card.info-card.info-card {
-          padding: 2px 6px !important;
-          margin: 0px 0px 1px 0px !important;
-        }
-
-        /* Info items */
-        [class*="info-card"] [class*="info-item"],
-        .info-item.info-item.info-item {
-          margin: 0px 0px 1px 0px !important;
-          padding: 1px 0px !important;
-        }
-
-        /* Section titles */
-        [class*="section"] [class*="section-title"],
-        .section-title.section-title.section-title {
-          margin: 0px 0px 1px 0px !important;
-          padding: 2px 0px 1px 0px !important;
-        }
-
-        /* Grid spacing */
-        [class*="info-grid"],
-        .info-grid.info-grid.info-grid {
-          gap: 1px !important;
-          margin: 0px !important;
-        }
-
-        /* Images grid */
-        [class*="images-grid"],
-        .images-grid.images-grid.images-grid {
-          margin-top: 1px !important;
-          gap: 2px !important;
-        }
-
-        /* Review cards */
-        [class*="review-card"],
-        .review-card.review-card.review-card {
-          padding: 8px !important;
-          margin: 0px 0px 1px 0px !important;
-        }
-
-        /* Rating row */
-        [class*="rating-row"],
-        .rating-row.rating-row.rating-row {
-          margin: 0px !important;
-          padding: 6px 8px !important;
-        }
-
-        /* แทนที่ทุก margin และ padding ใน content area */
-        .container .content * {
-          margin-top: 0px !important;
-          margin-bottom: 0px !important;
-          padding-top: 0px !important;
-          padding-bottom: 0px !important;
-        }
-
-        /* อนุญาตให้มี padding เล็กน้อยสำหรับ text content */
-        .container .content .info-value,
-        .container .content .info-label,
-        .container .content span:not([class]),
-        .container .content p {
-          padding: 1px !important;
-        }
-
-        /* Force กล่อง effects ให้แน่นสุด */
-        .effects-block strong {
-          display: inline !important;
-          margin-right: 5px !important;
-        }
-
-        .effects-block .effects-list {
-          display: inline !important;
-          margin: 0px !important;
-          padding: 0px !important;
+            display: inline;
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            border: none;
+            font-size: 13px;
+            line-height: 1.3;
+            color: #555;
         }
     </style>
 </head>

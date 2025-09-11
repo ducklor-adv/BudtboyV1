@@ -465,12 +465,11 @@
         .average-rating {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: flex-start;
             padding: 15px 20px;
             background: #f8f9fa;
             border-radius: 12px;
             margin-bottom: 20px;
-            flex-wrap: wrap;
             gap: 15px;
         }
 
@@ -778,7 +777,7 @@
 
                 <!-- Ratings Section -->
                 <div class="section">
-                    <div class="section-title">⭐ คะแนนรวม</div>
+                    <div class="section-title">คะแนนรวม</div>
                     <div id="ratingsContainer">
                         <div class="loading-state">กำลังโหลดคะแนน...</div>
                     </div>
@@ -1276,13 +1275,9 @@
             if (!reviews || reviews.length === 0) {
                 container.innerHTML = `
                     <div class="average-rating">
-                        <div class="rating-left">
-                            <div class="rating-display">0.0</div>
-                            <div class="rating-stars-large">☆☆☆☆☆</div>
-                        </div>
-                        <div class="rating-right">
-                            <div class="rating-count">ยังไม่มีรีวิว</div>
-                        </div>
+                        <div class="rating-display">0.0</div>
+                        <div class="rating-stars-large">☆☆☆☆☆</div>
+                        <div class="rating-count">ยังไม่มีรีวิว</div>
                     </div>
                 `;
                 return;
@@ -1294,13 +1289,9 @@
 
             container.innerHTML = `
                 <div class="average-rating">
-                    <div class="rating-left">
-                        <div class="rating-display">${averageRating.toFixed(1)}</div>
-                        <div class="rating-stars-large">${'⭐'.repeat(starCount)}${'☆'.repeat(5-starCount)}</div>
-                    </div>
-                    <div class="rating-right">
-                        <div class="rating-count">จาก ${reviews.length} รีวิว</div>
-                    </div>
+                    <div class="rating-display">${averageRating.toFixed(1)}</div>
+                    <div class="rating-stars-large">${'⭐'.repeat(starCount)}${'☆'.repeat(5-starCount)}</div>
+                    <div class="rating-count">จาก ${reviews.length} รีวิว</div>
                 </div>
             `;
         }

@@ -103,9 +103,30 @@
             margin-bottom: 15px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             border-bottom: 2px solid #e0e0e0;
             padding-bottom: 8px;
+        }
+
+        /* ทำให้หัวข้อกับคะแนนอยู่บรรทัดเดียว */
+        .section-title #ratingsContainer {
+            display: flex;
+        }
+
+        /* เมื่อ ratingsContainer อยู่ในหัวข้อ ให้ไม่ใส่กล่องพื้นหลัง/ระยะเกินจำเป็น */
+        .section-title .rating-row {
+            padding: 0 !important;
+            background: transparent !important;
+            margin: 0 !important;
+            gap: 8px !important;
+            border-radius: 0 !important;
+        }
+
+        /* คงพฤติกรรมบรรทัดเดียวของค่า 5.0 + ดาว + จาก x รีวิว */
+        .section-title .rating-row > * {
+            display: inline-flex !important;
+            line-height: 1 !important;
+            white-space: nowrap !important;
         }
 
         .loading-state {
@@ -822,9 +843,11 @@
 
                 <!-- Ratings Section -->
                 <div class="section">
-                    <div class="section-title">คะแนนรวม</div>
-                    <div id="ratingsContainer">
-                        <div class="loading-state">กำลังโหลดคะแนน...</div>
+                    <div class="section-title">
+                        <span>คะแนนรวม</span>
+                        <div id="ratingsContainer">
+                            <div class="loading-state">กำลังโหลดคะแนน...</div>
+                        </div>
                     </div>
                 </div>
 

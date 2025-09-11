@@ -1331,23 +1331,40 @@
 
             // Update grower profile image
             const growerProfileImg = document.getElementById('growerProfileImage');
+            
+            console.log('Grower profile image data:', {
+                grower_profile_image: budData.grower_profile_image,
+                creator_profile_image: budData.creator_profile_image,
+                grower_name: budData.grower_name
+            });
+
+            // First try grower_profile_image
             if (budData.grower_profile_image && budData.grower_profile_image.trim() !== '') {
-                // Use actual grower profile image
                 const imageSrc = budData.grower_profile_image.startsWith('/') ? budData.grower_profile_image : `/${budData.grower_profile_image}`;
                 growerProfileImg.src = imageSrc;
                 growerProfileImg.alt = `${budData.grower_name || 'Grower'} Profile`;
-            } else {
-                // Try to get profile image from creator if grower_profile_image is empty
-                if (budData.creator_profile_image && budData.creator_profile_image.trim() !== '') {
-                    const imageSrc = budData.creator_profile_image.startsWith('/') ? budData.creator_profile_image : `/${budData.creator_profile_image}`;
-                    growerProfileImg.src = imageSrc;
-                    growerProfileImg.alt = `${budData.grower_name || 'Grower'} Profile`;
-                } else {
-                    // Use default Budtboy logo if no profile image available
-                    growerProfileImg.src = "/uploads/budtboy_avatar.png";
-                    growerProfileImg.alt = "Budtboy Default Profile";
-                }
+                console.log('Using grower profile image:', imageSrc);
+            } 
+            // Then try creator_profile_image
+            else if (budData.creator_profile_image && budData.creator_profile_image.trim() !== '') {
+                const imageSrc = budData.creator_profile_image.startsWith('/') ? budData.creator_profile_image : `/${budData.creator_profile_image}`;
+                growerProfileImg.src = imageSrc;
+                growerProfileImg.alt = `${budData.grower_name || 'Creator'} Profile`;
+                console.log('Using creator profile image:', imageSrc);
+            } 
+            // Finally use default if no profile images available
+            else {
+                growerProfileImg.src = "/uploads/budtboy_avatar.png";
+                growerProfileImg.alt = "Budtboy Default Profile";
+                console.log('Using default budtboy avatar');
             }
+
+            // Add error handler for image loading
+            growerProfileImg.onerror = function() {
+                console.log('Failed to load profile image, using default');
+                this.src = "/uploads/budtboy_avatar.png";
+                this.alt = "Budtboy Default Profile";
+            };
 
             // Update basic info
             document.getElementById('strainNameEn').textContent = budData.strain_name_en || '-';

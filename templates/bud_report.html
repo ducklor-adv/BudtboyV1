@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -25,7 +24,6 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             overflow: hidden;
         }
-
 
         .header {
             background: linear-gradient(135deg, #2196F3, #1976D2);
@@ -110,6 +108,7 @@
             font-weight: 600;
             transition: all 0.3s ease;
             border: 2px solid transparent;
+            cursor: pointer;
         }
 
         .nav-item:hover {
@@ -126,6 +125,25 @@
 
         .content {
             padding: 40px;
+        }
+
+        .section {
+            display: none;
+            margin-bottom: 40px;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2c5530;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .loading-state {
@@ -335,6 +353,9 @@
             text-align: center;
             padding: 40px;
             color: #666;
+            background: #f8f9fa;
+            border-radius: 15px;
+            margin: 20px 0;
         }
 
         .no-reviews p {
@@ -351,6 +372,7 @@
             background: #f8f9fa;
             border-radius: 15px;
             text-align: center;
+            margin-bottom: 20px;
         }
 
         .rating-display {
@@ -542,10 +564,11 @@
         .effects-list {
             background: white;
             border-radius: 8px;
-            padding: 5px 10px;
-            margin-top: 3px;
-            line-height: 1.2;
+            padding: 15px;
+            margin-top: 10px;
+            line-height: 1.5;
             font-size: 14px;
+            color: #555;
         }
 
         .effects-grid {
@@ -870,29 +893,21 @@
                 <div class="header-content">
                     <img src="/uploads/20250727_055943_review_1_budtboy1_V2.png" alt="โลโก้" class="grower-logo">
                     <div class="header-text">
-                        <div class="header-main" id="headerStrainName">Afghan Kush</div>
-                        <div class="header-sub">Grade <span id="headerStrainGrade">B+</span></div>
+                        <div class="header-main" id="headerStrainName">กำลังโหลด...</div>
+                        <div class="header-sub">Grade <span id="headerStrainGrade">-</span></div>
                     </div>
                 </div>
             </div>
             <div style="width: 60px;"></div>
         </div>
 
-        <!-- Secondary Navigation Bar -->
+        <!-- Navigation -->
         <div class="secondary-nav">
             <div class="nav-container">
-                <a href="#bud-info" class="nav-item active" onclick="showSection('bud-info')">
-                    📊 ข้อมูลดอก
-                </a>
-                <a href="#reviews" class="nav-item" onclick="showSection('reviews')">
-                    📖 รีวิว
-                </a>
-                <a href="#ratings" class="nav-item" onclick="showSection('ratings')">
-                    ⭐ คะแนน
-                </a>
-                <a href="#contact" class="nav-item" onclick="showSection('contact')">
-                    📞 ติดต่อ
-                </a>
+                <div class="nav-item active" onclick="showSection('bud-info')">📊 ข้อมูลดอก</div>
+                <div class="nav-item" onclick="showSection('reviews')">📖 รีวิว</div>
+                <div class="nav-item" onclick="showSection('ratings')">⭐ คะแนน</div>
+                <div class="nav-item" onclick="showSection('contact')">📞 ติดต่อ</div>
             </div>
         </div>
 
@@ -904,201 +919,152 @@
                 <p>โปรดรอสักครู่</p>
             </div>
 
-            <!-- Error State -->
-            <div id="errorState" class="error-state" style="display: none;">
-                <div class="error-icon">❌</div>
-                <h3>ไม่สามารถโหลดข้อมูลได้</h3>
-                <p id="errorMessage">เกิดข้อผิดพลาดในการโหลดข้อมูลดอก</p>
-                <button class="retry-btn" onclick="loadBudData()">🔄 ลองใหม่</button>
+            <!-- Bud Info Section -->
+            <div id="bud-info" class="section active">
+                <!-- Images Section -->
+                <div class="images-section">
+                    <div class="section-title">🌿 ภาพดอก</div>
+                    <div class="images-grid" id="budImages">
+                        <!-- Images will be loaded here -->
+                    </div>
+                </div>
+
+                <div class="section-title">📊 ข้อมูลดอก</div>
+                
+                <div class="info-grid">
+                    <!-- Basic Info -->
+                    <div class="info-card">
+                        <h3>🌿 ข้อมูลพื้นฐาน</h3>
+                        <div class="info-item">
+                            <span class="info-label">ชื่อสายพันธุ์ (EN):</span>
+                            <span class="info-value" id="strainNameEn">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">ชื่อสายพันธุ์ (TH):</span>
+                            <span class="info-value" id="strainNameTh">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">ผู้พัฒนาสายพันธุ์:</span>
+                            <span class="info-value" id="breeder">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">ประเภท:</span>
+                            <span class="info-value" id="strainType">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">เกรด:</span>
+                            <span class="info-value" id="grade">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">สถานะ:</span>
+                            <span class="info-value" id="status">-</span>
+                        </div>
+                    </div>
+
+                    <!-- Cannabinoids -->
+                    <div class="info-card">
+                        <h3>🧪 สารสำคัญ</h3>
+                        <div class="info-item">
+                            <span class="info-label">THC:</span>
+                            <span class="info-value percentage-display" id="thcPercentage">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">CBD:</span>
+                            <span class="info-value percentage-display" id="cbdPercentage">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Terpene 1:</span>
+                            <span class="info-value" id="terpene1">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Terpene 2:</span>
+                            <span class="info-value" id="terpene2">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Terpene 3:</span>
+                            <span class="info-value" id="terpene3">-</span>
+                        </div>
+                    </div>
+
+                    <!-- Aroma & Effects -->
+                    <div class="info-card">
+                        <h3>👃 กลิ่นและผลกระทบ</h3>
+                        <div class="info-item">
+                            <span class="info-label">กลิ่นรส:</span>
+                            <span class="info-value" id="aromaFlavor">-</span>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <strong>😊 ผลกระทบเชิงบวก (จิตใจ):</strong>
+                            <div class="effects-list" id="mentalPositive">-</div>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <strong>💪 ผลกระทบเชิงบวก (ร่างกาย):</strong>
+                            <div class="effects-list" id="physicalPositive">-</div>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <strong>😔 ผลกระทบเชิงลบ (จิตใจ):</strong>
+                            <div class="effects-list" id="mentalNegative">-</div>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <strong>😣 ผลกระทบเชิงลบ (ร่างกาย):</strong>
+                            <div class="effects-list" id="physicalNegative">-</div>
+                        </div>
+                    </div>
+
+                    <!-- Growing Info -->
+                    <div class="info-card">
+                        <h3>🌱 ข้อมูลการปลูก</h3>
+                        <div class="info-item">
+                            <span class="info-label">วิธีปลูก:</span>
+                            <span class="info-value" id="growMethod">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">ปุ่ย:</span>
+                            <span class="info-value" id="fertilizerType">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">ประเภทดอก:</span>
+                            <span class="info-value" id="floweringType">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">วันเก็บเกี่ยว:</span>
+                            <span class="info-value" id="harvestDate">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">ห้องแลป:</span>
+                            <span class="info-value" id="labTestName">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button class="print-btn" onclick="printReport()">🖨️ Print รายงาน</button>
+                    <button class="review-btn" onclick="openReviewModal()">⭐ เขียนรีวิว</button>
+                </div>
             </div>
 
-            <!-- Main Content -->
-            <div id="mainContent" class="bud-info-section">
-                <!-- Bud Info Section -->
-                <div id="bud-info-content" class="section">
-                    <!-- Images Section -->
-                    <div class="images-section">
-                        <div class="section-title">🌿 ภาพดอก</div>
-                        <div class="images-grid" id="budImages">
-                            <!-- Images will be loaded here -->
-                        </div>
-                    </div>
+            <!-- Reviews Section -->
+            <div id="reviews" class="section">
+                <div class="section-title">📖 รีวิวจากผู้ใช้</div>
+                <div id="reviewsContainer">
+                    <div class="loading-state">กำลังโหลดรีวิว...</div>
+                </div>
+            </div>
 
-                    <div class="section-title">
-                        📊 ข้อมูลดอก
-                    </div>
-                    
-                    <div class="info-grid">
-                        <!-- Basic Info -->
-                        <div class="info-card">
-                            <h3>🌿 ข้อมูลพื้นฐาน</h3>
-                            <div class="info-item">
-                                <span class="info-label">ชื่อสายพันธุ์ (EN):</span>
-                                <span class="info-value" id="strainNameEn">-</span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">ชื่อสายพันธุ์ (TH):</span>
-                                <span class="info-value" id="strainNameTh">-</span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">ผู้พัฒนาสายพันธุ์:</span>
-                                <span class="info-value" id="breeder">-</span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">ประเภท:</span>
-                                <span class="info-value" id="strainType">-</span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">เกรด:</span>
-                                <span class="info-value" id="grade">-</span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">สถานะ:</span>
-                                <span class="info-value" id="status">-</span>
-                            </div>
-                        </div>
+            <!-- Ratings Section -->
+            <div id="ratings" class="section">
+                <div class="section-title">⭐ คะแนนรวม</div>
+                <div id="ratingsContainer">
+                    <div class="loading-state">กำลังโหลดคะแนน...</div>
+                </div>
+            </div>
 
-                        <!-- Cannabinoids -->
-                        <div class="info-card">
-                            <h3>🧪 สารสำคัญ</h3>
-                            <div class="info-item">
-                                <span class="info-label">THC:</span>
-                                <span class="info-value percentage-display" id="thcPercentage">-</span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">CBD:</span>
-                                <span class="info-value percentage-display" id="cbdPercentage">-</span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">Terpene 1:</span>
-                                <span class="info-value" id="terpene1">-</span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">Terpene 2:</span>
-                                <span class="info-value" id="terpene2">-</span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">Terpene 3:</span>
-                                <span class="info-value" id="terpene3">-</span>
-                            </div>
-                        </div>
-
-                        <!-- Certificate Section -->
-                        <div class="info-card">
-                            <h3>🏆 ใบรับรอง</h3>
-                            <div class="info-item">
-                                <span class="info-label">ชื่อห้องแลป:</span>
-                                <span class="info-value" id="labTestName">-</span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">ประเภทการทดสอบ:</span>
-                                <span class="info-value" id="testType">-</span>
-                            </div>
-                            <div class="certificate-images" id="certificateImages">
-                                <!-- Certificate images will be loaded here -->
-                            </div>
-                        </div>
-
-                        <!-- Growing Info -->
-                        <div class="info-card">
-                            <h3>🌱 ข้อมูลการปลูก</h3>
-                            <div class="info-item">
-                                <span class="info-label">วิธีปลูก:</span>
-                                <span class="info-value" id="growMethod">-</span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">ปุ่ย:</span>
-                                <span class="info-value" id="fertilizerType">-</span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">ประเภทดอก:</span>
-                                <span class="info-value" id="floweringType">-</span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">วันเก็บเกี่ยว:</span>
-                                <span class="info-value" id="harvestDate">-</span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">หมายเลขแบทช์:</span>
-                                <span class="info-value" id="batchNumber">-</span>
-                            </div>
-                        </div>
-
-                        <!-- Aroma & Flavor -->
-                        <div class="info-card">
-                            <h3>👃 กลิ่นและรส</h3>
-                            <div class="info-item">
-                                <span class="info-label">กลิ่นรส:</span>
-                                <span class="info-value" id="aromaFlavor">-</span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">เวลาแนะนำ:</span>
-                                <span class="info-value" id="recommendedTime">-</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Effects -->
-                    <div class="section">
-                        <div class="section-title">✨ ผลกระทบ</div>
-                        
-                        <div class="info-grid effects-grid">
-                            <div class="info-card effects-card">
-                                <h3>😊 ผลกระทบเชิงบวก (จิตใจ)</h3>
-                                <div class="effects-list effects-positive" id="mentalPositive">-</div>
-                            </div>
-                            
-                            <div class="info-card effects-card">
-                                <h3>😔 ผลกระทบเชิงลบ (จิตใจ)</h3>
-                                <div class="effects-list effects-negative" id="mentalNegative">-</div>
-                            </div>
-                            
-                            <div class="info-card effects-card">
-                                <h3>💪 ผลกระทบเชิงบวก (ร่างกาย)</h3>
-                                <div class="effects-list effects-positive" id="physicalPositive">-</div>
-                            </div>
-                            
-                            <div class="info-card effects-card">
-                                <h3>😣 ผลกระทบเชิงลบ (ร่างกาย)</h3>
-                                <div class="effects-list effects-negative" id="physicalNegative">-</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Action Buttons -->
-                    <div class="action-buttons" style="text-align: center; margin: 20px 0;">
-                        <button class="print-btn" onclick="printReport()">🖨️ Print รายงาน</button>
-                        <button class="review-btn" onclick="openReviewModal()">⭐ เขียนรีวิว</button>
-                    </div>
-
-                    
-
-                    <!-- Reviews Section -->
-                    <div id="reviews-content" class="section" style="display: none;">
-                        <div class="section-title">📖 รีวิวจากผู้ใช้</div>
-                        <div class="reviews-container" id="reviewsContainer">
-                            <div class="loading">กำลังโหลดรีวิว...</div>
-                        </div>
-                    </div>
-
-                    <!-- Ratings Section -->
-                    <div id="ratings-content" class="section" style="display: none;">
-                        <div class="section-title">⭐ คะแนนรวม</div>
-                        <div class="ratings-summary" id="ratingsSummary">
-                            <div class="loading">กำลังโหลดคะแนน...</div>
-                        </div>
-                        <div class="ratings-breakdown" id="ratingsBreakdown">
-                            <!-- Rating breakdown will be loaded here -->
-                        </div>
-                    </div>
-
-                    <!-- Contact Info -->
-                    <div id="contact-content" class="section" style="display: none;">
-                        <div class="section-title">📞 ข้อมูลการติดต่อ</div>
-                        <div class="contact-info" id="contactInfo">
-                            <!-- Contact info will be loaded here -->
-                        </div>
-                    </div>
+            <!-- Contact Section -->
+            <div id="contact" class="section">
+                <div class="section-title">📞 ข้อมูลการติดต่อ</div>
+                <div class="contact-info" id="contactInfo">
+                    <div class="loading-state">กำลังโหลดข้อมูลการติดต่อ...</div>
                 </div>
             </div>
         </div>
@@ -1113,408 +1079,289 @@
     <script>
         let budData = null;
         let currentBudId = null;
-        let isLoading = false;
 
-        // Get bud ID from URL or page context
+        // Get bud ID from URL
         function getBudId() {
             const urlParams = new URLSearchParams(window.location.search);
-            const budId = urlParams.get('id') || 
-                         (typeof window.budId !== 'undefined' ? window.budId : null);
-            
-            console.log('Got bud ID:', budId);
-            return budId;
+            return urlParams.get('id');
         }
 
-        // Show different sections
+        // Show section
         function showSection(sectionName) {
-            console.log(`Switching to section: ${sectionName}`);
-            
             // Update navigation
             document.querySelectorAll('.nav-item').forEach(item => {
                 item.classList.remove('active');
             });
-            
-            const activeNavItem = document.querySelector(`[onclick="showSection('${sectionName}')"]`);
-            if (activeNavItem) {
-                activeNavItem.classList.add('active');
-            } else {
-                console.warn(`Navigation item for section '${sectionName}' not found`);
-            }
+            event.target.classList.add('active');
 
-            // Show/hide content sections
-            const sections = ['bud-info-content', 'reviews-content', 'ratings-content', 'contact-content'];
-            sections.forEach(section => {
-                const element = document.getElementById(section);
-                if (element) {
-                    if (section === `${sectionName}-content`) {
-                        element.style.display = 'block';
-                        console.log(`Showing section: ${section}`);
-                    } else {
-                        element.style.display = 'none';
-                    }
-                } else {
-                    console.warn(`Section element '${section}' not found`);
-                }
+            // Show/hide sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
             });
+            document.getElementById(sectionName).classList.add('active');
 
-            // Force load reviews and ratings when switching to these sections
-            if (sectionName === 'reviews' || sectionName === 'ratings') {
-                console.log(`🔄 Loading content for section: ${sectionName}`);
-                
-                // Immediately load reviews without delay
+            // Load data for specific sections
+            if (sectionName === 'reviews' && currentBudId) {
                 loadReviews();
+            } else if (sectionName === 'ratings' && currentBudId) {
+                loadRatings();
+            } else if (sectionName === 'contact' && budData) {
+                displayContactInfo();
             }
-
-            // Scroll to top
-            window.scrollTo(0, 0);
         }
 
-        // Load reviews for this bud
-        async function loadReviews() {
-            console.log('🚀 [LOAD_REVIEWS] ==================== START ====================');
-            
+        // Load bud data
+        async function loadBudData() {
+            currentBudId = getBudId();
             if (!currentBudId) {
-                console.log('❌ [LOAD_REVIEWS] No current bud ID available');
+                alert('ไม่พบ ID ของดอก');
                 return;
             }
 
-            console.log(`🔄 [LOAD_REVIEWS] Starting to load reviews for bud ID: ${currentBudId}`);
-
-            const reviewsContainer = document.getElementById('reviewsContainer');
-            const ratingsContainer = document.getElementById('ratingsSummary');
-            
-            console.log('🔍 [LOAD_REVIEWS] Container check:', {
-                reviewsContainer: !!reviewsContainer,
-                ratingsContainer: !!ratingsContainer
-            });
-            
-            // Show loading state
-            if (reviewsContainer) {
-                reviewsContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: #4CAF50;"><div style="font-size: 32px; margin-bottom: 10px;">⏳</div>กำลังโหลดรีวิว...</div>';
-                console.log('⏳ [LOAD_REVIEWS] Loading state displayed');
-            }
+            console.log(`Loading bud data for ID: ${currentBudId}`);
 
             try {
-                const apiUrl = `/api/reviews?bud_id=${currentBudId}&_t=${Date.now()}`;
-                console.log(`🌐 [LOAD_REVIEWS] Fetching from: ${apiUrl}`);
-                
-                const response = await fetch(apiUrl);
-                console.log(`📡 [LOAD_REVIEWS] API response status: ${response.status}`);
-
+                const response = await fetch(`/api/buds/${currentBudId}/info`);
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
 
-                const rawData = await response.text();
-                console.log(`📄 [LOAD_REVIEWS] Raw response length: ${rawData.length} chars`);
-                console.log(`📄 [LOAD_REVIEWS] Raw response preview:`, rawData.substring(0, 200) + '...');
-                
-                let data;
-                try {
-                    data = JSON.parse(rawData);
-                    console.log(`✅ [LOAD_REVIEWS] JSON parsed successfully`);
-                } catch (parseError) {
-                    console.error('❌ [LOAD_REVIEWS] JSON Parse Error:', parseError);
-                    throw new Error('Invalid JSON response from server');
-                }
-                
-                console.log(`📋 [LOAD_REVIEWS] Full parsed data:`, data);
-                console.log(`📋 [LOAD_REVIEWS] Data type: ${typeof data}, Is array: ${Array.isArray(data)}`);
-                
-                // Handle different response formats
-                let reviews = [];
-                if (Array.isArray(data)) {
-                    reviews = data;
-                    console.log(`✅ [LOAD_REVIEWS] Using direct array format (${reviews.length} items)`);
-                } else if (data && Array.isArray(data.reviews)) {
-                    reviews = data.reviews;
-                    console.log(`✅ [LOAD_REVIEWS] Using data.reviews format (${reviews.length} items)`);
-                } else if (data && Array.isArray(data.data)) {
-                    reviews = data.data;
-                    console.log(`✅ [LOAD_REVIEWS] Using data.data format (${reviews.length} items)`);
-                } else {
-                    console.warn(`⚠️ [LOAD_REVIEWS] Unknown data format:`, data);
-                    reviews = [];
-                }
+                const data = await response.json();
+                console.log('Bud data loaded:', data);
 
-                console.log(`📊 [LOAD_REVIEWS] Final reviews array:`, reviews);
-                console.log(`📊 [LOAD_REVIEWS] Reviews count: ${reviews.length}`);
-                
-                // Display reviews and ratings immediately
-                console.log(`🖼️ [LOAD_REVIEWS] About to call displayReviews...`);
-                displayReviews(reviews);
-                
-                console.log(`⭐ [LOAD_REVIEWS] About to call displayRatings...`);
-                displayRatings(reviews);
-                
-                console.log('✅ [LOAD_REVIEWS] Display functions completed');
-                console.log('🚀 [LOAD_REVIEWS] ==================== END ====================');
+                budData = data.bud || data;
+                displayBudData();
+
+                // Hide loading and show content
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('bud-info').classList.add('active');
+
 
             } catch (error) {
-                console.error('❌ [LOAD_REVIEWS] Critical error loading reviews:', error);
-                console.error('❌ [LOAD_REVIEWS] Error stack:', error.stack);
-                
-                if (reviewsContainer) {
-                    reviewsContainer.innerHTML = `
-                        <div style="text-align: center; padding: 30px; color: #d32f2f; background: #ffebee; border-radius: 10px; margin: 20px 0;">
-                            <div style="font-size: 48px; margin-bottom: 15px;">❌</div>
-                            <h3>เกิดข้อผิดพลาดในการโหลดรีวิว</h3>
-                            <p style="color: #666; margin: 10px 0;">${error.message}</p>
-                            <p style="color: #999; font-size: 12px;">Bud ID: ${currentBudId}</p>
-                            <button onclick="loadReviews()" style="background: #4CAF50; color: white; border: none; padding: 12px 24px; border-radius: 25px; cursor: pointer; margin-top: 15px; font-size: 14px;">🔄 ลองใหม่</button>
-                        </div>
-                    `;
+                console.error('Error loading bud data:', error);
+                document.getElementById('loadingState').innerHTML = `
+                    <div class="error-state">
+                        <div style="font-size: 48px; margin-bottom: 15px;">❌</div>
+                        <h3>เกิดข้อผิดพลาดในการโหลดข้อมูล</h3>
+                        <p>${error.message}</p>
+                        <button onclick="loadBudData()" class="retry-btn">🔄 ลองใหม่</button>
+                    </div>
+                `;
+            }
+        }
+
+        // Display bud data
+        function displayBudData() {
+            if (!budData) return;
+
+            console.log('Displaying bud data:', budData);
+
+            // Update header
+            document.getElementById('headerStrainName').textContent = budData.strain_name_en || budData.strain_name_th || 'ไม่มีชื่อ';
+            document.getElementById('headerStrainGrade').textContent = budData.grade || '-';
+
+            // Update basic info
+            document.getElementById('strainNameEn').textContent = budData.strain_name_en || '-';
+            document.getElementById('strainNameTh').textContent = budData.strain_name_th || '-';
+            document.getElementById('breeder').textContent = budData.breeder || '-';
+            document.getElementById('strainType').textContent = budData.strain_type || '-';
+
+            // Grade with badge
+            const gradeElement = document.getElementById('grade');
+            if (budData.grade) {
+                gradeElement.innerHTML = `<span class="grade-badge">${budData.grade}</span>`;
+            } else {
+                gradeElement.textContent = '-';
+            }
+
+            // Status with badge
+            const statusElement = document.getElementById('status');
+            if (budData.status) {
+                const statusClass = budData.status === 'available' ? 'status-available' : 'status-sold-out';
+                const statusText = budData.status === 'available' ? 'ยังเหลือ' : 'หมดแล้ว';
+                statusElement.innerHTML = `<span class="status-badge ${statusClass}">${statusText}</span>`;
+            } else {
+                statusElement.textContent = '-';
+            }
+
+            // Cannabinoids
+            document.getElementById('thcPercentage').textContent = budData.thc_percentage ? `${budData.thc_percentage}%` : '-';
+            document.getElementById('cbdPercentage').textContent = budData.cbd_percentage ? `${budData.cbd_percentage}%` : '-';
+            document.getElementById('terpene1').textContent = budData.top_terpenes_1 || '-';
+            document.getElementById('terpene2').textContent = budData.top_terpenes_2 || '-';
+            document.getElementById('terpene3').textContent = budData.top_terpenes_3 || '-';
+
+            // Aroma and effects
+            document.getElementById('aromaFlavor').textContent = budData.aroma_flavor || '-';
+            document.getElementById('mentalPositive').textContent = budData.mental_effects_positive || 'ไม่มีข้อมูล';
+            document.getElementById('physicalPositive').textContent = budData.physical_effects_positive || 'ไม่มีข้อมูล';
+            document.getElementById('mentalNegative').textContent = budData.mental_effects_negative || 'ไม่มีข้อมูล';
+            document.getElementById('physicalNegative').textContent = budData.physical_effects_negative || 'ไม่มีข้อมูล';
+
+            // Growing info
+            document.getElementById('growMethod').textContent = budData.grow_method || '-';
+            document.getElementById('fertilizerType').textContent = budData.fertilizer_type || '-';
+            document.getElementById('floweringType').textContent = budData.flowering_type || '-';
+            document.getElementById('harvestDate').textContent = budData.harvest_date || '-';
+            document.getElementById('labTestName').textContent = budData.lab_test_name || '-';
+
+            // Display images
+            displayImages();
+        }
+
+        // Display images
+        function displayImages() {
+            const imagesContainer = document.getElementById('budImages');
+            imagesContainer.innerHTML = '';
+
+            const imageFields = ['image_1_url', 'image_2_url', 'image_3_url', 'image_4_url'];
+
+            imageFields.forEach((field, index) => {
+                if (budData && budData[field]) {
+                    const imageItem = document.createElement('div');
+                    imageItem.className = 'image-item';
+                    imageItem.onclick = () => openImageModal(budData[field]);
+
+                    const img = document.createElement('img');
+                    img.src = `/${budData[field]}`;
+                    img.alt = `รูปดอก ${index + 1}`;
+                    img.loading = 'lazy';
+
+                    imageItem.appendChild(img);
+                    imagesContainer.appendChild(imageItem);
                 }
-                
-                if (ratingsContainer) {
-                    ratingsContainer.innerHTML = `
-                        <div style="text-align: center; padding: 20px; color: #d32f2f; background: #ffebee; border-radius: 10px;">
-                            <p>ไม่สามารถโหลดคะแนนได้</p>
-                            <button onclick="loadReviews()" style="background: #4CAF50; color: white; border: none; padding: 8px 16px; border-radius: 15px; cursor: pointer; font-size: 12px;">ลองใหม่</button>
-                        </div>
-                    `;
+            });
+
+            if (imagesContainer.children.length === 0) {
+                imagesContainer.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">ไม่มีรูปภาพ</p>';
+            }
+        }
+
+        // Load reviews
+        async function loadReviews() {
+            if (!currentBudId) return;
+
+            console.log(`Loading reviews for bud ID: ${currentBudId}`);
+
+            const reviewsContainer = document.getElementById('reviewsContainer');
+            reviewsContainer.innerHTML = '<div class="loading-state">กำลังโหลดรีวิว...</div>';
+
+            try {
+                const response = await fetch(`/api/reviews?bud_id=${currentBudId}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
+
+                const data = await response.json();
+                const reviews = Array.isArray(data) ? data : (data.reviews || []);
+                console.log(`Loaded ${reviews.length} reviews`);
+
+                displayReviews(reviews);
+            } catch (error) {
+                console.error('Error loading reviews:', error);
+                reviewsContainer.innerHTML = `
+                    <div class="no-reviews">
+                        <div style="font-size: 48px; margin-bottom: 15px;">❌</div>
+                        <h3>เกิดข้อผิดพลาดในการโหลดรีวิว</h3>
+                        <p>${error.message}</p>
+                        <button onclick="loadReviews()" class="retry-btn">🔄 ลองใหม่</button>
+                    </div>
+                `;
             }
         }
 
         // Display reviews
         function displayReviews(reviews) {
-            console.log('🖼️ [DISPLAY_REVIEWS] ==================== START ====================');
-            console.log('🖼️ [DISPLAY_REVIEWS] Function called with reviews:', reviews);
-            console.log('🖼️ [DISPLAY_REVIEWS] Reviews type:', typeof reviews);
-            console.log('🖼️ [DISPLAY_REVIEWS] Reviews is array:', Array.isArray(reviews));
-            console.log('🖼️ [DISPLAY_REVIEWS] Reviews length:', reviews ? reviews.length : 'N/A');
-
             const container = document.getElementById('reviewsContainer');
-            console.log('🖼️ [DISPLAY_REVIEWS] Container element found:', !!container);
-            console.log('🖼️ [DISPLAY_REVIEWS] Container element:', container);
-            
-            if (!container) {
-                console.error('❌ [DISPLAY_REVIEWS] Reviews container not found! DOM might not be ready');
-                // ลองหา container อีกครั้งหลังจาก DOM โหลดเสร็จ
-                setTimeout(() => {
-                    const retryContainer = document.getElementById('reviewsContainer');
-                    if (retryContainer) {
-                        console.log('🔄 [DISPLAY_REVIEWS] Container found on retry, calling displayReviews again');
-                        displayReviews(reviews);
-                    } else {
-                        console.error('❌ [DISPLAY_REVIEWS] Container still not found after retry');
-                    }
-                }, 500);
-                return;
-            }
-
-            // Clear container
-            container.innerHTML = '';
-            console.log('🖼️ [DISPLAY_REVIEWS] Container cleared');
-
-            // Handle empty reviews
-            if (!reviews || !Array.isArray(reviews) || reviews.length === 0) {
-                console.log('📝 [DISPLAY_REVIEWS] No reviews detected, showing empty state');
-                const emptyHtml = `
-                    <div class="no-reviews" style="text-align: center; padding: 60px 20px; background: #f8f9fa; border-radius: 15px; margin: 20px 0; border: 2px solid #4CAF50;">
-                        <div style="font-size: 64px; margin-bottom: 20px; opacity: 0.3;">💬</div>
-                        <h3 style="color: #666; margin-bottom: 15px;">ยังไม่มีรีวิวสำหรับดอกนี้</h3>
-                        <p style="color: #888; margin-bottom: 20px;">เป็นคนแรกที่แชร์ประสบการณ์ของคุณ!</p>
-                        <button class="review-btn" onclick="openReviewModal()" style="background: #4CAF50; color: white; border: none; padding: 12px 24px; border-radius: 25px; cursor: pointer; font-size: 16px;">⭐ เขียนรีวิวแรก</button>
-                        <div style="margin-top: 20px; padding: 15px; background: #e3f2fd; border-radius: 10px;">
-                            <p style="font-size: 12px; color: #1976d2; margin: 0;">Debug Info: Bud ID ${currentBudId} | Reviews: ${reviews ? reviews.length : 'null'} | Time: ${new Date().toLocaleTimeString('th-TH')}</p>
-                        </div>
-                    </div>
-                `;
-                container.innerHTML = emptyHtml;
-                console.log('📝 [DISPLAY_REVIEWS] Empty state HTML set, final HTML length:', emptyHtml.length);
-                
-                // ตรวจสอบว่า HTML ถูกใส่จริง
-                console.log('📝 [DISPLAY_REVIEWS] Container innerHTML after empty state:', container.innerHTML.substring(0, 100) + '...');
-                return;
-            }
-
-            // Generate review cards
-            console.log(`📝 [DISPLAY_REVIEWS] Generating HTML for ${reviews.length} review cards`);
-            let reviewsHtml = '';
-            
-            try {
-                reviews.forEach((review, index) => {
-                    console.log(`🔄 [DISPLAY_REVIEWS] Processing review ${index + 1}:`, review);
-                    const cardHtml = createReviewCard(review);
-                    console.log(`🔄 [DISPLAY_REVIEWS] Generated card HTML length: ${cardHtml.length}`);
-                    reviewsHtml += cardHtml;
-                    console.log(`✅ [DISPLAY_REVIEWS] Card ${index + 1} HTML added, total length: ${reviewsHtml.length}`);
-                });
-                
-                // Add debug info at the bottom
-                reviewsHtml += `
-                    <div style="margin-top: 20px; padding: 15px; background: #e8f5e8; border-radius: 10px; text-align: center;">
-                        <p style="font-size: 12px; color: #2e7d32; margin: 0;">
-                            ✅ แสดงรีวิวสำเร็จ: ${reviews.length} รายการ | Bud ID: ${currentBudId} | เวลา: ${new Date().toLocaleTimeString('th-TH')}
-                        </p>
-                    </div>
-                `;
-                
-                console.log(`🖼️ [DISPLAY_REVIEWS] Final HTML generated, total length: ${reviewsHtml.length} chars`);
-                console.log(`🖼️ [DISPLAY_REVIEWS] HTML preview:`, reviewsHtml.substring(0, 200) + '...');
-                
-                // Set HTML
-                container.innerHTML = reviewsHtml;
-                console.log('✅ [DISPLAY_REVIEWS] HTML set to container');
-                
-                // Verify HTML was set
-                console.log('🔍 [DISPLAY_REVIEWS] Container innerHTML length after setting:', container.innerHTML.length);
-                console.log('🔍 [DISPLAY_REVIEWS] Container innerHTML preview:', container.innerHTML.substring(0, 200) + '...');
-                
-                // Force visual refresh
-                container.style.display = 'none';
-                const height = container.offsetHeight; // Trigger reflow
-                container.style.display = 'block';
-                console.log('🔄 [DISPLAY_REVIEWS] Forced DOM refresh, height:', height);
-                
-                // Check if visible
-                const rect = container.getBoundingClientRect();
-                console.log('🔍 [DISPLAY_REVIEWS] Container position:', rect);
-                
-            } catch (error) {
-                console.error('❌ [DISPLAY_REVIEWS] Critical error generating review HTML:', error);
-                console.error('❌ [DISPLAY_REVIEWS] Error stack:', error.stack);
-                container.innerHTML = `
-                    <div style="text-align: center; padding: 40px; color: #f44336; background: #ffebee; border-radius: 10px; margin: 20px 0;">
-                        <div style="font-size: 48px; margin-bottom: 15px;">💥</div>
-                        <h3>เกิดข้อผิดพลาดในการแสดงรีวิว</h3>
-                        <p>ข้อผิดพลาด: ${error.message}</p>
-                        <p style="font-size: 12px; color: #666;">Reviews count: ${reviews.length} | Stack: ${error.stack.substring(0, 200)}...</p>
-                        <button onclick="loadReviews()" style="background: #4CAF50; color: white; border: none; padding: 12px 24px; border-radius: 25px; cursor: pointer; margin-top: 15px;">🔄 ลองใหม่</button>
-                    </div>
-                `;
-            }
-            
-            console.log('🖼️ [DISPLAY_REVIEWS] ==================== END ====================');
-        }
-
-        // Create review card HTML
-        function createReviewCard(review) {
-            const reviewDate = new Date(review.created_at).toLocaleDateString('th-TH', {
-                day: 'numeric',
-                month: 'short',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-
-            const effectTags = (review.selected_effects || []).map(effect => 
-                `<span class="effect-tag">${effect}</span>`
-            ).join('');
-
-            const aromaTags = (review.aroma_flavors || []).map(aroma => 
-                `<span class="aroma-tag">${aroma}</span>`
-            ).join('');
-
-            const reviewerAvatar = review.reviewer_profile_image ? 
-                `<img src="${review.reviewer_profile_image}" alt="Profile">` :
-                (review.reviewer_name ? review.reviewer_name.charAt(0).toUpperCase() : '👤');
-
-            // สร้างรูปรีวิว 4 รูป - ปรับปรุงการแสดงผล
-            const reviewImages = review.review_images || [];
-            const validImages = reviewImages.filter(img => img && img.trim());
-            
-            let reviewImagesHtml = '';
-            if (validImages.length > 0) {
-                reviewImagesHtml = validImages.map((img, index) => 
-                    `<img src="/${img}" alt="รูปรีวิว ${index + 1}" class="review-image" onclick="openImageModal('${img}')">`
-                ).join('');
-                
-                // เติมช่องว่างให้ครบ 4 รูปถ้าจำเป็น
-                for (let i = validImages.length; i < 4; i++) {
-                    reviewImagesHtml += `<div class="review-image-placeholder">ไม่มีรูป ${i + 1}</div>`;
-                }
-            } else {
-                reviewImagesHtml = [1, 2, 3, 4].map(num => 
-                    `<div class="review-image-placeholder">ไม่มีรูป ${num}</div>`
-                ).join('');
-            }
-
-            // เพิ่มคะแนนกลิ่นถ้ามี
-            const aromaRatingHtml = review.aroma_rating ? 
-                `<div style="margin-top: 5px; font-size: 12px; color: #666;">
-                    คะแนนกลิ่น: ${'⭐'.repeat(review.aroma_rating)} (${review.aroma_rating}/5)
-                </div>` : '';
-
-            return `
-                <div class="review-card">
-                    <div class="review-header">
-                        <div class="reviewer-avatar">
-                            ${reviewerAvatar}
-                        </div>
-                        <div class="reviewer-info">
-                            <div class="reviewer-name">${review.reviewer_name || 'ผู้ใช้ไม่ระบุชื่อ'}</div>
-                            <div class="review-date">${reviewDate}</div>
-                        </div>
-                        <div class="review-rating">
-                            <div class="rating-stars">${'⭐'.repeat(review.overall_rating)}</div>
-                            <div class="rating-number">${review.overall_rating}/5</div>
-                        </div>
-                    </div>
-
-                    ${aromaRatingHtml}
-
-                    ${review.short_summary ? `<div class="review-summary">${review.short_summary}</div>` : ''}
-
-                    ${review.full_review_content ? `<div class="review-content">${review.full_review_content}</div>` : ''}
-
-                    ${effectTags || aromaTags ? `
-                        <div class="review-tags">
-                            ${effectTags ? `<div style="margin-bottom: 8px;"><strong>ผลกระทบ:</strong> ${effectTags}</div>` : ''}
-                            ${aromaTags ? `<div><strong>กลิ่นรส:</strong> ${aromaTags}</div>` : ''}
-                        </div>
-                    ` : ''}
-
-                    <div class="review-images-grid">
-                        ${reviewImagesHtml}
-                    </div>
-
-                    ${review.video_review_url ? `
-                        <div style="margin-top: 15px;">
-                            <a href="${review.video_review_url}" target="_blank" style="color: #4CAF50; text-decoration: none; font-weight: 600;">
-                                🎥 ดูวิดีโอรีวิว
-                            </a>
-                        </div>
-                    ` : ''}
-                </div>
-            `;
-        }
-
-        // Display ratings summary
-        function displayRatings(reviews) {
-            const container = document.getElementById('ratingsSummary');
-            const breakdownContainer = document.getElementById('ratingsBreakdown');
-
-            console.log('=== DISPLAY RATINGS DEBUG ===');
-            console.log('Ratings container:', container);
-            console.log('Breakdown container:', breakdownContainer);
-            console.log('Reviews for ratings:', reviews);
-
-            if (!container) {
-                console.error('Ratings summary container not found!');
-                return;
-            }
-
-            if (!breakdownContainer) {
-                console.error('Ratings breakdown container not found!');
-                return;
-            }
 
             if (!reviews || reviews.length === 0) {
-                console.log('No reviews for ratings, showing empty state');
+                container.innerHTML = `
+                    <div class="no-reviews">
+                        <div style="font-size: 64px; margin-bottom: 20px; opacity: 0.3;">💬</div>
+                        <h3>ยังไม่มีรีวิวสำหรับดอกนี้</h3>
+                        <p>เป็นคนแรกที่แชร์ประสบการณ์ของคุณ!</p>
+                        <button class="review-btn" onclick="openReviewModal()">⭐ เขียนรีวิวแรก</button>
+                    </div>
+                `;
+                return;
+            }
+
+            let reviewsHtml = '';
+            reviews.forEach(review => {
+                const reviewDate = new Date(review.created_at).toLocaleDateString('th-TH');
+                const reviewerAvatar = review.reviewer_name ? review.reviewer_name.charAt(0).toUpperCase() : '👤';
+
+                reviewsHtml += `
+                    <div class="review-card">
+                        <div class="review-header">
+                            <div class="reviewer-avatar">
+                                ${reviewerAvatar.startsWith('http') ? `<img src="${reviewerAvatar}" alt="Profile">` : reviewerAvatar}
+                            </div>
+                            <div class="reviewer-info">
+                                <div class="reviewer-name">${review.reviewer_name || 'ผู้ใช้ไม่ระบุชื่อ'}</div>
+                                <div class="review-date">${reviewDate}</div>
+                            </div>
+                            <div class="review-rating">
+                                <div class="rating-stars">${'⭐'.repeat(review.overall_rating)}</div>
+                                <div class="rating-number">${review.overall_rating}/5</div>
+                            </div>
+                        </div>
+                        ${review.short_summary ? `<div class="review-summary">${review.short_summary}</div>` : ''}
+                        ${review.full_review_content ? `<div class="review-content">${review.full_review_content}</div>` : ''}
+                        ${review.review_images && review.review_images.length > 0 ? `
+                            <div class="review-images-grid">
+                                ${review.review_images.map(img => 
+                                    `<img src="/${img}" alt="รูปรีวิว" class="review-image" onclick="openImageModal('${img}')">`
+                                ).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+
+            container.innerHTML = reviewsHtml;
+            console.log(`Displayed ${reviews.length} reviews successfully`);
+        }
+
+        // Load ratings
+        async function loadRatings() {
+            if (!currentBudId) return;
+
+            const ratingsContainer = document.getElementById('ratingsContainer');
+            ratingsContainer.innerHTML = '<div class="loading-state">กำลังโหลดคะแนน...</div>';
+
+            try {
+                const response = await fetch(`/api/reviews?bud_id=${currentBudId}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                const reviews = Array.isArray(data) ? data : (data.reviews || []);
+
+                displayRatings(reviews);
+            } catch (error) {
+                console.error('Error loading ratings:', error);
+                ratingsContainer.innerHTML = `
+                    <div class="no-reviews">
+                        <h3>ไม่สามารถโหลดคะแนนได้</h3>
+                        <p>${error.message}</p>
+                        <button onclick="loadRatings()" class="retry-btn">🔄 ลองใหม่</button>
+                    </div>
+                `;
+            }
+        }
+
+        // Display ratings
+        function displayRatings(reviews) {
+            const container = document.getElementById('ratingsContainer');
+
+            if (!reviews || reviews.length === 0) {
                 container.innerHTML = `
                     <div class="average-rating">
                         <div class="rating-display">0.0</div>
                         <div class="rating-stars-large">☆☆☆☆☆</div>
                         <div class="rating-count">ยังไม่มีรีวิว</div>
-                    </div>
-                `;
-                breakdownContainer.innerHTML = `
-                    <div style="text-align: center; padding: 20px; color: #666;">
-                        <p>ยังไม่มีคะแนนรีวิว</p>
-                        <button class="review-btn" onclick="openReviewModal()">⭐ เขียนรีวิวแรก</button>
                     </div>
                 `;
                 return;
@@ -1524,14 +1371,6 @@
             const averageRating = totalRating / reviews.length;
             const starCount = Math.round(averageRating);
 
-            // Count ratings for each star level
-            const ratingCounts = [0, 0, 0, 0, 0]; // Index 0 = 1 star, Index 4 = 5 stars
-            reviews.forEach(review => {
-                if (review.overall_rating >= 1 && review.overall_rating <= 5) {
-                    ratingCounts[review.overall_rating - 1]++;
-                }
-            });
-
             container.innerHTML = `
                 <div class="average-rating">
                     <div class="rating-display">${averageRating.toFixed(1)}</div>
@@ -1539,219 +1378,6 @@
                     <div class="rating-count">จาก ${reviews.length} รีวิว</div>
                 </div>
             `;
-
-            // Generate rating breakdown
-            let breakdownHtml = '<h3 style="margin-bottom: 20px; color: #2c5530;">📊 รายละเอียดคะแนน</h3>';
-            for (let i = 4; i >= 0; i--) { // Start from 5 stars down to 1 star
-                const starNum = i + 1;
-                const count = ratingCounts[i];
-                const percentage = reviews.length > 0 ? (count / reviews.length) * 100 : 0;
-                
-                breakdownHtml += `
-                    <div class="rating-bar-item">
-                        <div class="rating-label">${starNum} ⭐</div>
-                        <div class="rating-bar">
-                            <div class="rating-fill" style="width: ${percentage}%"></div>
-                        </div>
-                        <div class="rating-count-small">${count}</div>
-                    </div>
-                `;
-            }
-
-            breakdownContainer.innerHTML = breakdownHtml;
-            
-            console.log(`Displayed ratings summary: ${averageRating.toFixed(1)} average from ${reviews.length} reviews`);
-        }
-
-        // Load bud data
-        async function loadBudData() {
-            if (isLoading) {
-                console.log('Already loading, skipping...');
-                return;
-            }
-
-            currentBudId = getBudId();
-            if (!currentBudId) {
-                showError('ไม่พบ ID ของดอก');
-                return;
-            }
-
-            isLoading = true;
-            console.log(`Loading bud report for ID: ${currentBudId}`);
-
-            try {
-                showLoading();
-
-                const response = await fetch(`/api/buds/${currentBudId}/info?_cb=${Date.now()}`);
-                console.log('Bud response status:', response.status);
-
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-
-                const data = await response.json();
-                console.log('Bud data loaded:', data);
-
-                if (data.success === false) {
-                    throw new Error(data.error || 'API returned error');
-                }
-
-                budData = data.bud || data;
-                displayBudData();
-                showMainContent();
-
-            } catch (error) {
-                console.error('Error loading bud data:', error);
-                showError(`เกิดข้อผิดพลาด: ${error.message}`);
-            } finally {
-                isLoading = false;
-            }
-        }
-
-        // Display functions
-        function showLoading() {
-            document.getElementById('loadingState').style.display = 'block';
-            document.getElementById('errorState').style.display = 'none';
-            document.getElementById('mainContent').style.display = 'none';
-        }
-
-        function showError(message) {
-            document.getElementById('loadingState').style.display = 'none';
-            document.getElementById('errorState').style.display = 'block';
-            document.getElementById('mainContent').style.display = 'none';
-            document.getElementById('errorMessage').textContent = message;
-        }
-
-        function showMainContent() {
-            document.getElementById('loadingState').style.display = 'none';
-            document.getElementById('errorState').style.display = 'none';
-            document.getElementById('mainContent').style.display = 'block';
-        }
-
-        // Display bud data
-        function displayBudData() {
-            if (!budData) {
-                console.error('No bud data to display');
-                return;
-            }
-
-            console.log('Displaying bud data:', budData);
-
-            // Load reviews immediately when bud data is loaded
-            console.log('Loading reviews immediately after bud data is displayed');
-            loadReviews();
-
-            // Helper function to safely update element
-            function safeUpdateElement(id, value, defaultValue = '-') {
-                const element = document.getElementById(id);
-                if (element) {
-                    element.textContent = value || defaultValue;
-                } else {
-                    console.warn(`Element with ID '${id}' not found`);
-                }
-            }
-
-            // Update header strain name display
-            safeUpdateElement('headerStrainName', budData.strain_name_en || budData.strain_name_th);
-            safeUpdateElement('headerStrainGrade', budData.grade);
-
-            // Basic info
-            safeUpdateElement('strainNameEn', budData.strain_name_en);
-            safeUpdateElement('strainNameTh', budData.strain_name_th);
-            safeUpdateElement('breeder', budData.breeder);
-            safeUpdateElement('strainType', budData.strain_type);
-            
-            // Grade with badge
-            const gradeElement = document.getElementById('grade');
-            if (gradeElement) {
-                if (budData.grade) {
-                    gradeElement.innerHTML = `<span class="grade-badge">${budData.grade}</span>`;
-                } else {
-                    gradeElement.textContent = '-';
-                }
-            }
-
-            // Status with badge
-            const statusElement = document.getElementById('status');
-            if (statusElement) {
-                if (budData.status) {
-                    const statusClass = budData.status === 'available' ? 'status-available' : 'status-sold-out';
-                    const statusText = budData.status === 'available' ? 'ยังเหลือ' : 'หมดแล้ว';
-                    statusElement.innerHTML = `<span class="status-badge ${statusClass}">${statusText}</span>`;
-                } else {
-                    statusElement.textContent = '-';
-                }
-            }
-
-            // Cannabinoids
-            safeUpdateElement('thcPercentage', budData.thc_percentage ? `${budData.thc_percentage}%` : null);
-            safeUpdateElement('cbdPercentage', budData.cbd_percentage ? `${budData.cbd_percentage}%` : null);
-            safeUpdateElement('terpene1', budData.top_terpenes_1);
-            safeUpdateElement('terpene2', budData.top_terpenes_2);
-            safeUpdateElement('terpene3', budData.top_terpenes_3);
-
-            // Growing info
-            safeUpdateElement('growMethod', budData.grow_method);
-            safeUpdateElement('fertilizerType', budData.fertilizer_type);
-            safeUpdateElement('floweringType', budData.flowering_type);
-            safeUpdateElement('harvestDate', budData.harvest_date);
-            safeUpdateElement('batchNumber', budData.batch_number);
-
-            // Certificate info
-            safeUpdateElement('labTestName', budData.lab_test_name);
-            safeUpdateElement('testType', budData.lab_test_name ? 'การทดสอบคุณภาพ' : null);
-
-            // Aroma & flavor
-            safeUpdateElement('aromaFlavor', budData.aroma_flavor);
-            safeUpdateElement('recommendedTime', budData.recommended_time);
-
-            // Effects
-            safeUpdateElement('mentalPositive', budData.mental_effects_positive, 'ไม่มีข้อมูล');
-            safeUpdateElement('mentalNegative', budData.mental_effects_negative, 'ไม่มีข้อมูล');
-            safeUpdateElement('physicalPositive', budData.physical_effects_positive, 'ไม่มีข้อมูล');
-            safeUpdateElement('physicalNegative', budData.physical_effects_negative, 'ไม่มีข้อมูล');
-
-            // Grower name
-            safeUpdateElement('growerName', budData.grower_name, 'Budt.Boy');
-
-            // Display images
-            displayImages();
-
-            // Display contact info
-            displayContactInfo();
-
-            // Display certificate
-            displayCertificateImages();
-        }
-
-        // Display images
-        function displayImages() {
-            const imagesContainer = document.getElementById('budImages');
-            if (!imagesContainer) return;
-            
-            imagesContainer.innerHTML = '';
-
-            const imageFields = ['image_1_url', 'image_2_url', 'image_3_url', 'image_4_url'];
-            
-            imageFields.forEach((field, index) => {
-                if (budData && budData[field]) {
-                    const imageItem = document.createElement('div');
-                    imageItem.className = 'image-item';
-                    imageItem.onclick = () => openImageModal(budData[field]);
-                    
-                    const img = document.createElement('img');
-                    img.src = `/${budData[field]}`;
-                    img.alt = `รูปดอก ${index + 1}`;
-                    img.loading = 'lazy';
-                    
-                    imageItem.appendChild(img);
-                    imagesContainer.appendChild(imageItem);
-                }
-            });
-
-            if (imagesContainer.children.length === 0) {
-                imagesContainer.innerHTML = '<p>ไม่มีรูปภาพ</p>';
-            }
         }
 
         // Display contact info
@@ -1761,16 +1387,13 @@
                 { label: 'Facebook', value: budData.grower_contact_facebook, icon: '📘' },
                 { label: 'Line', value: budData.grower_contact_line, icon: '💬' },
                 { label: 'Instagram', value: budData.grower_contact_instagram, icon: '📷' },
-                { label: 'Twitter', value: budData.grower_contact_twitter, icon: '🐦' },
-                { label: 'Telegram', value: budData.grower_contact_telegram, icon: '✈️' },
-                { label: 'Phone', value: budData.grower_contact_phone, icon: '📞' },
-                { label: 'Other', value: budData.grower_contact_other, icon: '💌' }
+                { label: 'Phone', value: budData.grower_contact_phone, icon: '📞' }
             ];
 
             const validContacts = contacts.filter(contact => contact.value);
 
             if (validContacts.length === 0) {
-                contactContainer.innerHTML = '<p>ไม่มีข้อมูลการติดต่อ</p>';
+                contactContainer.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">ไม่มีข้อมูลการติดต่อ</p>';
                 return;
             }
 
@@ -1787,7 +1410,7 @@
         function openImageModal(imageSrc) {
             const modal = document.getElementById('imageModal');
             const modalImg = document.getElementById('modalImage');
-            
+
             modal.style.display = 'flex';
             modalImg.src = `/${imageSrc}`;
         }
@@ -1796,49 +1419,21 @@
             document.getElementById('imageModal').style.display = 'none';
         }
 
-        // Display certificate images
-        function displayCertificateImages() {
-            const certificateContainer = document.getElementById('certificateImages');
-            if (!certificateContainer) return;
-            
-            certificateContainer.innerHTML = '';
-
-            const certificateFields = ['certificate_image_1_url', 'certificate_image_2_url', 'certificate_image_3_url', 'certificate_image_4_url'];
-            
-            certificateFields.forEach((field, index) => {
-                if (budData && budData[field]) {
-                    const img = document.createElement('img');
-                    img.src = `/${budData[field]}`;
-                    img.alt = `ใบรับรอง ${index + 1}`;
-                    img.loading = 'lazy';
-                    img.onclick = () => openImageModal(budData[field]);
-                    
-                    certificateContainer.appendChild(img);
-                }
-            });
-
-            if (certificateContainer.children.length === 0) {
-                certificateContainer.innerHTML = '<p style="color: #666; font-style: italic;">ไม่มีใบรับรอง</p>';
-            }
-        }
-
-        // Print report function
+        // Print and review functions
         function printReport() {
             window.print();
         }
 
-        // Open review modal function
         function openReviewModal() {
-            // For now, redirect to a review form or show alert
             alert('ฟีเจอร์รีวิวจะเปิดใช้งานเร็วๆ นี้! 🌟');
             // TODO: Implement review modal or redirect to review page
         }
 
         // Event listeners
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, initializing...');
-            
-            // Close modal when clicking X or outside
+            console.log('DOM loaded, initializing bud report...');
+
+            // Close modal events
             document.querySelector('.close').onclick = closeImageModal;
             document.getElementById('imageModal').onclick = function(event) {
                 if (event.target === this) {

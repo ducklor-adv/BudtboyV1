@@ -925,54 +925,56 @@
             
             // Grade with badge
             const gradeElement = document.getElementById('grade');
-            if (budData.grade) {
-                gradeElement.innerHTML = `<span class="grade-badge">${budData.grade}</span>`;
-            } else {
-                gradeElement.textContent = '-';
+            if (gradeElement) {
+                if (budData.grade) {
+                    gradeElement.innerHTML = `<span class="grade-badge">${budData.grade}</span>`;
+                } else {
+                    gradeElement.textContent = '-';
+                }
             }
 
             // Status with badge
             const statusElement = document.getElementById('status');
-            if (budData.status) {
-                const statusClass = budData.status === 'available' ? 'status-available' : 'status-sold-out';
-                const statusText = budData.status === 'available' ? 'ยังเหลือ' : 'หมดแล้ว';
-                statusElement.innerHTML = `<span class="status-badge ${statusClass}">${statusText}</span>`;
-            } else {
-                statusElement.textContent = '-';
+            if (statusElement) {
+                if (budData.status) {
+                    const statusClass = budData.status === 'available' ? 'status-available' : 'status-sold-out';
+                    const statusText = budData.status === 'available' ? 'ยังเหลือ' : 'หมดแล้ว';
+                    statusElement.innerHTML = `<span class="status-badge ${statusClass}">${statusText}</span>`;
+                } else {
+                    statusElement.textContent = '-';
+                }
             }
 
             // Cannabinoids
-            document.getElementById('thcPercentage').textContent = budData.thc_percentage ? `${budData.thc_percentage}%` : '-';
-            document.getElementById('cbdPercentage').textContent = budData.cbd_percentage ? `${budData.cbd_percentage}%` : '-';
-            document.getElementById('terpene1').textContent = budData.top_terpenes_1 || '-';
-            document.getElementById('terpene2').textContent = budData.top_terpenes_2 || '-';
-            document.getElementById('terpene3').textContent = budData.top_terpenes_3 || '-';
+            safeUpdateElement('thcPercentage', budData.thc_percentage ? `${budData.thc_percentage}%` : null);
+            safeUpdateElement('cbdPercentage', budData.cbd_percentage ? `${budData.cbd_percentage}%` : null);
+            safeUpdateElement('terpene1', budData.top_terpenes_1);
+            safeUpdateElement('terpene2', budData.top_terpenes_2);
+            safeUpdateElement('terpene3', budData.top_terpenes_3);
 
             // Growing info
-            document.getElementById('growMethod').textContent = budData.grow_method || '-';
-            document.getElementById('fertilizerType').textContent = budData.fertilizer_type || '-';
-            document.getElementById('floweringType').textContent = budData.flowering_type || '-';
-            document.getElementById('harvestDate').textContent = budData.harvest_date || '-';
-            document.getElementById('batchNumber').textContent = budData.batch_number || '-';
-            document.getElementById('labTest').textContent = budData.lab_test_name || '-';
+            safeUpdateElement('growMethod', budData.grow_method);
+            safeUpdateElement('fertilizerType', budData.fertilizer_type);
+            safeUpdateElement('floweringType', budData.flowering_type);
+            safeUpdateElement('harvestDate', budData.harvest_date);
+            safeUpdateElement('batchNumber', budData.batch_number);
 
             // Certificate info
-            document.getElementById('labTestName').textContent = budData.lab_test_name || '-';
-            // Note: test_type field doesn't exist in database, use lab_test_name for now
-            document.getElementById('testType').textContent = budData.lab_test_name ? 'การทดสอบคุณภาพ' : '-';
+            safeUpdateElement('labTestName', budData.lab_test_name);
+            safeUpdateElement('testType', budData.lab_test_name ? 'การทดสอบคุณภาพ' : null);
 
             // Aroma & flavor
-            document.getElementById('aromaFlavor').textContent = budData.aroma_flavor || '-';
-            document.getElementById('recommendedTime').textContent = budData.recommended_time || '-';
+            safeUpdateElement('aromaFlavor', budData.aroma_flavor);
+            safeUpdateElement('recommendedTime', budData.recommended_time);
 
             // Effects
-            document.getElementById('mentalPositive').textContent = budData.mental_effects_positive || 'ไม่มีข้อมูล';
-            document.getElementById('mentalNegative').textContent = budData.mental_effects_negative || 'ไม่มีข้อมูล';
-            document.getElementById('physicalPositive').textContent = budData.physical_effects_positive || 'ไม่มีข้อมูล';
-            document.getElementById('physicalNegative').textContent = budData.physical_effects_negative || 'ไม่มีข้อมูล';
+            safeUpdateElement('mentalPositive', budData.mental_effects_positive, 'ไม่มีข้อมูล');
+            safeUpdateElement('mentalNegative', budData.mental_effects_negative, 'ไม่มีข้อมูล');
+            safeUpdateElement('physicalPositive', budData.physical_effects_positive, 'ไม่มีข้อมูล');
+            safeUpdateElement('physicalNegative', budData.physical_effects_negative, 'ไม่มีข้อมูล');
 
             // Grower name
-            document.getElementById('growerName').textContent = budData.grower_name || 'Budt.Boy';
+            safeUpdateElement('growerName', budData.grower_name, 'Budt.Boy');
 
             // Display images
             displayImages();

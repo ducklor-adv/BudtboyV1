@@ -1081,7 +1081,7 @@
             <a href="/activity" class="back-btn">← กลับ</a>
             <div class="header-title">
                 <div class="header-content">
-                    <img id="growerProfileImage" src="/uploads/20250727_055943_review_1_budtboy1_V2.png" alt="Grower Profile" class="grower-logo">
+                    <img id="growerProfileImage" src="/uploads/budtboy_avatar.png" alt="Grower Profile" class="grower-logo">
                     <div class="header-text">
                         <div class="header-main" id="headerStrainName">กำลังโหลด...</div>
                         <div class="header-sub">
@@ -1331,13 +1331,22 @@
 
             // Update grower profile image
             const growerProfileImg = document.getElementById('growerProfileImage');
-            if (budData.grower_profile_image) {
-                growerProfileImg.src = budData.grower_profile_image.startsWith('/') ? budData.grower_profile_image : `/${budData.grower_profile_image}`;
+            if (budData.grower_profile_image && budData.grower_profile_image.trim() !== '') {
+                // Use actual grower profile image
+                const imageSrc = budData.grower_profile_image.startsWith('/') ? budData.grower_profile_image : `/${budData.grower_profile_image}`;
+                growerProfileImg.src = imageSrc;
                 growerProfileImg.alt = `${budData.grower_name || 'Grower'} Profile`;
             } else {
-                // Use default image if no grower profile image
-                growerProfileImg.src = "/uploads/20250727_055943_review_1_budtboy1_V2.png";
-                growerProfileImg.alt = "Default Grower Profile";
+                // Try to get profile image from creator if grower_profile_image is empty
+                if (budData.creator_profile_image && budData.creator_profile_image.trim() !== '') {
+                    const imageSrc = budData.creator_profile_image.startsWith('/') ? budData.creator_profile_image : `/${budData.creator_profile_image}`;
+                    growerProfileImg.src = imageSrc;
+                    growerProfileImg.alt = `${budData.grower_name || 'Grower'} Profile`;
+                } else {
+                    // Use default Budtboy logo if no profile image available
+                    growerProfileImg.src = "/uploads/budtboy_avatar.png";
+                    growerProfileImg.alt = "Budtboy Default Profile";
+                }
             }
 
             // Update basic info

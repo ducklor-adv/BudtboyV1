@@ -363,6 +363,24 @@
             font-size: 16px;
         }
 
+        .video-link {
+            display: inline-block;
+            background: linear-gradient(135deg, #ff4757, #ff3742);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .video-link:hover {
+            background: linear-gradient(135deg, #ff3742, #ff2731);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 71, 87, 0.3);
+        }
+
         /* Ratings Summary Styles */
         .average-rating {
             display: flex;
@@ -1088,6 +1106,8 @@
 
         // Show section
         function showSection(sectionName) {
+            console.log(`🔄 Switching to section: ${sectionName}`);
+            
             // Update navigation
             document.querySelectorAll('.nav-item').forEach(item => {
                 item.classList.remove('active');
@@ -1101,12 +1121,27 @@
             document.getElementById(sectionName).classList.add('active');
 
             // Load data for specific sections
-            if (sectionName === 'reviews' && currentBudId) {
-                loadReviews();
-            } else if (sectionName === 'ratings' && currentBudId) {
-                loadRatings();
-            } else if (sectionName === 'contact' && budData) {
-                displayContactInfo();
+            if (sectionName === 'reviews') {
+                console.log('📖 Reviews section selected, loading reviews...');
+                if (currentBudId) {
+                    loadReviews();
+                } else {
+                    console.error('❌ No currentBudId available for reviews');
+                }
+            } else if (sectionName === 'ratings') {
+                console.log('⭐ Ratings section selected, loading ratings...');
+                if (currentBudId) {
+                    loadRatings();
+                } else {
+                    console.error('❌ No currentBudId available for ratings');
+                }
+            } else if (sectionName === 'contact') {
+                console.log('📞 Contact section selected, displaying contact info...');
+                if (budData) {
+                    displayContactInfo();
+                } else {
+                    console.error('❌ No budData available for contact info');
+                }
             }
         }
 
@@ -1242,26 +1277,41 @@
 
         // Load reviews
         async function loadReviews() {
-            if (!currentBudId) return;
+            if (!currentBudId) {
+                console.log('No currentBudId, cannot load reviews');
+                return;
+            }
 
-            console.log(`Loading reviews for bud ID: ${currentBudId}`);
+            console.log(`🔍 Loading reviews for bud ID: ${currentBudId}`);
 
             const reviewsContainer = document.getElementById('reviewsContainer');
+            if (!reviewsContainer) {
+                console.error('reviewsContainer not found');
+                return;
+            }
+
             reviewsContainer.innerHTML = '<div class="loading-state">กำลังโหลดรีวิว...</div>';
 
             try {
-                const response = await fetch(`/api/reviews?bud_id=${currentBudId}`);
+                const url = `/api/reviews?bud_id=${currentBudId}`;
+                console.log(`📡 Fetching reviews from: ${url}`);
+                
+                const response = await fetch(url);
+                console.log(`📥 Reviews response status: ${response.status}`);
+                
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
 
                 const data = await response.json();
+                console.log('📋 Raw reviews data:', data);
+                
                 const reviews = Array.isArray(data) ? data : (data.reviews || []);
-                console.log(`Loaded ${reviews.length} reviews`);
+                console.log(`✅ Processed ${reviews.length} reviews:`, reviews);
 
                 displayReviews(reviews);
             } catch (error) {
-                console.error('Error loading reviews:', error);
+                console.error('❌ Error loading reviews:', error);
                 reviewsContainer.innerHTML = `
                     <div class="no-reviews">
                         <div style="font-size: 48px; margin-bottom: 15px;">❌</div>
@@ -1275,9 +1325,16 @@
 
         // Display reviews
         function displayReviews(reviews) {
+            console.log('🎨 Starting displayReviews with:', reviews);
+            
             const container = document.getElementById('reviewsContainer');
+            if (!container) {
+                console.error('❌ reviewsContainer element not found');
+                return;
+            }
 
             if (!reviews || reviews.length === 0) {
+                console.log('📝 No reviews found, showing empty state');
                 container.innerHTML = `
                     <div class="no-reviews">
                         <div style="font-size: 64px; margin-bottom: 20px; opacity: 0.3;">💬</div>
@@ -1289,10 +1346,57 @@
                 return;
             }
 
+            console.log(`🔨 Building HTML for ${reviews.length} reviews`);
             let reviewsHtml = '';
-            reviews.forEach(review => {
+            
+            reviews.forEach((review, index) => {
+                console.log(`📝 Processing review ${index + 1}:`, review);
+                
                 const reviewDate = new Date(review.created_at).toLocaleDateString('th-TH');
                 const reviewerAvatar = review.reviewer_name ? review.reviewer_name.charAt(0).toUpperCase() : '👤';
+                const rating = Math.max(1, Math.min(5, review.overall_rating || 1));
+
+                // Build tags HTML
+                let tagsHtml = '';
+                if (review.aroma_flavors && review.aroma_flavors.length > 0) {
+                    tagsHtml += '<div class="review-tags">';
+                    review.aroma_flavors.forEach(aroma => {
+                        tagsHtml += `<span class="aroma-tag">${aroma}</span>`;
+                    });
+                    tagsHtml += '</div>';
+                }
+
+                if (review.selected_effects && review.selected_effects.length > 0) {
+                    if (!tagsHtml) tagsHtml += '<div class="review-tags">';
+                    review.selected_effects.forEach(effect => {
+                        tagsHtml += `<span class="effect-tag">${effect}</span>`;
+                    });
+                    if (tagsHtml && !tagsHtml.includes('</div>')) tagsHtml += '</div>';
+                }
+
+                // Build images HTML
+                let imagesHtml = '';
+                if (review.review_images && review.review_images.length > 0) {
+                    imagesHtml = `
+                        <div class="review-images-grid">
+                            ${review.review_images.map(img => 
+                                `<img src="/${img}" alt="รูปรีวิว" class="review-image" onclick="openImageModal('${img}')">`
+                            ).join('')}
+                        </div>
+                    `;
+                }
+
+                // Video link
+                let videoHtml = '';
+                if (review.video_review_url) {
+                    videoHtml = `
+                        <div style="margin-top: 15px;">
+                            <a href="${review.video_review_url}" target="_blank" class="video-link">
+                                🎥 ดูวิดีโอรีวิว
+                            </a>
+                        </div>
+                    `;
+                }
 
                 reviewsHtml += `
                     <div class="review-card">
@@ -1305,25 +1409,22 @@
                                 <div class="review-date">${reviewDate}</div>
                             </div>
                             <div class="review-rating">
-                                <div class="rating-stars">${'⭐'.repeat(review.overall_rating)}</div>
-                                <div class="rating-number">${review.overall_rating}/5</div>
+                                <div class="rating-stars">${'⭐'.repeat(rating)}</div>
+                                <div class="rating-number">${rating}/5</div>
                             </div>
                         </div>
                         ${review.short_summary ? `<div class="review-summary">${review.short_summary}</div>` : ''}
                         ${review.full_review_content ? `<div class="review-content">${review.full_review_content}</div>` : ''}
-                        ${review.review_images && review.review_images.length > 0 ? `
-                            <div class="review-images-grid">
-                                ${review.review_images.map(img => 
-                                    `<img src="/${img}" alt="รูปรีวิว" class="review-image" onclick="openImageModal('${img}')">`
-                                ).join('')}
-                            </div>
-                        ` : ''}
+                        ${tagsHtml}
+                        ${imagesHtml}
+                        ${videoHtml}
                     </div>
                 `;
             });
 
+            console.log('🎯 Setting reviews HTML to container');
             container.innerHTML = reviewsHtml;
-            console.log(`Displayed ${reviews.length} reviews successfully`);
+            console.log(`✅ Successfully displayed ${reviews.length} reviews`);
         }
 
         // Load ratings

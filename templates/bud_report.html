@@ -1057,6 +1057,8 @@
 
         // Show different sections
         function showSection(sectionName) {
+            console.log(`Switching to section: ${sectionName}`);
+            
             // Update navigation
             document.querySelectorAll('.nav-item').forEach(item => {
                 item.classList.remove('active');
@@ -1072,9 +1074,20 @@
                 }
             });
 
-            // Load reviews if switching to reviews or ratings section
+            // Load reviews and ratings when switching to any section that needs them
             if (sectionName === 'reviews' || sectionName === 'ratings') {
-                loadReviews();
+                // Add loading state
+                if (sectionName === 'reviews') {
+                    document.getElementById('reviewsContainer').innerHTML = '<div class="loading">กำลังโหลดรีวิว...</div>';
+                }
+                if (sectionName === 'ratings') {
+                    document.getElementById('ratingsSummary').innerHTML = '<div class="loading">กำลังโหลดคะแนน...</div>';
+                }
+                
+                // Load reviews with slight delay to show loading state
+                setTimeout(() => {
+                    loadReviews();
+                }, 200);
             }
 
             // Scroll to top
@@ -1085,21 +1098,26 @@
         async function loadReviews() {
             if (!currentBudId) return;
 
+            console.log(`Loading reviews for bud ID: ${currentBudId}`);
+
             try {
                 const response = await fetch(`/api/reviews?bud_id=${currentBudId}`);
                 const reviews = await response.json();
+
+                console.log('Reviews response:', response.status, reviews);
 
                 if (response.ok) {
                     displayReviews(reviews);
                     displayRatings(reviews);
                 } else {
-                    document.getElementById('reviewsContainer').innerHTML = '<div class="error">เกิดข้อผิดพลาดในการโหลดรีวิว</div>';
-                    document.getElementById('ratingsSummary').innerHTML = '<div class="error">เกิดข้อผิดพลาดในการโหลดคะแนน</div>';
+                    console.error('Failed to load reviews:', reviews.error);
+                    document.getElementById('reviewsContainer').innerHTML = `<div class="error">เกิดข้อผิดพลาดในการโหลดรีวิว: ${reviews.error || 'ไม่ทราบสาเหตุ'}</div>`;
+                    document.getElementById('ratingsSummary').innerHTML = `<div class="error">เกิดข้อผิดพลาดในการโหลดคะแนน: ${reviews.error || 'ไม่ทราบสาเหตุ'}</div>`;
                 }
             } catch (error) {
                 console.error('Error loading reviews:', error);
-                document.getElementById('reviewsContainer').innerHTML = '<div class="error">เกิดข้อผิดพลาดในการโหลดรีวิว</div>';
-                document.getElementById('ratingsSummary').innerHTML = '<div class="error">เกิดข้อผิดพลาดในการโหลดคะแนน</div>';
+                document.getElementById('reviewsContainer').innerHTML = `<div class="error">เกิดข้อผิดพลาดในการโหลดรีวิว: ${error.message}</div>`;
+                document.getElementById('ratingsSummary').innerHTML = `<div class="error">เกิดข้อผิดพลาดในการโหลดคะแนน: ${error.message}</div>`;
             }
         }
 
@@ -1107,7 +1125,9 @@
         function displayReviews(reviews) {
             const container = document.getElementById('reviewsContainer');
 
-            if (reviews.length === 0) {
+            console.log('Displaying reviews:', reviews);
+
+            if (!reviews || reviews.length === 0) {
                 container.innerHTML = `
                     <div class="no-reviews">
                         <p>🌟 ยังไม่มีรีวิวสำหรับดอกนี้</p>
@@ -1118,7 +1138,10 @@
                 return;
             }
 
-            container.innerHTML = reviews.map(review => createReviewCard(review)).join('');
+            const reviewsHtml = reviews.map(review => createReviewCard(review)).join('');
+            container.innerHTML = reviewsHtml;
+            
+            console.log(`Displayed ${reviews.length} reviews`);
         }
 
         // Create review card HTML
@@ -1218,7 +1241,9 @@
             const container = document.getElementById('ratingsSummary');
             const breakdownContainer = document.getElementById('ratingsBreakdown');
 
-            if (reviews.length === 0) {
+            console.log('Displaying ratings for:', reviews);
+
+            if (!reviews || reviews.length === 0) {
                 container.innerHTML = `
                     <div class="average-rating">
                         <div class="rating-display">0.0</div>
@@ -1226,11 +1251,16 @@
                         <div class="rating-count">ยังไม่มีรีวิว</div>
                     </div>
                 `;
-                breakdownContainer.innerHTML = '';
+                breakdownContainer.innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: #666;">
+                        <p>ยังไม่มีคะแนนรีวิว</p>
+                        <button class="review-btn" onclick="openReviewModal()">⭐ เขียนรีวิวแรก</button>
+                    </div>
+                `;
                 return;
             }
 
-            const totalRating = reviews.reduce((sum, review) => sum + review.overall_rating, 0);
+            const totalRating = reviews.reduce((sum, review) => sum + (review.overall_rating || 0), 0);
             const averageRating = totalRating / reviews.length;
             const starCount = Math.round(averageRating);
 
@@ -1269,6 +1299,8 @@
             }
 
             breakdownContainer.innerHTML = breakdownHtml;
+            
+            console.log(`Displayed ratings summary: ${averageRating.toFixed(1)} average from ${reviews.length} reviews`);
         }
 
         // Load bud data
@@ -1345,8 +1377,10 @@
 
             console.log('Displaying bud data:', budData);
 
-            // Load reviews when showing sections
-            loadReviews();
+            // Load reviews immediately when bud data is loaded
+            setTimeout(() => {
+                loadReviews();
+            }, 500);
 
             // Helper function to safely update element
             function safeUpdateElement(id, value, defaultValue = '-') {

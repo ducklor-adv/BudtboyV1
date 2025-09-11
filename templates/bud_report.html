@@ -85,55 +85,12 @@
             font-weight: 700;
         }
 
-        .secondary-nav {
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            border-bottom: 1px solid #dee2e6;
-            padding: 15px 0;
-        }
-
-        .nav-container {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        .nav-item {
-            padding: 12px 24px;
-            text-decoration: none;
-            color: #6c757d;
-            border-radius: 25px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
-            cursor: pointer;
-        }
-
-        .nav-item:hover {
-            color: #4CAF50;
-            background: rgba(76, 175, 80, 0.1);
-            border-color: rgba(76, 175, 80, 0.3);
-        }
-
-        .nav-item.active {
-            color: #4CAF50;
-            background: rgba(76, 175, 80, 0.15);
-            border-color: #4CAF50;
-        }
-
         .content {
             padding: 40px;
         }
 
         .section {
-            display: none;
             margin-bottom: 40px;
-        }
-
-        .section.active {
-            display: block;
         }
 
         .section-title {
@@ -144,6 +101,8 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
         }
 
         .loading-state {
@@ -198,6 +157,124 @@
         .retry-btn:hover {
             background: #45a049;
             transform: translateY(-2px);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .info-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+        }
+
+        .info-card h3 {
+            color: #2c5530;
+            margin-bottom: 20px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .info-value {
+            color: #333;
+            text-align: right;
+        }
+
+        .images-section {
+            margin-top: 40px;
+        }
+
+        .images-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .image-item {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .image-item:hover {
+            transform: scale(1.05);
+        }
+
+        .image-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .grade-badge {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #333;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .status-available {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-sold-out {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .percentage-display {
+            font-size: 18px;
+            font-weight: 700;
+            color: #4CAF50;
+        }
+
+        .effects-list {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+            line-height: 1.5;
+            font-size: 14px;
+            color: #555;
         }
 
         /* Reviews Styles */
@@ -335,20 +412,6 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
 
-        .review-image-placeholder {
-            width: 100%;
-            height: 120px;
-            background: #e0e0e0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #666;
-            font-size: 10px;
-            text-align: center;
-            border-radius: 8px;
-            border: 1px solid #ddd;
-        }
-
         .no-reviews {
             text-align: center;
             padding: 40px;
@@ -410,212 +473,6 @@
             color: #666;
             font-size: 16px;
             font-weight: 500;
-        }
-
-        .ratings-breakdown {
-            margin-top: 30px;
-        }
-
-        .rating-bar-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 12px;
-            padding: 8px 0;
-        }
-
-        .rating-label {
-            width: 80px;
-            font-size: 14px;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .rating-bar {
-            flex: 1;
-            height: 8px;
-            background: #e0e0e0;
-            border-radius: 4px;
-            margin: 0 15px;
-            overflow: hidden;
-        }
-
-        .rating-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #ffd700, #ffed4e);
-            border-radius: 4px;
-            transition: width 0.5s ease;
-        }
-
-        .rating-count-small {
-            width: 40px;
-            text-align: right;
-            font-size: 12px;
-            color: #666;
-        }
-
-        .bud-info-section {
-            display: none;
-        }
-
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin-bottom: 40px;
-        }
-
-        .info-card {
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 25px;
-        }
-
-        .info-card h3 {
-            color: #2c5530;
-            margin-bottom: 20px;
-            font-size: 18px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .info-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .info-item:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-        }
-
-        .info-label {
-            font-weight: 600;
-            color: #555;
-        }
-
-        .info-value {
-            color: #333;
-            text-align: right;
-        }
-
-        .images-section {
-            margin-top: 40px;
-        }
-
-        .images-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-            margin-top: 20px;
-        }
-
-        .image-item {
-            position: relative;
-            aspect-ratio: 1;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            cursor: pointer;
-            transition: transform 0.3s ease;
-        }
-
-        .image-item:hover {
-            transform: scale(1.05);
-        }
-
-        .image-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .section {
-            margin-bottom: 40px;
-        }
-
-        .section-title {
-            font-size: 24px;
-            font-weight: 700;
-            color: #2c5530;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .grade-badge {
-            background: linear-gradient(135deg, #ffd700, #ffed4e);
-            color: #333;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: 700;
-            font-size: 16px;
-        }
-
-        .status-badge {
-            padding: 6px 12px;
-            border-radius: 15px;
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .status-available {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .status-sold-out {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .percentage-display {
-            font-size: 18px;
-            font-weight: 700;
-            color: #4CAF50;
-        }
-
-        .effects-list {
-            background: white;
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 10px;
-            line-height: 1.5;
-            font-size: 14px;
-            color: #555;
-        }
-
-        .effects-grid {
-            gap: 1px;
-        }
-
-        .effects-card {
-            margin-bottom: 0px;
-            padding-bottom: 0px;
-            padding-top: 0px;
-        }
-
-        .effects-card h3 {
-            margin-bottom: 15px;
-            margin-top: 0px;
-            font-size: 18px;
-            padding-bottom: 0px;
-            padding-top: 0px;
-        }
-
-        .effects-list br {
-            line-height: 10px;
-        }
-
-        .effects-positive {
-        }
-
-        .effects-negative {
-            /* เอาเส้นขอบสีแดงออกเพื่อประหยัดพื้นที่ */
         }
 
         .contact-info {
@@ -729,20 +586,6 @@
                 border-radius: 0;
             }
 
-            .nav-container {
-                flex-wrap: wrap;
-                gap: 8px;
-                padding: 0 10px;
-            }
-
-            .nav-item {
-                padding: 8px 12px;
-                font-size: 13px;
-                flex: 1;
-                text-align: center;
-                min-width: 80px;
-            }
-
             .info-grid {
                 grid-template-columns: 1fr;
                 gap: 15px;
@@ -750,29 +593,6 @@
 
             .info-card {
                 padding: 15px;
-            }
-
-            .effects-grid {
-                grid-template-columns: 1fr;
-                gap: 1px;
-            }
-
-            .effects-card {
-                margin-bottom: 0px;
-                padding-bottom: 0px;
-                padding-top: 0px;
-            }
-
-            .effects-card h3 {
-                font-size: 16px;
-                margin-bottom: 10px;
-                padding-bottom: 0px;
-            }
-
-            .effects-list {
-                padding: 6px 8px;
-                font-size: 15px;
-                line-height: 1.5;
             }
 
             .images-grid {
@@ -787,10 +607,6 @@
 
             .certificate-images img {
                 height: 100px;
-            }
-
-            .action-buttons {
-                margin: 15px 0 !important;
             }
 
             .print-btn, .review-btn {
@@ -856,17 +672,6 @@
                 font-size: 18px;
             }
 
-
-            .nav-container {
-                padding: 0 15px;
-                gap: 10px;
-            }
-
-            .nav-item {
-                padding: 8px 12px;
-                font-size: 14px;
-            }
-
             .content {
                 padding: 10px;
             }
@@ -919,16 +724,6 @@
             <div style="width: 60px;"></div>
         </div>
 
-        <!-- Navigation -->
-        <div class="secondary-nav">
-            <div class="nav-container">
-                <div class="nav-item active" onclick="showSection('bud-info')">📊 ข้อมูลดอก</div>
-                <div class="nav-item" onclick="showSection('reviews')">📖 รีวิว</div>
-                <div class="nav-item" onclick="showSection('ratings')">⭐ คะแนน</div>
-                <div class="nav-item" onclick="showSection('contact')">📞 ติดต่อ</div>
-            </div>
-        </div>
-
         <div class="content">
             <!-- Loading State -->
             <div id="loadingState" class="loading-state">
@@ -937,152 +732,154 @@
                 <p>โปรดรอสักครู่</p>
             </div>
 
-            <!-- Bud Info Section -->
-            <div id="bud-info" class="section active">
+            <!-- Main Content -->
+            <div id="mainContent" style="display: none;">
                 <!-- Images Section -->
-                <div class="images-section">
+                <div class="section">
                     <div class="section-title">🌿 ภาพดอก</div>
                     <div class="images-grid" id="budImages">
                         <!-- Images will be loaded here -->
                     </div>
                 </div>
 
-                <div class="section-title">📊 ข้อมูลดอก</div>
+                <!-- Bud Info Section -->
+                <div class="section">
+                    <div class="section-title">📊 ข้อมูลดอก</div>
+                    <div class="info-grid">
+                        <!-- Basic Info -->
+                        <div class="info-card">
+                            <h3>🌿 ข้อมูลพื้นฐาน</h3>
+                            <div class="info-item">
+                                <span class="info-label">ชื่อสายพันธุ์ (EN):</span>
+                                <span class="info-value" id="strainNameEn">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">ชื่อสายพันธุ์ (TH):</span>
+                                <span class="info-value" id="strainNameTh">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">ผู้พัฒนาสายพันธุ์:</span>
+                                <span class="info-value" id="breeder">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">ประเภท:</span>
+                                <span class="info-value" id="strainType">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">เกรด:</span>
+                                <span class="info-value" id="grade">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">สถานะ:</span>
+                                <span class="info-value" id="status">-</span>
+                            </div>
+                        </div>
 
-                <div class="info-grid">
-                    <!-- Basic Info -->
-                    <div class="info-card">
-                        <h3>🌿 ข้อมูลพื้นฐาน</h3>
-                        <div class="info-item">
-                            <span class="info-label">ชื่อสายพันธุ์ (EN):</span>
-                            <span class="info-value" id="strainNameEn">-</span>
+                        <!-- Cannabinoids -->
+                        <div class="info-card">
+                            <h3>🧪 สารสำคัญ</h3>
+                            <div class="info-item">
+                                <span class="info-label">THC:</span>
+                                <span class="info-value percentage-display" id="thcPercentage">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">CBD:</span>
+                                <span class="info-value percentage-display" id="cbdPercentage">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Terpene 1:</span>
+                                <span class="info-value" id="terpene1">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Terpene 2:</span>
+                                <span class="info-value" id="terpene2">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Terpene 3:</span>
+                                <span class="info-value" id="terpene3">-</span>
+                            </div>
                         </div>
-                        <div class="info-item">
-                            <span class="info-label">ชื่อสายพันธุ์ (TH):</span>
-                            <span class="info-value" id="strainNameTh">-</span>
+
+                        <!-- Aroma & Effects -->
+                        <div class="info-card">
+                            <h3>👃 กลิ่นและผลกระทบ</h3>
+                            <div class="info-item">
+                                <span class="info-label">กลิ่นรส:</span>
+                                <span class="info-value" id="aromaFlavor">-</span>
+                            </div>
+                            <div style="margin-top: 15px;">
+                                <strong>😊 ผลกระทบเชิงบวก (จิตใจ):</strong>
+                                <div class="effects-list" id="mentalPositive">-</div>
+                            </div>
+                            <div style="margin-top: 15px;">
+                                <strong>💪 ผลกระทบเชิงบวก (ร่างกาย):</strong>
+                                <div class="effects-list" id="physicalPositive">-</div>
+                            </div>
+                            <div style="margin-top: 15px;">
+                                <strong>😔 ผลกระทบเชิงลบ (จิตใจ):</strong>
+                                <div class="effects-list" id="mentalNegative">-</div>
+                            </div>
+                            <div style="margin-top: 15px;">
+                                <strong>😣 ผลกระทบเชิงลบ (ร่างกาย):</strong>
+                                <div class="effects-list" id="physicalNegative">-</div>
+                            </div>
                         </div>
-                        <div class="info-item">
-                            <span class="info-label">ผู้พัฒนาสายพันธุ์:</span>
-                            <span class="info-value" id="breeder">-</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">ประเภท:</span>
-                            <span class="info-value" id="strainType">-</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">เกรด:</span>
-                            <span class="info-value" id="grade">-</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">สถานะ:</span>
-                            <span class="info-value" id="status">-</span>
+
+                        <!-- Growing Info -->
+                        <div class="info-card">
+                            <h3>🌱 ข้อมูลการปลูก</h3>
+                            <div class="info-item">
+                                <span class="info-label">วิธีปลูก:</span>
+                                <span class="info-value" id="growMethod">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">ปุ่ย:</span>
+                                <span class="info-value" id="fertilizerType">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">ประเภทดอก:</span>
+                                <span class="info-value" id="floweringType">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">วันเก็บเกี่ยว:</span>
+                                <span class="info-value" id="harvestDate">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">ห้องแลป:</span>
+                                <span class="info-value" id="labTestName">-</span>
+                            </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Cannabinoids -->
-                    <div class="info-card">
-                        <h3>🧪 สารสำคัญ</h3>
-                        <div class="info-item">
-                            <span class="info-label">THC:</span>
-                            <span class="info-value percentage-display" id="thcPercentage">-</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">CBD:</span>
-                            <span class="info-value percentage-display" id="cbdPercentage">-</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Terpene 1:</span>
-                            <span class="info-value" id="terpene1">-</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Terpene 2:</span>
-                            <span class="info-value" id="terpene2">-</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Terpene 3:</span>
-                            <span class="info-value" id="terpene3">-</span>
-                        </div>
+                <!-- Reviews Section -->
+                <div class="section">
+                    <div class="section-title">📖 รีวิวจากผู้ใช้</div>
+                    <div id="reviewsContainer">
+                        <div class="loading-state">กำลังโหลดรีวิว...</div>
                     </div>
+                </div>
 
-                    <!-- Aroma & Effects -->
-                    <div class="info-card">
-                        <h3>👃 กลิ่นและผลกระทบ</h3>
-                        <div class="info-item">
-                            <span class="info-label">กลิ่นรส:</span>
-                            <span class="info-value" id="aromaFlavor">-</span>
-                        </div>
-                        <div style="margin-top: 15px;">
-                            <strong>😊 ผลกระทบเชิงบวก (จิตใจ):</strong>
-                            <div class="effects-list" id="mentalPositive">-</div>
-                        </div>
-                        <div style="margin-top: 15px;">
-                            <strong>💪 ผลกระทบเชิงบวก (ร่างกาย):</strong>
-                            <div class="effects-list" id="physicalPositive">-</div>
-                        </div>
-                        <div style="margin-top: 15px;">
-                            <strong>😔 ผลกระทบเชิงลบ (จิตใจ):</strong>
-                            <div class="effects-list" id="mentalNegative">-</div>
-                        </div>
-                        <div style="margin-top: 15px;">
-                            <strong>😣 ผลกระทบเชิงลบ (ร่างกาย):</strong>
-                            <div class="effects-list" id="physicalNegative">-</div>
-                        </div>
+                <!-- Ratings Section -->
+                <div class="section">
+                    <div class="section-title">⭐ คะแนนรวม</div>
+                    <div id="ratingsContainer">
+                        <div class="loading-state">กำลังโหลดคะแนน...</div>
                     </div>
+                </div>
 
-                    <!-- Growing Info -->
-                    <div class="info-card">
-                        <h3>🌱 ข้อมูลการปลูก</h3>
-                        <div class="info-item">
-                            <span class="info-label">วิธีปลูก:</span>
-                            <span class="info-value" id="growMethod">-</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">ปุ่ย:</span>
-                            <span class="info-value" id="fertilizerType">-</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">ประเภทดอก:</span>
-                            <span class="info-value" id="floweringType">-</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">วันเก็บเกี่ยว:</span>
-                            <span class="info-value" id="harvestDate">-</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">ห้องแลป:</span>
-                            <span class="info-value" id="labTestName">-</span>
-                        </div>
+                <!-- Contact Section -->
+                <div class="section">
+                    <div class="section-title">📞 ข้อมูลการติดต่อ</div>
+                    <div class="contact-info" id="contactInfo">
+                        <div class="loading-state">กำลังโหลดข้อมูลการติดต่อ...</div>
                     </div>
                 </div>
 
                 <!-- Action Buttons -->
-                <div class="action-buttons">
+                <div class="section">
                     <button class="print-btn" onclick="printReport()">🖨️ Print รายงาน</button>
                     <button class="review-btn" onclick="openReviewModal()">⭐ เขียนรีวิว</button>
-                </div>
-            </div>
-
-            <!-- Reviews Section -->
-            <div id="reviews" class="section">
-                <div class="section-title">📖 รีวิวจากผู้ใช้</div>
-                <div id="reviewsContainer">
-                    <div class="loading-state">กำลังโหลดรีวิว...</div>
-                </div>
-            </div>
-
-            <!-- Ratings Section -->
-            <div id="ratings" class="section">
-                <div class="section-title">⭐ คะแนนรวม</div>
-                <div id="ratingsContainer">
-                    <div class="loading-state">กำลังโหลดคะแนน...</div>
-                </div>
-            </div>
-
-            <!-- Contact Section -->
-            <div id="contact" class="section">
-                <div class="section-title">📞 ข้อมูลการติดต่อ</div>
-                <div class="contact-info" id="contactInfo">
-                    <div class="loading-state">กำลังโหลดข้อมูลการติดต่อ...</div>
                 </div>
             </div>
         </div>
@@ -1102,47 +899,6 @@
         function getBudId() {
             const urlParams = new URLSearchParams(window.location.search);
             return urlParams.get('id');
-        }
-
-        // Show section
-        function showSection(sectionName) {
-            console.log(`🔄 Switching to section: ${sectionName}`);
-            
-            // Update navigation
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            event.target.classList.add('active');
-
-            // Show/hide sections
-            document.querySelectorAll('.section').forEach(section => {
-                section.classList.remove('active');
-            });
-            document.getElementById(sectionName).classList.add('active');
-
-            // Load data for specific sections
-            if (sectionName === 'reviews') {
-                console.log('📖 Reviews section selected, loading reviews...');
-                if (currentBudId) {
-                    loadReviews();
-                } else {
-                    console.error('❌ No currentBudId available for reviews');
-                }
-            } else if (sectionName === 'ratings') {
-                console.log('⭐ Ratings section selected, loading ratings...');
-                if (currentBudId) {
-                    loadRatings();
-                } else {
-                    console.error('❌ No currentBudId available for ratings');
-                }
-            } else if (sectionName === 'contact') {
-                console.log('📞 Contact section selected, displaying contact info...');
-                if (budData) {
-                    displayContactInfo();
-                } else {
-                    console.error('❌ No budData available for contact info');
-                }
-            }
         }
 
         // Load bud data
@@ -1166,14 +922,17 @@
 
                 budData = data.bud || data;
                 displayBudData();
+                displayContactInfo();
+
+                // Load all sections
+                await Promise.all([
+                    loadReviews(),
+                    loadRatings()
+                ]);
 
                 // Hide loading and show content
                 document.getElementById('loadingState').style.display = 'none';
-                document.getElementById('bud-info').classList.add('active');
-
-                // Pre-load reviews data for faster section switching
-                console.log('Pre-loading reviews data...');
-                loadReviews();
+                document.getElementById('mainContent').style.display = 'block';
 
             } catch (error) {
                 console.error('Error loading bud data:', error);
@@ -1282,7 +1041,7 @@
                 return;
             }
 
-            console.log(`🔍 Loading reviews for bud ID: ${currentBudId}`);
+            console.log(`Loading reviews for bud ID: ${currentBudId}`);
 
             const reviewsContainer = document.getElementById('reviewsContainer');
             if (!reviewsContainer) {
@@ -1290,28 +1049,26 @@
                 return;
             }
 
-            reviewsContainer.innerHTML = '<div class="loading-state">กำลังโหลดรีวิว...</div>';
-
             try {
                 const url = `/api/reviews?bud_id=${currentBudId}`;
-                console.log(`📡 Fetching reviews from: ${url}`);
-                
+                console.log(`Fetching reviews from: ${url}`);
+
                 const response = await fetch(url);
-                console.log(`📥 Reviews response status: ${response.status}`);
-                
+                console.log(`Reviews response status: ${response.status}`);
+
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
 
                 const data = await response.json();
-                console.log('📋 Raw reviews data:', data);
-                
+                console.log('Raw reviews data:', data);
+
                 const reviews = Array.isArray(data) ? data : (data.reviews || []);
-                console.log(`✅ Processed ${reviews.length} reviews:`, reviews);
+                console.log(`Processed ${reviews.length} reviews:`, reviews);
 
                 displayReviews(reviews);
             } catch (error) {
-                console.error('❌ Error loading reviews:', error);
+                console.error('Error loading reviews:', error);
                 reviewsContainer.innerHTML = `
                     <div class="no-reviews">
                         <div style="font-size: 48px; margin-bottom: 15px;">❌</div>
@@ -1325,16 +1082,16 @@
 
         // Display reviews
         function displayReviews(reviews) {
-            console.log('🎨 Starting displayReviews with:', reviews);
-            
+            console.log('Starting displayReviews with:', reviews);
+
             const container = document.getElementById('reviewsContainer');
             if (!container) {
-                console.error('❌ reviewsContainer element not found');
+                console.error('reviewsContainer element not found');
                 return;
             }
 
             if (!reviews || reviews.length === 0) {
-                console.log('📝 No reviews found, showing empty state');
+                console.log('No reviews found, showing empty state');
                 container.innerHTML = `
                     <div class="no-reviews">
                         <div style="font-size: 64px; margin-bottom: 20px; opacity: 0.3;">💬</div>
@@ -1346,12 +1103,12 @@
                 return;
             }
 
-            console.log(`🔨 Building HTML for ${reviews.length} reviews`);
+            console.log(`Building HTML for ${reviews.length} reviews`);
             let reviewsHtml = '';
-            
+
             reviews.forEach((review, index) => {
-                console.log(`📝 Processing review ${index + 1}:`, review);
-                
+                console.log(`Processing review ${index + 1}:`, review);
+
                 const reviewDate = new Date(review.created_at).toLocaleDateString('th-TH');
                 const reviewerAvatar = review.reviewer_name ? review.reviewer_name.charAt(0).toUpperCase() : '👤';
                 const rating = Math.max(1, Math.min(5, review.overall_rating || 1));
@@ -1422,9 +1179,9 @@
                 `;
             });
 
-            console.log('🎯 Setting reviews HTML to container');
+            console.log('Setting reviews HTML to container');
             container.innerHTML = reviewsHtml;
-            console.log(`✅ Successfully displayed ${reviews.length} reviews`);
+            console.log(`Successfully displayed ${reviews.length} reviews`);
         }
 
         // Load ratings
@@ -1432,7 +1189,6 @@
             if (!currentBudId) return;
 
             const ratingsContainer = document.getElementById('ratingsContainer');
-            ratingsContainer.innerHTML = '<div class="loading-state">กำลังโหลดคะแนน...</div>';
 
             try {
                 const response = await fetch(`/api/reviews?bud_id=${currentBudId}`);

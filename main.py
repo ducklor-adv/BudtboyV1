@@ -4272,7 +4272,36 @@ def get_bud_info(bud_id):
                 'error': f'ไม่พบข้อมูลดอก ID: {bud_id}'
             }), 404
 
-        bud_info = {
+        # Helper function to format date safely
+            def format_date_safely(date_value, format_type='date'):
+                if not date_value:
+                    return None
+                try:
+                    # If it's already a string, return as is for date fields
+                    if isinstance(date_value, str):
+                        if format_type == 'datetime':
+                            # Try to parse and reformat if needed
+                            from datetime import datetime
+                            try:
+                                parsed_date = datetime.strptime(date_value, '%Y-%m-%d %H:%M:%S')
+                                return parsed_date.strftime('%Y-%m-%d %H:%M:%S')
+                            except:
+                                return date_value
+                        else:
+                            # For date fields, return as is if it's already a string
+                            return date_value
+                    # If it's a datetime object, format it
+                    elif hasattr(date_value, 'strftime'):
+                        if format_type == 'datetime':
+                            return date_value.strftime('%Y-%m-%d %H:%M:%S')
+                        else:
+                            return date_value.strftime('%Y-%m-%d')
+                    return str(date_value) if date_value else None
+                except Exception as e:
+                    print(f"Date formatting error: {e}, value: {date_value}")
+                    return str(date_value) if date_value else None
+
+            bud_info = {
             'id': result[0],
             'strain_name_en': result[1],
             'strain_name_th': result[2],
@@ -4291,15 +4320,15 @@ def get_bud_info(bud_id):
             'physical_effects_negative': result[15],
             'recommended_time': result[16],
             'grow_method': result[17],
-            'harvest_date': result[18].strftime('%Y-%m-%d') if result[18] else None,
+            'harvest_date': format_date_safely(result[18], 'date'),
             'batch_number': result[19],
             'grower_id': result[20],
             'grower_license_verified': result[21],
             'fertilizer_type': result[22],
             'flowering_type': result[23],
             'status': result[24] or 'available',
-            'created_at': result[25].strftime('%Y-%m-%d %H:%M:%S') if result[25] else None,
-            'updated_at': result[26].strftime('%Y-%m-%d %H:%M:%S') if result[26] else None,
+            'created_at': format_date_safely(result[25], 'datetime'),
+            'updated_at': format_date_safely(result[26], 'datetime'),
             'created_by': result[27],
             'image_1_url': result[28],
             'image_2_url': result[29],

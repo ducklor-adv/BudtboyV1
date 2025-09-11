@@ -447,32 +447,46 @@
         /* Ratings Summary Styles */
         .average-rating {
             display: flex;
-            flex-direction: column;
             align-items: center;
-            padding: 30px;
+            justify-content: space-between;
+            padding: 15px 20px;
             background: #f8f9fa;
-            border-radius: 15px;
-            text-align: center;
+            border-radius: 12px;
             margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
         .rating-display {
-            font-size: 48px;
+            font-size: 28px;
             font-weight: 700;
             color: #4CAF50;
-            margin-bottom: 10px;
+            margin: 0;
         }
 
         .rating-stars-large {
             color: #ffd700;
-            font-size: 24px;
-            margin-bottom: 15px;
+            font-size: 20px;
+            margin: 0;
         }
 
         .rating-count {
             color: #666;
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 500;
+            margin: 0;
+        }
+
+        .rating-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .rating-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .contact-info {
@@ -1219,9 +1233,13 @@
             if (!reviews || reviews.length === 0) {
                 container.innerHTML = `
                     <div class="average-rating">
-                        <div class="rating-display">0.0</div>
-                        <div class="rating-stars-large">☆☆☆☆☆</div>
-                        <div class="rating-count">ยังไม่มีรีวิว</div>
+                        <div class="rating-left">
+                            <div class="rating-display">0.0</div>
+                            <div class="rating-stars-large">☆☆☆☆☆</div>
+                        </div>
+                        <div class="rating-right">
+                            <div class="rating-count">ยังไม่มีรีวิว</div>
+                        </div>
                     </div>
                 `;
                 return;
@@ -1233,9 +1251,13 @@
 
             container.innerHTML = `
                 <div class="average-rating">
-                    <div class="rating-display">${averageRating.toFixed(1)}</div>
-                    <div class="rating-stars-large">${'⭐'.repeat(starCount)}${'☆'.repeat(5-starCount)}</div>
-                    <div class="rating-count">จาก ${reviews.length} รีวิว</div>
+                    <div class="rating-left">
+                        <div class="rating-display">${averageRating.toFixed(1)}</div>
+                        <div class="rating-stars-large">${'⭐'.repeat(starCount)}${'☆'.repeat(5-starCount)}</div>
+                    </div>
+                    <div class="rating-right">
+                        <div class="rating-count">จาก ${reviews.length} รีวิว</div>
+                    </div>
                 </div>
             `;
         }

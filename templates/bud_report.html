@@ -309,16 +309,31 @@
 
         .effects-list {
             background: white;
-            border-radius: 10px;
-            padding: 20px;
-            margin-top: 15px;
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin-top: 8px;
+            line-height: 1.4;
+            font-size: 14px;
+        }
+
+        .effects-grid {
+            gap: 15px;
+        }
+
+        .effects-card {
+            margin-bottom: 10px;
+        }
+
+        .effects-card h3 {
+            margin-bottom: 8px;
+            font-size: 1.1em;
         }
 
         .effects-positive {
         }
 
         .effects-negative {
-            border-left: 4px solid #f44336;
+            /* เอาเส้นขอบสีแดงออกเพื่อประหยัดพื้นที่ */
         }
 
         .contact-info {
@@ -383,23 +398,119 @@
             text-decoration: none;
         }
 
+        .certificate-images {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .certificate-images img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .certificate-images img:hover {
+            transform: scale(1.05);
+        }
+
+        .print-btn, .review-btn {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .print-btn:hover, .review-btn:hover {
+            background: linear-gradient(135deg, #45a049, #3d8b40);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+        }
+
         @media (max-width: 768px) {
+            .container {
+                margin: 0;
+                border-radius: 0;
+            }
+
             .nav-container {
                 flex-wrap: wrap;
-                gap: 10px;
+                gap: 8px;
+                padding: 0 10px;
             }
 
             .nav-item {
-                padding: 8px 16px;
-                font-size: 14px;
+                padding: 8px 12px;
+                font-size: 13px;
+                flex: 1;
+                text-align: center;
+                min-width: 80px;
             }
 
             .info-grid {
                 grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .info-card {
+                padding: 15px;
+            }
+
+            .effects-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .effects-card {
+                margin-bottom: 8px;
+            }
+
+            .effects-card h3 {
+                font-size: 1em;
+                margin-bottom: 6px;
+            }
+
+            .effects-list {
+                padding: 8px 10px;
+                font-size: 13px;
             }
 
             .images-grid {
                 grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            .certificate-images {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+
+            .certificate-images img {
+                height: 100px;
+            }
+
+            .action-buttons {
+                margin: 15px 0 !important;
+            }
+
+            .print-btn, .review-btn {
+                padding: 10px 16px;
+                font-size: 14px;
+                margin: 5px 3px;
             }
 
             .close {
@@ -409,6 +520,28 @@
                 font-weight: bold;
                 color: #ffffff;
                 text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            }
+
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 15px;
+            }
+
+            .header-content {
+                gap: 10px;
+            }
+
+            .grower-logo {
+                width: 50px;
+                height: 50px;
+            }
+
+            .section-title {
+                font-size: 1.3em;
+                margin-bottom: 15px;
             }
         }
     </style>
@@ -526,6 +659,22 @@
                             </div>
                         </div>
 
+                        <!-- Certificate Section -->
+                        <div class="info-card">
+                            <h3>🏆 ใบรับรอง</h3>
+                            <div class="info-item">
+                                <span class="info-label">ชื่อห้องแลป:</span>
+                                <span class="info-value" id="labTestName">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">ประเภทการทดสอบ:</span>
+                                <span class="info-value" id="testType">-</span>
+                            </div>
+                            <div class="certificate-images" id="certificateImages">
+                                <!-- Certificate images will be loaded here -->
+                            </div>
+                        </div>
+
                         <!-- Growing Info -->
                         <div class="info-card">
                             <h3>🌱 ข้อมูลการปลูก</h3>
@@ -573,27 +722,33 @@
                     <div class="section">
                         <div class="section-title">✨ ผลกระทบ</div>
                         
-                        <div class="info-grid">
-                            <div class="info-card">
+                        <div class="info-grid effects-grid">
+                            <div class="info-card effects-card">
                                 <h3>😊 ผลกระทบเชิงบวก (จิตใจ)</h3>
                                 <div class="effects-list effects-positive" id="mentalPositive">-</div>
                             </div>
                             
-                            <div class="info-card">
+                            <div class="info-card effects-card">
                                 <h3>😔 ผลกระทบเชิงลบ (จิตใจ)</h3>
                                 <div class="effects-list effects-negative" id="mentalNegative">-</div>
                             </div>
                             
-                            <div class="info-card">
+                            <div class="info-card effects-card">
                                 <h3>💪 ผลกระทบเชิงบวก (ร่างกาย)</h3>
                                 <div class="effects-list effects-positive" id="physicalPositive">-</div>
                             </div>
                             
-                            <div class="info-card">
+                            <div class="info-card effects-card">
                                 <h3>😣 ผลกระทบเชิงลบ (ร่างกาย)</h3>
                                 <div class="effects-list effects-negative" id="physicalNegative">-</div>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="action-buttons" style="text-align: center; margin: 20px 0;">
+                        <button class="print-btn" onclick="printReport()">🖨️ Print รายงาน</button>
+                        <button class="review-btn" onclick="openReviewModal()">⭐ เขียนรีวิว</button>
                     </div>
 
                     <!-- Images -->
@@ -601,6 +756,30 @@
                         <div class="section-title">📸 รูปภาพดอก</div>
                         <div class="images-grid" id="budImages">
                             <!-- Images will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Reviews Section -->
+                    <div id="reviews-content" class="section" style="display: none;">
+                        <div class="section-title">📖 รีวิวจากผู้ใช้</div>
+                        <div class="reviews-container" id="reviewsContainer">
+                            <div class="no-reviews">
+                                <p>🌟 ยังไม่มีรีวิวสำหรับดอกนี้</p>
+                                <p>เป็นคนแรกที่เขียนรีวิว!</p>
+                                <button class="review-btn" onclick="openReviewModal()">⭐ เขียนรีวิวเลย</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ratings Section -->
+                    <div id="ratings-content" class="section" style="display: none;">
+                        <div class="section-title">⭐ คะแนนรวม</div>
+                        <div class="ratings-summary" id="ratingsSummary">
+                            <div class="average-rating">
+                                <div class="rating-number">0.0</div>
+                                <div class="rating-stars">⭐⭐⭐⭐⭐</div>
+                                <div class="rating-count">จาก 0 รีวิว</div>
+                            </div>
                         </div>
                     </div>
 
@@ -646,7 +825,7 @@
             document.querySelector(`[onclick="showSection('${sectionName}')"]`).classList.add('active');
 
             // Show/hide content sections
-            const sections = ['bud-info-content', 'contact-content'];
+            const sections = ['bud-info-content', 'reviews-content', 'ratings-content', 'contact-content'];
             sections.forEach(section => {
                 const element = document.getElementById(section);
                 if (element) {
@@ -766,6 +945,10 @@
             document.getElementById('batchNumber').textContent = budData.batch_number || '-';
             document.getElementById('labTest').textContent = budData.lab_test_name || '-';
 
+            // Certificate info
+            document.getElementById('labTestName').textContent = budData.lab_test_name || '-';
+            document.getElementById('testType').textContent = budData.test_type || '-';
+
             // Aroma & flavor
             document.getElementById('aromaFlavor').textContent = budData.aroma_flavor || '-';
             document.getElementById('recommendedTime').textContent = budData.recommended_time || '-';
@@ -784,6 +967,9 @@
 
             // Display contact info
             displayContactInfo();
+
+            // Display certificate
+            displayCertificateImages();
         }
 
         // Display images
@@ -854,6 +1040,42 @@
 
         function closeImageModal() {
             document.getElementById('imageModal').style.display = 'none';
+        }
+
+        // Display certificate images
+        function displayCertificateImages() {
+            const certificateContainer = document.getElementById('certificateImages');
+            certificateContainer.innerHTML = '';
+
+            const certificateFields = ['certificate_image_1_url', 'certificate_image_2_url', 'certificate_image_3_url', 'certificate_image_4_url'];
+            
+            certificateFields.forEach((field, index) => {
+                if (budData[field]) {
+                    const img = document.createElement('img');
+                    img.src = `/${budData[field]}`;
+                    img.alt = `ใบรับรอง ${index + 1}`;
+                    img.loading = 'lazy';
+                    img.onclick = () => openImageModal(budData[field]);
+                    
+                    certificateContainer.appendChild(img);
+                }
+            });
+
+            if (certificateContainer.children.length === 0) {
+                certificateContainer.innerHTML = '<p style="color: #666; font-style: italic;">ไม่มีใบรับรอง</p>';
+            }
+        }
+
+        // Print report function
+        function printReport() {
+            window.print();
+        }
+
+        // Open review modal function
+        function openReviewModal() {
+            // For now, redirect to a review form or show alert
+            alert('ฟีเจอร์รีวิวจะเปิดใช้งานเร็วๆ นี้! 🌟');
+            // TODO: Implement review modal or redirect to review page
         }
 
         // Event listeners

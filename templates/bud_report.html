@@ -900,13 +900,28 @@
 
         // Display bud data
         function displayBudData() {
-            if (!budData) return;
+            if (!budData) {
+                console.error('No bud data to display');
+                return;
+            }
+
+            console.log('Displaying bud data:', budData);
+
+            // Helper function to safely update element
+            function safeUpdateElement(id, value, defaultValue = '-') {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.textContent = value || defaultValue;
+                } else {
+                    console.warn(`Element with ID '${id}' not found`);
+                }
+            }
 
             // Basic info
-            document.getElementById('strainNameEn').textContent = budData.strain_name_en || '-';
-            document.getElementById('strainNameTh').textContent = budData.strain_name_th || '-';
-            document.getElementById('breeder').textContent = budData.breeder || '-';
-            document.getElementById('strainType').textContent = budData.strain_type || '-';
+            safeUpdateElement('strainNameEn', budData.strain_name_en);
+            safeUpdateElement('strainNameTh', budData.strain_name_th);
+            safeUpdateElement('breeder', budData.breeder);
+            safeUpdateElement('strainType', budData.strain_type);
             
             // Grade with badge
             const gradeElement = document.getElementById('grade');

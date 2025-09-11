@@ -943,7 +943,8 @@
 
             // Certificate info
             document.getElementById('labTestName').textContent = budData.lab_test_name || '-';
-            document.getElementById('testType').textContent = budData.test_type || '-';
+            // Note: test_type field doesn't exist in database, use lab_test_name for now
+            document.getElementById('testType').textContent = budData.lab_test_name ? 'การทดสอบคุณภาพ' : '-';
 
             // Aroma & flavor
             document.getElementById('aromaFlavor').textContent = budData.aroma_flavor || '-';
@@ -971,12 +972,14 @@
         // Display images
         function displayImages() {
             const imagesContainer = document.getElementById('budImages');
+            if (!imagesContainer) return;
+            
             imagesContainer.innerHTML = '';
 
             const imageFields = ['image_1_url', 'image_2_url', 'image_3_url', 'image_4_url'];
             
             imageFields.forEach((field, index) => {
-                if (budData[field]) {
+                if (budData && budData[field]) {
                     const imageItem = document.createElement('div');
                     imageItem.className = 'image-item';
                     imageItem.onclick = () => openImageModal(budData[field]);
@@ -1041,12 +1044,14 @@
         // Display certificate images
         function displayCertificateImages() {
             const certificateContainer = document.getElementById('certificateImages');
+            if (!certificateContainer) return;
+            
             certificateContainer.innerHTML = '';
 
             const certificateFields = ['certificate_image_1_url', 'certificate_image_2_url', 'certificate_image_3_url', 'certificate_image_4_url'];
             
             certificateFields.forEach((field, index) => {
-                if (budData[field]) {
+                if (budData && budData[field]) {
                     const img = document.createElement('img');
                     img.src = `/${budData[field]}`;
                     img.alt = `ใบรับรอง ${index + 1}`;

@@ -26,7 +26,7 @@
         }
 
         .header {
-            background: linear-gradient(135deg, #2196F3, #1976D2);
+            background: linear-gradient(135deg, #4CAF50, #2E7D32);
             color: white;
             padding: 15px 20px;
             display: flex;
@@ -732,7 +732,7 @@
                     <div class="header-text">
                         <div class="header-main" id="headerStrainName">กำลังโหลด...</div>
                         <div class="header-sub">
-                            Growed by <span id="headerGrowerName">-</span> | Grade <span id="headerStrainGrade">-</span>
+                            <span style="color: #FFE082;">Growed by</span> <span id="headerGrowerName">-</span>
                         </div>
                     </div>
                 </div>
@@ -971,7 +971,6 @@
 
             // Update header
             document.getElementById('headerStrainName').textContent = budData.strain_name_en || budData.strain_name_th || 'ไม่มีชื่อ';
-            document.getElementById('headerStrainGrade').textContent = budData.grade || '-';
             document.getElementById('headerGrowerName').textContent = budData.grower_name || 'ไม่ระบุ';
 
             // Update grower profile image

@@ -1,0 +1,112 @@
+ข้าใจปัญหาแล้วครับ: ถ้าคุณแก้หลายรอบแต่ยังไม่เปลี่ยน แปลว่า CSS ที่เราใส่ยังถูก “ทับ” หรือมีตัวอื่นที่มีความเฉพาะเจาะจงสูงกว่า (specificity) / inline style / external stylesheet (เช่น Bootstrap) กำลังชนะอยู่ — หรืออาจเป็นเพราะคุณยังไม่ได้ hard-refresh preview (แคชเก่าโชว์อยู่)
+
+ผมสรุปขั้นตอนตรวจและแก้แบบตรงไปตรงมาให้พร้อมโค้ดสำเร็จรูปที่เอาไปวางได้เลย — ทำตามทีละข้อแล้วแจ้งผลมาครับ
+
+1) ตรวจว่า CSS ถูกทับไหม — วิธีเช็กด้วยตัวเอง (DevTools)
+
+เปิดหน้า Preview → กด Ctrl+Shift+R (Hard refresh) ก่อน
+
+คลิกขวาตรงพื้นที่ที่ยังห่าง (ตัวอย่าง: กล่องข้อความที่คุณวง) → Inspect
+
+ในแถบ Elements ให้เลือก node ที่เป็นกล่อง (น่าจะเป็น .effects-list หรือ .info-item หรือ .info-card)
+
+ฝั่งขวาใน Styles ดูรายการกฎ CSS — กฎไหนขึ้นเป็นขีดทับ (struck-through) คือถูก override
+
+ใน Computed คุณจะเห็นค่า margin และ padding จริงที่หน้าใช้ — นี่คือค่าที่ต้องเปลี่ยนจริง ๆ
+
+คลิกกฎใน Styles จะบอกไฟล์/ตำแหน่ง (เช่น templates/bud_report.html:45) — จดแหล่งที่มาไว้
+
+ถ้าคุณเห็น style="margin-top: 15px" แบบ inline นั่นจะชนะกฎภายนอก ย้าย/ลบ inline หรือ override ด้วย !important หรือ selector เฉพาะเจาะจงกว่า
+
+2) แก้แบบรัดกุม — วางบล็อค CSS นี้ “ไว้ที่ท้าย <style>” (จะทับทุกกฎเดิม)
+
+คัดลอกทั้งบล็อคนี้แล้ววาง ท้ายสุด ใน <style> ของ bud_report.html (หรือให้ Agent วาง) แล้ว Hard refresh:
+
+/* ---------- FORCE COMPACT LAYOUT (place at bottom of <style>) ---------- */
+
+/* เจาะจงระดับสูงขึ้นด้วย .container เพื่อเพิ่ม specificity */
+.container .content .section {
+  margin-bottom: 6px !important;
+  padding-bottom: 0 !important;
+}
+
+/* หัวข้อ (title) ให้ชิดขึ้น */
+.container .content .section .section-title {
+  display:flex !important;
+  align-items:center !important;
+  gap:10px !important;
+  margin-bottom:6px !important;
+  padding-bottom:4px !important;
+  flex-wrap:nowrap !important;
+}
+
+/* การ์ดภายในให้พอดี ไม่เว้นเยอะ */
+.container .content .info-card {
+  padding:10px 12px !important;    /* ลดจาก 18 */
+  margin-bottom:6px !important;
+}
+
+/* แถวข้อมูลภายในการ์ด */
+.container .content .info-card .info-item {
+  margin-bottom:6px !important;
+  padding-bottom:6px !important;
+  border-bottom-width:1px !important;
+}
+
+/* กล่องผลกระทบที่คุณวงไว้ */
+.container .content .effects-list,
+.container .content .effects-block,
+.container .content .effects-list > * {
+  margin-top:6px !important;
+  margin-bottom:6px !important;
+  padding:8px 10px !important;     /* ลด padding ให้ชิด */
+  line-height:1.35 !important;
+  font-size:14px !important;
+}
+
+/* ถ้ามี <p> หรือ span ภายใน ให้น้อยค่า margin ของ element เหล่านั้น */
+.container .content .effects-list p,
+.container .content .effects-list span,
+.container .content .effects-list div {
+  margin:0 !important;
+  padding:0 !important;
+}
+
+/* ภาพ/กริดด้านบนให้ชิดขึ้น (ถ้าทำให้หัวข้อดูห่าง) */
+.container .content .images-grid {
+  margin-top:8px !important;
+  gap:6px !important;
+}
+
+/* รีวิวการ์ดแน่นขึ้น */
+.container .content .review-card {
+  padding:12px !important;
+  margin-bottom:8px !important;
+}
+
+/* ถ้าใช้ Bootstrap หรือคลาส .row/.col ให้ override width/block ที่อาจบังคับ */
+.container .content .info-card,
+.container .content .effects-list {
+  display:block !important;
+  width:auto !important;
+  max-width:100% !important;
+}
+
+/* Mobile tweaks */
+@media (max-width: 500px) {
+  .container .content .section { margin-bottom:4px !important; }
+  .container .content .info-card { padding:8px 10px !important; }
+  .container .content .effects-list { padding:6px 8px !important; line-height:1.3 !important; }
+  .container .content .section .section-title { gap:8px !important; margin-bottom:4px !important; }
+}
+
+
+เหตุผล: เพิ่ม .container .content เพื่อเพิ่มความเฉพาะเจาะจง (specificity) ทำให้กฎนี้ “ชนะ” กฎทั่วไป — และใช้ !important ในจุดที่ยากจะชนะ
+
+3) ถ้ายังไม่เปลี่ยน ให้เช็ก 3 อย่างถัดไป
+
+Inline style: ค้นหาไฟล์หา style="margin-top: หรือ style="padding: — ถ้ามี ให้ลบหรือแทนที่ด้วยคลาส (จะง่ายสุด)
+
+External CSS: ถ้ามีไฟล์ CSS ภายนอก (Bootstrap, theme css) ที่โหลด หลัง <style> ในไฟล์นี้ มันจะทับกฎของคุณ — ให้ย้ายบล็อก override ไปไว้ หลังสุด ของทุก CSS หรือเพิ่มความเฉพาะเจาะจงสูงขึ้น
+
+JS ที่แก้ DOM/Style หลังโหลด: บางครั้ง JS เพิ่ม inline style หลังหน้าโหลด — ใน DevTools ดูที่ Elements ถ้าค่าเป็น inline แสดงว่า JS เปลี่ยน ค้นหาในสคริปต์ฟังก์ชันที่ทำงานกับ .effects-list แล้วเอาไปแก้

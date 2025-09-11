@@ -1393,9 +1393,19 @@
             // Cannabinoids
             document.getElementById('thcPercentage').textContent = budData.thc_percentage ? `${budData.thc_percentage}%` : '-';
             document.getElementById('cbdPercentage').textContent = budData.cbd_percentage ? `${budData.cbd_percentage}%` : '-';
-            document.getElementById('terpene1').textContent = budData.top_terpenes_1 || '-';
-            document.getElementById('terpene2').textContent = budData.top_terpenes_2 || '-';
-            document.getElementById('terpene3').textContent = budData.top_terpenes_3 || '-';
+            
+            // Terpenes with percentage display
+            const terpene1Text = budData.top_terpenes_1 || '-';
+            const terpene1Percent = budData.terpene_1_percentage || budData.top_terpenes_1_percentage;
+            document.getElementById('terpene1').textContent = terpene1Text !== '-' && terpene1Percent ? `${terpene1Text} (${terpene1Percent}%)` : terpene1Text;
+            
+            const terpene2Text = budData.top_terpenes_2 || '-';
+            const terpene2Percent = budData.terpene_2_percentage || budData.top_terpenes_2_percentage;
+            document.getElementById('terpene2').textContent = terpene2Text !== '-' && terpene2Percent ? `${terpene2Text} (${terpene2Percent}%)` : terpene2Text;
+            
+            const terpene3Text = budData.top_terpenes_3 || '-';
+            const terpene3Percent = budData.terpene_3_percentage || budData.top_terpenes_3_percentage;
+            document.getElementById('terpene3').textContent = terpene3Text !== '-' && terpene3Percent ? `${terpene3Text} (${terpene3Percent}%)` : terpene3Text;
 
             // Aroma and effects
             document.getElementById('aromaFlavor').textContent = budData.aroma_flavor || '-';

@@ -1171,83 +1171,88 @@
 
         // Load reviews for this bud
         async function loadReviews() {
+            console.log('🚀 [LOAD_REVIEWS] ==================== START ====================');
+            
             if (!currentBudId) {
-                console.log('❌ No current bud ID available');
+                console.log('❌ [LOAD_REVIEWS] No current bud ID available');
                 return;
             }
 
-            console.log(`🔄 [REVIEWS] Starting to load reviews for bud ID: ${currentBudId}`);
+            console.log(`🔄 [LOAD_REVIEWS] Starting to load reviews for bud ID: ${currentBudId}`);
 
             const reviewsContainer = document.getElementById('reviewsContainer');
             const ratingsContainer = document.getElementById('ratingsSummary');
             
+            console.log('🔍 [LOAD_REVIEWS] Container check:', {
+                reviewsContainer: !!reviewsContainer,
+                ratingsContainer: !!ratingsContainer
+            });
+            
             // Show loading state
             if (reviewsContainer) {
                 reviewsContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: #4CAF50;"><div style="font-size: 32px; margin-bottom: 10px;">⏳</div>กำลังโหลดรีวิว...</div>';
+                console.log('⏳ [LOAD_REVIEWS] Loading state displayed');
             }
 
             try {
                 const apiUrl = `/api/reviews?bud_id=${currentBudId}&_t=${Date.now()}`;
-                console.log(`🌐 [REVIEWS] Fetching from: ${apiUrl}`);
+                console.log(`🌐 [LOAD_REVIEWS] Fetching from: ${apiUrl}`);
                 
                 const response = await fetch(apiUrl);
-                console.log(`📡 [REVIEWS] API response status: ${response.status}`);
-                console.log(`📡 [REVIEWS] API response headers:`, response.headers);
+                console.log(`📡 [LOAD_REVIEWS] API response status: ${response.status}`);
 
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
 
                 const rawData = await response.text();
-                console.log(`📄 [REVIEWS] Raw response data:`, rawData.substring(0, 500) + '...');
+                console.log(`📄 [LOAD_REVIEWS] Raw response length: ${rawData.length} chars`);
+                console.log(`📄 [LOAD_REVIEWS] Raw response preview:`, rawData.substring(0, 200) + '...');
                 
                 let data;
                 try {
                     data = JSON.parse(rawData);
+                    console.log(`✅ [LOAD_REVIEWS] JSON parsed successfully`);
                 } catch (parseError) {
-                    console.error('❌ [REVIEWS] JSON Parse Error:', parseError);
+                    console.error('❌ [LOAD_REVIEWS] JSON Parse Error:', parseError);
                     throw new Error('Invalid JSON response from server');
                 }
                 
-                console.log(`📋 [REVIEWS] Parsed JSON data:`, data);
-                console.log(`📋 [REVIEWS] Data type:`, typeof data);
-                console.log(`📋 [REVIEWS] Is array:`, Array.isArray(data));
+                console.log(`📋 [LOAD_REVIEWS] Full parsed data:`, data);
+                console.log(`📋 [LOAD_REVIEWS] Data type: ${typeof data}, Is array: ${Array.isArray(data)}`);
                 
                 // Handle different response formats
                 let reviews = [];
                 if (Array.isArray(data)) {
                     reviews = data;
-                    console.log(`✅ [REVIEWS] Using direct array format`);
+                    console.log(`✅ [LOAD_REVIEWS] Using direct array format (${reviews.length} items)`);
                 } else if (data && Array.isArray(data.reviews)) {
                     reviews = data.reviews;
-                    console.log(`✅ [REVIEWS] Using data.reviews format`);
+                    console.log(`✅ [LOAD_REVIEWS] Using data.reviews format (${reviews.length} items)`);
                 } else if (data && Array.isArray(data.data)) {
                     reviews = data.data;
-                    console.log(`✅ [REVIEWS] Using data.data format`);
+                    console.log(`✅ [LOAD_REVIEWS] Using data.data format (${reviews.length} items)`);
                 } else {
-                    console.warn(`⚠️ [REVIEWS] Unknown data format:`, data);
+                    console.warn(`⚠️ [LOAD_REVIEWS] Unknown data format:`, data);
                     reviews = [];
                 }
 
-                console.log(`📊 [REVIEWS] Final reviews array:`, reviews);
-                console.log(`📊 [REVIEWS] Reviews count: ${reviews.length}`);
+                console.log(`📊 [LOAD_REVIEWS] Final reviews array:`, reviews);
+                console.log(`📊 [LOAD_REVIEWS] Reviews count: ${reviews.length}`);
                 
-                // Display reviews and ratings - FORCE EXECUTION
-                setTimeout(() => {
-                    console.log(`🖼️ [REVIEWS] Calling displayReviews with ${reviews.length} reviews`);
-                    displayReviews(reviews);
-                    
-                    console.log(`⭐ [REVIEWS] Calling displayRatings with ${reviews.length} reviews`);
-                    displayRatings(reviews);
-                    
-                    console.log('✅ [REVIEWS] Display functions completed');
-                }, 100);
+                // Display reviews and ratings immediately
+                console.log(`🖼️ [LOAD_REVIEWS] About to call displayReviews...`);
+                displayReviews(reviews);
                 
-                console.log('🎉 [REVIEWS] Reviews loading process completed successfully');
+                console.log(`⭐ [LOAD_REVIEWS] About to call displayRatings...`);
+                displayRatings(reviews);
+                
+                console.log('✅ [LOAD_REVIEWS] Display functions completed');
+                console.log('🚀 [LOAD_REVIEWS] ==================== END ====================');
 
             } catch (error) {
-                console.error('❌ [REVIEWS] Critical error loading reviews:', error);
-                console.error('❌ [REVIEWS] Error stack:', error.stack);
+                console.error('❌ [LOAD_REVIEWS] Critical error loading reviews:', error);
+                console.error('❌ [LOAD_REVIEWS] Error stack:', error.stack);
                 
                 if (reviewsContainer) {
                     reviewsContainer.innerHTML = `
@@ -1274,27 +1279,38 @@
 
         // Display reviews
         function displayReviews(reviews) {
-            console.log('🖼️ [DISPLAY] === START DISPLAY REVIEWS ===');
-            console.log('🖼️ [DISPLAY] Input reviews:', reviews);
-            console.log('🖼️ [DISPLAY] Reviews type:', typeof reviews);
-            console.log('🖼️ [DISPLAY] Reviews is array:', Array.isArray(reviews));
-            console.log('🖼️ [DISPLAY] Reviews length:', reviews ? reviews.length : 'N/A');
+            console.log('🖼️ [DISPLAY_REVIEWS] ==================== START ====================');
+            console.log('🖼️ [DISPLAY_REVIEWS] Function called with reviews:', reviews);
+            console.log('🖼️ [DISPLAY_REVIEWS] Reviews type:', typeof reviews);
+            console.log('🖼️ [DISPLAY_REVIEWS] Reviews is array:', Array.isArray(reviews));
+            console.log('🖼️ [DISPLAY_REVIEWS] Reviews length:', reviews ? reviews.length : 'N/A');
 
             const container = document.getElementById('reviewsContainer');
-            console.log('🖼️ [DISPLAY] Container element:', container);
+            console.log('🖼️ [DISPLAY_REVIEWS] Container element found:', !!container);
+            console.log('🖼️ [DISPLAY_REVIEWS] Container element:', container);
             
             if (!container) {
-                console.error('❌ [DISPLAY] Reviews container not found!');
+                console.error('❌ [DISPLAY_REVIEWS] Reviews container not found! DOM might not be ready');
+                // ลองหา container อีกครั้งหลังจาก DOM โหลดเสร็จ
+                setTimeout(() => {
+                    const retryContainer = document.getElementById('reviewsContainer');
+                    if (retryContainer) {
+                        console.log('🔄 [DISPLAY_REVIEWS] Container found on retry, calling displayReviews again');
+                        displayReviews(reviews);
+                    } else {
+                        console.error('❌ [DISPLAY_REVIEWS] Container still not found after retry');
+                    }
+                }, 500);
                 return;
             }
 
             // Clear container
             container.innerHTML = '';
-            console.log('🖼️ [DISPLAY] Container cleared');
+            console.log('🖼️ [DISPLAY_REVIEWS] Container cleared');
 
             // Handle empty reviews
             if (!reviews || !Array.isArray(reviews) || reviews.length === 0) {
-                console.log('📝 [DISPLAY] No reviews detected, showing empty state');
+                console.log('📝 [DISPLAY_REVIEWS] No reviews detected, showing empty state');
                 const emptyHtml = `
                     <div class="no-reviews" style="text-align: center; padding: 60px 20px; background: #f8f9fa; border-radius: 15px; margin: 20px 0; border: 2px solid #4CAF50;">
                         <div style="font-size: 64px; margin-bottom: 20px; opacity: 0.3;">💬</div>
@@ -1302,25 +1318,29 @@
                         <p style="color: #888; margin-bottom: 20px;">เป็นคนแรกที่แชร์ประสบการณ์ของคุณ!</p>
                         <button class="review-btn" onclick="openReviewModal()" style="background: #4CAF50; color: white; border: none; padding: 12px 24px; border-radius: 25px; cursor: pointer; font-size: 16px;">⭐ เขียนรีวิวแรก</button>
                         <div style="margin-top: 20px; padding: 15px; background: #e3f2fd; border-radius: 10px;">
-                            <p style="font-size: 12px; color: #1976d2; margin: 0;">Debug Info: Bud ID ${currentBudId} | Reviews: ${reviews ? reviews.length : 'null'}</p>
+                            <p style="font-size: 12px; color: #1976d2; margin: 0;">Debug Info: Bud ID ${currentBudId} | Reviews: ${reviews ? reviews.length : 'null'} | Time: ${new Date().toLocaleTimeString('th-TH')}</p>
                         </div>
                     </div>
                 `;
                 container.innerHTML = emptyHtml;
-                console.log('📝 [DISPLAY] Empty state HTML set');
+                console.log('📝 [DISPLAY_REVIEWS] Empty state HTML set, final HTML length:', emptyHtml.length);
+                
+                // ตรวจสอบว่า HTML ถูกใส่จริง
+                console.log('📝 [DISPLAY_REVIEWS] Container innerHTML after empty state:', container.innerHTML.substring(0, 100) + '...');
                 return;
             }
 
             // Generate review cards
-            console.log(`📝 [DISPLAY] Generating HTML for ${reviews.length} review cards`);
+            console.log(`📝 [DISPLAY_REVIEWS] Generating HTML for ${reviews.length} review cards`);
             let reviewsHtml = '';
             
             try {
                 reviews.forEach((review, index) => {
-                    console.log(`🔄 [DISPLAY] Processing review ${index + 1}:`, review);
+                    console.log(`🔄 [DISPLAY_REVIEWS] Processing review ${index + 1}:`, review);
                     const cardHtml = createReviewCard(review);
+                    console.log(`🔄 [DISPLAY_REVIEWS] Generated card HTML length: ${cardHtml.length}`);
                     reviewsHtml += cardHtml;
-                    console.log(`✅ [DISPLAY] Card ${index + 1} HTML generated successfully`);
+                    console.log(`✅ [DISPLAY_REVIEWS] Card ${index + 1} HTML added, total length: ${reviewsHtml.length}`);
                 });
                 
                 // Add debug info at the bottom
@@ -1332,31 +1352,42 @@
                     </div>
                 `;
                 
-                console.log(`🖼️ [DISPLAY] Setting final HTML (${reviewsHtml.length} chars)`);
+                console.log(`🖼️ [DISPLAY_REVIEWS] Final HTML generated, total length: ${reviewsHtml.length} chars`);
+                console.log(`🖼️ [DISPLAY_REVIEWS] HTML preview:`, reviewsHtml.substring(0, 200) + '...');
+                
+                // Set HTML
                 container.innerHTML = reviewsHtml;
-                console.log('✅ [DISPLAY] Reviews displayed successfully in DOM');
+                console.log('✅ [DISPLAY_REVIEWS] HTML set to container');
+                
+                // Verify HTML was set
+                console.log('🔍 [DISPLAY_REVIEWS] Container innerHTML length after setting:', container.innerHTML.length);
+                console.log('🔍 [DISPLAY_REVIEWS] Container innerHTML preview:', container.innerHTML.substring(0, 200) + '...');
                 
                 // Force visual refresh
                 container.style.display = 'none';
-                container.offsetHeight; // Trigger reflow
+                const height = container.offsetHeight; // Trigger reflow
                 container.style.display = 'block';
-                console.log('🔄 [DISPLAY] Forced DOM refresh');
+                console.log('🔄 [DISPLAY_REVIEWS] Forced DOM refresh, height:', height);
+                
+                // Check if visible
+                const rect = container.getBoundingClientRect();
+                console.log('🔍 [DISPLAY_REVIEWS] Container position:', rect);
                 
             } catch (error) {
-                console.error('❌ [DISPLAY] Critical error generating review HTML:', error);
-                console.error('❌ [DISPLAY] Error stack:', error.stack);
+                console.error('❌ [DISPLAY_REVIEWS] Critical error generating review HTML:', error);
+                console.error('❌ [DISPLAY_REVIEWS] Error stack:', error.stack);
                 container.innerHTML = `
                     <div style="text-align: center; padding: 40px; color: #f44336; background: #ffebee; border-radius: 10px; margin: 20px 0;">
                         <div style="font-size: 48px; margin-bottom: 15px;">💥</div>
                         <h3>เกิดข้อผิดพลาดในการแสดงรีวิว</h3>
                         <p>ข้อผิดพลาด: ${error.message}</p>
-                        <p style="font-size: 12px; color: #666;">Reviews count: ${reviews.length} | Stack: ${error.stack}</p>
+                        <p style="font-size: 12px; color: #666;">Reviews count: ${reviews.length} | Stack: ${error.stack.substring(0, 200)}...</p>
                         <button onclick="loadReviews()" style="background: #4CAF50; color: white; border: none; padding: 12px 24px; border-radius: 25px; cursor: pointer; margin-top: 15px;">🔄 ลองใหม่</button>
                     </div>
                 `;
             }
             
-            console.log('🖼️ [DISPLAY] === END DISPLAY REVIEWS ===');
+            console.log('🖼️ [DISPLAY_REVIEWS] ==================== END ====================');
         }
 
         // Create review card HTML

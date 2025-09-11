@@ -371,6 +371,47 @@
             font-weight: 500;
         }
 
+        .ratings-breakdown {
+            margin-top: 30px;
+        }
+
+        .rating-bar-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            padding: 8px 0;
+        }
+
+        .rating-label {
+            width: 80px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .rating-bar {
+            flex: 1;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            margin: 0 15px;
+            overflow: hidden;
+        }
+
+        .rating-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ffd700, #ffed4e);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .rating-count-small {
+            width: 40px;
+            text-align: right;
+            font-size: 12px;
+            color: #666;
+        }
+
         .bud-info-section {
             display: none;
         }
@@ -976,6 +1017,9 @@
                         <div class="ratings-summary" id="ratingsSummary">
                             <div class="loading">กำลังโหลดคะแนน...</div>
                         </div>
+                        <div class="ratings-breakdown" id="ratingsBreakdown">
+                            <!-- Rating breakdown will be loaded here -->
+                        </div>
                     </div>
 
                     <!-- Contact Info -->
@@ -1082,7 +1126,9 @@
             const reviewDate = new Date(review.created_at).toLocaleDateString('th-TH', {
                 day: 'numeric',
                 month: 'short',
-                year: 'numeric'
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
             });
 
             const effectTags = (review.selected_effects || []).map(effect => 
@@ -1097,15 +1143,31 @@
                 `<img src="${review.reviewer_profile_image}" alt="Profile">` :
                 (review.reviewer_name ? review.reviewer_name.charAt(0).toUpperCase() : '👤');
 
-            // สร้างรูปรีวิว 4 รูป
+            // สร้างรูปรีวิว 4 รูป - ปรับปรุงการแสดงผล
             const reviewImages = review.review_images || [];
-            const reviewImagesHtml = [0, 1, 2, 3].map(index => {
-                if (reviewImages[index] && reviewImages[index].trim()) {
-                    return `<img src="${reviewImages[index]}" alt="รูปรีวิว ${index + 1}" class="review-image" onclick="openImageModal('${reviewImages[index]}')">`;
-                } else {
-                    return `<div class="review-image-placeholder">ไม่มีรูป ${index + 1}</div>`;
+            const validImages = reviewImages.filter(img => img && img.trim());
+            
+            let reviewImagesHtml = '';
+            if (validImages.length > 0) {
+                reviewImagesHtml = validImages.map((img, index) => 
+                    `<img src="/${img}" alt="รูปรีวิว ${index + 1}" class="review-image" onclick="openImageModal('${img}')">`
+                ).join('');
+                
+                // เติมช่องว่างให้ครบ 4 รูปถ้าจำเป็น
+                for (let i = validImages.length; i < 4; i++) {
+                    reviewImagesHtml += `<div class="review-image-placeholder">ไม่มีรูป ${i + 1}</div>`;
                 }
-            }).join('');
+            } else {
+                reviewImagesHtml = [1, 2, 3, 4].map(num => 
+                    `<div class="review-image-placeholder">ไม่มีรูป ${num}</div>`
+                ).join('');
+            }
+
+            // เพิ่มคะแนนกลิ่นถ้ามี
+            const aromaRatingHtml = review.aroma_rating ? 
+                `<div style="margin-top: 5px; font-size: 12px; color: #666;">
+                    คะแนนกลิ่น: ${'⭐'.repeat(review.aroma_rating)} (${review.aroma_rating}/5)
+                </div>` : '';
 
             return `
                 <div class="review-card">
@@ -1123,20 +1185,30 @@
                         </div>
                     </div>
 
-                    <div class="review-summary">${review.short_summary || ''}</div>
+                    ${aromaRatingHtml}
+
+                    ${review.short_summary ? `<div class="review-summary">${review.short_summary}</div>` : ''}
 
                     ${review.full_review_content ? `<div class="review-content">${review.full_review_content}</div>` : ''}
 
                     ${effectTags || aromaTags ? `
                         <div class="review-tags">
-                            ${effectTags}
-                            ${aromaTags}
+                            ${effectTags ? `<div style="margin-bottom: 8px;"><strong>ผลกระทบ:</strong> ${effectTags}</div>` : ''}
+                            ${aromaTags ? `<div><strong>กลิ่นรส:</strong> ${aromaTags}</div>` : ''}
                         </div>
                     ` : ''}
 
                     <div class="review-images-grid">
                         ${reviewImagesHtml}
                     </div>
+
+                    ${review.video_review_url ? `
+                        <div style="margin-top: 15px;">
+                            <a href="${review.video_review_url}" target="_blank" style="color: #4CAF50; text-decoration: none; font-weight: 600;">
+                                🎥 ดูวิดีโอรีวิว
+                            </a>
+                        </div>
+                    ` : ''}
                 </div>
             `;
         }
@@ -1144,6 +1216,7 @@
         // Display ratings summary
         function displayRatings(reviews) {
             const container = document.getElementById('ratingsSummary');
+            const breakdownContainer = document.getElementById('ratingsBreakdown');
 
             if (reviews.length === 0) {
                 container.innerHTML = `
@@ -1153,12 +1226,21 @@
                         <div class="rating-count">ยังไม่มีรีวิว</div>
                     </div>
                 `;
+                breakdownContainer.innerHTML = '';
                 return;
             }
 
             const totalRating = reviews.reduce((sum, review) => sum + review.overall_rating, 0);
             const averageRating = totalRating / reviews.length;
             const starCount = Math.round(averageRating);
+
+            // Count ratings for each star level
+            const ratingCounts = [0, 0, 0, 0, 0]; // Index 0 = 1 star, Index 4 = 5 stars
+            reviews.forEach(review => {
+                if (review.overall_rating >= 1 && review.overall_rating <= 5) {
+                    ratingCounts[review.overall_rating - 1]++;
+                }
+            });
 
             container.innerHTML = `
                 <div class="average-rating">
@@ -1167,6 +1249,26 @@
                     <div class="rating-count">จาก ${reviews.length} รีวิว</div>
                 </div>
             `;
+
+            // Generate rating breakdown
+            let breakdownHtml = '<h3 style="margin-bottom: 20px; color: #2c5530;">📊 รายละเอียดคะแนน</h3>';
+            for (let i = 4; i >= 0; i--) { // Start from 5 stars down to 1 star
+                const starNum = i + 1;
+                const count = ratingCounts[i];
+                const percentage = reviews.length > 0 ? (count / reviews.length) * 100 : 0;
+                
+                breakdownHtml += `
+                    <div class="rating-bar-item">
+                        <div class="rating-label">${starNum} ⭐</div>
+                        <div class="rating-bar">
+                            <div class="rating-fill" style="width: ${percentage}%"></div>
+                        </div>
+                        <div class="rating-count-small">${count}</div>
+                    </div>
+                `;
+            }
+
+            breakdownContainer.innerHTML = breakdownHtml;
         }
 
         // Load bud data

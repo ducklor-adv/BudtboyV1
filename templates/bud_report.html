@@ -1159,37 +1159,10 @@
 
             // Force load reviews and ratings when switching to these sections
             if (sectionName === 'reviews' || sectionName === 'ratings') {
-                console.log(`Loading content for section: ${sectionName}`);
+                console.log(`🔄 Loading content for section: ${sectionName}`);
                 
-                // Add loading state immediately with better visibility
-                const reviewsContainer = document.getElementById('reviewsContainer');
-                const ratingsContainer = document.getElementById('ratingsSummary');
-                
-                if (sectionName === 'reviews' && reviewsContainer) {
-                    reviewsContainer.innerHTML = `
-                        <div class="loading" style="text-align: center; padding: 40px; background: #f8f9fa; border-radius: 10px; margin: 20px 0;">
-                            <div style="font-size: 48px; margin-bottom: 15px;">🔄</div>
-                            <h3 style="color: #4CAF50; margin-bottom: 10px;">กำลังโหลดรีวิว...</h3>
-                            <p style="color: #666;">กรุณารอสักครู่</p>
-                        </div>
-                    `;
-                    console.log('Set loading state for reviews container');
-                }
-                if (sectionName === 'ratings' && ratingsContainer) {
-                    ratingsContainer.innerHTML = `
-                        <div class="loading" style="text-align: center; padding: 40px; background: #f8f9fa; border-radius: 10px;">
-                            <div style="font-size: 48px; margin-bottom: 15px;">📊</div>
-                            <h3 style="color: #4CAF50; margin-bottom: 10px;">กำลังโหลดคะแนน...</h3>
-                            <p style="color: #666;">กรุณารอสักครู่</p>
-                        </div>
-                    `;
-                }
-                
-                // Load reviews with a small delay to ensure DOM is ready
-                setTimeout(() => {
-                    console.log('Starting delayed reviews load');
-                    loadReviews();
-                }, 100);
+                // Immediately load reviews without delay
+                loadReviews();
             }
 
             // Scroll to top
@@ -1203,130 +1176,156 @@
                 return;
             }
 
-            console.log(`Loading reviews for bud ID: ${currentBudId}`);
+            console.log(`=== LOADING REVIEWS FOR BUD ${currentBudId} ===`);
+
+            // Set loading state immediately
+            const reviewsContainer = document.getElementById('reviewsContainer');
+            const ratingsContainer = document.getElementById('ratingsSummary');
+            
+            if (reviewsContainer) {
+                reviewsContainer.innerHTML = `
+                    <div style="text-align: center; padding: 40px; background: #f8f9fa; border-radius: 10px; margin: 20px 0;">
+                        <div style="font-size: 48px; margin-bottom: 15px;">🔄</div>
+                        <h3 style="color: #4CAF50; margin-bottom: 10px;">กำลังโหลดรีวิว...</h3>
+                        <p style="color: #666;">กรุณารอสักครู่</p>
+                    </div>
+                `;
+            }
 
             try {
-                const response = await fetch(`/api/reviews?bud_id=${currentBudId}&_t=${Date.now()}`);
+                const apiUrl = `/api/reviews?bud_id=${currentBudId}&_t=${Date.now()}`;
+                console.log('Calling API:', apiUrl);
+                
+                const response = await fetch(apiUrl);
                 console.log('Reviews API response status:', response.status);
-                console.log('Reviews API response headers:', response.headers);
+                console.log('Reviews API response ok:', response.ok);
 
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
 
-                const rawText = await response.text();
-                console.log('Reviews API raw response:', rawText.substring(0, 500) + (rawText.length > 500 ? '...' : ''));
-
-                let data;
-                try {
-                    data = JSON.parse(rawText);
-                } catch (parseError) {
-                    console.error('JSON parse error:', parseError);
-                    throw new Error('Invalid JSON response from server');
-                }
-
-                console.log('Reviews API parsed data:', data);
+                const data = await response.json();
+                console.log('=== REVIEWS API RESPONSE ===');
+                console.log('Raw data:', data);
                 console.log('Data type:', typeof data);
-                console.log('Data keys:', data ? Object.keys(data) : 'No keys');
+                console.log('Is array:', Array.isArray(data));
+                console.log('Data length:', data ? data.length : 'N/A');
 
-                // Handle both direct array and wrapped response
+                // Direct array handling (simplified)
                 let reviews = [];
                 if (Array.isArray(data)) {
-                    console.log('Data is direct array');
                     reviews = data;
-                } else if (data && data.reviews && Array.isArray(data.reviews)) {
-                    console.log('Data has reviews property');
+                    console.log('✅ Using data as direct array');
+                } else if (data && Array.isArray(data.reviews)) {
                     reviews = data.reviews;
-                } else if (data && data.data && Array.isArray(data.data)) {
-                    console.log('Data has data property');
+                    console.log('✅ Using data.reviews array');
+                } else if (data && Array.isArray(data.data)) {
                     reviews = data.data;
-                } else if (data && typeof data === 'object') {
-                    console.log('Data is object, trying to extract array');
-                    // Try to find any array property
-                    for (const [key, value] of Object.entries(data)) {
-                        if (Array.isArray(value)) {
-                            console.log(`Found array in property: ${key}`);
-                            reviews = value;
-                            break;
-                        }
-                    }
+                    console.log('✅ Using data.data array');
                 } else {
-                    console.warn('Unexpected reviews data structure:', data);
+                    console.warn('⚠️ Unexpected data format, using empty array');
                     reviews = [];
                 }
 
-                console.log(`Processing ${reviews.length} reviews:`, reviews);
+                console.log(`=== FINAL REVIEWS COUNT: ${reviews.length} ===`);
                 
-                // Force display immediately
+                // Always call display functions, even with empty array
                 displayReviews(reviews);
                 displayRatings(reviews);
+                
+                console.log('=== REVIEWS LOADING COMPLETE ===');
 
             } catch (error) {
-                console.error('Error loading reviews:', error);
-                const errorMessage = `เกิดข้อผิดพลาดในการโหลดรีวิว: ${error.message}`;
-                const reviewsContainer = document.getElementById('reviewsContainer');
-                const ratingsContainer = document.getElementById('ratingsSummary');
+                console.error('❌ Error loading reviews:', error);
                 
                 if (reviewsContainer) {
-                    reviewsContainer.innerHTML = `<div class="error" style="color: red; padding: 20px; text-align: center;">${errorMessage}</div>`;
+                    reviewsContainer.innerHTML = `
+                        <div style="text-align: center; padding: 40px; background: #ffebee; border-radius: 10px; margin: 20px 0; border: 1px solid #ffcdd2;">
+                            <div style="font-size: 48px; margin-bottom: 15px; color: #f44336;">❌</div>
+                            <h3 style="color: #d32f2f; margin-bottom: 10px;">ไม่สามารถโหลดรีวิวได้</h3>
+                            <p style="color: #666; margin-bottom: 15px;">เกิดข้อผิดพลาด: ${error.message}</p>
+                            <button onclick="loadReviews()" style="background: #f44336; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">ลองใหม่</button>
+                        </div>
+                    `;
                 }
+                
                 if (ratingsContainer) {
-                    ratingsContainer.innerHTML = `<div class="error" style="color: red; padding: 20px; text-align: center;">เกิดข้อผิดพลาดในการโหลดคะแนน: ${error.message}</div>`;
+                    ratingsContainer.innerHTML = `
+                        <div style="text-align: center; padding: 20px; color: #d32f2f;">
+                            <p>ไม่สามารถโหลดคะแนนได้</p>
+                        </div>
+                    `;
                 }
             }
         }
 
         // Display reviews
         function displayReviews(reviews) {
-            const container = document.getElementById('reviewsContainer');
-
-            console.log('=== DISPLAY REVIEWS DEBUG ===');
-            console.log('Reviews container:', container);
+            console.log('🔄 DISPLAY REVIEWS CALLED');
             console.log('Reviews data:', reviews);
-            console.log('Reviews type:', typeof reviews);
-            console.log('Reviews length:', reviews ? reviews.length : 'N/A');
-            console.log('Container innerHTML before:', container ? container.innerHTML : 'Container not found');
+            console.log('Reviews length:', reviews ? reviews.length : 'undefined');
 
+            const container = document.getElementById('reviewsContainer');
+            console.log('Container found:', !!container);
+            
             if (!container) {
-                console.error('Reviews container not found!');
-                // Try to find alternative containers
-                const altContainer = document.querySelector('.reviews-container');
-                console.log('Alternative container found:', altContainer);
+                console.error('❌ Reviews container not found!');
                 return;
             }
 
-            // Force clear any existing content
+            // Clear container
             container.innerHTML = '';
+            console.log('✅ Container cleared');
 
-            if (!reviews || reviews.length === 0) {
-                console.log('No reviews found, showing empty state');
+            // Handle empty reviews
+            if (!reviews || !Array.isArray(reviews) || reviews.length === 0) {
+                console.log('📝 Showing empty state');
                 container.innerHTML = `
-                    <div class="no-reviews">
-                        <p>🌟 ยังไม่มีรีวิวสำหรับดอกนี้</p>
-                        <p>เป็นคนแรกที่เขียนรีวิว!</p>
-                        <button class="review-btn" onclick="openReviewModal()">⭐ เขียนรีวิวเลย</button>
+                    <div class="no-reviews" style="text-align: center; padding: 60px 20px; background: #f8f9fa; border-radius: 15px; margin: 20px 0;">
+                        <div style="font-size: 64px; margin-bottom: 20px; opacity: 0.3;">💬</div>
+                        <h3 style="color: #666; margin-bottom: 15px;">ยังไม่มีรีวิวสำหรับดอกนี้</h3>
+                        <p style="color: #888; margin-bottom: 20px;">เป็นคนแรกที่แชร์ประสบการณ์ของคุณ!</p>
+                        <button class="review-btn" onclick="openReviewModal()" style="background: #4CAF50; color: white; border: none; padding: 12px 24px; border-radius: 25px; cursor: pointer; font-size: 16px;">⭐ เขียนรีวิวแรก</button>
                     </div>
                 `;
-                console.log('Empty state HTML set, container innerHTML:', container.innerHTML);
+                console.log('✅ Empty state displayed');
                 return;
             }
 
-            console.log(`Creating HTML for ${reviews.length} reviews`);
-            const reviewsHtml = reviews.map((review, index) => {
-                console.log(`Processing review ${index + 1}:`, review);
-                const cardHtml = createReviewCard(review);
-                console.log(`Generated card HTML length for review ${index + 1}:`, cardHtml.length);
-                return cardHtml;
-            }).join('');
+            // Generate review cards
+            console.log(`📝 Creating ${reviews.length} review cards`);
+            let reviewsHtml = '';
             
-            console.log('Generated HTML length:', reviewsHtml.length);
-            console.log('Generated HTML preview:', reviewsHtml.substring(0, 200) + '...');
-            
+            try {
+                reviewsHtml = reviews.map((review, index) => {
+                    console.log(`Processing review ${index + 1}:`, review.id);
+                    return createReviewCard(review);
+                }).join('');
+                
+                console.log('✅ HTML generated, length:', reviewsHtml.length);
+            } catch (error) {
+                console.error('❌ Error generating review HTML:', error);
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #f44336; background: #ffebee; border-radius: 10px; margin: 20px 0;">
+                        <h3>เกิดข้อผิดพลาดในการแสดงรีวิว</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Set HTML
             container.innerHTML = reviewsHtml;
+            console.log('✅ Reviews HTML set in container');
+            console.log('Final container children count:', container.children.length);
             
-            console.log('Container innerHTML after setting:', container.innerHTML.length > 0 ? 'Content set successfully' : 'Content is empty!');
-            console.log(`Successfully displayed ${reviews.length} reviews`);
-            console.log('=== END DISPLAY REVIEWS DEBUG ===');
+            // Verify display
+            setTimeout(() => {
+                console.log('🔍 POST-DISPLAY CHECK:');
+                console.log('Container exists:', !!document.getElementById('reviewsContainer'));
+                console.log('Container has content:', container.innerHTML.length > 0);
+                console.log('Container visible:', container.offsetHeight > 0);
+            }, 100);
         }
 
         // Create review card HTML

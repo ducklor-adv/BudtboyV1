@@ -310,9 +310,9 @@
         .effects-list {
             background: white;
             border-radius: 8px;
-            padding: 15px 20px;
+            padding: 10px 15px;
             margin-top: 8px;
-            line-height: 2.2;
+            line-height: 1.4;
             font-size: 14px;
         }
 
@@ -600,6 +600,14 @@
             <div id="mainContent" class="bud-info-section">
                 <!-- Bud Info Section -->
                 <div id="bud-info-content" class="section">
+                    <!-- Images Section - Moved to top -->
+                    <div class="images-section">
+                        <div class="section-title">📸 รูปภาพดอก</div>
+                        <div class="images-grid" id="budImages">
+                            <!-- Images will be loaded here -->
+                        </div>
+                    </div>
+
                     <div class="section-title">
                         📊 ข้อมูลดอก
                     </div>
@@ -747,13 +755,7 @@
                         <button class="review-btn" onclick="openReviewModal()">⭐ เขียนรีวิว</button>
                     </div>
 
-                    <!-- Images -->
-                    <div class="images-section">
-                        <div class="section-title">📸 รูปภาพดอก</div>
-                        <div class="images-grid" id="budImages">
-                            <!-- Images will be loaded here -->
-                        </div>
-                    </div>
+                    
 
                     <!-- Reviews Section -->
                     <div id="reviews-content" class="section" style="display: none;">

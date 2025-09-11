@@ -1098,86 +1098,106 @@
           .container .content .section .section-title { gap:8px !important; margin-bottom:4px !important; }
         }
 
-        /* ---------- ULTRA FORCE OVERRIDE - NUCLEAR OPTION ---------- */
+        /* ---------- ULTIMATE FORCE OVERRIDE - MAXIMUM SPECIFICITY ---------- */
         
-        /* ใช้ multiple classes และ attribute selector เพื่อเพิ่ม specificity สูงสุด */
-        html body.container div.container div.content div.section,
-        body[class] .container[class] .content[class] .section[class],
-        .container.container .content.content .section.section {
-          margin-bottom: 1px !important;
-          padding-bottom: 0px !important;
-        }
-
-        /* Effects list - บังคับให้ชิดสุด ๆ */
-        html body div.container div.content div.effects-list,
-        html body div.container div.content div.effects-block,
-        body[class] .container[class] .content[class] .effects-list[class],
-        body[class] .container[class] .content[class] .effects-block[class] {
-          margin: 1px 0 1px 0 !important;
-          padding: 1px 2px 1px 2px !important;
-          line-height: 1.2 !important;
-          font-size: 13px !important;
-        }
-
-        /* Info cards - บังคับ padding ให้เล็กสุด */
-        html body div.container div.content div.info-card,
-        body[class] .container[class] .content[class] .info-card[class] {
-          padding: 5px 8px 5px 8px !important;
-          margin-bottom: 2px !important;
-        }
-
-        /* Info items ภายในการ์ด */
-        html body div.container div.content div.info-card div.info-item,
-        body[class] .container[class] .content[class] .info-card[class] .info-item[class] {
-          margin-bottom: 2px !important;
-          padding-bottom: 2px !important;
-        }
-
-        /* Section titles */
-        html body div.container div.content div.section div.section-title,
-        body[class] .container[class] .content[class] .section[class] .section-title[class] {
-          margin-bottom: 2px !important;
-          padding-bottom: 2px !important;
-        }
-
-        /* ผลกระทบที่คุณวงไว้ - บังคับทุกอย่างให้ชิด */
-        html body div.container div.content strong + div.effects-list,
-        html body div.container div.content div[class*="effects"],
-        body[class] .container[class] .content[class] *[class*="effects"] {
-          margin: 0px !important;
-          padding: 1px !important;
-          line-height: 1.1 !important;
-          font-size: 12px !important;
-        }
-
-        /* Grid spacing override */
-        html body div.container div.content div.info-grid,
-        body[class] .container[class] .content[class] .info-grid[class] {
-          gap: 2px !important;
-          margin-bottom: 2px !important;
-        }
-
-        /* Images grid spacing */
-        html body div.container div.content div.images-grid,
-        body[class] .container[class] .content[class] .images-grid[class] {
-          margin-top: 2px !important;
-          gap: 2px !important;
-        }
-
-        /* แม้แต่ paragraph และ text nodes */
-        .container .content p,
-        .container .content span,
-        .container .content div {
-          margin: 0px !important;
+        /* ใช้ attribute selectors และ multiple classes เพื่อ specificity สูงสุด */
+        [class*="container"] [class*="content"] [class*="section"],
+        html body div[class*="container"] div[class*="content"] div[class*="section"],
+        .container.container.container .content.content.content .section.section.section {
+          margin: 0px 0px 1px 0px !important;
           padding: 0px !important;
         }
 
-        /* สำหรับ effects ที่มี background หรือ wrapper */
-        .container .content .effects-card,
-        .container .content .effects-card h3,
-        .container .content .effects-grid {
+        /* Effects - บังคับให้ระยะห่างเป็น 0 */
+        [class*="container"] [class*="content"] [class*="effects"],
+        html body div[class*="container"] div[class*="content"] div[class*="effects"],
+        .container .content .effects-list,
+        .container .content .effects-block,
+        .effects-list.effects-list,
+        .effects-block.effects-block {
           margin: 0px !important;
+          padding: 0px 2px !important;
+          line-height: 1.1 !important;
+          font-size: 12px !important;
+          background: transparent !important;
+        }
+
+        /* Info cards - บังคับให้แน่นสุด */
+        [class*="container"] [class*="content"] [class*="info-card"],
+        html body div[class*="container"] div[class*="content"] div[class*="info-card"],
+        .info-card.info-card.info-card {
+          padding: 2px 6px !important;
+          margin: 0px 0px 1px 0px !important;
+        }
+
+        /* Info items */
+        [class*="info-card"] [class*="info-item"],
+        .info-item.info-item.info-item {
+          margin: 0px 0px 1px 0px !important;
+          padding: 1px 0px !important;
+        }
+
+        /* Section titles */
+        [class*="section"] [class*="section-title"],
+        .section-title.section-title.section-title {
+          margin: 0px 0px 1px 0px !important;
+          padding: 2px 0px 1px 0px !important;
+        }
+
+        /* Grid spacing */
+        [class*="info-grid"],
+        .info-grid.info-grid.info-grid {
+          gap: 1px !important;
+          margin: 0px !important;
+        }
+
+        /* Images grid */
+        [class*="images-grid"],
+        .images-grid.images-grid.images-grid {
+          margin-top: 1px !important;
+          gap: 2px !important;
+        }
+
+        /* Review cards */
+        [class*="review-card"],
+        .review-card.review-card.review-card {
+          padding: 8px !important;
+          margin: 0px 0px 1px 0px !important;
+        }
+
+        /* Rating row */
+        [class*="rating-row"],
+        .rating-row.rating-row.rating-row {
+          margin: 0px !important;
+          padding: 6px 8px !important;
+        }
+
+        /* แทนที่ทุก margin และ padding ใน content area */
+        .container .content * {
+          margin-top: 0px !important;
+          margin-bottom: 0px !important;
+          padding-top: 0px !important;
+          padding-bottom: 0px !important;
+        }
+
+        /* อนุญาตให้มี padding เล็กน้อยสำหรับ text content */
+        .container .content .info-value,
+        .container .content .info-label,
+        .container .content span:not([class]),
+        .container .content p {
           padding: 1px !important;
+        }
+
+        /* Force กล่อง effects ให้แน่นสุด */
+        .effects-block strong {
+          display: inline !important;
+          margin-right: 5px !important;
+        }
+
+        .effects-block .effects-list {
+          display: inline !important;
+          margin: 0px !important;
+          padding: 0px !important;
         }
     </style>
 </head>

@@ -545,6 +545,19 @@
             display: inline-flex !important; 
         }
 
+        /* Override CSS ที่อาจทำให้ rating elements แยกบรรทัด */
+        .rating-row .average-rating,
+        .rating-row .rating-score,
+        .rating-row .rating-count,
+        .rating-row .star-rating { 
+            display: inline-flex !important; 
+            width: auto !important; 
+            clear: none !important; 
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
+            float: none !important;
+        }
+
         .contact-item {
             display: flex;
             align-items: center;

@@ -488,8 +488,8 @@
 
         .images-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
             margin-top: 20px;
         }
 
@@ -756,7 +756,7 @@
 
             .images-grid {
                 grid-template-columns: repeat(2, 1fr);
-                gap: 10px;
+                gap: 6px;
             }
 
             .certificate-images {
@@ -1480,6 +1480,10 @@
                     console.warn(`Element with ID '${id}' not found`);
                 }
             }
+
+            // Update main strain name display
+            safeUpdateElement('mainStrainName', budData.strain_name_en || budData.strain_name_th);
+            safeUpdateElement('strainGrade', budData.grade);
 
             // Basic info
             safeUpdateElement('strainNameEn', budData.strain_name_en);

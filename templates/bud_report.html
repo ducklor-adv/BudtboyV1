@@ -26,23 +26,23 @@
             overflow: hidden;
         }
 
-        /* Strain Name Section */
-        .strain-name-section {
+        /* Strain Header */
+        .strain-header {
             background: #f5f5f5;
-            padding: 20px;
+            padding: 15px 20px;
             text-align: center;
             border-bottom: 1px solid #e0e0e0;
         }
 
-        .strain-name {
-            font-size: 24px;
+        .strain-title {
+            font-size: 22px;
             font-weight: 700;
             color: #333;
-            margin: 0 0 10px 0;
+            margin: 0 0 8px 0;
         }
 
-        .strain-subtitle {
-            font-size: 16px;
+        .strain-grade-text {
+            font-size: 14px;
             color: #666;
             margin: 0;
         }
@@ -809,6 +809,89 @@
                 margin-bottom: 15px;
             }
         }
+
+        /* Mobile Extra Small Devices (max-width: 500px) */
+        @media (max-width: 500px) {
+            .container {
+                max-width: 100%;
+                margin: 0;
+                border-radius: 0;
+            }
+
+            .header {
+                padding: 10px 15px;
+            }
+
+            .grower-logo {
+                width: 40px;
+                height: 40px;
+            }
+
+            .header-main {
+                font-size: 14px;
+            }
+
+            .header-sub {
+                font-size: 18px;
+            }
+
+            .strain-header {
+                padding: 12px 15px;
+            }
+
+            .strain-title {
+                font-size: 20px;
+                margin-bottom: 6px;
+            }
+
+            .strain-grade-text {
+                font-size: 13px;
+            }
+
+            .nav-container {
+                padding: 0 15px;
+                gap: 10px;
+            }
+
+            .nav-item {
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+
+            .content {
+                padding: 10px;
+            }
+
+            .images-grid {
+                gap: 4px;
+            }
+
+            .section-title {
+                font-size: 1.2em;
+                margin-bottom: 10px;
+            }
+
+            .info-card {
+                padding: 12px;
+            }
+
+            .info-card h3 {
+                font-size: 1em;
+                margin-bottom: 8px;
+            }
+
+            .info-item {
+                margin-bottom: 6px;
+            }
+
+            .info-label {
+                font-size: 13px;
+            }
+
+            .info-value {
+                font-size: 13px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -820,11 +903,17 @@
                     <img src="/uploads/20250727_055943_review_1_budtboy1_V2.png" alt="โลโก้" class="grower-logo">
                     <div class="header-text">
                         <div class="header-main">Grow by</div>
-                        <div class="header-sub" id="growerName">-</div>
+                        <div class="header-sub">BudtBoy</div>
                     </div>
                 </div>
             </div>
             <div style="width: 60px;"></div>
+        </div>
+
+        <!-- Strain Name Header -->
+        <div class="strain-header">
+            <h1 class="strain-title" id="headerStrainName">Afghan Kush</h1>
+            <p class="strain-grade-text">Grade <span id="headerStrainGrade">B+</span></p>
         </div>
 
         <!-- Secondary Navigation Bar -->
@@ -863,12 +952,6 @@
 
             <!-- Main Content -->
             <div id="mainContent" class="bud-info-section">
-                <!-- Strain Name Section -->
-                <div class="strain-name-section">
-                    <h1 class="strain-name" id="mainStrainName">Afghan Kush</h1>
-                    <p class="strain-subtitle" id="strainSubtitle">Grade: <span id="strainGrade">B+</span></p>
-                </div>
-
                 <!-- Bud Info Section -->
                 <div id="bud-info-content" class="section">
                     <!-- Images Section -->
@@ -1481,9 +1564,9 @@
                 }
             }
 
-            // Update main strain name display
-            safeUpdateElement('mainStrainName', budData.strain_name_en || budData.strain_name_th);
-            safeUpdateElement('strainGrade', budData.grade);
+            // Update header strain name display
+            safeUpdateElement('headerStrainName', budData.strain_name_en || budData.strain_name_th);
+            safeUpdateElement('headerStrainGrade', budData.grade);
 
             // Basic info
             safeUpdateElement('strainNameEn', budData.strain_name_en);

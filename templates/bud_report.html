@@ -461,44 +461,54 @@
             box-shadow: 0 4px 12px rgba(255, 71, 87, 0.3);
         }
 
-        /* Ratings Summary Styles */
+        /* Ratings Summary Styles - Unified and Enhanced */
         .rating-row {
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
+            display: flex !important;
+            flex-wrap: nowrap !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
             padding: 15px 20px;
             background: #f8f9fa;
             border-radius: 12px;
             margin-bottom: 20px;
-            gap: 15px;
-            flex-wrap: nowrap;
-            white-space: nowrap;
+            gap: 12px !important;
+            white-space: nowrap !important;
+            line-height: 1 !important;
         }
 
         .rating-score {
-            font-size: 28px;
-            font-weight: 700;
-            color: #4CAF50;
-            margin: 0;
-            white-space: nowrap;
-            display: inline-block;
+            font-size: 28px !important;
+            font-weight: 700 !important;
+            color: #4CAF50 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            white-space: nowrap !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            flex-shrink: 0 !important;
         }
 
         .rating-stars {
-            color: #ffd700;
-            font-size: 20px;
-            margin: 0;
-            white-space: nowrap;
-            display: inline-block;
+            color: #ffd700 !important;
+            font-size: 20px !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            white-space: nowrap !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            flex-shrink: 0 !important;
         }
 
         .rating-count {
-            color: #666;
-            font-size: 14px;
-            font-weight: 500;
-            margin: 0;
-            white-space: nowrap;
-            display: inline-block;
+            color: #666 !important;
+            font-size: 14px !important;
+            font-weight: 500 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            white-space: nowrap !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            flex-shrink: 0 !important;
         }
 
         .contact-info {
@@ -508,54 +518,43 @@
             margin-top: 15px;
         }
 
-        /* Force rating elements to stay inline */
+        /* Comprehensive Rating Row Override Rules */
+        .rating-row > *,
         .rating-row span,
-        .average-rating span,
-        .average-rating div {
-            display: inline-block !important;
-            white-space: nowrap !important;
-        }
-
-        /* Additional rating-row CSS for better inline control */
-        .rating-row {
-            display: flex;
-            flex-wrap: nowrap;            /* ไม่ให้ตัดบรรทัด */
-            align-items: center;          /* จัดกลางแนวตั้ง */
-            gap: 8px;                     /* ช่องว่างระหว่างชิ้น */
-            white-space: nowrap;          /* ไม่ให้ขึ้นบรรทัดใหม่เอง */
-        }
-
-        .rating-row > * {
-            display: inline-flex !important; /* กันเคสที่มี display:block/w-100 ทับมา */
-            line-height: 1;
-        }
-
-        .rating-score { 
-            font-weight: 700; 
-            color: #28a745; 
-        }   /* เขียวแบบภาพตัวอย่าง */
-
-        .rating-count { 
-            color: #666; 
-        }
-
-        /* ถ้าใช้ปลั๊กอิน/คลาสดาว ให้บังคับเป็นอินไลน์ด้วย */
-        .rating-row .star-rating,
-        .rating-row .rating-stars { 
-            display: inline-flex !important; 
-        }
-
-        /* Override CSS ที่อาจทำให้ rating elements แยกบรรทัด */
-        .rating-row .average-rating,
         .rating-row .rating-score,
+        .rating-row .rating-stars,
         .rating-row .rating-count,
-        .rating-row .star-rating { 
-            display: inline-flex !important; 
-            width: auto !important; 
-            clear: none !important; 
+        .rating-row .average-rating,
+        .rating-row .star-rating {
+            display: inline-flex !important;
+            width: auto !important;
+            height: auto !important;
+            clear: none !important;
+            float: none !important;
             margin-top: 0 !important;
             margin-bottom: 0 !important;
-            float: none !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+            line-height: 1 !important;
+            white-space: nowrap !important;
+            flex-shrink: 0 !important;
+            align-items: center !important;
+            vertical-align: middle !important;
+        }
+
+        /* Remove any Bootstrap or other framework interference */
+        .rating-row .w-100,
+        .rating-row .clearfix,
+        .rating-row .d-block {
+            display: inline-flex !important;
+            width: auto !important;
+        }
+
+        /* Prevent any child elements from breaking the line */
+        .rating-row * {
+            box-sizing: border-box !important;
         }
 
         .contact-item {

@@ -874,34 +874,34 @@
 
         /* ถ้าหน้าจอเล็กมาก ให้ยอมตัดส่วน "จาก x รีวิว" ออกเพื่อไม่ให้หลุดบรรทัด */
         @media (max-width: 420px) {
-            .section-title .rating-count { 
-                display: none !important; 
+            .section-title .rating-count {
+                display: none !important;
             }
-            .section-title .rating-score { 
+            .section-title .rating-score {
                 font-size: 24px !important;   /* ลดนิดหน่อย */
             }
-            .section-title .rating-stars { 
-                font-size: 18px !important; 
+            .section-title .rating-stars {
+                font-size: 18px !important;
             }
         }
 
         /* Effects block compact styling */
-        .effects-block { 
-            margin: 10px 0 !important; 
+        .effects-block{
+            margin: 10px 0 !important;
         }
 
         /* Mobile responsive - even tighter spacing for info cards */
         @media (max-width: 500px) {
-            .info-grid { 
-                gap: 8px !important; 
-                margin-bottom: 8px !important; 
+            .info-grid {
+                gap: 8px !important;
+                margin-bottom: 8px !important;
             }
-            .info-card h3 { 
-                margin-bottom: 6px !important; 
+            .info-card h3 {
+                margin-bottom: 6px !important;
             }
-            .info-item { 
-                margin-bottom: 6px !important; 
-                padding-bottom: 4px !important; 
+            .info-item {
+                margin-bottom: 6px !important;
+                padding-bottom: 4px !important;
             }
         }
 
@@ -960,6 +960,7 @@
         /* บล็อกผลกระทบ (ที่เดิมมี inline style มาก่อน) */
         .effects-block{
           margin-top:6px !important;      /* เดิม 8/15 */
+          margin-bottom: 5px !important;
         }
 
         /* มือถือให้ยิ่งชิดขึ้นอีกเล็กน้อย */
@@ -1087,19 +1088,19 @@
                                 <span class="info-label">กลิ่นรส:</span>
                                 <span class="info-value" id="aromaFlavor">-</span>
                             </div>
-                            <div class="effects-block">
+                            <div class="effects-block" style="margin-bottom: 5px;">
                                 <strong>😊 ผลกระทบเชิงบวก (จิตใจ):</strong>
                                 <div class="effects-list" id="mentalPositive">-</div>
                             </div>
-                            <div class="effects-block">
+                            <div class="effects-block" style="margin-bottom: 5px;">
                                 <strong>💪 ผลกระทบเชิงบวก (ร่างกาย):</strong>
                                 <div class="effects-list" id="physicalPositive">-</div>
                             </div>
-                            <div class="effects-block">
+                            <div class="effects-block" style="margin-bottom: 5px;">
                                 <strong>😔 ผลกระทบเชิงลบ (จิตใจ):</strong>
                                 <div class="effects-list" id="mentalNegative">-</div>
                             </div>
-                            <div class="effects-block">
+                            <div class="effects-block" style="margin-bottom: 5px;">
                                 <strong>😣 ผลกระทบเชิงลบ (ร่างกาย):</strong>
                                 <div class="effects-list" id="physicalNegative">-</div>
                             </div>
@@ -1421,7 +1422,7 @@
                     const maxImages = 4;
                     const imagesToShow = review.review_images.slice(0, maxImages);
                     const imageElements = [];
-                    
+
                     for (let i = 0; i < maxImages; i++) {
                         if (i < imagesToShow.length && imagesToShow[i]) {
                             const imgSrc = imagesToShow[i].startsWith('/') ? imagesToShow[i] : `/${imagesToShow[i]}`;
@@ -1430,7 +1431,7 @@
                             imageElements.push(`<div class="review-image-placeholder">ไม่มีรูป ${i + 1}</div>`);
                         }
                     }
-                    
+
                     imagesHtml = `
                         <div class="review-images-grid">
                             ${imageElements.join('')}

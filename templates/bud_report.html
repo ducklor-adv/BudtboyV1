@@ -1063,31 +1063,47 @@
             document.querySelectorAll('.nav-item').forEach(item => {
                 item.classList.remove('active');
             });
-            document.querySelector(`[onclick="showSection('${sectionName}')"]`).classList.add('active');
+            
+            const activeNavItem = document.querySelector(`[onclick="showSection('${sectionName}')"]`);
+            if (activeNavItem) {
+                activeNavItem.classList.add('active');
+            } else {
+                console.warn(`Navigation item for section '${sectionName}' not found`);
+            }
 
             // Show/hide content sections
             const sections = ['bud-info-content', 'reviews-content', 'ratings-content', 'contact-content'];
             sections.forEach(section => {
                 const element = document.getElementById(section);
                 if (element) {
-                    element.style.display = section === `${sectionName}-content` ? 'block' : 'none';
+                    if (section === `${sectionName}-content`) {
+                        element.style.display = 'block';
+                        console.log(`Showing section: ${section}`);
+                    } else {
+                        element.style.display = 'none';
+                    }
+                } else {
+                    console.warn(`Section element '${section}' not found`);
                 }
             });
 
-            // Load reviews and ratings when switching to any section that needs them
+            // Load reviews and ratings when switching to these sections
             if (sectionName === 'reviews' || sectionName === 'ratings') {
-                // Add loading state
-                if (sectionName === 'reviews') {
-                    document.getElementById('reviewsContainer').innerHTML = '<div class="loading">กำลังโหลดรีวิว...</div>';
+                console.log(`Loading content for section: ${sectionName}`);
+                
+                // Add loading state immediately
+                const reviewsContainer = document.getElementById('reviewsContainer');
+                const ratingsContainer = document.getElementById('ratingsSummary');
+                
+                if (sectionName === 'reviews' && reviewsContainer) {
+                    reviewsContainer.innerHTML = '<div class="loading">กำลังโหลดรีวิว...</div>';
                 }
-                if (sectionName === 'ratings') {
-                    document.getElementById('ratingsSummary').innerHTML = '<div class="loading">กำลังโหลดคะแนน...</div>';
+                if (sectionName === 'ratings' && ratingsContainer) {
+                    ratingsContainer.innerHTML = '<div class="loading">กำลังโหลดคะแนน...</div>';
                 }
                 
-                // Load reviews with slight delay to show loading state
-                setTimeout(() => {
-                    loadReviews();
-                }, 200);
+                // Load reviews immediately
+                loadReviews();
             }
 
             // Scroll to top
@@ -1096,27 +1112,45 @@
 
         // Load reviews for this bud
         async function loadReviews() {
-            if (!currentBudId) return;
+            if (!currentBudId) {
+                console.log('No current bud ID available');
+                return;
+            }
 
             console.log(`Loading reviews for bud ID: ${currentBudId}`);
 
             try {
                 const response = await fetch(`/api/reviews?bud_id=${currentBudId}`);
-                const reviews = await response.json();
+                console.log('Reviews API response status:', response.status);
 
-                console.log('Reviews response:', response.status, reviews);
-
-                if (response.ok) {
-                    displayReviews(reviews);
-                    displayRatings(reviews);
-                } else {
-                    console.error('Failed to load reviews:', reviews.error);
-                    document.getElementById('reviewsContainer').innerHTML = `<div class="error">เกิดข้อผิดพลาดในการโหลดรีวิว: ${reviews.error || 'ไม่ทราบสาเหตุ'}</div>`;
-                    document.getElementById('ratingsSummary').innerHTML = `<div class="error">เกิดข้อผิดพลาดในการโหลดคะแนน: ${reviews.error || 'ไม่ทราบสาเหตุ'}</div>`;
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
+
+                const data = await response.json();
+                console.log('Reviews API data received:', data);
+
+                // Handle both direct array and wrapped response
+                let reviews = [];
+                if (Array.isArray(data)) {
+                    reviews = data;
+                } else if (data.reviews && Array.isArray(data.reviews)) {
+                    reviews = data.reviews;
+                } else if (data.data && Array.isArray(data.data)) {
+                    reviews = data.data;
+                } else {
+                    console.warn('Unexpected reviews data structure:', data);
+                    reviews = [];
+                }
+
+                console.log(`Processing ${reviews.length} reviews`);
+                displayReviews(reviews);
+                displayRatings(reviews);
+
             } catch (error) {
                 console.error('Error loading reviews:', error);
-                document.getElementById('reviewsContainer').innerHTML = `<div class="error">เกิดข้อผิดพลาดในการโหลดรีวิว: ${error.message}</div>`;
+                const errorMessage = `เกิดข้อผิดพลาดในการโหลดรีวิว: ${error.message}`;
+                document.getElementById('reviewsContainer').innerHTML = `<div class="error">${errorMessage}</div>`;
                 document.getElementById('ratingsSummary').innerHTML = `<div class="error">เกิดข้อผิดพลาดในการโหลดคะแนน: ${error.message}</div>`;
             }
         }
@@ -1125,9 +1159,19 @@
         function displayReviews(reviews) {
             const container = document.getElementById('reviewsContainer');
 
-            console.log('Displaying reviews:', reviews);
+            console.log('=== DISPLAY REVIEWS DEBUG ===');
+            console.log('Reviews container:', container);
+            console.log('Reviews data:', reviews);
+            console.log('Reviews type:', typeof reviews);
+            console.log('Reviews length:', reviews ? reviews.length : 'N/A');
+
+            if (!container) {
+                console.error('Reviews container not found!');
+                return;
+            }
 
             if (!reviews || reviews.length === 0) {
+                console.log('No reviews found, showing empty state');
                 container.innerHTML = `
                     <div class="no-reviews">
                         <p>🌟 ยังไม่มีรีวิวสำหรับดอกนี้</p>
@@ -1138,10 +1182,17 @@
                 return;
             }
 
-            const reviewsHtml = reviews.map(review => createReviewCard(review)).join('');
+            console.log(`Creating HTML for ${reviews.length} reviews`);
+            const reviewsHtml = reviews.map((review, index) => {
+                console.log(`Processing review ${index + 1}:`, review);
+                return createReviewCard(review);
+            }).join('');
+            
+            console.log('Generated HTML length:', reviewsHtml.length);
             container.innerHTML = reviewsHtml;
             
-            console.log(`Displayed ${reviews.length} reviews`);
+            console.log(`Successfully displayed ${reviews.length} reviews`);
+            console.log('=== END DISPLAY REVIEWS DEBUG ===');
         }
 
         // Create review card HTML
@@ -1241,9 +1292,23 @@
             const container = document.getElementById('ratingsSummary');
             const breakdownContainer = document.getElementById('ratingsBreakdown');
 
-            console.log('Displaying ratings for:', reviews);
+            console.log('=== DISPLAY RATINGS DEBUG ===');
+            console.log('Ratings container:', container);
+            console.log('Breakdown container:', breakdownContainer);
+            console.log('Reviews for ratings:', reviews);
+
+            if (!container) {
+                console.error('Ratings summary container not found!');
+                return;
+            }
+
+            if (!breakdownContainer) {
+                console.error('Ratings breakdown container not found!');
+                return;
+            }
 
             if (!reviews || reviews.length === 0) {
+                console.log('No reviews for ratings, showing empty state');
                 container.innerHTML = `
                     <div class="average-rating">
                         <div class="rating-display">0.0</div>
@@ -1378,9 +1443,8 @@
             console.log('Displaying bud data:', budData);
 
             // Load reviews immediately when bud data is loaded
-            setTimeout(() => {
-                loadReviews();
-            }, 500);
+            console.log('Loading reviews immediately after bud data is displayed');
+            loadReviews();
 
             // Helper function to safely update element
             function safeUpdateElement(id, value, defaultValue = '-') {

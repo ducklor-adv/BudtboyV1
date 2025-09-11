@@ -415,6 +415,20 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
 
+        .review-image-placeholder {
+            width: 100%;
+            height: 120px;
+            background: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 12px;
+            text-align: center;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+
         .no-reviews {
             text-align: center;
             padding: 40px;
@@ -1165,11 +1179,23 @@
                 // Build images HTML
                 let imagesHtml = '';
                 if (review.review_images && review.review_images.length > 0) {
+                    // สร้างรูป 4 รูป (แสดงในตาราง 2x2)
+                    const maxImages = 4;
+                    const imagesToShow = review.review_images.slice(0, maxImages);
+                    const imageElements = [];
+                    
+                    for (let i = 0; i < maxImages; i++) {
+                        if (i < imagesToShow.length && imagesToShow[i]) {
+                            const imgSrc = imagesToShow[i].startsWith('/') ? imagesToShow[i] : `/${imagesToShow[i]}`;
+                            imageElements.push(`<img src="${imgSrc}" alt="รูปรีวิว ${i + 1}" class="review-image" onclick="openImageModal('${imgSrc}')">`);
+                        } else {
+                            imageElements.push(`<div class="review-image-placeholder">ไม่มีรูป ${i + 1}</div>`);
+                        }
+                    }
+                    
                     imagesHtml = `
                         <div class="review-images-grid">
-                            ${review.review_images.map(img => 
-                                `<img src="/${img}" alt="รูปรีวิว" class="review-image" onclick="openImageModal('${img}')">`
-                            ).join('')}
+                            ${imageElements.join('')}
                         </div>
                     `;
                 }
@@ -1311,7 +1337,8 @@
             const modalImg = document.getElementById('modalImage');
 
             modal.style.display = 'flex';
-            modalImg.src = `/${imageSrc}`;
+            // ตรวจสอบว่า path มี / อยู่หน้าแล้วหรือไม่
+            modalImg.src = imageSrc.startsWith('/') ? imageSrc : `/${imageSrc}`;
         }
 
         function closeImageModal() {

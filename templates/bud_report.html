@@ -1176,113 +1176,187 @@
                 return;
             }
 
-            console.log(`🔄 Loading reviews for bud ID: ${currentBudId}`);
+            console.log(`🔄 [REVIEWS] Starting to load reviews for bud ID: ${currentBudId}`);
 
             const reviewsContainer = document.getElementById('reviewsContainer');
             const ratingsContainer = document.getElementById('ratingsSummary');
             
             // Show loading state
             if (reviewsContainer) {
-                reviewsContainer.innerHTML = '<div style="text-align: center; padding: 20px;">กำลังโหลดรีวิว...</div>';
+                reviewsContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: #4CAF50;"><div style="font-size: 32px; margin-bottom: 10px;">⏳</div>กำลังโหลดรีวิว...</div>';
             }
 
             try {
-                const response = await fetch(`/api/reviews?bud_id=${currentBudId}&_t=${Date.now()}`);
-                console.log('📡 Reviews API response status:', response.status);
+                const apiUrl = `/api/reviews?bud_id=${currentBudId}&_t=${Date.now()}`;
+                console.log(`🌐 [REVIEWS] Fetching from: ${apiUrl}`);
+                
+                const response = await fetch(apiUrl);
+                console.log(`📡 [REVIEWS] API response status: ${response.status}`);
+                console.log(`📡 [REVIEWS] API response headers:`, response.headers);
 
                 if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
 
-                const data = await response.json();
-                console.log('📋 Reviews data received:', data);
+                const rawData = await response.text();
+                console.log(`📄 [REVIEWS] Raw response data:`, rawData.substring(0, 500) + '...');
+                
+                let data;
+                try {
+                    data = JSON.parse(rawData);
+                } catch (parseError) {
+                    console.error('❌ [REVIEWS] JSON Parse Error:', parseError);
+                    throw new Error('Invalid JSON response from server');
+                }
+                
+                console.log(`📋 [REVIEWS] Parsed JSON data:`, data);
+                console.log(`📋 [REVIEWS] Data type:`, typeof data);
+                console.log(`📋 [REVIEWS] Is array:`, Array.isArray(data));
                 
                 // Handle different response formats
                 let reviews = [];
                 if (Array.isArray(data)) {
                     reviews = data;
+                    console.log(`✅ [REVIEWS] Using direct array format`);
                 } else if (data && Array.isArray(data.reviews)) {
                     reviews = data.reviews;
+                    console.log(`✅ [REVIEWS] Using data.reviews format`);
                 } else if (data && Array.isArray(data.data)) {
                     reviews = data.data;
+                    console.log(`✅ [REVIEWS] Using data.data format`);
+                } else {
+                    console.warn(`⚠️ [REVIEWS] Unknown data format:`, data);
+                    reviews = [];
                 }
 
-                console.log(`📊 Processing ${reviews.length} reviews`);
+                console.log(`📊 [REVIEWS] Final reviews array:`, reviews);
+                console.log(`📊 [REVIEWS] Reviews count: ${reviews.length}`);
                 
-                // Display reviews and ratings
-                displayReviews(reviews);
-                displayRatings(reviews);
+                // Display reviews and ratings - FORCE EXECUTION
+                setTimeout(() => {
+                    console.log(`🖼️ [REVIEWS] Calling displayReviews with ${reviews.length} reviews`);
+                    displayReviews(reviews);
+                    
+                    console.log(`⭐ [REVIEWS] Calling displayRatings with ${reviews.length} reviews`);
+                    displayRatings(reviews);
+                    
+                    console.log('✅ [REVIEWS] Display functions completed');
+                }, 100);
                 
-                console.log('✅ Reviews loaded successfully');
+                console.log('🎉 [REVIEWS] Reviews loading process completed successfully');
 
             } catch (error) {
-                console.error('❌ Error loading reviews:', error);
+                console.error('❌ [REVIEWS] Critical error loading reviews:', error);
+                console.error('❌ [REVIEWS] Error stack:', error.stack);
                 
                 if (reviewsContainer) {
                     reviewsContainer.innerHTML = `
-                        <div style="text-align: center; padding: 20px; color: #d32f2f;">
-                            <p>ไม่สามารถโหลดรีวิวได้: ${error.message}</p>
-                            <button onclick="loadReviews()" style="background: #4CAF50; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-top: 10px;">ลองใหม่</button>
+                        <div style="text-align: center; padding: 30px; color: #d32f2f; background: #ffebee; border-radius: 10px; margin: 20px 0;">
+                            <div style="font-size: 48px; margin-bottom: 15px;">❌</div>
+                            <h3>เกิดข้อผิดพลาดในการโหลดรีวิว</h3>
+                            <p style="color: #666; margin: 10px 0;">${error.message}</p>
+                            <p style="color: #999; font-size: 12px;">Bud ID: ${currentBudId}</p>
+                            <button onclick="loadReviews()" style="background: #4CAF50; color: white; border: none; padding: 12px 24px; border-radius: 25px; cursor: pointer; margin-top: 15px; font-size: 14px;">🔄 ลองใหม่</button>
                         </div>
                     `;
                 }
                 
                 if (ratingsContainer) {
-                    ratingsContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: #d32f2f;">ไม่สามารถโหลดคะแนนได้</div>';
+                    ratingsContainer.innerHTML = `
+                        <div style="text-align: center; padding: 20px; color: #d32f2f; background: #ffebee; border-radius: 10px;">
+                            <p>ไม่สามารถโหลดคะแนนได้</p>
+                            <button onclick="loadReviews()" style="background: #4CAF50; color: white; border: none; padding: 8px 16px; border-radius: 15px; cursor: pointer; font-size: 12px;">ลองใหม่</button>
+                        </div>
+                    `;
                 }
             }
         }
 
         // Display reviews
         function displayReviews(reviews) {
-            console.log('🖼️ Display reviews called with:', reviews ? reviews.length : 0, 'reviews');
+            console.log('🖼️ [DISPLAY] === START DISPLAY REVIEWS ===');
+            console.log('🖼️ [DISPLAY] Input reviews:', reviews);
+            console.log('🖼️ [DISPLAY] Reviews type:', typeof reviews);
+            console.log('🖼️ [DISPLAY] Reviews is array:', Array.isArray(reviews));
+            console.log('🖼️ [DISPLAY] Reviews length:', reviews ? reviews.length : 'N/A');
 
             const container = document.getElementById('reviewsContainer');
+            console.log('🖼️ [DISPLAY] Container element:', container);
+            
             if (!container) {
-                console.error('❌ Reviews container not found!');
+                console.error('❌ [DISPLAY] Reviews container not found!');
                 return;
             }
 
             // Clear container
             container.innerHTML = '';
+            console.log('🖼️ [DISPLAY] Container cleared');
 
             // Handle empty reviews
             if (!reviews || !Array.isArray(reviews) || reviews.length === 0) {
-                console.log('📝 No reviews, showing empty state');
-                container.innerHTML = `
+                console.log('📝 [DISPLAY] No reviews detected, showing empty state');
+                const emptyHtml = `
                     <div class="no-reviews" style="text-align: center; padding: 60px 20px; background: #f8f9fa; border-radius: 15px; margin: 20px 0; border: 2px solid #4CAF50;">
                         <div style="font-size: 64px; margin-bottom: 20px; opacity: 0.3;">💬</div>
                         <h3 style="color: #666; margin-bottom: 15px;">ยังไม่มีรีวิวสำหรับดอกนี้</h3>
                         <p style="color: #888; margin-bottom: 20px;">เป็นคนแรกที่แชร์ประสบการณ์ของคุณ!</p>
                         <button class="review-btn" onclick="openReviewModal()" style="background: #4CAF50; color: white; border: none; padding: 12px 24px; border-radius: 25px; cursor: pointer; font-size: 16px;">⭐ เขียนรีวิวแรก</button>
+                        <div style="margin-top: 20px; padding: 15px; background: #e3f2fd; border-radius: 10px;">
+                            <p style="font-size: 12px; color: #1976d2; margin: 0;">Debug Info: Bud ID ${currentBudId} | Reviews: ${reviews ? reviews.length : 'null'}</p>
+                        </div>
                     </div>
                 `;
+                container.innerHTML = emptyHtml;
+                console.log('📝 [DISPLAY] Empty state HTML set');
                 return;
             }
 
             // Generate review cards
-            console.log(`📝 Generating ${reviews.length} review cards`);
+            console.log(`📝 [DISPLAY] Generating HTML for ${reviews.length} review cards`);
             let reviewsHtml = '';
             
             try {
                 reviews.forEach((review, index) => {
-                    reviewsHtml += createReviewCard(review);
-                    console.log(`✅ Card ${index + 1} generated`);
+                    console.log(`🔄 [DISPLAY] Processing review ${index + 1}:`, review);
+                    const cardHtml = createReviewCard(review);
+                    reviewsHtml += cardHtml;
+                    console.log(`✅ [DISPLAY] Card ${index + 1} HTML generated successfully`);
                 });
                 
+                // Add debug info at the bottom
+                reviewsHtml += `
+                    <div style="margin-top: 20px; padding: 15px; background: #e8f5e8; border-radius: 10px; text-align: center;">
+                        <p style="font-size: 12px; color: #2e7d32; margin: 0;">
+                            ✅ แสดงรีวิวสำเร็จ: ${reviews.length} รายการ | Bud ID: ${currentBudId} | เวลา: ${new Date().toLocaleTimeString('th-TH')}
+                        </p>
+                    </div>
+                `;
+                
+                console.log(`🖼️ [DISPLAY] Setting final HTML (${reviewsHtml.length} chars)`);
                 container.innerHTML = reviewsHtml;
-                console.log('✅ Reviews displayed successfully');
+                console.log('✅ [DISPLAY] Reviews displayed successfully in DOM');
+                
+                // Force visual refresh
+                container.style.display = 'none';
+                container.offsetHeight; // Trigger reflow
+                container.style.display = 'block';
+                console.log('🔄 [DISPLAY] Forced DOM refresh');
                 
             } catch (error) {
-                console.error('❌ Error generating review HTML:', error);
+                console.error('❌ [DISPLAY] Critical error generating review HTML:', error);
+                console.error('❌ [DISPLAY] Error stack:', error.stack);
                 container.innerHTML = `
                     <div style="text-align: center; padding: 40px; color: #f44336; background: #ffebee; border-radius: 10px; margin: 20px 0;">
+                        <div style="font-size: 48px; margin-bottom: 15px;">💥</div>
                         <h3>เกิดข้อผิดพลาดในการแสดงรีวิว</h3>
                         <p>ข้อผิดพลาด: ${error.message}</p>
-                        <button onclick="loadReviews()" style="background: #4CAF50; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-top: 10px;">ลองใหม่</button>
+                        <p style="font-size: 12px; color: #666;">Reviews count: ${reviews.length} | Stack: ${error.stack}</p>
+                        <button onclick="loadReviews()" style="background: #4CAF50; color: white; border: none; padding: 12px 24px; border-radius: 25px; cursor: pointer; margin-top: 15px;">🔄 ลองใหม่</button>
                     </div>
                 `;
             }
+            
+            console.log('🖼️ [DISPLAY] === END DISPLAY REVIEWS ===');
         }
 
         // Create review card HTML

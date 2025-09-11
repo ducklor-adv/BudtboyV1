@@ -181,6 +181,196 @@
             transform: translateY(-2px);
         }
 
+        /* Reviews Styles */
+        .review-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-left: 4px solid #4CAF50;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .review-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .reviewer-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: white;
+            font-weight: 600;
+            overflow: hidden;
+        }
+
+        .reviewer-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .reviewer-info {
+            flex: 1;
+        }
+
+        .reviewer-name {
+            font-weight: 600;
+            color: #333;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .review-date {
+            color: #666;
+            font-size: 12px;
+        }
+
+        .review-rating {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .rating-stars {
+            color: #ffd700;
+            font-size: 16px;
+        }
+
+        .rating-number {
+            background: #4CAF50;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .review-summary {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin: 15px 0;
+            line-height: 1.5;
+        }
+
+        .review-content {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .review-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .effect-tag {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .aroma-tag {
+            background: #f3e5f5;
+            color: #7b1fa2;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .review-images-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .review-image {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid #ddd;
+        }
+
+        .review-image:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .review-image-placeholder {
+            width: 100%;
+            height: 120px;
+            background: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 10px;
+            text-align: center;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+
+        .no-reviews {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .no-reviews p {
+            margin: 10px 0;
+            font-size: 16px;
+        }
+
+        /* Ratings Summary Styles */
+        .average-rating {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .rating-display {
+            font-size: 48px;
+            font-weight: 700;
+            color: #4CAF50;
+            margin-bottom: 10px;
+        }
+
+        .rating-stars-large {
+            color: #ffd700;
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .rating-count {
+            color: #666;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
         .bud-info-section {
             display: none;
         }
@@ -776,11 +966,7 @@
                     <div id="reviews-content" class="section" style="display: none;">
                         <div class="section-title">📖 รีวิวจากผู้ใช้</div>
                         <div class="reviews-container" id="reviewsContainer">
-                            <div class="no-reviews">
-                                <p>🌟 ยังไม่มีรีวิวสำหรับดอกนี้</p>
-                                <p>เป็นคนแรกที่เขียนรีวิว!</p>
-                                <button class="review-btn" onclick="openReviewModal()">⭐ เขียนรีวิวเลย</button>
-                            </div>
+                            <div class="loading">กำลังโหลดรีวิว...</div>
                         </div>
                     </div>
 
@@ -788,11 +974,7 @@
                     <div id="ratings-content" class="section" style="display: none;">
                         <div class="section-title">⭐ คะแนนรวม</div>
                         <div class="ratings-summary" id="ratingsSummary">
-                            <div class="average-rating">
-                                <div class="rating-number">0.0</div>
-                                <div class="rating-stars">⭐⭐⭐⭐⭐</div>
-                                <div class="rating-count">จาก 0 รีวิว</div>
-                            </div>
+                            <div class="loading">กำลังโหลดคะแนน...</div>
                         </div>
                     </div>
 
@@ -846,8 +1028,145 @@
                 }
             });
 
+            // Load reviews if switching to reviews or ratings section
+            if (sectionName === 'reviews' || sectionName === 'ratings') {
+                loadReviews();
+            }
+
             // Scroll to top
             window.scrollTo(0, 0);
+        }
+
+        // Load reviews for this bud
+        async function loadReviews() {
+            if (!currentBudId) return;
+
+            try {
+                const response = await fetch(`/api/reviews?bud_id=${currentBudId}`);
+                const reviews = await response.json();
+
+                if (response.ok) {
+                    displayReviews(reviews);
+                    displayRatings(reviews);
+                } else {
+                    document.getElementById('reviewsContainer').innerHTML = '<div class="error">เกิดข้อผิดพลาดในการโหลดรีวิว</div>';
+                    document.getElementById('ratingsSummary').innerHTML = '<div class="error">เกิดข้อผิดพลาดในการโหลดคะแนน</div>';
+                }
+            } catch (error) {
+                console.error('Error loading reviews:', error);
+                document.getElementById('reviewsContainer').innerHTML = '<div class="error">เกิดข้อผิดพลาดในการโหลดรีวิว</div>';
+                document.getElementById('ratingsSummary').innerHTML = '<div class="error">เกิดข้อผิดพลาดในการโหลดคะแนน</div>';
+            }
+        }
+
+        // Display reviews
+        function displayReviews(reviews) {
+            const container = document.getElementById('reviewsContainer');
+
+            if (reviews.length === 0) {
+                container.innerHTML = `
+                    <div class="no-reviews">
+                        <p>🌟 ยังไม่มีรีวิวสำหรับดอกนี้</p>
+                        <p>เป็นคนแรกที่เขียนรีวิว!</p>
+                        <button class="review-btn" onclick="openReviewModal()">⭐ เขียนรีวิวเลย</button>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = reviews.map(review => createReviewCard(review)).join('');
+        }
+
+        // Create review card HTML
+        function createReviewCard(review) {
+            const reviewDate = new Date(review.created_at).toLocaleDateString('th-TH', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+            });
+
+            const effectTags = (review.selected_effects || []).map(effect => 
+                `<span class="effect-tag">${effect}</span>`
+            ).join('');
+
+            const aromaTags = (review.aroma_flavors || []).map(aroma => 
+                `<span class="aroma-tag">${aroma}</span>`
+            ).join('');
+
+            const reviewerAvatar = review.reviewer_profile_image ? 
+                `<img src="${review.reviewer_profile_image}" alt="Profile">` :
+                (review.reviewer_name ? review.reviewer_name.charAt(0).toUpperCase() : '👤');
+
+            // สร้างรูปรีวิว 4 รูป
+            const reviewImages = review.review_images || [];
+            const reviewImagesHtml = [0, 1, 2, 3].map(index => {
+                if (reviewImages[index] && reviewImages[index].trim()) {
+                    return `<img src="${reviewImages[index]}" alt="รูปรีวิว ${index + 1}" class="review-image" onclick="openImageModal('${reviewImages[index]}')">`;
+                } else {
+                    return `<div class="review-image-placeholder">ไม่มีรูป ${index + 1}</div>`;
+                }
+            }).join('');
+
+            return `
+                <div class="review-card">
+                    <div class="review-header">
+                        <div class="reviewer-avatar">
+                            ${reviewerAvatar}
+                        </div>
+                        <div class="reviewer-info">
+                            <div class="reviewer-name">${review.reviewer_name || 'ผู้ใช้ไม่ระบุชื่อ'}</div>
+                            <div class="review-date">${reviewDate}</div>
+                        </div>
+                        <div class="review-rating">
+                            <div class="rating-stars">${'⭐'.repeat(review.overall_rating)}</div>
+                            <div class="rating-number">${review.overall_rating}/5</div>
+                        </div>
+                    </div>
+
+                    <div class="review-summary">${review.short_summary || ''}</div>
+
+                    ${review.full_review_content ? `<div class="review-content">${review.full_review_content}</div>` : ''}
+
+                    ${effectTags || aromaTags ? `
+                        <div class="review-tags">
+                            ${effectTags}
+                            ${aromaTags}
+                        </div>
+                    ` : ''}
+
+                    <div class="review-images-grid">
+                        ${reviewImagesHtml}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Display ratings summary
+        function displayRatings(reviews) {
+            const container = document.getElementById('ratingsSummary');
+
+            if (reviews.length === 0) {
+                container.innerHTML = `
+                    <div class="average-rating">
+                        <div class="rating-display">0.0</div>
+                        <div class="rating-stars-large">☆☆☆☆☆</div>
+                        <div class="rating-count">ยังไม่มีรีวิว</div>
+                    </div>
+                `;
+                return;
+            }
+
+            const totalRating = reviews.reduce((sum, review) => sum + review.overall_rating, 0);
+            const averageRating = totalRating / reviews.length;
+            const starCount = Math.round(averageRating);
+
+            container.innerHTML = `
+                <div class="average-rating">
+                    <div class="rating-display">${averageRating.toFixed(1)}</div>
+                    <div class="rating-stars-large">${'⭐'.repeat(starCount)}${'☆'.repeat(5-starCount)}</div>
+                    <div class="rating-count">จาก ${reviews.length} รีวิว</div>
+                </div>
+            `;
         }
 
         // Load bud data
@@ -923,6 +1242,9 @@
             }
 
             console.log('Displaying bud data:', budData);
+
+            // Load reviews when showing sections
+            loadReviews();
 
             // Helper function to safely update element
             function safeUpdateElement(id, value, defaultValue = '-') {

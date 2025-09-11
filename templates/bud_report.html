@@ -1003,37 +1003,7 @@
         .contact-link.other { background: #f3e5f5; color: #9c27b0; }
         .contact-link.other:hover { background: #9c27b0; color: white; }
 
-        .verification-card {
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            border-left: 4px solid #ffc107;
-        }
-
-        .verification-card.verified {
-            border-left-color: #28a745;
-            background: linear-gradient(135deg, #f8fff9 0%, #f0f8f0 100%);
-        }
-
-        .verification-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .verification-item {
-            font-size: 16px;
-            color: #666;
-            margin-bottom: 8px;
-            line-height: 1.4;
-        }
-
-        .verification-item:last-child {
-            margin-bottom: 0;
-        }
+        
 
         @media (max-width: 768px) {
             .video-modal {
@@ -1087,21 +1057,7 @@
                 border-radius: 15px;
             }
 
-            .verification-card {
-                padding: 15px;
-                margin-bottom: 12px;
-                border-radius: 12px;
-            }
-
-            .verification-title {
-                font-size: 16px;
-                margin-bottom: 8px;
-            }
-
-            .verification-item {
-                font-size: 14px;
-                margin-bottom: 6px;
-            }
+            
 
             .container {
                 margin: 0;
@@ -1855,8 +1811,7 @@
                 // Display components with individual error handling
                 const components = [
                     { name: 'Bud images', func: () => displayBudImages(bud) },
-                    { name: 'Bud info', func: () => displayAllBudInfo(bud) },
-                    
+                    { name: 'Bud info', func: () => displayAllBudInfo(bud) }
                 ];
 
                 components.forEach(component => {
@@ -2336,19 +2291,27 @@
                         { label: 'CBD', value: bud.cbd_percentage ? `${bud.cbd_percentage}%` : null },
                         { label: 'กลิ่นและรส', value: bud.aroma_flavor },
                         { label: 'เวลาที่แนะนำ', value: bud.recommended_time },
-                        { label: 'Terpene อันดับ 1', value: bud.top_terpenes_1 },
-                        { label: 'Terpene อันดับ 2', value: bud.top_terpenes_2 },
-                        { label: 'Terpene อันดับ 3', value: bud.top_terpenes_3 }
+                        { 
+                            label: 'Terpene อันดับ 1', 
+                            value: bud.top_terpenes_1 && bud.terpene_1_percentage ? 
+                                `${bud.top_terpenes_1} (${bud.terpene_1_percentage}%)` : 
+                                bud.top_terpenes_1 
+                        },
+                        { 
+                            label: 'Terpene อันดับ 2', 
+                            value: bud.top_terpenes_2 && bud.terpene_2_percentage ? 
+                                `${bud.top_terpenes_2} (${bud.terpene_2_percentage}%)` : 
+                                bud.top_terpenes_2 
+                        },
+                        { 
+                            label: 'Terpene อันดับ 3', 
+                            value: bud.top_terpenes_3 && bud.terpene_3_percentage ? 
+                                `${bud.top_terpenes_3} (${bud.terpene_3_percentage}%)` : 
+                                bud.top_terpenes_3 
+                        }
                     ]
                 },
-                {
-                    title: '🏆 การตรวจสอบและใบรับรอง',
-                    items: [
-                        { label: 'Lab test', value: bud.lab_test_name },
-                        { label: 'Test type', value: bud.test_type },
-                        { label: 'ผู้ปลูกที่ได้รับการรับรอง', value: bud.grower_license_verified ? 'ใช่' : 'ไม่ได้รับการรับรอง' }
-                    ]
-                },
+                
                 {
                     title: '💭 ผลกระทบและการใช้งาน',
                     items: [

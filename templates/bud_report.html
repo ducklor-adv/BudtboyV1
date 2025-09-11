@@ -186,8 +186,8 @@
         .info-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 25px;
+            gap: 10px;            /* เดิม 20px */
+            margin-bottom: 10px;  /* เดิม 25px */
         }
 
         .info-card {
@@ -198,7 +198,7 @@
 
         .info-card h3 {
             color: #2c5530;
-            margin-bottom: 20px;
+            margin-bottom: 8px;   /* เดิม 20px */
             font-size: 18px;
             display: flex;
             align-items: center;
@@ -208,8 +208,8 @@
         .info-item {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
+            margin-bottom: 8px;   /* เดิม 15px */
+            padding-bottom: 6px;  /* เดิม 10px */
             border-bottom: 1px solid #e0e0e0;
         }
 
@@ -882,6 +882,26 @@
                 font-size: 18px !important; 
             }
         }
+
+        /* Effects block compact styling */
+        .effects-block { 
+            margin-top: 8px !important; 
+        }
+
+        /* Mobile responsive - even tighter spacing for info cards */
+        @media (max-width: 500px) {
+            .info-grid { 
+                gap: 8px !important; 
+                margin-bottom: 8px !important; 
+            }
+            .info-card h3 { 
+                margin-bottom: 6px !important; 
+            }
+            .info-item { 
+                margin-bottom: 6px !important; 
+                padding-bottom: 4px !important; 
+            }
+        }
     </style>
 </head>
 <body>
@@ -996,19 +1016,19 @@
                                 <span class="info-label">กลิ่นรส:</span>
                                 <span class="info-value" id="aromaFlavor">-</span>
                             </div>
-                            <div style="margin-top: 15px;">
+                            <div class="effects-block">
                                 <strong>😊 ผลกระทบเชิงบวก (จิตใจ):</strong>
                                 <div class="effects-list" id="mentalPositive">-</div>
                             </div>
-                            <div style="margin-top: 15px;">
+                            <div class="effects-block">
                                 <strong>💪 ผลกระทบเชิงบวก (ร่างกาย):</strong>
                                 <div class="effects-list" id="physicalPositive">-</div>
                             </div>
-                            <div style="margin-top: 15px;">
+                            <div class="effects-block">
                                 <strong>😔 ผลกระทบเชิงลบ (จิตใจ):</strong>
                                 <div class="effects-list" id="mentalNegative">-</div>
                             </div>
-                            <div style="margin-top: 15px;">
+                            <div class="effects-block">
                                 <strong>😣 ผลกระทบเชิงลบ (ร่างกาย):</strong>
                                 <div class="effects-list" id="physicalNegative">-</div>
                             </div>

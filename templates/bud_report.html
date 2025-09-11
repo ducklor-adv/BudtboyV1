@@ -473,6 +473,12 @@
             margin-bottom: 20px;
             gap: 10px;
             flex-wrap: nowrap;
+            white-space: nowrap;
+        }
+
+        .average-rating * {
+            display: inline-block !important;
+            white-space: nowrap !important;
         }
 
         .rating-display {
@@ -481,6 +487,7 @@
             color: #4CAF50;
             margin: 0;
             white-space: nowrap;
+            display: inline-block !important;
         }
 
         .rating-stars-large {
@@ -488,6 +495,7 @@
             font-size: 20px;
             margin: 0;
             white-space: nowrap;
+            display: inline-block !important;
         }
 
         .rating-count {
@@ -496,6 +504,7 @@
             font-weight: 500;
             margin: 0;
             white-space: nowrap;
+            display: inline-block !important;
         }
 
         .contact-info {
@@ -503,6 +512,14 @@
             border-radius: 15px;
             padding: 18px;
             margin-top: 15px;
+        }
+
+        /* Force rating elements to stay inline */
+        .rating-row span,
+        .average-rating span,
+        .average-rating div {
+            display: inline-block !important;
+            white-space: nowrap !important;
         }
 
         .contact-item {

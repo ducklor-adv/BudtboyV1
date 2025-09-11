@@ -974,17 +974,29 @@
             }
         }
 
-        /* Clean effects styling with strong specificity */
-        .container .content .info-card .effects-block {
-            margin: 2px 0 !important;
+        /* Ultra-strong CSS specificity for effects styling - multiple selectors */
+        .container .content .info-card .effects-block,
+        .info-card .effects-block,
+        .effects-block {
+            margin: 1px 0 !important;
             padding: 0 !important;
             background: none !important;
             border: none !important;
             box-shadow: none !important;
+            display: block !important;
+            width: auto !important;
+            height: auto !important;
+            clear: none !important;
+            float: none !important;
+            position: static !important;
+            min-height: auto !important;
+            max-height: none !important;
         }
 
-        .container .content .info-card .effects-block strong {
-            display: inline-block !important;
+        .container .content .info-card .effects-block strong,
+        .info-card .effects-block strong,
+        .effects-block strong {
+            display: inline !important;
             margin: 0 5px 0 0 !important;
             padding: 0 !important;
             font-size: 13px !important;
@@ -993,9 +1005,17 @@
             background: none !important;
             border: none !important;
             line-height: 1.2 !important;
+            width: auto !important;
+            height: auto !important;
+            box-shadow: none !important;
+            text-decoration: none !important;
+            outline: none !important;
+            vertical-align: baseline !important;
         }
 
-        .container .content .info-card .effects-list {
+        .container .content .info-card .effects-list,
+        .info-card .effects-list,
+        .effects-list {
             display: inline !important;
             margin: 0 !important;
             padding: 0 !important;
@@ -1008,10 +1028,46 @@
             box-shadow: none !important;
             width: auto !important;
             height: auto !important;
+            min-width: auto !important;
+            max-width: none !important;
+            min-height: auto !important;
+            max-height: none !important;
+            outline: none !important;
+            text-decoration: none !important;
+            vertical-align: baseline !important;
+            white-space: normal !important;
+            word-wrap: normal !important;
+            overflow: visible !important;
+            position: static !important;
+            z-index: auto !important;
+            float: none !important;
+            clear: none !important;
         }
 
-        /* Override any potential conflicting styles */
-        .container .content .info-card .effects-block * {
+        /* Override Bootstrap and any framework styles */
+        div.effects-block,
+        span.effects-list,
+        .effects-block div,
+        .effects-list span {
+            all: unset !important;
+        }
+
+        .effects-block {
+            display: block !important;
+            margin: 1px 0 !important;
+            padding: 0 !important;
+        }
+
+        .effects-list {
+            display: inline !important;
+            font-size: 13px !important;
+            color: #555 !important;
+        }
+
+        /* Ensure no interference from any parent containers */
+        .container .content .info-card .effects-block *,
+        .info-card .effects-block *,
+        .effects-block * {
             box-sizing: border-box !important;
         }
     </style>

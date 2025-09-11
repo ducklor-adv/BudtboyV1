@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cannabis App - รายงานดอกแบบละเอียด</title>
+    <title>รายงานรายละเอียด</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -11,13 +12,9 @@
             margin: 0;
             padding: 20px;
             min-height: 100vh;
-            /* ปรับแต่งการแสดงผลฟอนต์ให้คมชัดสูงสุด */
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             text-rendering: optimizeLegibility;
-            image-rendering: -webkit-optimize-contrast;
-            image-rendering: crisp-edges;
-            image-rendering: pixelated;
         }
 
         .container {
@@ -27,634 +24,351 @@
             border-radius: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             overflow: hidden;
-            /* ปรับแต่งสำหรับการจับภาพคุณภาพสูงสุด */
-            image-rendering: -webkit-optimize-contrast;
-            image-rendering: crisp-edges;
-            image-rendering: pixelated;
-            -webkit-backface-visibility: hidden;
-            backface-visibility: hidden;
-            transform: translateZ(0);
-            will-change: transform;
-        }
-
-        .secondary-nav {
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            border-bottom: 1px solid #dee2e6;
-            padding: 10px 0;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .nav-container {
-            display: flex;
-            justify-content: center;
-            gap: 5px;
-            max-width: 100%;
-            overflow-x: auto;
-            padding: 0 10px;
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            padding: 8px 12px;
-            background: white;
-            color: #6c757d;
-            text-decoration: none;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            white-space: nowrap;
-            border: 1px solid #e9ecef;
-            min-width: fit-content;
-        }
-
-        .nav-item:hover {
-            background: #e3f2fd;
-            color: #1976d2;
-            border-color: #1976d2;
-        }
-
-        .nav-item.active {
-            background: linear-gradient(135deg, #2196F3, #1976D2);
-            color: white;
-            border-color: #1976d2;
         }
 
         .header {
-            background: linear-gradient(135deg, #2196F3, #1976D2);
-            padding: 15px 20px;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
             color: white;
+            padding: 20px;
             display: flex;
-            align-items: center;
             justify-content: space-between;
-        }
-
-        .header-content {
-            display: flex;
             align-items: center;
-            gap: 12px;
-        }
-
-        .grower-logo {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid rgba(255,255,255,0.3);
-            background: white;
-        }
-
-        .header-text {
-            line-height: 1.2;
-        }
-
-        .header-main {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 2px;
-        }
-
-        .header-sub {
-            font-size: 14px;
-            opacity: 0.9;
-            font-weight: 400;
         }
 
         .back-btn {
-            background: rgba(255,255,255,0.2);
             color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 20px;
-            cursor: pointer;
             text-decoration: none;
-            font-size: 14px;
+            font-size: 18px;
+            font-weight: 600;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 25px;
             transition: all 0.3s ease;
         }
 
         .back-btn:hover {
             background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
         }
 
-        .bud-header {
-            padding: 15px 10px;
+        .header-title {
+            flex: 1;
             text-align: center;
-            background: #f8f9fa;
-            border-bottom: 1px solid #e9ecef;
         }
 
-        .bud-name {
-            font-size: 16px;
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .grower-logo {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 3px solid white;
+            object-fit: cover;
+        }
+
+        .header-text {
+            text-align: left;
+        }
+
+        .header-main {
+            font-size: 18px;
             font-weight: 600;
-            color: #333;
             margin-bottom: 5px;
-            line-height: 1.2;
         }
 
-        .bud-name-thai {
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 8px;
-            line-height: 1.2;
+        .header-sub {
+            font-size: 24px;
+            font-weight: 700;
         }
 
-        .bud-id {
-            background: #e3f2fd;
-            color: #1976d2;
-            padding: 3px 8px;
-            border-radius: 10px;
-            font-size: 11px;
+        .secondary-nav {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-bottom: 1px solid #dee2e6;
+            padding: 15px 0;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .nav-item {
+            padding: 12px 24px;
+            text-decoration: none;
+            color: #6c757d;
+            border-radius: 25px;
             font-weight: 600;
-            display: inline-block;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .nav-item:hover {
+            color: #4CAF50;
+            background: rgba(76, 175, 80, 0.1);
+            border-color: rgba(76, 175, 80, 0.3);
+        }
+
+        .nav-item.active {
+            color: #4CAF50;
+            background: rgba(76, 175, 80, 0.15);
+            border-color: #4CAF50;
         }
 
         .content {
-            padding: 10px;
+            padding: 40px;
         }
 
-        .section {
+        .loading-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4CAF50;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #d32f2f;
+        }
+
+        .error-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .error-state h3 {
             margin-bottom: 15px;
-            background: #f8f9fa;
-            padding: 12px;
-            border-radius: 10px;
-            border-left: 3px solid #2196F3;
+            font-size: 20px;
         }
 
-        .section-title {
+        .retry-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
             font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 10px;
-            color: #333;
-            display: flex;
-            align-items: center;
-            gap: 5px;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .retry-btn:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .bud-info-section {
+            display: none;
         }
 
         .info-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
         }
 
         .info-card {
-            background: white;
-            padding: 20px;
+            background: #f8f9fa;
             border-radius: 15px;
-            border-left: 4px solid #4CAF50;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 25px;
+            border-left: 5px solid #4CAF50;
         }
 
-        .info-label {
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 5px;
-        }
-
-        .info-value {
+        .info-card h3 {
+            color: #2c5530;
+            margin-bottom: 20px;
             font-size: 18px;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .strain-type {
-            display: inline-block;
-            padding: 6px 12px;
-            border-radius: 15px;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .type-indica { background: #e8eaf6; color: #3f51b5; }
-        .type-sativa { background: #e8f5e9; color: #4caf50; }
-        .type-hybrid { background: #fff3e0; color: #ff9800; }
-
-        .thc-cbd {
-            display: flex;
-            gap: 15px;
-        }
-
-        .thc { color: #ff6b6b; }
-        .cbd { color: #4ecdc4; }
-
-        .rating-display {
             display: flex;
             align-items: center;
-            gap: 8px;
-            margin-bottom: 8px;
-            background: white;
-            padding: 8px;
-            border-radius: 8px;
-        }
-
-        .stars {
-            font-size: 14px;
-            color: #ffd700;
-        }
-
-        .rating-number {
-            font-size: 14px;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .review-count {
-            color: #666;
-            font-size: 12px;
-        }
-
-        .effects-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-        }
-
-        .effect-card {
-            background: white;
-            padding: 15px;
-            border-radius: 10px;
-            border-left: 4px solid #28a745;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .effect-card.negative {
-            border-left-color: #dc3545;
-        }
-
-        .effect-type {
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 5px;
-            color: #333;
-        }
-
-        .effect-text {
-            font-size: 14px;
-            color: #666;
-            line-height: 1.4;
-        }
-
-        .grower-info {
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .grower-name {
-            font-size: 18px;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .verified-badge {
-            background: #28a745;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 10px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .terpenes-list {
-            display: flex;
-            flex-wrap: wrap;
             gap: 10px;
         }
 
-        .terpene-tag {
-            background: #e3f2fd;
-            color: #1976d2;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .review-card {
-            background: white;
-            padding: 12px;
-            border-radius: 10px;
-            margin-bottom: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            border-left: 3px solid #ffd700;
-        }
-
-        .review-header {
+        .info-item {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 8px;
-            gap: 8px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e0e0e0;
         }
 
-        .reviewer-info {
-            flex: 1;
-            min-width: 0;
+        .info-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
         }
 
-        .reviewer-name {
+        .info-label {
             font-weight: 600;
+            color: #555;
+        }
+
+        .info-value {
             color: #333;
-            font-size: 18px;
-            line-height: 1.2;
+            text-align: right;
         }
 
-        .review-date {
-            color: #666;
-            font-size: 15px;
-            margin-top: 2px;
+        .images-section {
+            margin-top: 40px;
         }
 
-        .review-stars {
-            color: #ffd700;
-            font-size: 18px;
-        }
-
-        .review-summary {
-            background: #f8f9fa;
-            padding: 8px;
-            border-radius: 6px;
-            margin-bottom: 8px;
-            border-left: 2px solid #2196F3;
-            font-size: 17px;
-            line-height: 1.3;
-        }
-
-        .review-content {
-            line-height: 1.4;
-            color: #333;
-            margin-bottom: 8px;
-            font-size: 17px;
-        }
-
-        .review-effects {
-            margin-bottom: 8px;
-        }
-
-        .effect-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px;
-            margin-top: 4px;
-        }
-
-        .effect-tag {
-            background: #e8f5e9;
-            color: #2e7d32;
-            padding: 2px 6px;
-            border-radius: 8px;
-            font-size: 9px;
-            font-weight: 500;
-        }
-
-        .effect-tag.positive {
-            background: #e8f5e9;
-            color: #2e7d32;
-        }
-
-        .effect-tag.negative {
-            background: #ffebee;
-            color: #c62828;
-        }
-
-        .review-images {
+        .images-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-            gap: 6px;
-            margin-top: 8px;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
         }
 
-        .review-image {
-            width: 100%;
-            height: 60px;
-            object-fit: cover;
-            border-radius: 6px;
-            border: 1px solid #e9ecef;
-        }
-
-        .reviewer-info-section {
-            margin-bottom: 4px;
-            padding: 4px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            border-left: 3px solid #4CAF50;
-        }
-
-        .reviewer-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 4px;
-        }
-
-        .reviewer-by-text {
-            font-size: 18px;
-            color: #666;
-            font-weight: 600;
-        }
-
-        .aroma-rating-text {
-            font-size: 18px;
-            color: #7b1fa2;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .reviewer-display {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .reviewer-avatar-small {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #a78bfa, #60a5fa);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            color: white;
-            font-weight: 600;
+        .image-item {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 15px;
             overflow: hidden;
-            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.3s ease;
         }
 
-        .reviewer-avatar-img {
+        .image-item:hover {
+            transform: scale(1.05);
+        }
+
+        .image-item img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            border-radius: 50%;
         }
 
-        .reviewer-name-display {
-            font-size: 21px;
-            font-weight: 600;
-            color: #333;
+        .section {
+            margin-bottom: 40px;
         }
 
-        .review-ratings-section {
-            margin: 6px 0;
-            padding: 6px;
-            background: #f8f9fa;
-            border-radius: 6px;
-        }
-
-        .review-summary-text {
-            font-size: 20px;
-            color: #333;
-            font-style: italic;
-            margin-top: 5px;
-        }
-
-        .tags-section {
-            margin: 4px 0;
-        }
-
-        .tags-row {
-            display: flex;
-            align-items: flex-start;
-            gap: 4px;
-            margin-bottom: 3px;
-        }
-
-        .tags-label {
-            font-size: 17px;
-            font-weight: 600;
-            color: #666;
-            min-width: 70px;
-        }
-
-        .tags-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px;
-        }
-
-        .aroma-tag {
-            background: #f3e5f5;
-            color: #7b1fa2;
-            padding: 2px 6px;
-            border-radius: 12px;
-            font-size: 10px;
-            font-weight: 500;
-        }
-
-        .more-tag {
-            background: #e0e0e0;
-            color: #666;
-            padding: 2px 6px;
-            border-radius: 12px;
-            font-size: 10px;
-            font-weight: 500;
-        }
-
-        .expand-btn {
-            background: none;
-            border: none;
-            color: #1976d2;
-            font-size: 11px;
-            cursor: pointer;
-            text-decoration: underline;
-            margin-top: 5px;
-        }
-
-        .review-images-section {
-            margin: 4px 0;
-        }
-
-        .review-images-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 3px;
-            max-width: 120px;
-        }
-
-        .review-image-thumb {
-            width: 100%;
-            height: 25px;
-            object-fit: cover;
-            border-radius: 3px;
-            border: 1px solid #e9ecef;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-        }
-
-        .review-image-thumb:hover {
-            transform: scale(1.05);
-            border-color: #FF9800;
-        }
-
-        .more-images {
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2c5530;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            background: #f0f0f0;
-            border: 1px solid #ddd;
-            border-radius: 3px;
-            font-size: 8px;
-            color: #666;
-            height: 25px;
+            gap: 10px;
         }
 
-        .review-media-section {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 15px;
+        .grade-badge {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #333;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .status-available {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-sold-out {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .percentage-display {
+            font-size: 18px;
+            font-weight: 700;
+            color: #4CAF50;
+        }
+
+        .effects-list {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
             margin-top: 15px;
         }
 
-        .video-review-btn {
-            padding: 4px 8px;
-            background: #ff1744;
-            color: white;
-            text-decoration: none;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 500;
-            border: none;
-            cursor: pointer;
+        .effects-positive {
+            border-left: 4px solid #4CAF50;
         }
 
-        .video-review-btn:hover {
-            background: #d50000;
+        .effects-negative {
+            border-left: 4px solid #f44336;
+        }
+
+        .contact-info {
+            background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 20px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 8px;
+        }
+
+        .contact-item:last-child {
+            margin-bottom: 0;
         }
 
         /* Image Modal Styles */
         .image-modal {
             display: none;
             position: fixed;
-            z-index: 9999;
+            z-index: 1000;
             left: 0;
             top: 0;
             width: 100%;
             height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.9);
-            padding-top: 50px;
+            background-color: rgba(0, 0, 0, 0.9);
+            justify-content: center;
+            align-items: center;
         }
 
         .modal-content {
+            position: relative;
+            max-width: 90%;
+            max-height: 90%;
             margin: auto;
             display: block;
-            max-width: 90%;
-            max-height: 80%;
-            border-radius: 10px;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
         }
 
-        .modal-close {
+        .close {
             position: absolute;
             top: 15px;
             right: 35px;
@@ -665,764 +379,32 @@
             cursor: pointer;
         }
 
-        .modal-close:hover,
-        .modal-close:focus {
+        .close:hover,
+        .close:focus {
             color: #bbb;
             text-decoration: none;
         }
 
-        /* Video Modal Styles */
-        .video-modal {
-            display: none;
-            position: fixed;
-            z-index: 9999;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background-color: rgba(0,0,0,0.9);
-            padding-top: 50px;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .video-container {
-            margin: auto;
-            display: block;
-            max-width: 90%;
-            max-height: 80%;
-            text-align: center;
-            position: relative;
-        }
-
-        .video-container iframe {
-            max-width: 100%;
-            max-height: 80vh;
-            border: none;
-            border-radius: 8px;
-        }
-
-        /* CSS สำหรับป้องกันการ scroll เมื่อ modal เปิด */
-        body.modal-open {
-            overflow: hidden;
-            position: fixed;
-            width: 100%;
-            height: 100%;
-        }
-
         @media (max-width: 768px) {
-            .video-modal {
-                padding-top: 20px;
-            }
-
-            .video-container {
-                max-width: 95%;
-                max-height: 85%;
-                margin-top: 10vh;
-            }
-
-            .video-container iframe {
-                width: 90vw;
-                height: 50.6vw; /* 16:9 aspect ratio */
-                min-height: 200px;
-                max-height: 70vh;
-            }
-
-            .modal-close {
-                top: 10px;
-                right: 20px;
-                font-size: 35px;
-                z-index: 10000;
-            }
-        }
-
-        .actions {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            padding: 20px 0;
-        }
-
-        .action-btn {
-            background: #2196F3;
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-
-        .action-btn:hover {
-            background: #1976D2;
-            transform: translateY(-2px);
-        }
-
-        .action-btn.secondary {
-            background: #28a745;
-        }
-
-        .action-btn.secondary:hover {
-            background: #218838;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 60px;
-            color: #666;
-        }
-
-        .error {
-            text-align: center;
-            padding: 60px;
-            color: #dc3545;
-        }
-
-        .empty-reviews {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-            background: white;
-            border-radius: 15px;
-        }
-
-        .simple-info-list {
-            background: white;
-            padding: 12px;
-            border-radius: 10px;
-            box-shadow: 0 1px 5px rgba(0,0,0,0.1);
-        }
-
-        .simple-info-item {
-            display: flex;
-            margin-bottom: 6px;
-            font-size: 18px;
-            line-height: 1.3;
-            align-items: flex-start;
-        }
-
-        .simple-info-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .simple-info-label {
-            font-weight: 600;
-            color: #333;
-            margin-right: 6px;
-            min-width: 80px;
-            flex-shrink: 0;
-        }
-
-        .simple-info-value {
-            color: #666;
-            flex: 1;
-            word-break: break-word;
-        }
-
-        .bud-info-layout {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            margin-top: 10px;
-        }
-
-        .bud-info-left {
-            width: 100%;
-        }
-
-        .bud-info-right {
-            width: 100%;
-            max-width: 400px;
-            margin: 0 auto;
-        }
-
-        .bud-images-display {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            border: 3px solid #ffd700;
-            border-radius: 15px;
-            padding: 15px;
-            background: #f8f9fa;
-            width: 100%;
-            max-width: 100%;
-            height: auto;
-            margin: 0 auto;
-            box-sizing: border-box;
-        }
-
-        .bud-image {
-            width: 100%;
-            aspect-ratio: 1 / 1;
-            object-fit: contain;
-            object-position: center;
-            border-radius: 8px;
-            border: 2px solid #e9ecef;
-            background: #f8f9fa;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-sizing: border-box;
-            /* คุณภาพรูปภาพสูงสุด */
-            image-rendering: -webkit-optimize-contrast;
-            image-rendering: crisp-edges;
-            image-rendering: pixelated;
-            -webkit-backface-visibility: hidden;
-            backface-visibility: hidden;
-            transform: translateZ(0);
-        }
-
-        .bud-image:hover {
-            transform: scale(1.05);
-            border-color: #ffd700;
-        }
-
-        .no-image {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #f8f9fa;
-            color: #666;
-            font-size: 10px;
-            text-align: center;
-            border: 2px dashed #ccc;
-        }
-
-        .info-group {
-            background: #f8f9fa;
-            border-left: 4px solid #4CAF50;
-            border-radius: 0;
-            padding: 12px;
-            margin-bottom: 0;
-            border-bottom: 1px solid #e9ecef;
-        }
-
-        .info-group:first-child {
-            border-top-left-radius: 8px;
-            border-top-right-radius: 8px;
-        }
-
-        .info-group:last-child {
-            border-bottom-left-radius: 8px;
-            border-bottom-right-radius: 8px;
-            border-bottom: none;
-        }
-
-        .info-groups-container {
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .info-group-title {
-            font-size: 21px;
-            font-weight: 600;
-            color: #2e7d32;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .info-group-content {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .info-item {
-            display: flex;
-            margin-bottom: 4px;
-            font-size: 18px;
-            line-height: 1.3;
-        }
-
-        .info-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .info-item-label {
-            font-weight: 600;
-            color: #333;
-            margin-right: 6px;
-            min-width: 80px;
-            flex-shrink: 0;
-        }
-
-        .info-item-value {
-            color: #666;
-            flex: 1;
-            word-break: break-word;
-        }
-
-        .no-contacts {
-            color: #999;
-            font-style: italic;
-            font-size: 18px;
-        }
-
-        .contact-link {
-            display: inline-block;
-            background: #e3f2fd;
-            color: #1976d2;
-            padding: 2px 6px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-size: 10px;
-            font-weight: 600;
-            margin: 2px 2px 2px 0;
-            transition: all 0.3s ease;
-        }
-
-        .contact-link:hover {
-            background: #1976d2;
-            color: white;
-            transform: translateY(-1px);
-        }
-
-        .contact-link.facebook { background: #e8f4fd; color: #1877f2; }
-        .contact-link.facebook:hover { background: #1877f2; color: white; }
-
-        .contact-link.line { background: #e8f9e8; color: #00c300; }
-        .contact-link.line:hover { background: #00c300; color: white; }
-
-        .contact-link.instagram { background: #fce4ec; color: #e91e63; }
-        .contact-link.instagram:hover { background: #e91e63; color: white; }
-
-        .contact-link.twitter { background: #e3f2fd; color: #1da1f2; }
-        .contact-link.twitter:hover { background: #1da1f2; color: white; }
-
-        .contact-link.telegram { background: #e8f4fd; color: #0088cc; }
-        .contact-link.telegram:hover { background: #0088cc; color: white; }
-
-        .contact-link.phone { background: #fff3e0; color: #ff9800; }
-        .contact-link.phone:hover { background: #ff9800; color: white; }
-
-        .contact-link.other { background: #f3e5f5; color: #9c27b0; }
-        .contact-link.other:hover { background: #9c27b0; color: white; }
-
-        
-
-        @media (max-width: 768px) {
-            .video-modal {
-                padding-top: 20px;
-            }
-
-            .video-container {
-                max-width: 95%;
-                max-height: 85%;
-                margin-top: 10vh;
-            }
-
-            .video-container iframe {
-                width: 90vw;
-                height: 50.6vw; /* 16:9 aspect ratio */
-                min-height: 200px;
-                max-height: 70vh;
-            }
-
-            .modal-close {
-                top: 10px;
-                right: 20px;
-                font-size: 35px;
-                z-index: 10000;
-            }
-        }
-
-        @media (max-width: 768px) {
-            body {
-                padding: 10px;
-                font-size: 16px;
-            }
-
-            .secondary-nav {
-                position: sticky;
-                top: 0;
-                background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-                border-bottom: 2px solid #dee2e6;
-                padding: 8px 0;
-                z-index: 100;
-            }
-
             .nav-container {
-                gap: 3px;
-                padding: 0 5px;
+                flex-wrap: wrap;
+                gap: 10px;
             }
 
             .nav-item {
-                padding: 6px 10px;
-                font-size: 12px;
-                border-radius: 15px;
-            }
-
-            
-
-            .container {
-                margin: 0;
-                border-radius: 15px;
-                box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-            }
-
-            .header {
-                padding: 15px 20px;
-                border-radius: 15px 15px 0 0;
-            }
-
-            .grower-logo {
-                width: 45px;
-                height: 45px;
-            }
-
-            .header-content {
-                gap: 12px;
-            }
-
-            .header-main {
-                font-size: 18px;
-                font-weight: 700;
-            }
-
-            .header-sub {
-                font-size: 15px;
-                font-weight: 500;
-            }
-
-            .back-btn {
-                padding: 12px 18px;
-                font-size: 15px;
-                font-weight: 600;
-                border-radius: 25px;
-            }
-
-            .bud-header {
-                padding: 15px 10px;
-                background: white;
-            }
-
-            .bud-name {
-                font-size: 22px;
-                font-weight: 700;
-                color: #2c3e50;
-                margin-bottom: 8px;
-            }
-
-            .bud-name-thai {
-                font-size: 18px;
-                color: #7f8c8d;
-                font-weight: 500;
-                margin-bottom: 12px;
-            }
-
-            .bud-id {
+                padding: 8px 16px;
                 font-size: 14px;
-                padding: 6px 12px;
-                border-radius: 20px;
-                font-weight: 700;
             }
 
-            .content {
-                padding: 10px;
+            .info-grid {
+                grid-template-columns: 1fr;
             }
 
-            .section {
-                margin-bottom: 15px;
-                padding: 10px;
-                background: white;
-            }
-
-            .section-title {
-                font-size: 18px;
-                font-weight: 700;
-                margin-bottom: 15px;
-                color: #2c3e50;
-                display: flex;
-                align-items: center;
-                gap: 8px;
-            }
-
-            .bud-images-display {
+            .images-grid {
                 grid-template-columns: repeat(2, 1fr);
-                gap: 10px;
-                padding: 15px;
-                border: 3px solid #f39c12;
-                border-radius: 20px;
-                background: linear-gradient(135deg, #fff9e6 0%, #fef5e7 100%);            }
-
-            .bud-image {
-                height: 140px;
-                border-radius: 12px;
-                border: 2px solid #e9ecef;
-                transition: all 0.3s ease;
             }
 
-            .bud-image:hover {
-                transform: scale(1.03);
-                border-color: #f39c12;
-                box-shadow: 0 6px 15px rgba(243, 156, 18, 0.3);
-            }
-
-            .no-image {
-                font-size: 14px;
-                font-weight: 600;
-                color: #7f8c8d;
-            }
-
-            .info-groups-container {
-                border-radius: 15px;
-                overflow: hidden;
-                box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-            }
-
-            .info-group {
-                padding: 20px;
-                margin-bottom: 0;
-                border-left: 5px solid #27ae60;
-                background: linear-gradient(135deg, #f8fff9 0%, #f0f0f0 100%);
-            }
-
-            .info-group-title {
-                font-size: 20px;
-                font-weight: 700;
-                color: #27ae60;
-                margin-bottom: 15px;
-                display: flex;
-                align-items: center;
-                gap: 8px;
-            }
-
-            .info-item {
-                margin-bottom: 12px;
-                font-size: 16px;
-                line-height: 1.5;
-                padding: 8px 0;
-                border-bottom: 1px solid rgba(0,0,0,0.05);
-            }
-
-            .info-item:last-child {
-                border-bottom: none;
-                margin-bottom: 0;
-            }
-
-            .info-item-label {
-                font-weight: 700;
-                color: #2c3e50;
-                margin-right: 8px;
-                min-width: 100px;
-                display: block;
-                margin-bottom: 4px;
-            }
-
-            .info-item-value {
-                color: #34495e;
-                font-weight: 500;
-                line-height: 1.4;
-                word-break: break-word;
-            }
-
-            .contact-link {
-                display: inline-block;
-                padding: 6px 12px;
-                border-radius: 20px;
-                font-size: 13px;
-                font-weight: 600;
-                margin: 4px 6px 4px 0;
-                text-decoration: none;
-                transition: all 0.3s ease;
-                box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-            }
-
-            .contact-link:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            }
-
-            .no-contacts {
-                color: #95a5a6;
-                font-style: italic;
-                font-size: 16px;
-                font-weight: 500;
-            }
-
-            .rating-display {
-                padding: 15px;
-                gap: 10px;
-                background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
-                border-radius: 15px;
-                box-shadow: 0 4px 12px rgba(255, 193, 7, 0.2);
-            }
-
-            .stars {
-                font-size: 20px;
-            }
-
-            .rating-number {
-                font-size: 18px;
-                font-weight: 700;
-                color: #f39c12;
-            }
-
-            .review-count {
-                font-size: 14px;
-                color: #7f8c8d;
-                font-weight: 500;
-            }
-
-            .actions {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 12px;
-                padding: 20px 0;
-            }
-
-            .action-btn {
-                padding: 15px 25px;
-                font-size: 16px;
-                font-weight: 700;
-                border-radius: 30px;
-                text-align: center;
-                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-                transition: all 0.3s ease;
-            }
-
-            .action-btn:hover {
-                transform: translateY(-3px);
-                box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-            }
-
-            .review-card {
-                padding: 15px;
-                margin-bottom: 15px;
-                border-radius: 15px;
-                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-                border-left: 4px solid #f39c12;
-                background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-            }
-
-            .reviewer-info-section {
-                padding: 12px;
-                background: linear-gradient(135deg, #e8f5e9 0%, #f0f8f0 100%);
-                border-radius: 12px;
-                border-left: 4px solid #27ae60;
-                margin-bottom: 12px;
-            }
-
-            .reviewer-by-text {
-                font-size: 16px;
-                font-weight: 700;
-                color: #27ae60;
-            }
-
-            .reviewer-name-display {
-                font-size: 18px;
-                font-weight: 700;
-                color: #2c3e50;
-            }
-
-            .reviewer-avatar-small {
-                width: 35px;
-                height: 35px;
-                font-size: 16px;
-            }
-
-            .review-ratings-section {
-                padding: 12px;
-                background: linear-gradient(135deg, #e3f2fd 0%, #f0f8ff 100%);
-                border-radius: 12px;
-                margin: 8px 0;
-            }
-
-            .review-summary-text {
-                font-size: 17px;
-                color: #2c3e50;
-                font-style: italic;
-                font-weight: 600;
-                line-height: 1.4;
-            }
-
-            .tags-label {
-                font-size: 15px;
-                font-weight: 700;
-                color: #34495e;
-                min-width: 80px;
-            }
-
-            .effect-tag {
-                font-size: 11px;
-                padding: 4px 8px;
-                border-radius: 15px;
-                font-weight: 600;
-                margin: 2px;
-            }
-
-            .aroma-tag {
-                font-size: 11px;
-                padding: 4px 8px;
-                border-radius: 15px;
-                font-weight: 600;
-                margin: 2px;
-            }
-
-            .more-tag {
-                font-size: 11px;
-                padding: 4px 8px;
-                border-radius: 15px;
-                font-weight: 600;
-                margin: 2px;
-            }
-
-            .review-images-grid {
-                grid-template-columns: repeat(4, 1fr);
-                gap: 6px;
-                max-width: 160px;
-            }
-
-            .review-image-thumb {
-                height: 35px;
-                border-radius: 6px;
-                border: 2px solid #e9ecef;
-            }
-
-            .more-images {
-                height: 35px;
-                font-size: 10px;
-                font-weight: 600;
-            }
-
-            .video-review-btn {
-                padding: 8px 15px;
-                font-size: 13px;
-                font-weight: 700;
-                border-radius: 20px;
-                box-shadow: 0 3px 10px rgba(255, 23, 68, 0.3);
-            }
-
-            .empty-reviews {
-                padding: 50px 20px;
-                border-radius: 15px;
-                background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            }
-
-            .empty-reviews div:first-child {
-                font-size: 48px;
-                margin-bottom: 15px;
-            }
-
-            .empty-reviews div:nth-child(2) {
-                font-size: 18px;
-                font-weight: 700;
-                color: #2c3e50;
-                margin-bottom: 8px;
-            }
-
-            .empty-reviews div:last-child {
-                font-size: 15px;
-                color: #7f8c8d;
-                font-weight: 500;
-            }
-
-            .modal-close {
+            .close {
                 top: 20px;
                 right: 25px;
                 font-size: 40px;
@@ -1452,1403 +434,452 @@
         <!-- Secondary Navigation Bar -->
         <div class="secondary-nav">
             <div class="nav-container">
-                <a href="#bud-info" class="nav-item active" onclick="scrollToSection('bud-info')">
+                <a href="#bud-info" class="nav-item active" onclick="showSection('bud-info')">
                     📊 ข้อมูลดอก
                 </a>
-                <a href="#reviews" class="nav-item" onclick="scrollToSection('reviews')">
+                <a href="#reviews" class="nav-item" onclick="showSection('reviews')">
                     📖 รีวิว
                 </a>
-                <a href="#ratings" class="nav-item" onclick="scrollToSection('ratings')">
+                <a href="#ratings" class="nav-item" onclick="showSection('ratings')">
                     ⭐ คะแนน
                 </a>
-                <a href="#images" class="nav-item" onclick="scrollToSection('images')">
-                    📸 รูปภาพ
+                <a href="#contact" class="nav-item" onclick="showSection('contact')">
+                    📞 ติดต่อ
                 </a>
-                
             </div>
         </div>
 
-        <div id="loadingMessage" class="loading">กำลังโหลดข้อมูล...</div>
-        <div id="errorMessage" class="error" style="display: none;"></div>
+        <div class="content">
+            <!-- Loading State -->
+            <div id="loadingState" class="loading-state">
+                <div class="loading-spinner"></div>
+                <h3>กำลังโหลดข้อมูล...</h3>
+                <p>โปรดรอสักครู่</p>
+            </div>
 
-        <div id="budContent" style="display: none;">
-            <div class="bud-header">
-                <div class="bud-name" id="budName">-</div>
-                <div class="bud-name-thai" id="budNameThai">-</div>
-                <div class="bud-id" id="budId">Bud ID: -</div>
+            <!-- Error State -->
+            <div id="errorState" class="error-state" style="display: none;">
+                <div class="error-icon">❌</div>
+                <h3>ไม่สามารถโหลดข้อมูลได้</h3>
+                <p id="errorMessage">เกิดข้อผิดพลาดในการโหลดข้อมูลดอก</p>
+                <button class="retry-btn" onclick="loadBudData()">🔄 ลองใหม่</button>
+            </div>
 
-                </div>
-
-            <div class="content">
-                <!-- รูปดอก 4 รูป -->
-                <div class="section" id="images">
-                    <div class="section-title">📸 รูปดอก</div>
-                    <div class="bud-images-display" id="budImagesDisplay">
-                        <!-- Bud images will be populated here -->
+            <!-- Main Content -->
+            <div id="mainContent" class="bud-info-section">
+                <!-- Bud Info Section -->
+                <div id="bud-info-content" class="section">
+                    <div class="section-title">
+                        📊 ข้อมูลดอก
                     </div>
-                </div>
+                    
+                    <div class="info-grid">
+                        <!-- Basic Info -->
+                        <div class="info-card">
+                            <h3>🌿 ข้อมูลพื้นฐาน</h3>
+                            <div class="info-item">
+                                <span class="info-label">ชื่อสายพันธุ์ (EN):</span>
+                                <span class="info-value" id="strainNameEn">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">ชื่อสายพันธุ์ (TH):</span>
+                                <span class="info-value" id="strainNameTh">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">ผู้พัฒนาสายพันธุ์:</span>
+                                <span class="info-value" id="breeder">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">ประเภท:</span>
+                                <span class="info-value" id="strainType">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">เกรด:</span>
+                                <span class="info-value" id="grade">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">สถานะ:</span>
+                                <span class="info-value" id="status">-</span>
+                            </div>
+                        </div>
 
-                <!-- แสดงข้อมูลทั้งหมด -->
-                <div class="section" id="bud-info">
-                    <div class="section-title">📊 ข้อมูลดอกทั้งหมด</div>
-                    <div id="groupedBudInfo">
-                        <!-- Grouped bud info will be populated here -->
+                        <!-- Cannabinoids -->
+                        <div class="info-card">
+                            <h3>🧪 สารสำคัญ</h3>
+                            <div class="info-item">
+                                <span class="info-label">THC:</span>
+                                <span class="info-value percentage-display" id="thcPercentage">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">CBD:</span>
+                                <span class="info-value percentage-display" id="cbdPercentage">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Terpene 1:</span>
+                                <span class="info-value" id="terpene1">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Terpene 2:</span>
+                                <span class="info-value" id="terpene2">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Terpene 3:</span>
+                                <span class="info-value" id="terpene3">-</span>
+                            </div>
+                        </div>
+
+                        <!-- Growing Info -->
+                        <div class="info-card">
+                            <h3>🌱 ข้อมูลการปลูก</h3>
+                            <div class="info-item">
+                                <span class="info-label">วิธีปลูก:</span>
+                                <span class="info-value" id="growMethod">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">ปุ่ย:</span>
+                                <span class="info-value" id="fertilizerType">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">ประเภทดอก:</span>
+                                <span class="info-value" id="floweringType">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">วันเก็บเกี่ยว:</span>
+                                <span class="info-value" id="harvestDate">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">หมายเลขแบทช์:</span>
+                                <span class="info-value" id="batchNumber">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">ใบรับรอง:</span>
+                                <span class="info-value" id="labTest">-</span>
+                            </div>
+                        </div>
+
+                        <!-- Aroma & Flavor -->
+                        <div class="info-card">
+                            <h3>👃 กลิ่นและรส</h3>
+                            <div class="info-item">
+                                <span class="info-label">กลิ่นรส:</span>
+                                <span class="info-value" id="aromaFlavor">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">เวลาแนะนำ:</span>
+                                <span class="info-value" id="recommendedTime">-</span>
+                            </div>
+                        </div>
                     </div>
-                </div>
 
-                <!-- คะแนนรีวิว -->
-                <div class="section" id="ratings">
-                    <div class="section-title">📊 คะแนนรีวิว</div>
-                    <div class="rating-display">
-                        <div class="stars" id="ratingStars">-</div>
-                        <div class="rating-number" id="ratingNumber">0.0</div>
-                        <div class="review-count" id="reviewCount">(0 รีวิว)</div>
+                    <!-- Effects -->
+                    <div class="section">
+                        <div class="section-title">✨ ผลกระทบ</div>
+                        
+                        <div class="info-grid">
+                            <div class="info-card">
+                                <h3>😊 ผลกระทบเชิงบวก (จิตใจ)</h3>
+                                <div class="effects-list effects-positive" id="mentalPositive">-</div>
+                            </div>
+                            
+                            <div class="info-card">
+                                <h3>😔 ผลกระทบเชิงลบ (จิตใจ)</h3>
+                                <div class="effects-list effects-negative" id="mentalNegative">-</div>
+                            </div>
+                            
+                            <div class="info-card">
+                                <h3>💪 ผลกระทบเชิงบวก (ร่างกาย)</h3>
+                                <div class="effects-list effects-positive" id="physicalPositive">-</div>
+                            </div>
+                            
+                            <div class="info-card">
+                                <h3>😣 ผลกระทบเชิงลบ (ร่างกาย)</h3>
+                                <div class="effects-list effects-negative" id="physicalNegative">-</div>
+                            </div>
+                        </div>
                     </div>
-                </div>
 
-                <!-- รีวิวทั้งหมด -->
-                <div class="section" id="reviews">
-                    <div class="section-title">📖 รีวิวทั้งหมด</div>
-                    <div id="reviewsContainer">
-                        <!-- Reviews will be populated here -->
+                    <!-- Images -->
+                    <div class="images-section">
+                        <div class="section-title">📸 รูปภาพดอก</div>
+                        <div class="images-grid" id="budImages">
+                            <!-- Images will be loaded here -->
+                        </div>
                     </div>
-                </div>
 
-                
-
-                <div class="actions">
-                    <a href="#" class="action-btn" id="writeReviewBtn">⭐ เขียนรีวิว</a>
-                    <button type="button" class="action-btn secondary" onclick="captureAsImage()">📸 บันทึกเป็นรูปภาพ</button>
+                    <!-- Contact Info -->
+                    <div id="contact-content" class="section" style="display: none;">
+                        <div class="section-title">📞 ข้อมูลการติดต่อ</div>
+                        <div class="contact-info" id="contactInfo">
+                            <!-- Contact info will be loaded here -->
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal สำหรับดูรูปขยาย -->
+    <!-- Image Modal -->
     <div id="imageModal" class="image-modal">
-        <span class="modal-close" onclick="closeImageModal()">&times;</span>
-        <img id="modalImage" class="modal-content">
+        <span class="close">&times;</span>
+        <img class="modal-content" id="modalImage">
     </div>
-
-    <!-- Modal สำหรับดูวิดีโอ YouTube -->
-    <div id="videoModal" class="video-modal">
-        <span class="modal-close" onclick="closeVideoModal()">&times;</span>
-        <div class="video-container">
-            <iframe id="youtubePlayer" width="800" height="450" frameborder="0" allowfullscreen></iframe>
-        </div>
-    </div>
-
-    <!-- html2canvas library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <script>
-        // ป้องกันการโหลดซ้ำในมือถือ
+        let budData = null;
+        let currentBudId = null;
         let isLoading = false;
-        let loadAttempted = false;
-        let reviews = []; // Declare reviews globally to be accessible in expandContent
 
-        function initializePage() {
-            // ตรวจสอบว่าโหลดแล้วหรือยัง
-            if (loadAttempted) {
-                console.log('Page already loaded, skipping...');
-                return;
-            }
-
+        // Get bud ID from URL or page context
+        function getBudId() {
             const urlParams = new URLSearchParams(window.location.search);
-            const budId = urlParams.get('id');
-
-            if (!budId) {
-                document.getElementById('loadingMessage').style.display = 'none';
-                document.getElementById('errorMessage').style.display = 'block';
-                document.getElementById('errorMessage').textContent = 'ไม่พบ ID ของดอก';
-                loadAttempted = true;
-                return;
-            }
-
-            // เริ่มโหลดข้อมูล
-            if (!isLoading) {
-                loadAttempted = true;
-                loadBudReport();
-            }
+            const budId = urlParams.get('id') || 
+                         (typeof window.budId !== 'undefined' ? window.budId : null);
+            
+            console.log('Got bud ID:', budId);
+            return budId;
         }
 
-        // เรียกใช้เมื่อ DOM พร้อม
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initializePage);
-        } else {
-            initializePage();
+        // Show different sections
+        function showSection(sectionName) {
+            // Update navigation
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector(`[onclick="showSection('${sectionName}')"]`).classList.add('active');
+
+            // Show/hide content sections
+            const sections = ['bud-info-content', 'contact-content'];
+            sections.forEach(section => {
+                const element = document.getElementById(section);
+                if (element) {
+                    element.style.display = section === `${sectionName}-content` ? 'block' : 'none';
+                }
+            });
+
+            // Scroll to top
+            window.scrollTo(0, 0);
         }
 
-        async function loadBudReport() {
-            // ป้องกันการเรียกซ้ำ
+        // Load bud data
+        async function loadBudData() {
             if (isLoading) {
                 console.log('Already loading, skipping...');
                 return;
             }
 
-            isLoading = true;
-            let retryCount = 0;
-            const maxRetries = 3;
-
-            while (retryCount < maxRetries) {
-                try {
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const budId = urlParams.get('id');
-
-                    console.log(`Loading bud report for ID: ${budId} (attempt ${retryCount + 1}/${maxRetries})`);
-
-                    // ตรวจสอบ budId อีกครั้ง
-                    if (!budId) {
-                        throw new Error('ไม่พบ ID ของดอก');
-                    }
-
-                    // เพิ่ม cache buster เพื่อป้องกัน caching issues
-                    const cacheBuster = Date.now();
-
-                    // Load bud info with timeout และ retry logic
-                    const budResponse = await Promise.race([
-                        fetch(`/api/buds/${budId}/info?_cb=${cacheBuster}`, {
-                            method: 'GET',
-                            headers: {
-                                'Cache-Control': 'no-cache',
-                                'Pragma': 'no-cache'
-                            }
-                        }),
-                        new Promise((_, reject) => 
-                            setTimeout(() => reject(new Error('Request timeout')), 8000)
-                        )
-                    ]);
-
-                    console.log('Bud response status:', budResponse.status);
-
-                    if (!budResponse.ok) {
-                        const errorText = await budResponse.text().catch(() => 'Unknown error');
-                        console.error(`Bud info API error: ${budResponse.status} - ${errorText}`);
-
-                        // ถ้าเป็น 404 หรือ 403 ไม่ต้อง retry
-                        if (budResponse.status === 404 || budResponse.status === 403) {
-                            throw new Error(`ไม่พบข้อมูลดอก (${budResponse.status})`);
-                        }
-
-                        // ถ้าเป็น server error ให้ retry
-                        if (budResponse.status >= 500 && retryCount < maxRetries - 1) {
-                            retryCount++;
-                            console.log(`Server error, retrying in ${retryCount * 1000}ms...`);
-                            await new Promise(resolve => setTimeout(resolve, retryCount * 1000));
-                            continue;
-                        }
-
-                        throw new Error(`เกิดข้อผิดพลาดจากเซิร์ฟเวอร์ (${budResponse.status})`);
-                    }
-
-                    const budData = await budResponse.json();
-                    console.log('Bud data loaded:', budData);
-
-                    // ตรวจสอบข้อมูลที่ได้อย่างละเอียด
-                    if (!budData) {
-                        throw new Error('ไม่ได้รับข้อมูลจากเซิร์ฟเวอร์');
-                    }
-
-                    if (!budData.success) {
-                        throw new Error(budData.error || 'API ส่งกลับสถานะไม่สำเร็จ');
-                    }
-
-                    if (!budData.bud) {
-                        throw new Error('ไม่พบข้อมูลดอกในการตอบกลับ');
-                    }
-
-                    const bud = budData.bud;
-                    console.log('Grower name from API:', bud.grower_name);
-
-                    // Load reviews with error handling
-                    try {
-                        console.log('Loading reviews...');
-                        const reviewsResponse = await fetch(`/api/reviews?bud_id=${budId}&_cb=${cacheBuster}`, {
-                            headers: {
-                                'Cache-Control': 'no-cache',
-                                'Pragma': 'no-cache'
-                            }
-                        });
-                        if (reviewsResponse.ok) {
-                            reviews = await reviewsResponse.json();
-                            console.log('Reviews loaded:', reviews.length, 'reviews');
-                        } else {
-                            console.warn('Failed to load reviews:', reviewsResponse.status);
-                            reviews = [];
-                        }
-                    } catch (reviewError) {
-                        console.warn('Error loading reviews:', reviewError);
-                        reviews = [];
-                    }
-
-                    console.log('Displaying bud report...');
-
-                    // เพิ่ม delay เล็กน้อยเพื่อให้ DOM พร้อม
-                    await new Promise(resolve => setTimeout(resolve, 100));
-
-                    displayBudReport(bud, reviews);
-
-                    document.getElementById('loadingMessage').style.display = 'none';
-                    document.getElementById('budContent').style.display = 'block';
-                    console.log('Bud report display completed');
-
-                    // สำเร็จแล้ว ออกจาก loop
-                    break;
-
-                } catch (error) {
-                    console.error(`Error loading bud report (attempt ${retryCount + 1}):`, error);
-
-                    // ถ้าเป็นครั้งสุดท้าย หรือเป็น error ที่ไม่ควร retry
-                    if (retryCount >= maxRetries - 1 || 
-                        error.message.includes('ไม่พบ ID ของดอก') ||
-                        error.message.includes('ไม่พบข้อมูลดอก (404)') ||
-                        error.message.includes('ไม่พบข้อมูลดอก (403)')) {
-
-                        const urlParams = new URLSearchParams(window.location.search);
-                        const budId = urlParams.get('id');
-
-                        console.error('Final error details:', {
-                            message: error.message,
-                            stack: error.stack,
-                            budId: budId,
-                            attempts: retryCount + 1
-                        });
-
-                        document.getElementById('loadingMessage').style.display = 'none';
-                        document.getElementById('errorMessage').style.display = 'block';
-
-                        let errorMessage = 'เกิดข้อผิดพลาดในการโหลดข้อมูล';
-                        if (error.message === 'Request timeout') {
-                            errorMessage = 'การโหลดข้อมูลล่าช้า กรุณาลองใหม่';
-                        } else if (error.message) {
-                            errorMessage = error.message;
-                        }
-
-                        document.getElementById('errorMessage').innerHTML = `
-                            <div style="text-align: center; padding: 20px;">
-                                <div style="font-size: 48px; margin-bottom: 15px;">❌</div>
-                                <div style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">${errorMessage}</div>
-                                <div style="font-size: 14px; color: #666; margin-bottom: 15px;">Bud ID: ${budId || 'N/A'}</div>
-                                <div style="font-size: 12px; color: #999; margin-bottom: 15px;">พยายาม ${retryCount + 1} ครั้ง</div>
-                                <button onclick="retryLoad()" style="background: #4CAF50; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 14px;">🔄 ลองใหม่</button>
-                            </div>
-                        `;
-                        break;
-                    } else {
-                        // ลองใหม่
-                        retryCount++;
-                        console.log(`Retrying in ${retryCount * 1000}ms... (${retryCount}/${maxRetries})`);
-                        await new Promise(resolve => setTimeout(resolve, retryCount * 1000));
-                    }
-                }
-            }
-
-            isLoading = false;
-        }
-
-        // ฟังก์ชันสำหรับลองใหม่
-        function retryLoad() {
-            loadAttempted = false;
-            isLoading = false;
-            document.getElementById('errorMessage').style.display = 'none';
-            document.getElementById('loadingMessage').style.display = 'block';
-            document.getElementById('budContent').style.display = 'none';
-            initializePage();
-        }
-
-        function displayBudReport(bud, reviews) {
-            try {
-                console.log('Displaying bud report for:', bud);
-                console.log('Grower name received:', bud.grower_name);
-
-                // ตรวจสอบว่า bud object มีข้อมูลที่จำเป็น
-                if (!bud || typeof bud !== 'object') {
-                    throw new Error('ข้อมูลดอกไม่ถูกต้อง: ไม่ใช่ object');
-                }
-
-                // Basic info with error handling และ fallback values
-                const budNameEl = document.getElementById('budName');
-                const budNameThaiEl = document.getElementById('budNameThai');
-                const budIdEl = document.getElementById('budId');
-
-                if (budNameEl) {
-                    const strainNameEn = bud.strain_name_en || bud.name || 'ไม่ระบุชื่อ';
-                    budNameEl.textContent = strainNameEn;
-                }
-
-                if (budNameThaiEl) {
-                    const strainNameTh = bud.strain_name_th || '';
-                    budNameThaiEl.textContent = strainNameTh;
-                    // ซ่อนถ้าไม่มีชื่อไทย
-                    budNameThaiEl.style.display = strainNameTh ? 'block' : 'none';
-                }
-
-                if (budIdEl) {
-                    const budId = bud.id || bud.bud_id || 'N/A';
-                    budIdEl.textContent = `Bud ID: ${budId}`;
-                }
-
-                // Update grower name in header with better handling
-                const growerNameElement = document.getElementById('growerName');
-                if (growerNameElement) {
-                    let growerName = 'บัดท์บอย';  // Default fallback name
-
-                    // Check multiple possible sources for grower name
-                    if (bud.grower_name && typeof bud.grower_name === 'string' && bud.grower_name.trim()) {
-                        growerName = bud.grower_name.trim();
-                    } else if (bud.username && typeof bud.username === 'string' && bud.username.trim()) {
-                        growerName = bud.username.trim();
-                    } else if (bud.created_by_name && typeof bud.created_by_name === 'string' && bud.created_by_name.trim()) {
-                        growerName = bud.created_by_name.trim();
-                    }
-
-                    growerNameElement.textContent = growerName;
-                    console.log('Updated grower name element with:', growerName);
-                } else {
-                    console.warn('Grower name element not found');
-                }
-
-                // Display components with individual error handling
-                const components = [
-                    { name: 'Bud images', func: () => displayBudImages(bud) },
-                    { name: 'Bud info', func: () => displayAllBudInfo(bud) }
-                ];
-
-                components.forEach(component => {
-                    try {
-                        component.func();
-                        console.log(`${component.name} displayed successfully`);
-                    } catch (error) {
-                        console.error(`Error displaying ${component.name}:`, error);
-                        // Continue with other components
-                    }
-                });
-
-                // Rating calculation with error handling
-                try {
-                    let avgRating = 0;
-                    let reviewsArray = [];
-
-                    if (Array.isArray(reviews)) {
-                        reviewsArray = reviews;
-                        if (reviews.length > 0) {
-                            const validRatings = reviews
-                                .map(review => review.overall_rating || 0)
-                                .filter(rating => rating > 0);
-
-                            if (validRatings.length > 0) {
-                                avgRating = validRatings.reduce((sum, rating) => sum + rating, 0) / validRatings.length;
-                            }
-                        }
-                    }
-
-                    const ratingStarsEl = document.getElementById('ratingStars');
-                    const ratingNumberEl = document.getElementById('ratingNumber');
-                    const reviewCountEl = document.getElementById('reviewCount');
-
-                    if (ratingStarsEl) {
-                        const starCount = Math.max(0, Math.min(5, Math.round(avgRating)));
-                        ratingStarsEl.textContent = starCount > 0 ? '⭐'.repeat(starCount) : '☆☆☆☆☆';
-                    }
-
-                    if (ratingNumberEl) {
-                        ratingNumberEl.textContent = avgRating > 0 ? avgRating.toFixed(1) : '0.0';
-                    }
-
-                    if (reviewCountEl) {
-                        reviewCountEl.textContent = `(${reviewsArray.length} รีวิว)`;
-                    }
-
-                    console.log('Rating display updated successfully');
-                } catch (error) {
-                    console.error('Error updating rating display:', error);
-                    // Set fallback values
-                    const ratingStarsEl = document.getElementById('ratingStars');
-                    const ratingNumberEl = document.getElementById('ratingNumber');
-                    const reviewCountEl = document.getElementById('reviewCount');
-
-                    if (ratingStarsEl) ratingStarsEl.textContent = '☆☆☆☆☆';
-                    if (ratingNumberEl) ratingNumberEl.textContent = '0.0';
-                    if (reviewCountEl) reviewCountEl.textContent = '(0 รีวิว)';
-                }
-
-                // Reviews with error handling
-                try {
-                    const reviewsToDisplay = Array.isArray(reviews) ? reviews : [];
-                    displayReviews(reviewsToDisplay);
-                    console.log('Reviews displayed successfully');
-                } catch (error) {
-                    console.error('Error displaying reviews:', error);
-                    // Show empty reviews section
-                    const reviewsContainer = document.getElementById('reviewsContainer');
-                    if (reviewsContainer) {
-                        reviewsContainer.innerHTML = `
-                            <div class="empty-reviews">
-                                <div style="font-size: 32px; margin-bottom: 10px;">⚠️</div>
-                                <div style="font-size: 14px; font-weight: 600;">ไม่สามารถโหลดรีวิวได้</div>
-                                <div style="font-size: 12px; color: #666;">กรุณาลองใหม่อีกครั้ง</div>
-                            </div>
-                        `;
-                    }
-                }
-
-                // Set up write review button with bud ID
-                try {
-                    const writeReviewBtn = document.getElementById('writeReviewBtn');
-                    if (writeReviewBtn) {
-                        const budId = bud.id || bud.bud_id;
-                        if (budId) {
-                            writeReviewBtn.href = `/add-review?bud_id=${budId}`;
-                            writeReviewBtn.style.display = 'inline-block';
-                        } else {
-                            writeReviewBtn.style.display = 'none';
-                        }
-                    }
-                    console.log('Write review button updated successfully');
-                } catch (error) {
-                    console.error('Error updating write review button:', error);
-                }
-
-                console.log('Display bud report completed successfully');
-
-            } catch (error) {
-                console.error('Error in displayBudReport:', error);
-
-                // แสดง fallback UI
-                const budContent = document.getElementById('budContent');
-                if (budContent) {
-                    budContent.innerHTML = `
-                        <div style="text-align: center; padding: 40px;">
-                            <div style="font-size: 48px; margin-bottom: 15px;">⚠️</div>
-                            <div style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">ไม่สามารถแสดงข้อมูลได้</div>
-                            <div style="font-size: 14px; color: #666; margin-bottom: 15px;">เกิดข้อผิดพลาดในการประมวลผลข้อมูล</div>
-                            <button onclick="retryLoad()" style="background: #4CAF50; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 14px;">🔄 ลองใหม่</button>
-                        </div>
-                    `;
-                }
-
-                throw error; // Re-throw to be caught by loadBudReport
-            }
-        }
-
-        // Event listeners
-        window.onclick = function(event) {
-            const imageModal = document.getElementById('imageModal');
-            const videoModal = document.getElementById('videoModal');
-
-            if (event.target === imageModal) {
-                closeImageModal();
-            }
-
-            if (event.target === videoModal) {
-                closeVideoModal();
-            }
-        }
-
-        // เพิ่ม event listener สำหรับ touch events ในมือถือ
-        document.addEventListener('touchstart', function(event) {
-            const videoModal = document.getElementById('videoModal');
-            const imageModal = document.getElementById('imageModal');
-
-            if (event.target === videoModal) {
-                closeVideoModal();
-            }
-
-            if (event.target === imageModal) {
-                closeImageModal();
-            }
-        });
-
-        // ป้องกันการ scroll เมื่อ modal เปิด และจัดการ Page Visibility
-        document.addEventListener('DOMContentLoaded', function() {
-            const videoModal = document.getElementById('videoModal');
-            const imageModal = document.getElementById('imageModal');
-
-            if (videoModal) {
-                videoModal.addEventListener('touchmove', function(e) {
-                    e.preventDefault();
-                }, { passive: false });
-            }
-
-            if (imageModal) {
-                imageModal.addEventListener('touchmove', function(e) {
-                    e.preventDefault();
-                }, { passive: false });
-            }
-        });
-
-        // จัดการ Page Visibility API เพื่อป้องกันการรีโหลดในพื้นหลัง
-        document.addEventListener('visibilitychange', function() {
-            if (document.visibilityState === 'hidden') {
-                // หน้าถูกซ่อน ยกเลิก request ที่กำลังทำงาน
-                console.log('Page hidden, pausing operations');
-            } else if (document.visibilityState === 'visible') {
-                // หน้ากลับมาแสดง
-                console.log('Page visible');
-
-                // ตรวจสอบว่าต้องโหลดข้อมูลใหม่หรือไม่
-                if (!loadAttempted && !isLoading) {
-                    console.log('Page became visible, reinitializing if needed');
-                    setTimeout(initializePage, 100);
-                }
-            }
-        });
-
-        // ป้องกันการ reload จาก browser back/forward
-        window.addEventListener('pageshow', function(event) {
-            if (event.persisted) {
-                console.log('Page restored from cache');
-                // หน้ามาจาก cache ไม่ต้องโหลดใหม่
+            currentBudId = getBudId();
+            if (!currentBudId) {
+                showError('ไม่พบ ID ของดอก');
                 return;
             }
-        });
 
-        function displayBudImages(bud) {
-            const budImagesDisplay = document.getElementById('budImagesDisplay');
-            const images = [
-                bud.image_1_url,
-                bud.image_2_url,
-                bud.image_3_url,
-                bud.image_4_url
-            ];
+            isLoading = true;
+            console.log(`Loading bud report for ID: ${currentBudId}`);
 
-            budImagesDisplay.innerHTML = images.map((imageUrl, index) => {
-                if (imageUrl && imageUrl.trim()) {
-                    return `<img src="${imageUrl}" alt="รูปดอก ${index + 1}" class="bud-image" onclick="viewImage('${imageUrl}')">`;
-                } else {
-                    return `<div class="bud-image no-image">ไม่มีรูป<br>${index + 1}</div>`;
-                }
-            }).join('');
-        }
+            try {
+                showLoading();
 
-        function displayBasicInfo(bud) {
-            const basicInfoGrid = document.getElementById('basicInfoGrid');
+                const response = await fetch(`/api/buds/${currentBudId}/info?_cb=${Date.now()}`);
+                console.log('Bud response status:', response.status);
 
-            const basicInfo = [
-                { label: 'ผู้พัฒนา', value: bud.breeder || 'ไม่ระบุ' },
-                { label: 'ประเภท', value: bud.strain_type || 'ไม่ระบุ', isStrainType: true },
-                { label: 'THC', value: `${bud.thc_percentage || 'N/A'}%`, className: 'thc' },
-                { label: 'CBD', value: `${bud.cbd_percentage || 'N/A'}%`, className: 'cbd' },
-                { label: 'เกรด', value: bud.grade || 'ไม่ระบุ' },
-                { label: 'กลิน่และรส', value: bud.aroma_flavor || 'ไม่ระบุ' },
-                { label: 'เวลาที่แนะนำ', value: bud.recommended_time || 'ไม่ระบุ' }
-            ];
-
-            basicInfoGrid.innerHTML = basicInfo.map(info => {
-                let valueContent = info.value;
-                if (info.isStrainType && bud.strain_type) {
-                    valueContent = `<span class="strain-type type-${bud.strain_type.toLowerCase()}">${info.value}</span>`;
-                } else if (info.className) {
-                    valueContent = `<span class="${info.className}">${info.value}</span>`;
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
 
-                return `
-                    <div class="info-card">
-                        <div class="info-label">${info.label}</div>
-                        <div class="info-value">${valueContent}</div>
-                    </div>
-                `;
-            }).join('');
+                const data = await response.json();
+                console.log('Bud data loaded:', data);
+
+                if (data.success === false) {
+                    throw new Error(data.error || 'API returned error');
+                }
+
+                budData = data.bud || data;
+                displayBudData();
+                showMainContent();
+
+            } catch (error) {
+                console.error('Error loading bud data:', error);
+                showError(`เกิดข้อผิดพลาด: ${error.message}`);
+            } finally {
+                isLoading = false;
+            }
         }
 
-        function displayGrowingInfo(bud) {
-            const growingInfoGrid = document.getElementById('growingInfoGrid');
+        // Display functions
+        function showLoading() {
+            document.getElementById('loadingState').style.display = 'block';
+            document.getElementById('errorState').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'none';
+        }
 
-            const growingInfo = [
-                { label: 'วิธีการปลูก', value: bud.grow_method || 'ไม่ระบุ' },
-                { label: 'ประเภทปุ๋ย', value: bud.fertilizer_type || 'ไม่ระบุ' },
-                { label: 'ประเภทการออกดอก', value: bud.flowering_type || 'ไม่ระบุ' },
-                { label: 'วันที่เก็บเกี่ยว', value: bud.harvest_date || 'ไม่ระบุ' },
-                { label: 'หมายเลข Batch', value: bud.batch_number || 'ไม่ระบุ' },
-                { label: 'วันที่เพิ่มข้อมูล', value: formatDate(bud.created_at) }
+        function showError(message) {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('errorState').style.display = 'block';
+            document.getElementById('mainContent').style.display = 'none';
+            document.getElementById('errorMessage').textContent = message;
+        }
+
+        function showMainContent() {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('errorState').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'block';
+        }
+
+        // Display bud data
+        function displayBudData() {
+            if (!budData) return;
+
+            // Basic info
+            document.getElementById('strainNameEn').textContent = budData.strain_name_en || '-';
+            document.getElementById('strainNameTh').textContent = budData.strain_name_th || '-';
+            document.getElementById('breeder').textContent = budData.breeder || '-';
+            document.getElementById('strainType').textContent = budData.strain_type || '-';
+            
+            // Grade with badge
+            const gradeElement = document.getElementById('grade');
+            if (budData.grade) {
+                gradeElement.innerHTML = `<span class="grade-badge">${budData.grade}</span>`;
+            } else {
+                gradeElement.textContent = '-';
+            }
+
+            // Status with badge
+            const statusElement = document.getElementById('status');
+            if (budData.status) {
+                const statusClass = budData.status === 'available' ? 'status-available' : 'status-sold-out';
+                const statusText = budData.status === 'available' ? 'ยังเหลือ' : 'หมดแล้ว';
+                statusElement.innerHTML = `<span class="status-badge ${statusClass}">${statusText}</span>`;
+            } else {
+                statusElement.textContent = '-';
+            }
+
+            // Cannabinoids
+            document.getElementById('thcPercentage').textContent = budData.thc_percentage ? `${budData.thc_percentage}%` : '-';
+            document.getElementById('cbdPercentage').textContent = budData.cbd_percentage ? `${budData.cbd_percentage}%` : '-';
+            document.getElementById('terpene1').textContent = budData.top_terpenes_1 || '-';
+            document.getElementById('terpene2').textContent = budData.top_terpenes_2 || '-';
+            document.getElementById('terpene3').textContent = budData.top_terpenes_3 || '-';
+
+            // Growing info
+            document.getElementById('growMethod').textContent = budData.grow_method || '-';
+            document.getElementById('fertilizerType').textContent = budData.fertilizer_type || '-';
+            document.getElementById('floweringType').textContent = budData.flowering_type || '-';
+            document.getElementById('harvestDate').textContent = budData.harvest_date || '-';
+            document.getElementById('batchNumber').textContent = budData.batch_number || '-';
+            document.getElementById('labTest').textContent = budData.lab_test_name || '-';
+
+            // Aroma & flavor
+            document.getElementById('aromaFlavor').textContent = budData.aroma_flavor || '-';
+            document.getElementById('recommendedTime').textContent = budData.recommended_time || '-';
+
+            // Effects
+            document.getElementById('mentalPositive').textContent = budData.mental_effects_positive || 'ไม่มีข้อมูล';
+            document.getElementById('mentalNegative').textContent = budData.mental_effects_negative || 'ไม่มีข้อมูล';
+            document.getElementById('physicalPositive').textContent = budData.physical_effects_positive || 'ไม่มีข้อมูล';
+            document.getElementById('physicalNegative').textContent = budData.physical_effects_negative || 'ไม่มีข้อมูล';
+
+            // Grower name
+            document.getElementById('growerName').textContent = budData.grower_name || 'Budt.Boy';
+
+            // Display images
+            displayImages();
+
+            // Display contact info
+            displayContactInfo();
+        }
+
+        // Display images
+        function displayImages() {
+            const imagesContainer = document.getElementById('budImages');
+            imagesContainer.innerHTML = '';
+
+            const imageFields = ['image_1_url', 'image_2_url', 'image_3_url', 'image_4_url'];
+            
+            imageFields.forEach((field, index) => {
+                if (budData[field]) {
+                    const imageItem = document.createElement('div');
+                    imageItem.className = 'image-item';
+                    imageItem.onclick = () => openImageModal(budData[field]);
+                    
+                    const img = document.createElement('img');
+                    img.src = `/${budData[field]}`;
+                    img.alt = `รูปดอก ${index + 1}`;
+                    img.loading = 'lazy';
+                    
+                    imageItem.appendChild(img);
+                    imagesContainer.appendChild(imageItem);
+                }
+            });
+
+            if (imagesContainer.children.length === 0) {
+                imagesContainer.innerHTML = '<p>ไม่มีรูปภาพ</p>';
+            }
+        }
+
+        // Display contact info
+        function displayContactInfo() {
+            const contactContainer = document.getElementById('contactInfo');
+            const contacts = [
+                { label: 'Facebook', value: budData.grower_contact_facebook, icon: '📘' },
+                { label: 'Line', value: budData.grower_contact_line, icon: '💬' },
+                { label: 'Instagram', value: budData.grower_contact_instagram, icon: '📷' },
+                { label: 'Twitter', value: budData.grower_contact_twitter, icon: '🐦' },
+                { label: 'Telegram', value: budData.grower_contact_telegram, icon: '✈️' },
+                { label: 'Phone', value: budData.grower_contact_phone, icon: '📞' },
+                { label: 'Other', value: budData.grower_contact_other, icon: '💌' }
             ];
 
-            growingInfoGrid.innerHTML = growingInfo.map(info => `
-                <div class="info-card">
-                    <div class="info-label">${info.label}</div>
-                    <div class="info-value">${info.value}</div>
+            const validContacts = contacts.filter(contact => contact.value);
+
+            if (validContacts.length === 0) {
+                contactContainer.innerHTML = '<p>ไม่มีข้อมูลการติดต่อ</p>';
+                return;
+            }
+
+            contactContainer.innerHTML = validContacts.map(contact => `
+                <div class="contact-item">
+                    <span>${contact.icon}</span>
+                    <strong>${contact.label}:</strong>
+                    <span>${contact.value}</span>
                 </div>
             `).join('');
         }
 
-        function displayEffects(bud) {
-            const effectsGrid = document.getElementById('effectsGrid');
-            effectsGrid.innerHTML = '';
-
-            const effects = [
-                { type: 'ผลทางจิต (บวก)', text: bud.mental_effects_positive, positive: true },
-                { type: 'ผลทางจิต (ลบ)', text: bud.mental_effects_negative, positive: false },
-                { type: 'ผลทางกาย (บวก)', text: bud.physical_effects_positive, positive: true },
-                { type: 'ผลทางกาย (ลบ)', text: bud.physical_effects_negative, positive: false }
-            ];
-
-            effects.forEach(effect => {
-                if (effect.text && effect.text.trim()) {
-                    const effectCard = document.createElement('div');
-                    effectCard.className = `effect-card ${effect.positive ? '' : 'negative'}`;
-                    effectCard.innerHTML = `
-                        <div class="effect-type">${effect.type}</div>
-                        <div class="effect-text">${effect.text}</div>
-                    `;
-                    effectsGrid.appendChild(effectCard);
-                }
-            });
-
-            if (effectsGrid.children.length === 0) {
-                effectsGrid.innerHTML = '<div class="effect-card"><div class="effect-text">ไม่มีข้อมูลผลกระทบ</div></div>';
-            }
-        }
-
-        function displayTerpenes(bud) {
-            const terpenesList = document.getElementById('terpenesList');
-            const terpenes = [bud.top_terpenes_1, bud.top_terpenes_2, bud.top_terpenes_3].filter(t => t && t.trim());
-
-            if (terpenes.length > 0) {
-                terpenesList.innerHTML = terpenes.map(terpene => 
-                    `<div class="terpene-tag">${terpene}</div>`
-                ).join('');
-            } else {
-                terpenesList.innerHTML = '<div class="terpene-tag">ไม่มีข้อมูล Terpenes</div>';
-            }
-        }
-
-        function displayReviews(reviewsData) { // Renamed parameter to avoid conflict with global 'reviews'
-            const reviewsContainer = document.getElementById('reviewsContainer');
-
-            if (reviewsData.length === 0) {
-                reviewsContainer.innerHTML = `
-                    <div class="empty-reviews">
-                        <div style="font-size: 32px; margin-bottom: 10px;">📝</div>
-                        <div style="font-size: 14px; font-weight: 600;">ยังไม่มีรีวิว</div>
-                        <div style="font-size: 12px; color: #666;">เป็นคนแรกที่รีวิวดอกนี้!</div>
-                    </div>
-                `;
-                return;
-            }
-
-            const reviewsHtml = reviewsData.map(review => {
-                const createdDate = formatDate(review.created_at);
-                const updatedDate = review.updated_at && review.updated_at !== review.created_at ? 
-                    ` (แก้ไขล่าสุด: ${formatDate(review.updated_at)})` : '';
-
-                // สร้าง avatar สำหรับคนรีวิว
-                const reviewerAvatar = review.reviewer_profile_image ? 
-                    `<img src="${review.reviewer_profile_image}" alt="Profile" class="reviewer-avatar-img">` :
-                    (review.reviewer_name ? review.reviewer_name.charAt(0).toUpperCase() : '👤');
-
-                // สร้าง effects tags
-                const effectsTags = review.selected_effects && review.selected_effects.length > 0 ? 
-                    review.selected_effects.slice(0, 4).map(effect => 
-                        `<span class="effect-tag">${effect}</span>`
-                    ).join('') + (review.selected_effects.length > 4 ? `<span class="more-tag">+${review.selected_effects.length - 4}</span>` : '') : '';
-
-                // สร้าง aroma tags
-                const aromaTags = review.aroma_flavors && review.aroma_flavors.length > 0 ? 
-                    review.aroma_flavors.slice(0, 3).map(aroma => 
-                        `<span class="aroma-tag">${aroma}</span>`
-                    ).join('') + (review.aroma_flavors.length > 3 ? `<span class="more-tag">+${review.aroma_flavors.length - 3}</span>` : '') : '';
-
-                // สร้าง review images
-                const reviewImages = review.review_images && review.review_images.length > 0 ? 
-                    `<div class="review-images-section">
-                        <div class="review-images-grid">
-                            ${review.review_images.slice(0, 4).map((img, index) => 
-                                `<img src="${img}" alt="Review image ${index + 1}" class="review-image-thumb" onclick="viewImage('${img}')">`
-                            ).join('')}
-                            ${review.review_images.length > 4 ? `<div class="more-images">+${review.review_images.length - 4}</div>` : ''}
-                        </div>
-                    </div>` : '';
-
-                return `
-                    <div class="item-card" data-review-id="${review.id}">
-                        <div class="review-content">
-                            <div class="review-main-info">
-                                <div class="item-header">
-                                    <div class="item-name">
-                                        ${review.strain_name_th || 'ไม่ระบุชื่อไทย'} (${review.strain_name_en || 'ไม่ระบุชื่ออังกฤษ'}) - Bud ID: ${review.bud_reference_id}
-                                    </div>
-                                    <div class="item-date">${createdDate}${updatedDate}</div>
-                                </div>
-
-                                <div class="reviewer-info-section">
-                                    <div class="reviewer-header">
-                                        <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
-                                            <div class="reviewer-by-text">Review by :</div>
-                                            <div class="reviewer-display">
-                                                <div class="reviewer-avatar-small">
-                                                    ${reviewerAvatar}
-                                                </div>
-                                                <div class="reviewer-name-display">${review.reviewer_name || 'ผู้ใช้ไม่ระบุชื่อ'}</div>
-                                                <div style="margin-left: 8px; font-size: 12px; color: #FF9800; font-weight: 600;">
-                                                    คะแนนรวม: ${'⭐'.repeat(review.overall_rating)} (${review.overall_rating}/5)${review.aroma_rating ? ` | คะแนนกลิ่น: ${'⭐'.repeat(review.aroma_rating)} (${review.aroma_rating}/5)` : ''}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- สรุปรีวิว -->
-                                <div class="review-ratings-section">
-                                    <div class="review-summary-text">${review.short_summary || 'ไม่มีสรุป'}</div>
-                                </div>
-
-                                <!-- Effects และ Aromas -->
-                                ${effectsTags ? `<div class="tags-section">
-                                    <div class="tags-row">
-                                        <span class="tags-label">🧠 ผลกระทบ:</span>
-                                        <div class="tags-container">${effectsTags}</div>
-                                    </div>
-                                </div>` : ''}
-
-                                ${aromaTags ? `<div class="tags-section">
-                                    <div class="tags-row">
-                                        <span class="tags-label">👃 กลิ่น/รส:</span>
-                                        <div class="tags-container">${aromaTags}</div>
-                                    </div>
-                                </div>` : ''}
-
-                                <!-- เนื้อหารีวิวเต็ม (ย่อ) -->
-                                ${review.full_review_content ? `<div class="review-full-content">
-                                    <div class="content-preview">${review.full_review_content.length > 100 ? 
-                                        review.full_review_content.substring(0, 100) + '...' : 
-                                        review.full_review_content}</div>
-                                    ${review.full_review_content.length > 100 ? 
-                                        `<button class="expand-btn" onclick="expandContent(${review.id})">อ่านเพิ่มเติม</button>` : ''}
-                                </div>` : ''}
-
-                                <!-- รูปภาพประกอบการรีวิว และปุ่มวิดีโอรีวิว -->
-                                <div class="review-media-section">
-                                    ${reviewImages}
-                                    ${review.video_review_url ? `
-                                        <button class="video-review-btn" onclick="playVideoReview('${review.video_review_url}'); return false;" type="button">
-                                            🎥 ดูรีวิว
-                                        </button>
-                                    ` : ''}
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-
-            reviewsContainer.innerHTML = reviewsHtml;
-        }
-
-        function displayAllBudInfo(bud) {
-            const groupedBudInfo = document.getElementById('groupedBudInfo');
-
-            console.log('DisplayAllBudInfo - Grower name:', bud.grower_name);
-
-            // จัดกลุ่มข้อมูลตามหมวดหมู่
-            const infoGroups = [
-                {
-                    title: '🌿 ข้อมูลพื้นฐาน',
-                    items: [
-                        { label: 'ผู้ปลูก', value: bud.grower_name || (bud.created_by && typeof bud.created_by === 'string' && bud.created_by.trim()) || 'บัดท์บอย' },
-                         // ช่องทางติดต่อของผู้ปลูก
-                        {
-                            label: 'ช่องทางติดต่อ',
-                            value: (() => {
-                                let contactLinks = [];
-
-                                if (bud.grower_contact_facebook) {
-                                    contactLinks.push('<a href="' + bud.grower_contact_facebook + '" target="_blank" class="contact-link facebook">📘 Facebook</a>');
-                                }
-                                if (bud.grower_contact_line) {
-                                    const lineUrl = bud.grower_contact_line.startsWith('http') ? bud.grower_contact_line : 'https://line.me/ti/p/' + bud.grower_contact_line;
-                                    contactLinks.push('<a href="' + lineUrl + '" target="_blank" class="contact-link line">💚 Line</a>');
-                                }
-                                if (bud.grower_contact_instagram) {
-                                    contactLinks.push('<a href="' + bud.grower_contact_instagram + '" target="_blank" class="contact-link instagram">📸 Instagram</a>');
-                                }
-                                if (bud.grower_contact_twitter) {
-                                    contactLinks.push('<a href="' + bud.grower_contact_twitter + '" target="_blank" class="contact-link twitter">🐦 Twitter</a>');
-                                }
-                                if (bud.grower_contact_telegram) {
-                                    const telegramUrl = bud.grower_contact_telegram.startsWith('http') ? bud.grower_contact_telegram : 'https://t.me/' + bud.grower_contact_telegram;
-                                    contactLinks.push('<a href="' + telegramUrl + '" target="_blank" class="contact-link telegram">✈️ Telegram</a>');
-                                }
-                                if (bud.grower_contact_phone) {
-                                    contactLinks.push('<a href="tel:' + bud.grower_contact_phone + '" class="contact-link phone">📱 ' + bud.grower_contact_phone + '</a>');
-                                }
-                                if (bud.grower_contact_other) {
-                                    contactLinks.push('<a href="' + bud.grower_contact_other + '" target="_blank" class="contact-link other">🔗 อื่นๆ</a>');
-                                }
-
-                                return contactLinks.length > 0 ? contactLinks.join(' ') : '<span class="no-contacts">ไม่มีช่องทางติดต่อ</span>';
-                            })()
-                        },
-                        { label: 'ผู้พัฒนาสายพันธ์', value: bud.breeder },
-                        { label: 'ประเภท', value: bud.strain_type },
-                        { label: 'เกรด', value: bud.grade }
-                    ]
-                },
-                {
-                    title: '🧪 องค์ประกอบ',
-                    items: [
-                        { label: 'THC', value: bud.thc_percentage ? `${bud.thc_percentage}%` : null },
-                        { label: 'CBD', value: bud.cbd_percentage ? `${bud.cbd_percentage}%` : null },
-                        { label: 'กลิ่นและรส', value: bud.aroma_flavor },
-                        { label: 'เวลาที่แนะนำ', value: bud.recommended_time },
-                        { 
-                            label: 'Terpene อันดับ 1', 
-                            value: bud.top_terpenes_1 && bud.terpene_1_percentage ? 
-                                `${bud.top_terpenes_1} (${bud.terpene_1_percentage}%)` : 
-                                bud.top_terpenes_1 
-                        },
-                        { 
-                            label: 'Terpene อันดับ 2', 
-                            value: bud.top_terpenes_2 && bud.terpene_2_percentage ? 
-                                `${bud.top_terpenes_2} (${bud.terpene_2_percentage}%)` : 
-                                bud.top_terpenes_2 
-                        },
-                        { 
-                            label: 'Terpene อันดับ 3', 
-                            value: bud.top_terpenes_3 && bud.terpene_3_percentage ? 
-                                `${bud.top_terpenes_3} (${bud.terpene_3_percentage}%)` : 
-                                bud.top_terpenes_3 
-                        }
-                    ]
-                },
-                
-                {
-                    title: '💭 ผลกระทบและการใช้งาน',
-                    items: [
-                        { label: 'ผลกระทบทางจิต (บวก)', value: bud.mental_effects_positive || 'ไม่มีข้อมูล' },
-                        { label: 'ผลกระทบทางจิต (ลบ)', value: bud.mental_effects_negative || 'ไม่มีข้อมูล' },
-                        { label: 'ผลกระทบทางกาย (บวก)', value: bud.physical_effects_positive || 'ไม่มีข้อมูล' },
-                        { label: 'ผลกระทบทางกาย (ลบ)', value: bud.physical_effects_negative || 'ไม่มีข้อมูล' }
-                    ]
-                },
-                {
-                    title: '🌱 ข้อมูลการปลูก',
-                    items: [
-                        { label: 'วิธีการปลูก', value: bud.grow_method },
-                        { label: 'ประเภทปุ๋ย', value: bud.fertilizer_type },
-                        { label: 'ประเภทการออกดอก', value: bud.flowering_type },
-                        { label: 'วันที่เก็บเกี่ยว', value: bud.harvest_date },
-                        { label: 'หมายเลข Batch', value: bud.batch_number }
-                    ]
-                },
-                {
-                    title: '📅 ข้อมูลเพิ่มเติม',
-                    items: [
-                        { label: 'วันที่เพิ่มข้อมูล', value: formatDate(bud.created_at) }
-                    ]
-                }
-            ];
-
-            const groupsHtml = infoGroups.map(group => {
-                // สำหรับกลุ่ม "ผลกระทบและการใช้งาน" ให้แสดงเสมอ
-                if (group.title === '💭 ผลกระทบและการใช้งาน') {
-                    return `
-                        <div class="info-group">
-                            <div class="info-group-title">${group.title}</div>
-                            <div class="info-group-content">
-                                ${group.items.map(item => `
-                                    <div class="info-item">
-                                        <div class="info-item-label">${item.label}:</div>
-                                        <div class="info-item-value">${item.value}</div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    // สำหรับกลุ่มอื่นๆ ให้กรองเฉพาะที่มีข้อมูล
-                    const validItems = group.items.filter(item => item.value && item.value.toString().trim() && item.value !== 'ไม่มีข้อมูล');
-
-                    if (validItems.length === 0) return '';
-
-                    return `
-                        <div class="info-group">
-                            <div class="info-group-title">${group.title}</div>
-                            <div class="info-group-content">
-                                ${validItems.map(item => `
-                                    <div class="info-item">
-                                        <div class="info-item-label">${item.label}:</div>
-                                        <div class="info-item-value">${item.value}</div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    `;
-                }
-            }).filter(group => group);
-
-            groupedBudInfo.innerHTML = `<div class="info-groups-container">${groupsHtml.join('')}</div>`;
-        }
-
-        function formatDate(dateString) {
-            if (!dateString) return 'ไม่ระบุ';
-            try {
-                const date = new Date(dateString);
-                return date.toLocaleDateString('th-TH', {
-                    day: 'numeric',
-                    month: 'short',
-                    year: 'numeric'
-                });
-            } catch (error) {
-                return 'ไม่ระบุ';
-            }
-        }
-
-        function expandContent(reviewId) {
-            const contentDiv = document.querySelector(`[data-review-id="${reviewId}"] .content-preview`);
-            const expandBtn = document.querySelector(`[data-review-id="${reviewId}"] .expand-btn`);
-
-            // ค้นหารีวิวจากข้อมูล
-            const review = reviews.find(r => r.id === reviewId);
-            if (review && contentDiv) {
-                contentDiv.textContent = review.full_review_content;
-                if (expandBtn) {
-                    expandBtn.style.display = 'none';
-                }
-            }
-        }
-
-        function viewImage(imageUrl) {
-            if (!imageUrl) return;
-
+        // Image modal functions
+        function openImageModal(imageSrc) {
             const modal = document.getElementById('imageModal');
             const modalImg = document.getElementById('modalImage');
-
-            if (modal && modalImg) {
-                modal.style.display = 'block';
-                modalImg.src = imageUrl;
-            }
+            
+            modal.style.display = 'flex';
+            modalImg.src = `/${imageSrc}`;
         }
 
         function closeImageModal() {
-            const modal = document.getElementById('imageModal');
-            if (modal) {
-                modal.style.display = 'none';
-            }
+            document.getElementById('imageModal').style.display = 'none';
         }
 
-        function playVideoReview(videoUrl) {
-            if (videoUrl && videoUrl.trim()) {
-                // ป้องกันการ reload หน้า
-                if (event) {
-                    event.preventDefault();
-                    event.stopPropagation();
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing...');
+            
+            // Close modal when clicking X or outside
+            document.querySelector('.close').onclick = closeImageModal;
+            document.getElementById('imageModal').onclick = function(event) {
+                if (event.target === this) {
+                    closeImageModal();
                 }
-                openVideoModal(videoUrl);
+            };
+
+            // Load bud data
+            loadBudData();
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeImageModal();
             }
-            return false;
-        }
-
-        function openVideoModal(videoUrl) {
-            if (!videoUrl) return;
-
-            // ป้องกันการ reload หน้าในมือถือ
-            event.preventDefault();
-            event.stopPropagation();
-
-            const modal = document.getElementById('videoModal');
-            const player = document.getElementById('youtubePlayer');
-
-            if (!modal || !player) return;
-
-            // แปลง YouTube URL เป็น embed URL
-            let embedUrl = '';
-            try {
-                if (videoUrl.includes('youtube.com/watch?v=')) {
-                    const videoId = videoUrl.split('v=')[1].split('&')[0];
-                    embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0&modestbranding=1`;
-                } else if (videoUrl.includes('youtu.be/')) {
-                    const videoId = videoUrl.split('youtu.be/')[1].split('?')[0];
-                    embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0&modestbranding=1`;
-                } else if (videoUrl.includes('youtube.com/embed/')) {
-                    embedUrl = videoUrl + (videoUrl.includes('?') ? '&' : '?') + 'autoplay=0&rel=0&modestbranding=1';
-                } else {
-                    // ถ้าไม่ใช่ YouTube URL ให้เปิดในแท็บใหม่
-                    window.open(videoUrl, '_blank');
-                    return;
-                }
-
-                player.src = embedUrl;
-                modal.style.display = 'block';
-
-                // เพิ่ม class สำหรับ mobile
-                document.body.classList.add('modal-open');
-
-            } catch (error) {
-                console.error('Error opening video:', error);
-                window.open(videoUrl, '_blank');
-            }
-        }
-
-        function closeVideoModal() {
-            const modal = document.getElementById('videoModal');
-            const player = document.getElementById('youtubePlayer');
-
-            if (modal) {
-                modal.style.display = 'none';
-            }
-            if (player) {
-                player.src = ''; // หยุดเล่นวิดีโอ
-            }
-
-            // ลบ class สำหรับ mobile
-            document.body.classList.remove('modal-open');
-        }
-
-        function captureAsImage() {
-            try {
-                console.log('Starting image capture...');
-
-                // ตรวจสอบว่ามี html2canvas หรือไม่
-                if (typeof html2canvas === 'undefined') {
-                    throw new Error('html2canvas library not loaded');
-                }
-
-                // ตรวจสอบว่าเป็นมือถือหรือไม่
-                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-                console.log('Is mobile:', isMobile);
-
-                // ซ่อนปุ่มต่างๆ ก่อนจับภาพ
-                const actions = document.querySelector('.actions');
-                const backBtn = document.querySelector('.back-btn');
-
-                if (actions) actions.style.display = 'none';
-                if (backBtn) backBtn.style.display = 'none';
-
-                // แสดง loading message
-                const loadingMsg = document.createElement('div');
-                loadingMsg.innerHTML = '📸 กำลังสร้างรูปภาพ...';
-                loadingMsg.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.8); color: white; padding: 20px; border-radius: 10px; z-index: 10000; font-size: 18px; font-weight: bold;';
-                document.body.appendChild(loadingMsg);
-
-                // รอให้ DOM update แล้วจับภาพ
-                setTimeout(() => {
-                    const container = document.querySelector('.container');
-                    if (!container) {
-                        throw new Error('Container element not found');
-                    }
-
-                    html2canvas(container, {
-                        backgroundColor: '#ffffff',
-                        scale: isMobile ? 4 : 6, // เพิ่มความละเอียดสูงสุด มือถือ 4x, PC 6x
-                        useCORS: true,
-                        allowTaint: false,
-                        scrollX: 0,
-                        scrollY: 0,
-                        width: container.scrollWidth,
-                        height: container.scrollHeight,
-                        logging: true,
-                        quality: 1.0, // คุณภาพสูงสุด
-                        removeContainer: true,
-                        pixelRatio: window.devicePixelRatio || 1, // ใช้ pixel ratio ของอุปกรณ์
-                        foreignObjectRendering: true, // เพิ่มการ render ที่ดีขึ้น
-                        imageTimeout: 15000, // เพิ่มเวลารอโหลดรูป
-                        onclone: function(clonedDoc) {
-                            // ปรับแต่ง cloned document เพื่อความคมชัด
-                            const style = clonedDoc.createElement('style');
-                            style.innerHTML = `
-                                * {
-                                    -webkit-font-smoothing: antialiased !important;
-                                    -moz-osx-font-smoothing: grayscale !important;
-                                    text-rendering: optimizeLegibility !important;
-                                    image-rendering: -webkit-optimize-contrast !important;
-                                    image-rendering: crisp-edges !important;
-                                }
-                                img {
-                                    image-rendering: -webkit-optimize-contrast !important;
-                                    image-rendering: crisp-edges !important;
-                                    image-rendering: pixelated !important;
-                                    max-width: none !important;
-                                    height: auto !important;
-                                }
-                            `;
-                            clonedDoc.head.appendChild(style);
-                        },
-                        ignoreElements: function(element) {
-                            // ละเว้น element ที่ไม่จำเป็น เช่น scrollbar
-                            return element.classList.contains('no-print');
-                        }
-                    }).then(canvas => {
-                        console.log('Canvas created successfully');
-
-                        const currentDate = new Date().toISOString().split('T')[0];
-                        const budNameEl = document.getElementById('budName');
-                        const budName = (budNameEl ? budNameEl.textContent : null) || 'bud-report';
-                        const fileName = budName.replace(/[^a-zA-Z0-9]/g, '_') + '_report_' + currentDate + '.png';
-
-                        // ลบ loading message
-                        try {
-                            if (loadingMsg && document.body.contains(loadingMsg)) {
-                                document.body.removeChild(loadingMsg);
-                            }
-                        } catch (e) {
-                            console.warn('Error removing loading message:', e);
-                        }
-
-                        // แสดงปุ่มกลับมา
-                        if (actions) actions.style.display = 'flex';
-                        if (backBtn) backBtn.style.display = 'inline-block';
-
-                        if (isMobile) {
-                            // สำหรับมือถือ: สร้างรูปภาพและแสดงแบบ Modal พร้อมลิงก์ดาวน์โหลด
-                            const imageDataUrl = canvas.toDataURL('image/png', 1.0); // คุณภาพสูงสุด PNG
-
-                            // ลบ Modal เก่าถ้ามี
-                            const existingModal = document.getElementById('mobileImageModal');
-                            if (existingModal) {
-                                document.body.removeChild(existingModal);
-                            }
-
-                            // สร้าง Modal แสดงรูปภาพ
-                            const imageModal = document.createElement('div');
-                            imageModal.id = 'mobileImageModal';
-                            imageModal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.95); z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 20px 10px; box-sizing: border-box; overflow-y: auto; -webkit-overflow-scrolling: touch;';
-
-                            // ปุ่มปิด
-                            const closeBtn = document.createElement('button');
-                            closeBtn.innerHTML = '❌ ปิด';
-                            closeBtn.style.cssText = 'position: absolute; top: 20px; right: 20px; background: #f44336; color: white; border: none; padding: 12px 18px; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; z-index: 100000; box-shadow: 0 4px 12px rgba(244,67,54,0.4); user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;';
-                            closeBtn.onclick = (e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                document.body.style.overflow = '';
-                                document.body.style.position = '';
-                                document.body.style.width = '';
-                                document.body.style.height = '';
-                                if (document.body.contains(imageModal)) {
-                                    document.body.removeChild(imageModal);
-                                }
-                            };
-
-                            // Header
-                            const header = document.createElement('div');
-                            header.innerHTML = '<h2 style="color: white; text-align: center; margin: 50px 0 20px 0; font-size: 20px; font-weight: bold;">📸 รูปภาพรายงานดอก</h2>';
-                            header.style.cssText = 'width: 100%; max-width: 400px;';
-
-                            // คำแนะนำ
-                            const instructions = document.createElement('div');
-                            instructions.innerHTML = `
-                                <div style="background: linear-gradient(135deg, #2196F3, #1976D2); color: white; padding: 20px; border-radius: 15px; margin-bottom: 25px; font-size: 15px; line-height: 1.6; text-align: center; box-shadow: 0 6px 20px rgba(33,150,243,0.3);">
-                                    <strong style="font-size: 18px;">📱 วิธีบันทึกในมือถือ</strong><br><br>
-                                    <div style="text-align: left; margin-top: 15px;">
-                                        1️⃣ กดปุ่ม <strong>"💾 ดาวน์โหลดรูป"</strong> ด้านล่าง<br><br>
-                                        2️⃣ หรือ <strong>กดค้างที่รูปภาพ</strong> แล้วเลือก <strong>"บันทึกรูป"</strong><br><br>
-                                        3️⃣ รูปจะถูกบันทึกใน <strong>แกลเลอรี่</strong> ของคุณ<br><br>
-                                        💡 <em>หากไม่สำเร็จ ให้ลองเปิดรูปในแท็บใหม่แล้วบันทึก</em>
-                                    </div>
-                                </div>
-                            `;
-                            instructions.style.cssText = 'width: 100%; max-width: 400px;';
-
-                            // สร้างปุ่มดาวน์โหลดหลายแบบ
-                            const downloadButtonsContainer = document.createElement('div');
-                            downloadButtonsContainer.style.cssText = 'display: flex; flex-direction: column; gap: 15px; margin-bottom: 25px; width: 100%; max-width: 400px;';
-
-                            // ปุ่มดาวน์โหลดหลัก
-                            const downloadBtn = document.createElement('a');
-                            downloadBtn.innerHTML = '💾 ดาวน์โหลดรูป';
-                            downloadBtn.href = imageDataUrl;
-                            downloadBtn.download = fileName;
-                            downloadBtn.target = '_blank';
-                            downloadBtn.style.cssText = 'background: linear-gradient(135deg, #4CAF50, #45a049); color: white; padding: 18px 30px; border-radius: 30px; font-size: 18px; font-weight: bold; text-decoration: none; display: inline-block; box-shadow: 0 8px 20px rgba(76,175,80,0.4); transition: all 0.3s ease; text-align: center; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;';
-                            downloadBtn.onclick = (e) => {
-                                e.stopPropagation();
-                                console.log('Download button clicked');
-                                setTimeout(() => {
-                                    showMobileSuccessMessage('✅ เริ่มดาวน์โหลดแล้ว!\n📱 ตรวจสอบในโฟลเดอร์ "ดาวน์โหลด" หรือ "แกลเลอรี่"', 4000);
-                                }, 300);
-                            };
-
-                            // ปุ่มเปิดในแท็บใหม่
-                            const openNewTabBtn = document.createElement('button');
-                            openNewTabBtn.innerHTML = '🔗 เปิดในแท็บใหม่';
-                            openNewTabBtn.style.cssText = 'background: linear-gradient(135deg, #FF9800, #F57C00); color: white; padding: 15px 25px; border: none; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 6px 15px rgba(255,152,0,0.4); transition: all 0.3s ease; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;';
-                            openNewTabBtn.onclick = (e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                console.log('Open new tab clicked');
-                                window.open(imageDataUrl, '_blank');
-                                showMobileSuccessMessage('✅ เปิดในแท็บใหม่แล้ว!\n📱 กดค้างที่รูปแล้วเลือก "บันทึกรูป"', 3000);
-                            };
-
-                            downloadButtonsContainer.appendChild(downloadBtn);
-                            downloadButtonsContainer.appendChild(openNewTabBtn);
-
-                            // รูปภาพ
-                            const img = document.createElement('img');
-                            img.src = imageDataUrl;
-                            img.alt = fileName;
-                            img.style.cssText = 'max-width: 95%; max-height: 55vh; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.7); background: white; margin-bottom: 25px; object-fit: contain; user-select: none; -webkit-user-select: none; -webkit-touch-callout: default;';
-
-                            // ข้อความเพิ่มเติม
-                            const additionalInfo = document.createElement('div');
-                            additionalInfo.innerHTML = `
-                                <div style="color: #FFD700; text-align: center; font-size: 14px; font-weight: 500; background: rgba(255,215,0,0.1); padding: 15px; border-radius: 12px; border: 2px solid rgba(255,215,0,0.3);">
-                                    <strong>💡 หากดาวน์โหลดไม่สำเร็จ:</strong><br><br>
-                                    • กดปุ่ม "เปิดในแท็บใหม่" ด้านบน<br>
-                                    • หรือกดค้างที่รูปภาพข้างบนแล้วเลือก "บันทึกรูปภาพ"<br>
-                                    • หรือ Screenshot หน้าจอนี้
-                                </div>
-                            `;
-                            additionalInfo.style.cssText = 'width: 100%; max-width: 400px; margin-bottom: 20px;';
-
-                            // รวมทุกอย่างเข้าด้วยกัน
-                            imageModal.appendChild(closeBtn);
-                            imageModal.appendChild(header);
-                            imageModal.appendChild(instructions);
-                            imageModal.appendChild(downloadButtonsContainer);
-                            imageModal.appendChild(img);
-                            imageModal.appendChild(additionalInfo);
-
-                            // เพิ่มเข้าหน้า
-                            document.body.appendChild(imageModal);
-
-                            // ป้องกันการ scroll และ zoom
-                            document.body.style.overflow = 'hidden';
-                            document.body.style.position = 'fixed';
-                            document.body.style.width = '100%';
-                            document.body.style.height = '100%';
-
-                            // ปิดเมื่อคลิกพื้นหลัง (ยกเว้นรูปภาพ)
-                            imageModal.addEventListener('click', (e) => {
-                                if (e.target === imageModal) {
-                                    closeBtn.onclick(e);
-                                }
-                            });
-
-                            // ป้องกันการ zoom บนมือถือ
-                            imageModal.addEventListener('touchstart', (e) => {
-                                if (e.touches.length > 1) {
-                                    e.preventDefault();
-                                }
-                            }, { passive: false });
-
-                            showMobileSuccessMessage('✅ สร้างรูปภาพสำเร็จ!\n📱 เลือกวิธีดาวน์โหลดด้านล่าง', 3000);
-
-                        } else {
-                            // สำหรับ PC: ใช้วิธีเดิม
-                            const link = document.createElement('a');
-                            link.download = fileName;
-                            link.href = canvas.toDataURL('image/png', 1.0); // คุณภาพสูงสุด PNG
-
-                            document.body.appendChild(link);
-                            link.click();
-                            document.body.removeChild(link);
-
-                            showSuccessMessage('✅ บันทึกรูปภาพสำเร็จ!', 3000);
-                        }
-
-                    }).catch(error => {
-                        console.error('html2canvas error:', error);
-                        handleCaptureError(error, loadingMsg, actions, backBtn);
-                    });
-                }, 100);
-
-            } catch (error) {
-                console.error('Capture initialization error:', error);
-                handleCaptureError(error, null, null, null);
-            }
-        }
-
-        function showSuccessMessage(message, duration) {
-            const successMsg = document.createElement('div');
-            successMsg.innerHTML = message.replace(/\n/g, '<br>');
-            successMsg.style.cssText = 'position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #4CAF50; color: white; padding: 20px; border-radius: 15px; z-index: 10000; font-weight: bold; box-shadow: 0 6px 20px rgba(0,0,0,0.3); text-align: center; max-width: 90%; width: 300px;';
-            document.body.appendChild(successMsg);
-
-            setTimeout(() => {
-                try {
-                    if (successMsg && document.body.contains(successMsg)) {
-                        document.body.removeChild(successMsg);
-                    }
-                } catch (e) {
-                    console.warn('Error removing success message:', e);
-                }
-            }, duration || 3000);
-        }
-
-        function showMobileSuccessMessage(message, duration) {
-            // ลบข้อความเก่าถ้ามี
-            const existingMsg = document.getElementById('mobileSuccessMsg');
-            if (existingMsg) {
-                document.body.removeChild(existingMsg);
-            }
-
-            const successMsg = document.createElement('div');
-            successMsg.id = 'mobileSuccessMsg';
-            successMsg.innerHTML = message.replace(/\n/g, '<br>');
-            successMsg.style.cssText = 'position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #4CAF50, #45a049); color: white; padding: 20px 25px; border-radius: 20px; z-index: 100001; font-weight: bold; box-shadow: 0 8px 25px rgba(76,175,80,0.4); text-align: center; max-width: 85%; font-size: 16px; line-height: 1.4; border: 3px solid rgba(255,255,255,0.3);';
-            document.body.appendChild(successMsg);
-
-            setTimeout(() => {
-                try {
-                    if (successMsg && document.body.contains(successMsg)) {
-                        successMsg.style.opacity = '0';
-                        successMsg.style.transform = 'translateX(-50%) translateY(-20px)';
-                        successMsg.style.transition = 'all 0.5s ease';
-                        setTimeout(() => {
-                            if (document.body.contains(successMsg)) {
-                                document.body.removeChild(successMsg);
-                            }
-                        }, 500);
-                    }
-                } catch (e) {
-                    console.warn('Error removing mobile success message:', e);
-                }
-            }, duration || 3000);
-        }
-
-        function handleCaptureError(error, loadingMsg, actions, backBtn) {
-            console.error('Image capture error:', error);
-
-            // ลบ loading message
-            try {
-                if (loadingMsg && document.body.contains(loadingMsg)) {
-                    document.body.removeChild(loadingMsg);
-                }
-            } catch (e) {
-                console.warn('Error removing loading message:', e);
-            }
-
-            // แสดงปุ่มกลับมา
-            if (actions) actions.style.display = 'flex';
-            if (backBtn) backBtn.style.display = 'inline-block';
-
-            // แสดงข้อความผิดพลาด
-            const errorMsg = document.createElement('div');
-            errorMsg.innerHTML = '❌ เกิดข้อผิดพลาดในการสร้างรูปภาพ<br>กรุณาลองใหม่อีกครั้ง';
-            errorMsg.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #f44336; color: white; padding: 15px 20px; border-radius: 10px; z-index: 10000; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.3);';
-            document.body.appendChild(errorMsg);
-
-            setTimeout(() => {
-                try {
-                    if (errorMsg && document.body.contains(errorMsg)) {
-                        document.body.removeChild(errorMsg);
-                    }
-                } catch (e) {
-                    console.warn('Error removing error message:', e);
-                }
-            }, 5000);
-        }
-
-        function scrollToSection(sectionId) {
-            const section = document.getElementById(sectionId);
-            if (section) {
-                // Update active nav item
-                document.querySelectorAll('.nav-item').forEach(item => {
-                    item.classList.remove('active');
-                });
-                document.querySelector(`[onclick="scrollToSection('${sectionId}')"]`).classList.add('active');
-
-                // Scroll to section
-                section.scrollIntoView({ 
-                    behavior: 'smooth', 
-                    block: 'start'
-                });
-            }
-        }
-
-        
+        });
     </script>
 </body>
 </html>

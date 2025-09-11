@@ -516,6 +516,35 @@
             white-space: nowrap !important;
         }
 
+        /* Additional rating-row CSS for better inline control */
+        .rating-row {
+            display: flex;
+            flex-wrap: nowrap;            /* ไม่ให้ตัดบรรทัด */
+            align-items: center;          /* จัดกลางแนวตั้ง */
+            gap: 8px;                     /* ช่องว่างระหว่างชิ้น */
+            white-space: nowrap;          /* ไม่ให้ขึ้นบรรทัดใหม่เอง */
+        }
+
+        .rating-row > * {
+            display: inline-flex !important; /* กันเคสที่มี display:block/w-100 ทับมา */
+            line-height: 1;
+        }
+
+        .rating-score { 
+            font-weight: 700; 
+            color: #28a745; 
+        }   /* เขียวแบบภาพตัวอย่าง */
+
+        .rating-count { 
+            color: #666; 
+        }
+
+        /* ถ้าใช้ปลั๊กอิน/คลาสดาว ให้บังคับเป็นอินไลน์ด้วย */
+        .rating-row .star-rating,
+        .rating-row .rating-stars { 
+            display: inline-flex !important; 
+        }
+
         .contact-item {
             display: flex;
             align-items: center;

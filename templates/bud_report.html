@@ -805,7 +805,8 @@
 
         /* Compact Layout - Reduce spacing between sections and titles */
         .section-title {
-            margin-bottom: 8px !important;
+            margin-top: 5px !important;
+            margin-bottom: 5px !important;
             padding-bottom: 6px !important;
         }
 
@@ -828,7 +829,8 @@
         /* Mobile compact layout - even tighter spacing */
         @media (max-width: 500px) {
             .section-title {
-                margin-bottom: 6px !important;
+                margin-top: 5px !important;
+                margin-bottom: 5px !important;
                 padding-bottom: 4px !important;
             }
 
@@ -905,7 +907,8 @@
 
         /* --- Compact overrides (final) --- */
         .section-title{
-          margin-bottom:6px !important;   /* ชิดลงอีก */
+          margin-top:5px !important;      /* กำหนด top margin */
+          margin-bottom:5px !important;   /* ลดลงเหลือ 5px */
           padding-bottom:4px !important;
         }
 
@@ -961,7 +964,7 @@
 
         /* มือถือให้ยิ่งชิดขึ้นอีกเล็กน้อย */
         @media (max-width:500px){
-          .section-title{ margin-bottom:4px !important; padding-bottom:3px !important; }
+          .section-title{ margin-top:5px !important; margin-bottom:5px !important; padding-bottom:3px !important; }
           .section{ margin-bottom:4px !important; }
           .info-grid{ gap:6px !important; margin-bottom:6px !important; }
           .info-card{ padding:10px !important; }

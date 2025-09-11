@@ -463,31 +463,31 @@
 
         /* Ratings Summary Styles */
         .average-rating {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: flex-start;
             padding: 15px 20px;
             background: #f8f9fa;
             border-radius: 12px;
             margin-bottom: 20px;
+            gap: 10px;
+            flex-wrap: nowrap;
         }
 
-        .rating-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .rating-display {
+            font-size: 28px;
+            font-weight: 700;
+            color: #4CAF50;
+            margin: 0;
             white-space: nowrap;
         }
 
-        .rating-score {
-            font-size: 28px;
-            font-weight: 700;
-            color: #28a745;
-            margin: 0;
-        }
-
-        .rating-stars {
+        .rating-stars-large {
             color: #ffd700;
             font-size: 20px;
             margin: 0;
-            line-height: 1;
+            white-space: nowrap;
         }
 
         .rating-count {
@@ -495,6 +495,7 @@
             font-size: 14px;
             font-weight: 500;
             margin: 0;
+            white-space: nowrap;
         }
 
         .contact-info {
@@ -1267,11 +1268,9 @@
             if (!reviews || reviews.length === 0) {
                 container.innerHTML = `
                     <div class="average-rating">
-                        <div class="rating-row">
-                            <span class="rating-score">0.0</span>
-                            <span class="rating-stars">☆☆☆☆☆</span>
-                            <span class="rating-count">ยังไม่มีรีวิว</span>
-                        </div>
+                        <div class="rating-display">0.0</div>
+                        <div class="rating-stars-large">☆☆☆☆☆</div>
+                        <div class="rating-count">ยังไม่มีรีวิว</div>
                     </div>
                 `;
                 return;
@@ -1283,11 +1282,9 @@
 
             container.innerHTML = `
                 <div class="average-rating">
-                    <div class="rating-row">
-                        <span class="rating-score">${averageRating.toFixed(1)}</span>
-                        <span class="rating-stars">${'⭐'.repeat(starCount)}${'☆'.repeat(5-starCount)}</span>
-                        <span class="rating-count">จาก ${reviews.length} รีวิว</span>
-                    </div>
+                    <div class="rating-display">${averageRating.toFixed(1)}</div>
+                    <div class="rating-stars-large">${'⭐'.repeat(starCount)}${'☆'.repeat(5-starCount)}</div>
+                    <div class="rating-count">จาก ${reviews.length} รีวิว</div>
                 </div>
             `;
         }

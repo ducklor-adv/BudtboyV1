@@ -2218,16 +2218,9 @@ def health_check():
     
     return jsonify({'status': 'ok'}), 200
 
-@app.route('/api')  
+@app.route('/api', methods=['GET', 'POST'])
 def api_health_check():
-    """Main API endpoint - redirect monitoring to dedicated endpoint"""
-    from flask import request, redirect, url_for
-    import logging
-    
-    # Redirect HEAD requests to dedicated health check endpoint
-    if request.method == 'HEAD':
-        return redirect(url_for('health_check'), code=301)
-    
+    """Main API endpoint - only accept GET and POST, block HEAD monitoring"""
     return jsonify({
         'status': 'healthy',
         'service': 'budtboy-cannabis-app',

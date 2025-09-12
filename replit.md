@@ -8,6 +8,14 @@ This is a Flask-based web application for managing cannabis bud information, rev
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+
+**September 12, 2025**
+- **Fixed API loop issue**: Resolved excessive HEAD /api calls from Replit's Node.js monitoring service causing system slowdowns and 500 errors
+- **Optimized health check endpoint**: Modified `/api` endpoint to return HTTP 204 for monitoring service requests, eliminating performance bottlenecks
+- **Improved system stability**: Eliminated JavaScript syntax errors and restored normal performance for bud report functionality
+- **Enhanced monitoring handling**: Added User-Agent detection to differentiate between monitoring services and user requests
+
 ## System Architecture
 
 ### Backend Framework

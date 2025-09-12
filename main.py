@@ -2206,6 +2206,15 @@ def quick_signup():
     else:
         return jsonify({'success': False, 'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
+@app.route('/api')
+def api_health_check():
+    """Health check endpoint for monitoring services"""
+    return jsonify({
+        'status': 'healthy',
+        'service': 'budtboy-cannabis-app',
+        'timestamp': datetime.now().isoformat()
+    }), 200
+
 @app.route('/logout')
 def logout():
     session.clear()

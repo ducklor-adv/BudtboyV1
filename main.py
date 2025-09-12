@@ -2220,14 +2220,16 @@ def health_check():
 
 @app.route('/api')  
 def api_health_check():
-    """Main API endpoint with silent monitoring support"""
+    """Main API endpoint with optimized monitoring support"""
     from flask import request
     import logging
     
-    # Handle HEAD requests silently to prevent log spam
+    # Handle HEAD requests efficiently for monitoring services
     if request.method == 'HEAD':
-        # Silent return for monitoring - no processing, no logging
-        return '', 204
+        # Set cache headers to potentially reduce frequency
+        response = app.make_response(('', 204))
+        response.headers['Cache-Control'] = 'public, max-age=30'
+        return response
     
     return jsonify({
         'status': 'healthy',

@@ -2218,15 +2218,16 @@ def health_check():
     
     return jsonify({'status': 'ok'}), 200
 
-@app.route('/api')
+@app.route('/api')  
 def api_health_check():
-    """Main API endpoint - discourage HEAD requests"""
+    """Main API endpoint with silent monitoring support"""
     from flask import request
+    import logging
     
-    # Discourage HEAD requests from monitoring services
+    # Handle HEAD requests silently to prevent log spam
     if request.method == 'HEAD':
-        # Return 405 Method Not Allowed to discourage monitoring
-        return '', 405
+        # Silent return for monitoring - no processing, no logging
+        return '', 204
     
     return jsonify({
         'status': 'healthy',

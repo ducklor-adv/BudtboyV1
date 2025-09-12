@@ -2207,16 +2207,16 @@ def quick_signup():
         return jsonify({'success': False, 'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
 # Dedicated health check endpoint for monitoring services
-@app.route('/healthz')
+@app.route('/healthz', methods=['GET', 'HEAD'])
 def health_check():
-    """Lightweight health check endpoint for external monitoring"""
-    from flask import request
+    """Ultra-lightweight health check - no DB, no business logic, instant response"""
+    from flask import Response
     
-    # Always return success for monitoring
-    if request.method == 'HEAD':
-        return '', 204
-    
-    return jsonify({'status': 'ok'}), 200
+    # Return 204 No Content for both GET and HEAD - zero cost operation
+    response = Response('', 204)
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    return response
 
 @app.route('/api', methods=['GET', 'POST'])
 def api_health_check():

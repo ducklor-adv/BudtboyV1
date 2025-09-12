@@ -1716,7 +1716,6 @@
 
         // Save report as high-quality image
         async function saveReport() {
-            const reportContainer = document.querySelector('.report-container');
             const button = document.querySelector('.print-btn');
             
             // Show loading state
@@ -1725,25 +1724,43 @@
             button.disabled = true;
             
             try {
+                // Check if html2canvas is available
+                if (typeof html2canvas === 'undefined') {
+                    throw new Error('html2canvas library ไม่โหลด กรุณาลองใหม่อีกครั้ง');
+                }
+                
+                // Find the report container - try multiple selectors
+                let reportContainer = document.querySelector('.report-container');
+                if (!reportContainer) {
+                    reportContainer = document.querySelector('.container');
+                }
+                if (!reportContainer) {
+                    reportContainer = document.querySelector('.main-content');
+                }
+                if (!reportContainer) {
+                    reportContainer = document.body;
+                }
+                
+                console.log('Using container:', reportContainer);
+                
                 // Configure html2canvas for high quality
                 const canvas = await html2canvas(reportContainer, {
-                    scale: 3, // Higher scale for better quality
+                    scale: 2, // Reduce scale to prevent memory issues
                     useCORS: true,
                     allowTaint: true,
                     backgroundColor: '#ffffff',
-                    width: reportContainer.scrollWidth,
-                    height: reportContainer.scrollHeight,
-                    scrollX: 0,
-                    scrollY: 0,
-                    x: 0,
-                    y: 0,
-                    logging: false,
-                    imageTimeout: 15000,
-                    removeContainer: true
+                    logging: true, // Enable logging for debugging
+                    imageTimeout: 10000,
+                    removeContainer: false,
+                    foreignObjectRendering: true
                 });
                 
                 // Convert to blob with high quality
                 canvas.toBlob(function(blob) {
+                    if (!blob) {
+                        throw new Error('ไม่สามารถสร้างรูปภาพได้');
+                    }
+                    
                     // Create download link
                     const url = URL.createObjectURL(blob);
                     const link = document.createElement('a');
@@ -1770,11 +1787,12 @@
                 
             } catch (error) {
                 console.error('Error saving report:', error);
-                button.innerHTML = '❌ เกิดข้อผิดพลาด';
+                const errorMsg = error.message || 'เกิดข้อผิดพลาดไม่ทราบสาเหตุ';
+                button.innerHTML = '❌ ' + errorMsg;
                 setTimeout(() => {
                     button.innerHTML = originalText;
                     button.disabled = false;
-                }, 2000);
+                }, 3000);
             }
         }
 

@@ -1250,7 +1250,7 @@
 
                 <!-- Action Buttons -->
                 <div class="section">
-                    <button class="print-btn" onclick="printReport()">🖨️ Print รายงาน</button>
+                    <button class="print-btn" onclick="saveReport()">💾 บันทึกรายงาน</button>
                     <button class="review-btn" onclick="openReviewModal()">⭐ เขียนรีวิว</button>
                 </div>
             </div>
@@ -1263,6 +1263,9 @@
         <img class="modal-content" id="modalImage">
     </div>
 
+    <!-- Add html2canvas library for high-quality image capture -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
     <script>
         let budData = null;
         let currentBudId = null;
@@ -1711,9 +1714,68 @@
             document.getElementById('imageModal').style.display = 'none';
         }
 
-        // Print and review functions
-        function printReport() {
-            window.print();
+        // Save report as high-quality image
+        async function saveReport() {
+            const reportContainer = document.querySelector('.report-container');
+            const button = document.querySelector('.print-btn');
+            
+            // Show loading state
+            const originalText = button.innerHTML;
+            button.innerHTML = '⏳ กำลังบันทึก...';
+            button.disabled = true;
+            
+            try {
+                // Configure html2canvas for high quality
+                const canvas = await html2canvas(reportContainer, {
+                    scale: 3, // Higher scale for better quality
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: '#ffffff',
+                    width: reportContainer.scrollWidth,
+                    height: reportContainer.scrollHeight,
+                    scrollX: 0,
+                    scrollY: 0,
+                    x: 0,
+                    y: 0,
+                    logging: false,
+                    imageTimeout: 15000,
+                    removeContainer: true
+                });
+                
+                // Convert to blob with high quality
+                canvas.toBlob(function(blob) {
+                    // Create download link
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    
+                    // Generate filename with strain name and date
+                    const strainName = budData?.strain_name_en || budData?.strain_name_th || 'BudReport';
+                    const date = new Date().toLocaleDateString('th-TH').replace(/\//g, '-');
+                    link.download = `${strainName}_Report_${date}.png`;
+                    
+                    // Trigger download
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                    
+                    // Show success message
+                    button.innerHTML = '✅ บันทึกสำเร็จ!';
+                    setTimeout(() => {
+                        button.innerHTML = originalText;
+                        button.disabled = false;
+                    }, 2000);
+                }, 'image/png', 1.0); // Maximum quality
+                
+            } catch (error) {
+                console.error('Error saving report:', error);
+                button.innerHTML = '❌ เกิดข้อผิดพลาด';
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                }, 2000);
+            }
         }
 
         function openReviewModal() {

@@ -4311,7 +4311,7 @@ def get_bud_info(bud_id):
         else:
             lab_test_select = "NULL as lab_test_name, NULL as test_type"
 
-        # Get detailed bud info with grower contact information
+        # Get detailed bud info with grower and creator contact information
         cur.execute(f"""
             SELECT b.id, b.strain_name_en, b.strain_name_th, b.breeder, b.strain_type,
                    b.thc_percentage, b.cbd_percentage, b.grade, b.aroma_flavor,
@@ -4326,13 +4326,14 @@ def get_bud_info(bud_id):
                    {lab_test_select},
                    COALESCE(u_grower.username, u_creator.username, 'บัดท์บอย') as grower_name,
                    u_grower.profile_image_url as grower_profile_image,
-                   u_grower.contact_facebook as grower_contact_facebook,
-                   u_grower.contact_line as grower_contact_line,
-                   u_grower.contact_instagram as grower_contact_instagram,
-                   u_grower.contact_twitter as grower_contact_twitter,
-                   u_grower.contact_telegram as grower_contact_telegram,
-                   u_grower.contact_phone as grower_contact_phone,
-                   u_grower.contact_other as grower_contact_other
+                   u_creator.profile_image_url as creator_profile_image,
+                   COALESCE(u_grower.contact_facebook, u_creator.contact_facebook) as grower_contact_facebook,
+                   COALESCE(u_grower.contact_line, u_creator.contact_line) as grower_contact_line,
+                   COALESCE(u_grower.contact_instagram, u_creator.contact_instagram) as grower_contact_instagram,
+                   COALESCE(u_grower.contact_twitter, u_creator.contact_twitter) as grower_contact_twitter,
+                   COALESCE(u_grower.contact_telegram, u_creator.contact_telegram) as grower_contact_telegram,
+                   COALESCE(u_grower.contact_phone, u_creator.contact_phone) as grower_contact_phone,
+                   COALESCE(u_grower.contact_other, u_creator.contact_other) as grower_contact_other
             FROM buds_data b
             LEFT JOIN users u_grower ON b.grower_id = u_grower.id
             LEFT JOIN users u_creator ON b.created_by = u_creator.id
@@ -4417,13 +4418,14 @@ def get_bud_info(bud_id):
             'test_type': result[35],
             'grower_name': result[36],
             'grower_profile_image': result[37],
-            'grower_contact_facebook': result[38],
-            'grower_contact_line': result[39],
-            'grower_contact_instagram': result[40],
-            'grower_contact_twitter': result[41],
-            'grower_contact_telegram': result[42],
-            'grower_contact_phone': result[43],
-            'grower_contact_other': result[44]
+            'creator_profile_image': result[38],
+            'grower_contact_facebook': result[39],
+            'grower_contact_line': result[40],
+            'grower_contact_instagram': result[41],
+            'grower_contact_twitter': result[42],
+            'grower_contact_telegram': result[43],
+            'grower_contact_phone': result[44],
+            'grower_contact_other': result[45]
         }
 
         print(f"Successfully loaded bud data: {bud_info['strain_name_en']}")

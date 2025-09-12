@@ -4345,15 +4345,15 @@ def get_bud_info(bud_id):
             'created_by': result[30],
             'lab_test_name': result[31],
             'test_type': result[32],
-            'grower_name': result[34],
-            'grower_profile_image': result[35],
-            'grower_contact_facebook': result[36],
-            'grower_contact_line': result[37],
-            'grower_contact_instagram': result[38],
-            'grower_contact_twitter': result[39],
-            'grower_contact_telegram': result[40],
-            'grower_contact_phone': result[41],
-            'grower_contact_other': result[42]
+            'grower_name': result[33],
+            'grower_profile_image': result[34],
+            'grower_contact_facebook': result[35],
+            'grower_contact_line': result[36],
+            'grower_contact_instagram': result[37],
+            'grower_contact_twitter': result[38],
+            'grower_contact_telegram': result[39],
+            'grower_contact_phone': result[40],
+            'grower_contact_other': result[41]
         }
 
         print(f"Successfully loaded bud data: {bud_info['strain_name_en']}")

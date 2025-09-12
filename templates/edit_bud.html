@@ -2134,6 +2134,9 @@
                 // Convert numeric fields
                 if (data.thc_percentage) data.thc_percentage = parseFloat(data.thc_percentage);
                 if (data.cbd_percentage) data.cbd_percentage = parseFloat(data.cbd_percentage);
+                if (data.terpene_1_percentage) data.terpene_1_percentage = parseFloat(data.terpene_1_percentage);
+                if (data.terpene_2_percentage) data.terpene_2_percentage = parseFloat(data.terpene_2_percentage);
+                if (data.terpene_3_percentage) data.terpene_3_percentage = parseFloat(data.terpene_3_percentage);
 
                 const response = await fetch(`/api/buds/${currentBudId}`, {
                     method: 'PUT',
@@ -2790,8 +2793,8 @@
                     }
                 }
                 
-                if (percentageInput && budData[`terpene_${i}_percentage`]) {
-                    percentageInput.value = budData[`terpene_${i}_percentage`];
+                if (percentageInput && budData[`top_terpenes_${i}_percentage`]) {
+                    percentageInput.value = budData[`top_terpenes_${i}_percentage`];
                 }
             }
         }

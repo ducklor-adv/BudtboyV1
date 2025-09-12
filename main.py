@@ -2961,11 +2961,40 @@ def add_bud():
             test_type = data.get('test_type')
 
 
+            # Process terpene percentage fields
+            terpene_1_percentage = data.get('terpene_1_percentage')
+            if terpene_1_percentage and str(terpene_1_percentage).strip():
+                try:
+                    terpene_1_percentage = float(terpene_1_percentage)
+                except (ValueError, TypeError):
+                    terpene_1_percentage = None
+            else:
+                terpene_1_percentage = None
+
+            terpene_2_percentage = data.get('terpene_2_percentage')
+            if terpene_2_percentage and str(terpene_2_percentage).strip():
+                try:
+                    terpene_2_percentage = float(terpene_2_percentage)
+                except (ValueError, TypeError):
+                    terpene_2_percentage = None
+            else:
+                terpene_2_percentage = None
+
+            terpene_3_percentage = data.get('terpene_3_percentage')
+            if terpene_3_percentage and str(terpene_3_percentage).strip():
+                try:
+                    terpene_3_percentage = float(terpene_3_percentage)
+                except (ValueError, TypeError):
+                    terpene_3_percentage = None
+            else:
+                terpene_3_percentage = None
+
             # Construct the INSERT query dynamically
             query_fields = [
                 'strain_name_th', 'strain_name_en', 'breeder', 'strain_type',
                 'thc_percentage', 'cbd_percentage', 'grade', 'aroma_flavor',
                 'top_terpenes_1', 'top_terpenes_2', 'top_terpenes_3',
+                'top_terpenes_1_percentage', 'top_terpenes_2_percentage', 'top_terpenes_3_percentage',
                 'mental_effects_positive', 'mental_effects_negative',
                 'physical_effects_positive', 'physical_effects_negative',
                 'recommended_time', 'grow_method', 'harvest_date', 'batch_number',
@@ -2979,6 +3008,7 @@ def add_bud():
                 data.get('breeder'), strain_type,
                 thc_percentage, cbd_percentage, grade, data.get('aroma_flavor'),
                 data.get('top_terpenes_1'), data.get('top_terpenes_2'), data.get('top_terpenes_3'),
+                terpene_1_percentage, terpene_2_percentage, terpene_3_percentage,
                 data.get('mental_effects_positive'), data.get('mental_effects_negative'),
                 data.get('physical_effects_positive'), data.get('physical_effects_negative'),
                 data.get('recommended_time'), grow_method, data.get('harvest_date'), data.get('batch_number'),
@@ -3057,7 +3087,8 @@ def update_bud(bud_id):
             sql.SQL("strain_name_th = %s"), sql.SQL("strain_name_en = %s"), sql.SQL("breeder = %s"),
             sql.SQL("strain_type = %s"), sql.SQL("thc_percentage = %s"), sql.SQL("cbd_percentage = %s"),
             sql.SQL("grade = %s"), sql.SQL("aroma_flavor = %s"), sql.SQL("top_terpenes_1 = %s"),
-            sql.SQL("top_terpenes_2 = %s"), sql.SQL("top_terpenes_3 = %s"), 
+            sql.SQL("top_terpenes_2 = %s"), sql.SQL("top_terpenes_3 = %s"),
+            sql.SQL("top_terpenes_1_percentage = %s"), sql.SQL("top_terpenes_2_percentage = %s"), sql.SQL("top_terpenes_3_percentage = %s"),
             sql.SQL("mental_effects_positive = %s"), sql.SQL("mental_effects_negative = %s"),
             sql.SQL("physical_effects_positive = %s"), sql.SQL("physical_effects_negative = %s"),
             sql.SQL("recommended_time = %s"), sql.SQL("grow_method = %s"), sql.SQL("harvest_date = %s"),
@@ -3135,6 +3166,34 @@ def update_bud(bud_id):
         else:
             cbd_percentage = None
 
+        # Process terpene percentage fields
+        terpene_1_percentage = data.get('terpene_1_percentage')
+        if terpene_1_percentage and str(terpene_1_percentage).strip():
+            try:
+                terpene_1_percentage = float(terpene_1_percentage)
+            except (ValueError, TypeError):
+                terpene_1_percentage = None
+        else:
+            terpene_1_percentage = None
+
+        terpene_2_percentage = data.get('terpene_2_percentage')
+        if terpene_2_percentage and str(terpene_2_percentage).strip():
+            try:
+                terpene_2_percentage = float(terpene_2_percentage)
+            except (ValueError, TypeError):
+                terpene_2_percentage = None
+        else:
+            terpene_2_percentage = None
+
+        terpene_3_percentage = data.get('terpene_3_percentage')
+        if terpene_3_percentage and str(terpene_3_percentage).strip():
+            try:
+                terpene_3_percentage = float(terpene_3_percentage)
+            except (ValueError, TypeError):
+                terpene_3_percentage = None
+        else:
+            terpene_3_percentage = None
+
         update_values = [
             data.get('strain_name_th'),
             data.get('strain_name_en'),
@@ -3147,6 +3206,9 @@ def update_bud(bud_id):
             data.get('top_terpenes_1'),
             data.get('top_terpenes_2'),
             data.get('top_terpenes_3'),
+            terpene_1_percentage,
+            terpene_2_percentage,
+            terpene_3_percentage,
             data.get('mental_effects_positive'),
             data.get('mental_effects_negative'),
             data.get('physical_effects_positive'),

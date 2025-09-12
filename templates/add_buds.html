@@ -2047,7 +2047,7 @@
                     imageFiles.append(key, value);
                 } else if (typeof value === 'string' && value.trim() !== '') {
                     // Convert numeric fields
-                    if (key === 'thc_percentage' || key === 'cbd_percentage') {
+                    if (key === 'thc_percentage' || key === 'cbd_percentage' || key === 'terpene_1_percentage' || key === 'terpene_2_percentage' || key === 'terpene_3_percentage') {
                         data[key] = parseFloat(value);
                     } else {
                         data[key] = value;

@@ -4383,6 +4383,15 @@ def get_bud_info(bud_id):
         if conn:
             return_db_connection(conn)
 
+@app.route('/api/pending_friends_count')
+def get_pending_friends_count():
+    """Get pending friends count"""
+    if not is_authenticated():
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    # For now, return 0 as placeholder - can be implemented later
+    return jsonify({'count': 0})
+
 @app.route('/add-review')
 def add_review_page():
     """Add review page"""

@@ -2220,16 +2220,13 @@ def health_check():
 
 @app.route('/api')  
 def api_health_check():
-    """Main API endpoint with optimized monitoring support"""
-    from flask import request
+    """Main API endpoint - redirect monitoring to dedicated endpoint"""
+    from flask import request, redirect, url_for
     import logging
     
-    # Handle HEAD requests efficiently for monitoring services
+    # Redirect HEAD requests to dedicated health check endpoint
     if request.method == 'HEAD':
-        # Set cache headers to potentially reduce frequency
-        response = app.make_response(('', 204))
-        response.headers['Cache-Control'] = 'public, max-age=30'
-        return response
+        return redirect(url_for('health_check'), code=301)
     
     return jsonify({
         'status': 'healthy',

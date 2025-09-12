@@ -1729,36 +1729,99 @@
                     throw new Error('html2canvas library ไม่โหลด กรุณาลองใหม่อีกครั้ง');
                 }
                 
-                // Find the report container - try multiple selectors
-                let reportContainer = document.querySelector('.report-container');
+                // Wait for fonts and images to load completely
+                await document.fonts?.ready;
+                
+                // Wait for all images to load
+                const images = [...document.images];
+                if (images.length > 0) {
+                    await Promise.all(images.map(img => {
+                        if (img.complete) return Promise.resolve();
+                        return new Promise(resolve => {
+                            img.onload = img.onerror = resolve;
+                        });
+                    }));
+                }
+                
+                // Find the report container with content validation
+                let reportContainer = document.getElementById('mainContent');
+                
+                // Fallback to container if mainContent not found
                 if (!reportContainer) {
                     reportContainer = document.querySelector('.container');
+                    if (!reportContainer) {
+                        reportContainer = document.body;
+                    }
                 }
+                
+                // Validate container has content
                 if (!reportContainer) {
-                    reportContainer = document.querySelector('.main-content');
-                }
-                if (!reportContainer) {
-                    reportContainer = document.body;
+                    throw new Error('ไม่พบ container สำหรับสร้างรายงาน');
                 }
                 
-                console.log('Using container:', reportContainer);
+                // Check if container has visible content
+                const hasContent = reportContainer.offsetHeight > 0 && reportContainer.offsetWidth > 0;
+                if (!hasContent) {
+                    throw new Error('Container ไม่มีเนื้อหาที่มองเห็นได้');
+                }
                 
-                // Configure html2canvas for high quality
-                const canvas = await html2canvas(reportContainer, {
-                    scale: 2, // Reduce scale to prevent memory issues
-                    useCORS: true,
-                    allowTaint: true,
-                    backgroundColor: '#ffffff',
-                    logging: true, // Enable logging for debugging
-                    imageTimeout: 10000,
-                    removeContainer: false,
-                    foreignObjectRendering: true
-                });
+                console.log('Using container:', reportContainer.id || reportContainer.className || 'body');
+                console.log('Container dimensions:', reportContainer.offsetWidth, 'x', reportContainer.offsetHeight);
+                console.log('Container scroll dimensions:', reportContainer.scrollWidth, 'x', reportContainer.scrollHeight);
                 
-                // Convert to blob with high quality
-                canvas.toBlob(function(blob) {
+                // Add temporary class to disable animations during capture
+                const originalClasses = reportContainer.className;
+                reportContainer.classList.add('capturing');
+                
+                // Add CSS to disable animations temporarily
+                const captureStyles = document.createElement('style');
+                captureStyles.textContent = `
+                    .capturing, .capturing * {
+                        animation-duration: 0s !important;
+                        animation-delay: 0s !important;
+                        transition-duration: 0s !important;
+                        transition-delay: 0s !important;
+                        transform: none !important;
+                    }
+                `;
+                document.head.appendChild(captureStyles);
+                
+                try {
+                    // Configure html2canvas for high quality and better cross-browser support
+                    const canvas = await html2canvas(reportContainer, {
+                        scale: Math.min(window.devicePixelRatio || 1, 2), // Use device pixel ratio but cap at 2
+                        useCORS: true,
+                        allowTaint: false, // Set to false for better CORS handling
+                        backgroundColor: '#ffffff',
+                        logging: false, // Enable for debugging if needed
+                        imageTimeout: 15000, // Increase timeout for slower images
+                        removeContainer: false,
+                        foreignObjectRendering: false, // Disable to avoid CORS issues
+                        width: reportContainer.scrollWidth,
+                        height: reportContainer.scrollHeight,
+                        scrollX: 0,
+                        scrollY: 0,
+                        onclone: (clonedDoc) => {
+                            // Ensure cloned document has all styles and content
+                            const clonedContainer = clonedDoc.querySelector('#mainContent') || 
+                                                  clonedDoc.querySelector('.container') || 
+                                                  clonedDoc.body;
+                            if (clonedContainer) {
+                                clonedContainer.style.transform = 'none';
+                                clonedContainer.style.opacity = '1';
+                            }
+                        }
+                    });
+                    
+                    console.log('Canvas created successfully:', canvas.width, 'x', canvas.height);
+                    
+                    // Convert to blob with high quality using Promise to handle errors properly
+                    const blob = await new Promise((resolve) => {
+                        canvas.toBlob(resolve, 'image/png', 0.95);
+                    });
+                    
                     if (!blob) {
-                        throw new Error('ไม่สามารถสร้างรูปภาพได้');
+                        throw new Error('ไม่สามารถสร้างรูปภาพได้ กรุณาลองใหม่อีกครั้ง');
                     }
                     
                     // Create download link
@@ -1768,8 +1831,9 @@
                     
                     // Generate filename with strain name and date
                     const strainName = budData?.strain_name_en || budData?.strain_name_th || 'BudReport';
-                    const date = new Date().toLocaleDateString('th-TH').replace(/\//g, '-');
-                    link.download = `${strainName}_Report_${date}.png`;
+                    const cleanStrainName = strainName.replace(/[^\w\-_]/g, '_');
+                    const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '');
+                    link.download = `${cleanStrainName}_Report_${timestamp}.png`;
                     
                     // Trigger download
                     document.body.appendChild(link);
@@ -1777,13 +1841,22 @@
                     document.body.removeChild(link);
                     URL.revokeObjectURL(url);
                     
+                    console.log('Report saved successfully as:', link.download);
+                    
                     // Show success message
                     button.innerHTML = '✅ บันทึกสำเร็จ!';
                     setTimeout(() => {
                         button.innerHTML = originalText;
                         button.disabled = false;
                     }, 2000);
-                }, 'image/png', 1.0); // Maximum quality
+                    
+                } finally {
+                    // Clean up: remove temporary styles and classes
+                    reportContainer.className = originalClasses;
+                    if (captureStyles && captureStyles.parentNode) {
+                        captureStyles.parentNode.removeChild(captureStyles);
+                    }
+                }
                 
             } catch (error) {
                 console.error('Error saving report:', error);

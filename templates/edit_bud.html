@@ -2779,14 +2779,23 @@
 
         // Function to load terpene data into the UI
         function loadTerpeneData(budData) {
+            console.log('🧪 loadTerpeneData called with:', budData);
+            
             // Load existing top terpenes and percentages
             for (let i = 1; i <= 3; i++) {
                 const hiddenInput = document.getElementById(`top_terpenes_${i}`);
                 const dropdown = document.getElementById(`terpene_${i}_select`);
                 const percentageInput = document.getElementById(`terpene_${i}_percentage`);
                 
+                console.log(`🧪 Terpene ${i}:`, {
+                    terpene_name: budData[`top_terpenes_${i}`],
+                    percentage: budData[`top_terpenes_${i}_percentage`],
+                    percentageInput_exists: !!percentageInput
+                });
+                
                 if (hiddenInput && budData[`top_terpenes_${i}`]) {
                     hiddenInput.value = budData[`top_terpenes_${i}`];
+                    console.log(`🧪 Set terpene ${i} name:`, budData[`top_terpenes_${i}`]);
                     
                     if (dropdown) {
                         dropdown.value = budData[`top_terpenes_${i}`];
@@ -2795,6 +2804,9 @@
                 
                 if (percentageInput && budData[`top_terpenes_${i}_percentage`]) {
                     percentageInput.value = budData[`top_terpenes_${i}_percentage`];
+                    console.log(`🧪 Set terpene ${i} percentage:`, budData[`top_terpenes_${i}_percentage`]);
+                } else if (percentageInput) {
+                    console.log(`🧪 Percentage input exists but no data for terpene ${i}`);
                 }
             }
         }

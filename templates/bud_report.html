@@ -1786,69 +1786,137 @@
                 `;
                 document.head.appendChild(captureStyles);
                 
-                try {
-                    // Configure html2canvas for high quality and better cross-browser support
-                    const canvas = await html2canvas(reportContainer, {
-                        scale: Math.min(window.devicePixelRatio || 1, 2), // Use device pixel ratio but cap at 2
-                        useCORS: true,
-                        allowTaint: false, // Set to false for better CORS handling
-                        backgroundColor: '#ffffff',
-                        logging: false, // Enable for debugging if needed
-                        imageTimeout: 15000, // Increase timeout for slower images
-                        removeContainer: false,
-                        foreignObjectRendering: false, // Disable to avoid CORS issues
-                        width: reportContainer.scrollWidth,
-                        height: reportContainer.scrollHeight,
-                        scrollX: 0,
-                        scrollY: 0,
-                        onclone: (clonedDoc) => {
-                            // Ensure cloned document has all styles and content
-                            const clonedContainer = clonedDoc.querySelector('#mainContent') || 
-                                                  clonedDoc.querySelector('.container') || 
-                                                  clonedDoc.body;
-                            if (clonedContainer) {
-                                clonedContainer.style.transform = 'none';
-                                clonedContainer.style.opacity = '1';
+                // Calculate dynamic scale for maximum quality targeting 2048px on longest side
+                const scrollWidth = reportContainer.scrollWidth;
+                const scrollHeight = reportContainer.scrollHeight;
+                const longestSide = Math.max(scrollWidth, scrollHeight);
+                const targetResolution = 2048;
+                const targetScale = Math.min(4, Math.max(0.25, targetResolution / longestSide)); // Lower minimum to 0.25 for precise targeting
+                
+                console.log('Target scale for maximum quality:', targetScale);
+                console.log('Container dimensions (scroll):', scrollWidth, 'x', scrollHeight, '- longest side:', longestSide);
+                console.log('Expected final longest side:', Math.round(longestSide * targetScale), 'px');
+                
+                // Retry scales - always decrease after first attempt for memory safety
+                const baseScales = targetScale < 1 ? 
+                    [0.9, 0.8, 0.75, 0.67, 0.6, 0.5, 0.4, 0.33, 0.25] : 
+                    [3, 2.5, 2, 1.5, 1, 0.75, 0.5, 0.25];
+                
+                // Build strictly decreasing sequence relative to last accepted value
+                const retryScales = [targetScale];
+                for (const scale of baseScales) {
+                    const lastAccepted = retryScales[retryScales.length - 1];
+                    if (scale < lastAccepted && (lastAccepted - scale) > 1e-6) {
+                        retryScales.push(scale);
+                    }
+                }
+                
+                console.log('Retry scales sequence:', retryScales);
+                let canvas;
+                let usedScale;
+                
+                for (const scale of retryScales) {
+                    try {
+                        console.log('Attempting render with scale:', scale);
+                        
+                        // Configure html2canvas for maximum quality
+                        canvas = await html2canvas(reportContainer, {
+                            scale: scale,
+                            useCORS: true,
+                            allowTaint: false,
+                            backgroundColor: '#ffffff', // White background for clean JPEG
+                            logging: false,
+                            imageTimeout: 15000,
+                            removeContainer: false,
+                            foreignObjectRendering: false,
+                            width: reportContainer.scrollWidth,
+                            height: reportContainer.scrollHeight,
+                            scrollX: 0,
+                            scrollY: 0,
+                            onclone: (clonedDoc) => {
+                                // Ensure cloned document has all styles and content
+                                const clonedContainer = clonedDoc.querySelector('#mainContent') || 
+                                                      clonedDoc.querySelector('.container') || 
+                                                      clonedDoc.body;
+                                if (clonedContainer) {
+                                    clonedContainer.style.transform = 'none';
+                                    clonedContainer.style.opacity = '1';
+                                    clonedContainer.style.backgroundColor = '#ffffff';
+                                }
                             }
+                        });
+                        
+                        usedScale = scale;
+                        console.log('Canvas created successfully with scale', scale + ':', canvas.width, 'x', canvas.height);
+                        
+                        // Verify precision when not clamped
+                        const finalLongestSide = Math.max(canvas.width, canvas.height);
+                        if (targetScale !== 0.25 && Math.abs(finalLongestSide - 2048) > 2) {
+                            console.warn('Precision warning: expected ~2048px, got', finalLongestSide, 'px');
+                        } else {
+                            console.log('Precision verified: longest side', finalLongestSide, 'px (target: 2048px)');
                         }
-                    });
-                    
-                    console.log('Canvas created successfully:', canvas.width, 'x', canvas.height);
-                    
-                    // Convert to blob with high quality using Promise to handle errors properly
+                        break;
+                        
+                    } catch (error) {
+                        console.warn('Failed with scale', scale + ', trying lower scale:', error.message);
+                        if (scale === retryScales[retryScales.length - 1]) {
+                            throw new Error('ไม่สามารถสร้างรูปภาพได้ กรุณาลองใหม่อีกครั้ง');
+                        }
+                    }
+                }
+                
+                // Convert to high-quality JPEG for social media with Safari fallback
+                let url, link;
+                
+                try {
                     const blob = await new Promise((resolve) => {
-                        canvas.toBlob(resolve, 'image/png', 0.95);
+                        canvas.toBlob(resolve, 'image/jpeg', 0.95);
                     });
                     
                     if (!blob) {
-                        throw new Error('ไม่สามารถสร้างรูปภาพได้ กรุณาลองใหม่อีกครั้ง');
+                        throw new Error('toBlob failed, using fallback');
                     }
                     
-                    // Create download link
-                    const url = URL.createObjectURL(blob);
-                    const link = document.createElement('a');
+                    // Create download link with blob
+                    url = URL.createObjectURL(blob);
+                    link = document.createElement('a');
                     link.href = url;
                     
-                    // Generate filename with strain name and date
-                    const strainName = budData?.strain_name_en || budData?.strain_name_th || 'BudReport';
-                    const cleanStrainName = strainName.replace(/[^\w\-_]/g, '_');
-                    const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '');
-                    link.download = `${cleanStrainName}_Report_${timestamp}.png`;
+                } catch (error) {
+                    console.warn('toBlob failed, using dataURL fallback:', error.message);
                     
-                    // Trigger download
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
+                    // Safari fallback: use dataURL
+                    const dataURL = canvas.toDataURL('image/jpeg', 0.95);
+                    link = document.createElement('a');
+                    link.href = dataURL;
+                }
+                
+                // Generate filename with strain name and date
+                const strainName = budData?.strain_name_en || budData?.strain_name_th || 'BudReport';
+                const cleanStrainName = strainName.replace(/[^\w\-_]/g, '_');
+                const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '');
+                link.download = `${cleanStrainName}_Report_${timestamp}.jpg`; // Change to .jpg
+                
+                // Trigger download
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // Clean up URL if it's a blob URL
+                if (url && url.startsWith('blob:')) {
                     URL.revokeObjectURL(url);
-                    
-                    console.log('Report saved successfully as:', link.download);
-                    
-                    // Show success message
-                    button.innerHTML = '✅ บันทึกสำเร็จ!';
-                    setTimeout(() => {
-                        button.innerHTML = originalText;
-                        button.disabled = false;
-                    }, 2000);
+                }
+                
+                console.log('High-quality report saved successfully as:', link.download);
+                console.log('Final dimensions:', canvas.width, 'x', canvas.height, 'with scale:', usedScale);
+                
+                // Show success message with quality info
+                button.innerHTML = `✅ บันทึกสำเร็จ! (${canvas.width}×${canvas.height})`;
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                }, 3000);
                     
                 } finally {
                     // Clean up: remove temporary styles and classes

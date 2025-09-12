@@ -2209,6 +2209,17 @@ def quick_signup():
 @app.route('/api')
 def api_health_check():
     """Health check endpoint for monitoring services"""
+    from flask import request
+    
+    # Block excessive calls from node monitoring services entirely
+    user_agent = request.headers.get('User-Agent', '')
+    if user_agent == 'node' and request.method == 'HEAD':
+        return '', 204  # No Content - indicates success but no response needed
+    
+    # Minimal response for other HEAD requests
+    if request.method == 'HEAD':
+        return '', 200
+    
     return jsonify({
         'status': 'healthy',
         'service': 'budtboy-cannabis-app',

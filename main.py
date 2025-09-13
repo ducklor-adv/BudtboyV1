@@ -2042,17 +2042,44 @@ def get_user_buds():
 
         cur = conn.cursor()
 
-        # Optimized query with better performance - separate review stats
-        # Simplified query for actual buds table schema
-        cur.execute("""
-            SELECT b.id, b.name, b.name as strain_name_th, 'Unknown' as breeder, b.thc_content, 
-                   b.cbd_content, b.strain_type, b.created_at, b.image_url, 'active' as status,
-                   NULL as lab_test_name, NULL as test_type
-            FROM buds b
-            WHERE b.created_by = ? 
-            ORDER BY b.created_at DESC
-            LIMIT 50
-        """, (user_id,))
+        # Check if we're using SQLite and handle table differences
+        placeholder = db_placeholder(conn)
+        
+        # First try with buds_data table (standard schema)
+        try:
+            query = f"""
+                SELECT b.id, COALESCE(b.strain_name_en, 'Unknown') as name, 
+                       COALESCE(b.strain_name_th, '') as strain_name_th, 
+                       COALESCE(b.breeder, 'Unknown') as breeder, 
+                       b.thc_percentage, b.cbd_percentage, b.strain_type, 
+                       b.created_at, b.image_1_url, 
+                       COALESCE(b.status, 'available') as status,
+                       b.lab_test_name, b.test_type
+                FROM buds_data b
+                WHERE b.created_by = {placeholder}
+                ORDER BY b.created_at DESC
+                LIMIT 50
+            """
+            cur.execute(query, (user_id,))
+        except Exception as e:
+            print(f"buds_data query failed, trying buds table: {e}")
+            # Fallback to simpler buds table if buds_data doesn't exist
+            try:
+                query = f"""
+                    SELECT b.id, COALESCE(b.name, 'Unknown') as name, 
+                           COALESCE(b.name, '') as strain_name_th, 'Unknown' as breeder, 
+                           b.thc_content as thc_percentage, b.cbd_content as cbd_percentage, 
+                           b.strain_type, b.created_at, b.image_url as image_1_url, 
+                           'available' as status, NULL as lab_test_name, NULL as test_type
+                    FROM buds b
+                    WHERE b.created_by = {placeholder}
+                    ORDER BY b.created_at DESC
+                    LIMIT 50
+                """
+                cur.execute(query, (user_id,))
+            except Exception as e2:
+                print(f"Both table queries failed: {e2}")
+                return jsonify({'buds': []})
 
         bud_rows = cur.fetchall()
 
@@ -2143,21 +2170,101 @@ def get_user_reviews():
 
         cur = conn.cursor()
 
-        # Optimized query with limit
-        cur.execute("""
+        # Check if we're using SQLite and create tables if needed
+        if is_sqlite(conn):
+            try:
+                # Try to create missing tables
+                cur.execute("""
+                    CREATE TABLE IF NOT EXISTS buds_data (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        strain_name_th TEXT,
+                        strain_name_en TEXT NOT NULL,
+                        breeder TEXT,
+                        strain_type TEXT,
+                        thc_percentage REAL,
+                        cbd_percentage REAL,
+                        grade TEXT,
+                        aroma_flavor TEXT,
+                        top_terpenes_1 TEXT,
+                        top_terpenes_2 TEXT,
+                        top_terpenes_3 TEXT,
+                        mental_effects_positive TEXT,
+                        mental_effects_negative TEXT,
+                        physical_effects_positive TEXT,
+                        physical_effects_negative TEXT,
+                        recommended_time TEXT,
+                        grow_method TEXT,
+                        harvest_date DATE,
+                        batch_number TEXT,
+                        grower_id INTEGER,
+                        grower_license_verified BOOLEAN DEFAULT FALSE,
+                        fertilizer_type TEXT,
+                        flowering_type TEXT,
+                        status TEXT DEFAULT 'available',
+                        lab_test_name TEXT,
+                        test_type TEXT,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        created_by INTEGER,
+                        image_1_url TEXT,
+                        image_2_url TEXT,
+                        image_3_url TEXT,
+                        image_4_url TEXT
+                    )
+                """)
+                
+                cur.execute("""
+                    CREATE TABLE IF NOT EXISTS reviews (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        user_id INTEGER,
+                        bud_id INTEGER,
+                        reviewer_id INTEGER,
+                        bud_reference_id INTEGER,
+                        rating INTEGER,
+                        overall_rating INTEGER,
+                        title TEXT,
+                        content TEXT,
+                        review_text TEXT,
+                        short_summary TEXT,
+                        full_review_content TEXT,
+                        taste_rating INTEGER,
+                        potency_rating INTEGER,
+                        appearance_rating INTEGER,
+                        aroma_rating INTEGER,
+                        selected_effects TEXT,
+                        aroma_flavors TEXT,
+                        review_images TEXT,
+                        video_review_url TEXT,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                """)
+                
+                conn.commit()
+                print("SQLite tables created/verified successfully")
+            except Exception as e:
+                print(f"Warning: Could not create SQLite tables: {e}")
+
+        # Optimized query with better error handling for SQLite
+        placeholder = db_placeholder(conn)
+        query = f"""
             SELECT r.id, r.overall_rating, r.short_summary, r.full_review_content, 
                    r.aroma_rating, r.selected_effects, r.aroma_flavors, r.review_images,
                    r.created_at, r.updated_at, r.video_review_url,
-                   b.strain_name_en, b.strain_name_th, b.breeder,
-                   u.username as reviewer_name, u.profile_image_url as reviewer_profile_image,
+                   COALESCE(b.strain_name_en, 'Unknown Strain') as strain_name_en, 
+                   COALESCE(b.strain_name_th, '') as strain_name_th, 
+                   COALESCE(b.breeder, 'Unknown') as breeder,
+                   COALESCE(u.username, 'Unknown User') as reviewer_name, 
+                   u.profile_image_url as reviewer_profile_image,
                    r.bud_reference_id
             FROM reviews r
-            JOIN buds_data b ON r.bud_reference_id = b.id
-            JOIN users u ON r.reviewer_id = u.id
-            WHERE r.reviewer_id = ? 
+            LEFT JOIN buds_data b ON r.bud_reference_id = b.id
+            LEFT JOIN users u ON r.reviewer_id = u.id
+            WHERE r.reviewer_id = {placeholder}
             ORDER BY r.created_at DESC
             LIMIT 50
-        """, (user_id,))
+        """
+        cur.execute(query, (user_id,))
 
         print(f"Debug: Query executed for user_id {user_id}")
 

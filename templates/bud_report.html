@@ -1928,22 +1928,16 @@
                 }, 3000);
             } finally {
                 // Clean up: remove temporary styles and classes
-                if (typeof reportContainer !== 'undefined' && reportContainer) {
-                    reportContainer.className = originalClasses;
-                }
-                if (typeof captureStyles !== 'undefined' && captureStyles && captureStyles.parentNode) {
+                reportContainer.className = originalClasses;
+                if (captureStyles && captureStyles.parentNode) {
                     captureStyles.parentNode.removeChild(captureStyles);
                 }
             }
         }
 
         function openReviewModal() {
-            // Redirect to add-review page with current bud ID
-            if (currentBudId) {
-                window.location.href = `/add-review?bud_id=${currentBudId}`;
-            } else {
-                alert('ไม่พบ ID ของดอก กรุณาลองใหม่อีกครั้ง');
-            }
+            alert('ฟีเจอร์รีวิวจะเปิดใช้งานเร็วๆ นี้! 🌟');
+            // TODO: Implement review modal or redirect to review page
         }
 
         // Event listeners

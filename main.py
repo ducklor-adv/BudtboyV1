@@ -576,33 +576,6 @@ def create_tables():
                 ensure_sqlite_schema()
                 return
             else:
-                        email TEXT UNIQUE NOT NULL,
-                        password_hash TEXT NOT NULL,
-                        is_grower BOOLEAN DEFAULT FALSE,
-                        grow_license_file_url TEXT,
-                        is_budtender BOOLEAN DEFAULT FALSE,
-                        is_consumer BOOLEAN DEFAULT TRUE,
-                        birth_year INTEGER,
-                        profile_image_url TEXT,
-                        is_verified BOOLEAN DEFAULT FALSE,
-                        contact_facebook TEXT,
-                        contact_line TEXT,
-                        contact_instagram TEXT,
-                        contact_twitter TEXT,
-                        contact_telegram TEXT,
-                        contact_phone TEXT,
-                        contact_other TEXT,
-                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        referred_by INTEGER,
-                        referral_code TEXT UNIQUE,
-                        is_approved BOOLEAN DEFAULT TRUE,
-                        approved_at TIMESTAMP,
-                        approved_by INTEGER,
-                        FOREIGN KEY (referred_by) REFERENCES users(id),
-                        FOREIGN KEY (approved_by) REFERENCES users(id)
-                    );
-                """)
-            else:
                 cur.execute("""
                     CREATE TABLE IF NOT EXISTS users (
                         id SERIAL PRIMARY KEY,

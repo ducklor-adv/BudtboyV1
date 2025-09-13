@@ -1917,14 +1917,6 @@
                     button.innerHTML = originalText;
                     button.disabled = false;
                 }, 3000);
-                    
-                } finally {
-                    // Clean up: remove temporary styles and classes
-                    reportContainer.className = originalClasses;
-                    if (captureStyles && captureStyles.parentNode) {
-                        captureStyles.parentNode.removeChild(captureStyles);
-                    }
-                }
                 
             } catch (error) {
                 console.error('Error saving report:', error);
@@ -1934,6 +1926,12 @@
                     button.innerHTML = originalText;
                     button.disabled = false;
                 }, 3000);
+            } finally {
+                // Clean up: remove temporary styles and classes
+                reportContainer.className = originalClasses;
+                if (captureStyles && captureStyles.parentNode) {
+                    captureStyles.parentNode.removeChild(captureStyles);
+                }
             }
         }
 

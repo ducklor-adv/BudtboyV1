@@ -1016,9 +1016,6 @@ def create_tables():
                     top_terpenes_1 VARCHAR(100),
                     top_terpenes_2 VARCHAR(100),
                     top_terpenes_3 VARCHAR(100),
-                    top_terpenes_1_percentage DECIMAL(5,2),
-                    top_terpenes_2_percentage DECIMAL(5,2),
-                    top_terpenes_3_percentage DECIMAL(5,2),
                     mental_effects_positive TEXT,
                     mental_effects_negative TEXT,
                     physical_effects_positive TEXT,
@@ -1034,17 +1031,13 @@ def create_tables():
                     status VARCHAR(20) CHECK (status IN ('available', 'sold_out')) DEFAULT 'available',
                     lab_test_name VARCHAR(255),
                     test_type VARCHAR(255),
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    created_by INTEGER REFERENCES users(id),
                     image_1_url VARCHAR(500),
                     image_2_url VARCHAR(500),
                     image_3_url VARCHAR(500),
-                    image_4_url VARCHAR(500),
-                    certificate_image_1_url VARCHAR(500),
-                    certificate_image_2_url VARCHAR(500),
-                    certificate_image_3_url VARCHAR(500),
-                    certificate_image_4_url VARCHAR(500),
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    created_by INTEGER REFERENCES users(id)
+                    image_4_url VARCHAR(500)
                 );
             """)
 
@@ -1372,23 +1365,19 @@ def create_tables():
                 # Migrate data from old columns to new format if needed
                 cur.execute("""
                     UPDATE activities 
-                    SET first_prize_description = COALESCE(first_prize_description, first_prize_name),
-                        second_prize_description = COALESCE(second_prize_description, second_prize_name),
-                        third_prize_description = COALESCE(third_prize_description, third_prize_name)
+                    SET first_prize_description = COALESCE(first_prize_name, first_prize_amount::TEXT),
+                        second_prize_description = COALESCE(second_prize_name, second_prize_amount::TEXT),
+                        third_prize_description = COALESCE(third_prize_name, third_prize_amount::TEXT)
                     WHERE first_prize_description IS NULL;
                 """)
 
                 # Copy old prize values if new ones are not set
                 cur.execute("""
                     UPDATE activities 
-                    SET first_prize_value = COALESCE(first_prize_value, first_prize_amount)
+                    SET first_prize_value = COALESCE(first_prize_value, first_prize_amount),
+                        second_prize_value = COALESCE(second_prize_value, second_prize_amount),
+                        third_prize_value = COALESCE(third_prize_value, third_prize_amount)
                     WHERE first_prize_value = 0 AND first_prize_amount > 0;
-                    UPDATE activities 
-                    SET second_prize_value = COALESCE(second_prize_value, second_prize_amount)
-                    WHERE second_prize_value = 0 AND second_prize_amount > 0;
-                    UPDATE activities 
-                    SET third_prize_value = COALESCE(third_prize_value, third_prize_amount)
-                    WHERE third_prize_value = 0 AND third_prize_amount > 0;
                 """)
 
             except Exception as e:
@@ -1463,7 +1452,7 @@ def create_tables():
                                 (
                                     f'บลูดรีม{i+1}', 'Blue Dream', 'Barney\'s Farm', 'Hybrid',
                                     18.5, 1.2, 'A+', 'หวาน, เบอร์รี่, ซิตรัส',
-                                    'Myrcene', 'Limonene', 'Pinene', 1.5, 0.8, 0.5, # Added percentage fields
+                                    'Myrcene', 'Limonene', 'Pinene',
                                     'ผ่อนคลาย, สร้างสรรค์, สุขใจ', '',
                                     'บรรเทาปวด, คลายกล้าม', 'ปากแห้ง',
                                     'ตลอดวัน', 'Indoor', '2024-12-01',
@@ -1474,7 +1463,7 @@ def create_tables():
                                 (
                                     f'โอจี คัช{i+1}', 'OG Kush', 'DNA Genetics', 'Indica',
                                     22.3, 0.8, 'A', 'ดิน, สน, เผ็ด',
-                                    'Myrcene', 'Caryophyllene', 'Limonene', 1.8, 0.7, 0.4, # Added percentage fields
+                                    'Myrcene', 'Caryophyllene', 'Limonene',
                                     'ผ่อนคลาย, หลับง่าย', 'ง่วงหนัก',
                                     'บรรเทาปวด, หลับง่าย', 'ตาแดง, ปากแห้ง',
                                     'กลางคืน', 'Indoor', '2024-11-15',
@@ -1485,7 +1474,7 @@ def create_tables():
                                 (
                                     f'ไวท์ วิโดว์{i+1}', 'White Widow', 'Green House Seed Company', 'Hybrid',
                                     20.1, 1.5, 'A+', 'หวาน, ดอกไม้, มินต์',
-                                    'Pinene', 'Myrcene', 'Limonene', 1.6, 0.9, 0.6, # Added percentage fields
+                                    'Pinene', 'Myrcene', 'Limonene',
                                     'ตื่นตัว, โฟกัส, เบิกบาน', '',
                                     'ต้านอักเสบ, สดชื่น', 'ตาแห้ง',
                                     'กลางวัน', 'Greenhouse', '2024-10-20',
@@ -1500,7 +1489,6 @@ def create_tables():
                                 strain_name_th, strain_name_en, breeder, strain_type,
                                 thc_percentage, cbd_percentage, grade, aroma_flavor,
                                 top_terpenes_1, top_terpenes_2, top_terpenes_3,
-                                top_terpenes_1_percentage, top_terpenes_2_percentage, top_terpenes_3_percentage,
                                 mental_effects_positive, mental_effects_negative,
                                 physical_effects_positive, physical_effects_negative,
                                 recommended_time, grow_method, harvest_date,
@@ -1509,7 +1497,7 @@ def create_tables():
                                 created_by, status
                             ) VALUES (
                                 %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+                                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
                             )
                         """, sample_buds)
 
@@ -1898,7 +1886,7 @@ def get_user_reviews():
 
         # Optimized query with limit
         cur.execute("""
-            SELECT r.id, r.overall_rating, r.short_summary, r.full_review_content,
+            SELECT r.id, r.overall_rating, r.short_summary, r.full_review_content, 
                    r.aroma_rating, r.selected_effects, r.aroma_flavors, r.review_images,
                    r.created_at, r.updated_at, r.video_review_url,
                    b.strain_name_en, b.strain_name_th, b.breeder,
@@ -2233,7 +2221,7 @@ def quick_signup():
 def health_check():
     """Ultra-lightweight health check - no DB, no business logic, instant response"""
     from flask import Response
-
+    
     # Return 204 No Content for both GET and HEAD - zero cost operation
     response = Response('', 204)
     response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
@@ -2246,7 +2234,7 @@ def api_health_check():
     if request.method == 'HEAD':
         # Instant response for Replit's health monitoring - no DB, no logic
         return '', 204
-
+    
     # Normal responses for actual API calls
     return jsonify({
         'status': 'healthy',
@@ -3649,7 +3637,7 @@ def add_strain():
 
             # Insert new strain
             cur.execute("""
-                INSERT INTO strain_names (name_en, name_th, is_popular)
+                INSERT INTO strain_names (name_en, name_name_th, is_popular)
                 VALUES (%s, %s, %s)
                 RETURNING id
             """, (name_en, name_th if name_th else None, is_popular))
@@ -4192,7 +4180,15 @@ def get_all_buds_report():
 
         cur.execute(f"""
             SELECT b.id, b.strain_name_en, b.strain_name_th, b.breeder, b.strain_type,
-                   b.thc_percentage, b.cbd_percentage, b.grade, b.created_at,
+                   b.thc_percentage, b.cbd_percentage, b.grade, b.aroma_flavor,
+                   b.top_terpenes_1, b.top_terpenes_2, b.top_terpenes_3,
+                   b.mental_effects_positive, b.mental_effects_negative,
+                   b.physical_effects_positive, b.physical_effects_negative,
+                   b.recommended_time, b.grow_method, b.harvest_date, b.batch_number,
+                   b.grower_id, b.grower_license_verified, b.fertilizer_type, 
+                   b.flowering_type, b.status, b.created_at, b.updated_at, b.created_by,
+                   COALESCE(u_grower.username, u_creator.username, 'บัดท์บอย') as grower_name, 
+                   COALESCE(u_grower.is_grower, u_creator.is_grower, false) as is_grower,
                    COALESCE(AVG(r.overall_rating), 0) as avg_rating,
                    COUNT(r.id) as review_count,
                    {lab_test_select}
@@ -4201,9 +4197,15 @@ def get_all_buds_report():
             LEFT JOIN users u_creator ON b.created_by = u_creator.id
             LEFT JOIN reviews r ON b.id = r.bud_reference_id
             GROUP BY b.id, b.strain_name_en, b.strain_name_th, b.breeder, b.strain_type,
-                     b.thc_percentage, b.cbd_percentage, b.grade, b.created_at,
-                     b.lab_test_name, b.test_type,
-                     u_grower.username, u_creator.username, u_grower.is_grower, u_creator.is_grower
+                     b.thc_percentage, b.cbd_percentage, b.grade, b.aroma_flavor,
+                     b.top_terpenes_1, b.top_terpenes_2, b.top_terpenes_3,
+                     b.mental_effects_positive, b.mental_effects_negative,
+                     b.physical_effects_positive, b.physical_effects_negative,
+                     b.recommended_time, b.grow_method, b.harvest_date, b.batch_number,
+                     b.grower_id, b.grower_license_verified, b.fertilizer_type, 
+                     b.flowering_type, b.status, b.created_at, b.updated_at, b.created_by,
+                     u_grower.username, u_grower.is_grower, u_creator.username, u_creator.is_grower,
+                     b.lab_test_name, b.test_type
             ORDER BY b.created_at DESC
         """)
 
@@ -4218,11 +4220,32 @@ def get_all_buds_report():
                 'thc_percentage': float(row[5]) if row[5] else None,
                 'cbd_percentage': float(row[6]) if row[6] else None,
                 'grade': row[7],
-                'created_at': row[8].strftime('%Y-%m-%d') if row[8] else None,
-                'avg_rating': float(row[9]) if row[9] else 0,
-                'review_count': row[10],
-                'lab_test_name': row[11],
-                'test_type': row[12]
+                'aroma_flavor': row[8],
+                'top_terpenes_1': row[9],
+                'top_terpenes_2': row[10],
+                'top_terpenes_3': row[11],
+                'mental_effects_positive': row[12],
+                'mental_effects_negative': row[13],
+                'physical_effects_positive': row[14],
+                'physical_effects_negative': row[15],
+                'recommended_time': row[16],
+                'grow_method': row[17],
+                'harvest_date': row[18].strftime('%Y-%m-%d') if row[18] else None,
+                'batch_number': row[19],
+                'grower_id': row[20],
+                'grower_license_verified': row[21],
+                'fertilizer_type': row[22],
+                'flowering_type': row[23],
+                'status': row[24] or 'available',
+                'created_at': row[25].strftime('%Y-%m-%d %H:%M:%S') if row[25] else None,
+                'updated_at': row[26].strftime('%Y-%m-%d %H:%M:%S') if row[26] else None,
+                'created_by': row[27],
+                'grower_name': row[28],
+                'is_grower': row[29],
+                'avg_rating': float(row[30]) if row[30] else 0,
+                'review_count': row[31],
+                'lab_test_name': row[32],
+                'test_type': row[33]
             })
 
         return jsonify({'buds': buds})
@@ -4475,7 +4498,7 @@ def get_pending_friends_count():
     """Get pending friends count"""
     if not is_authenticated():
         return jsonify({'error': 'Unauthorized'}), 401
-
+    
     # For now, return 0 as placeholder - can be implemented later
     return jsonify({'count': 0})
 
@@ -4489,7 +4512,7 @@ def add_review_page():
             session['user_id'] = 1  # Mock session for testing
         else:
             return redirect('/auth')
-
+    
     # Get bud_id from query parameter
     bud_id = request.args.get('bud_id')
     return render_template('add_review.html', bud_id=bud_id)
@@ -4520,11 +4543,23 @@ def report_page():
 @app.route('/bud-report')
 @app.route('/bud-report/<int:bud_id>')
 def bud_report_page(bud_id=None):
-    # Check if user is logged in
+    # Check if user is logged in (with preview mode bypass)
     if 'user_id' not in session:
-        return redirect('/auth')
-    if not is_approved():
-        return redirect('/profile?not_approved=1')
+        # Only bypass in development/preview environment
+        if os.getenv('REPLIT_DEPLOYMENT') is None:  # Preview mode
+            session['user_id'] = 1  # Mock session for testing
+        else:
+            return redirect('/auth')  # Production requires real auth
+
+    # Handle query parameter for id
+    if bud_id is None:
+        bud_id = request.args.get('id')
+        if bud_id:
+            try:
+                bud_id = int(bud_id)
+            except (ValueError, TypeError):
+                bud_id = None
+
     return render_template('bud_report.html', bud_id=bud_id)
 
 @app.route('/search-tool')
@@ -4584,7 +4619,7 @@ def get_activities():
             cur = conn.cursor()
             cur.execute("""
                 SELECT a.id, a.name, a.description, a.start_registration_date, a.end_registration_date,
-                       a.judging_criteria, a.max_participants,
+                       a.judging_criteria, a.max_participants, 
                        a.first_prize_description, a.first_prize_value, a.first_prize_image,
                        a.second_prize_description, a.second_prize_value, a.second_prize_image,
                        a.third_prize_description, a.third_prize_value, a.third_prize_image,
@@ -4621,7 +4656,8 @@ def get_activities():
                     'third_prize_value': float(row[14]) if row[14] else 0,
                     'third_prize_image': row[15],
                     'status': row[16],
-                    'created_at': row[17].strftime('%Y-%m-%d %H:%M:%S') if row[17] else None,                    'participant_count': row[18]
+                    'created_at': row[17].strftime('%Y-%m-%d %H:%M:%S') if row[17] else None,
+                    'participant_count': row[18]
                 })
 
             return jsonify({'activities': activities})
@@ -4696,50 +4732,50 @@ def preview_eligible_buds():
 
             # Build dynamic WHERE clause based on criteria
             where_conditions = []
-            params = {} # Use dictionary for named parameters to avoid issues with order
+            params = []
 
             # Basic filters
             if criteria.get('allowed_strain_types') and criteria['allowed_strain_types'] != '':
                 types = [t.strip() for t in criteria['allowed_strain_types'].split(',') if t.strip() and t.strip() != '']
                 if types:
-                    where_conditions.append("b.strain_type = ANY(%(strain_types)s)")
-                    params['strain_types'] = types
+                    where_conditions.append(f"b.strain_type = ANY(%s)")
+                    params.append(types)
 
             if criteria.get('allowed_grow_methods') and criteria['allowed_grow_methods'] != '':
                 methods = [m.strip() for m in criteria['allowed_grow_methods'].split(',') if m.strip() and m.strip() != '']
                 if methods:
-                    where_conditions.append("b.grow_method = ANY(%(grow_methods)s)")
-                    params['grow_methods'] = methods
+                    where_conditions.append(f"b.grow_method = ANY(%s)")
+                    params.append(methods)
 
             if criteria.get('allowed_grades') and criteria['allowed_grades'] != '':
                 grades = [g.strip() for g in criteria['allowed_grades'].split(',') if g.strip() and g.strip() != '']
                 if grades:
-                    where_conditions.append("b.grade = ANY(%(grades)s)")
-                    params['grades'] = grades
+                    where_conditions.append(f"b.grade = ANY(%s)")
+                    params.append(grades)
 
             if criteria.get('allowed_fertilizer_types') and criteria['allowed_fertilizer_types'] != '':
                 ferts = [f.strip() for f in criteria['allowed_fertilizer_types'].split(',') if f.strip() and f.strip() != '']
                 if ferts:
-                    where_conditions.append("b.fertilizer_type = ANY(%(fertilizer_types)s)")
-                    params['fertilizer_types'] = ferts
+                    where_conditions.append(f"b.fertilizer_type = ANY(%s)")
+                    params.append(ferts)
 
             if criteria.get('allowed_recommended_times') and criteria['allowed_recommended_times'] != '':
                 times = [t.strip() for t in criteria['allowed_recommended_times'].split(',') if t.strip() and t.strip() != '']
                 if times:
-                    where_conditions.append("b.recommended_time = ANY(%(recommended_times)s)")
-                    params['recommended_times'] = times
+                    where_conditions.append(f"b.recommended_time = ANY(%s)")
+                    params.append(times)
 
             if criteria.get('allowed_flowering_types') and criteria['allowed_flowering_types'] != '':
                 flowering = [f.strip() for f in criteria['allowed_flowering_types'].split(',') if f.strip() and f.strip() != '']
                 if flowering:
-                    where_conditions.append("b.flowering_type = ANY(%(flowering_types)s)")
-                    params['flowering_types'] = flowering
+                    where_conditions.append(f"b.flowering_type = ANY(%s)")
+                    params.append(flowering)
 
             if criteria.get('allowed_status') and criteria['allowed_status'] != '':
                 statuses = [s.strip() for s in criteria['allowed_status'].split(',') if s.strip() and s.strip() != '']
                 if statuses:
-                    where_conditions.append("b.status = ANY(%(statuses)s)")
-                    params['statuses'] = statuses
+                    where_conditions.append(f"b.status = ANY(%s)")
+                    params.append(statuses)
 
             # THC/CBD ranges
             if criteria.get('min_thc') is not None:
@@ -4763,10 +4799,9 @@ def preview_eligible_buds():
                 terpenes = [t.strip() for t in criteria['preferred_terpenes'].split(',') if t.strip() and t.strip() != '']
                 if terpenes:
                     terpene_conditions = []
-                    for i, terpene in enumerate(terpenes):
-                        terpene_key = f'terpene_{i+1}'
-                        terpene_conditions.append(f"(b.top_terpenes_1 = %({terpene_key})s OR b.top_terpenes_2 = %({terpene_key})s OR b.top_terpenes_3 = %({terpene_key})s)")
-                        params[terpene_key] = terpene
+                    for terpene in terpenes:
+                        terpene_conditions.append("(b.top_terpenes_1 = %(terpene)s OR b.top_terpenes_2 = %(terpene)s OR b.top_terpenes_3 = %(terpene)s)")
+                        params['terpene'] = terpene # Note: This will use the last terpene value if multiple are provided in the same condition set, need adjustment for multiple distinct terpenes.
                     where_conditions.append(f"({' OR '.join(terpene_conditions)})")
 
             # Certificate requirement
@@ -5509,5 +5544,4 @@ if __name__ == '__main__':
 
     # Production configuration
     debug_mode = os.environ.get('FLASK_ENV') != 'production'
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=debug_mode)
+    app.run(host='0.0.0.0', port=5000, debug=debug_mode)

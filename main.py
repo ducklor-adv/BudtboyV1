@@ -266,13 +266,31 @@ def ensure_sqlite_schema():
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 approved BOOLEAN DEFAULT FALSE,
+                is_approved BOOLEAN DEFAULT FALSE,
                 profile_image TEXT,
+                profile_image_url TEXT,
                 bio TEXT,
                 location TEXT,
                 birth_date TEXT,
+                birth_year INTEGER,
                 experience_level TEXT,
                 favorite_strains TEXT,
-                last_login TIMESTAMP
+                last_login TIMESTAMP,
+                is_grower BOOLEAN DEFAULT FALSE,
+                is_consumer BOOLEAN DEFAULT TRUE,
+                is_budtender BOOLEAN DEFAULT FALSE,
+                is_verified BOOLEAN DEFAULT FALSE,
+                referral_code TEXT,
+                referred_by INTEGER,
+                grow_license_file_url TEXT,
+                contact_facebook TEXT,
+                contact_line TEXT,
+                contact_instagram TEXT,
+                contact_twitter TEXT,
+                contact_telegram TEXT,
+                contact_phone TEXT,
+                contact_other TEXT,
+                FOREIGN KEY (referred_by) REFERENCES users(id)
             )
         """)
         

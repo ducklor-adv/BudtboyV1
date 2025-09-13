@@ -278,7 +278,7 @@ def ensure_sqlite_schema():
         
         # Create admin_users table
         cursor.execute("""
-            CREATE TABLE IF NOT EXISTS admin_users (
+            CREATE TABLE IF NOT EXISTS admin_accounts (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 admin_name TEXT UNIQUE NOT NULL,
                 password_hash TEXT NOT NULL,
@@ -286,7 +286,11 @@ def ensure_sqlite_schema():
                 permissions TEXT DEFAULT 'full',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 last_login TIMESTAMP,
-                is_active BOOLEAN DEFAULT TRUE
+                is_active BOOLEAN DEFAULT TRUE,
+                login_attempts INTEGER DEFAULT 0,
+                locked_until TIMESTAMP,
+                session_token TEXT,
+                token_expires TIMESTAMP
             )
         """)
         
@@ -359,6 +363,28 @@ def ensure_sqlite_schema():
                 FOREIGN KEY (friend_id) REFERENCES users(id),
                 UNIQUE(user_id, friend_id)
             )
+        """)
+        
+        # Create admin_settings table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS admin_settings (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                setting_key TEXT UNIQUE NOT NULL,
+                setting_value TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_by INTEGER,
+                FOREIGN KEY (updated_by) REFERENCES users(id)
+            )
+        """)
+        
+        # Insert default admin settings
+        cursor.execute("""
+            INSERT OR REPLACE INTO admin_settings (setting_key, setting_value) 
+            VALUES 
+            ('video_url', ''),
+            ('video_title', 'ทำความรู้จัก Budt.Boy'),
+            ('show_video', 'false')
         """)
         
         conn.commit()
@@ -449,6 +475,53 @@ def return_db_connection(conn):
                 conn.close()
         except:
             pass
+
+# Database compatibility helper functions
+def is_sqlite(conn):
+    """Check if connection is SQLite"""
+    return hasattr(conn, 'row_factory')
+
+def db_placeholder(conn):
+    """Return appropriate placeholder for database type"""
+    return '?' if is_sqlite(conn) else '%s'
+
+def db_now(conn):
+    """Return appropriate NOW function for database type"""
+    return 'CURRENT_TIMESTAMP' if is_sqlite(conn) else 'NOW()'
+
+def db_execute_with_id(conn, cur, query, params=None):
+    """Execute query and return ID, handling RETURNING clause compatibility"""
+    if is_sqlite(conn):
+        # SQLite: remove RETURNING clause and use lastrowid
+        query_clean = query.replace(' RETURNING id', '')
+        if params:
+            cur.execute(query_clean, params)
+        else:
+            cur.execute(query_clean)
+        return cur.lastrowid
+    else:
+        # PostgreSQL: use RETURNING clause
+        if params:
+            cur.execute(query, params)
+        else:
+            cur.execute(query)
+        result = cur.fetchone()
+        return result[0] if result else None
+
+def adapt_sql_for_db(conn, query, params=None):
+    """Adapt SQL query for database type"""
+    if is_sqlite(conn):
+        # Replace %s with ? for SQLite
+        if params and isinstance(params, (list, tuple)):
+            # Count %s occurrences and replace with appropriate number of ?
+            param_count = query.count('%s')
+            if param_count > 0:
+                query = query.replace('%s', '?')
+        # Replace NOW() with CURRENT_TIMESTAMP
+        query = query.replace('NOW()', 'CURRENT_TIMESTAMP')
+        # Replace INTERVAL syntax (basic case)
+        query = query.replace("NOW() + INTERVAL '30 minutes'", "datetime(CURRENT_TIMESTAMP, '+30 minutes')")
+    return query
 
 # Create tables on startup
 def create_tables():
@@ -1319,7 +1392,8 @@ def create_tables():
             for user_row in users_without_codes:
                 import secrets
                 referral_code = secrets.token_urlsafe(8)
-                cur.execute("UPDATE users SET referral_code = %s WHERE id = %s", (referral_code, user_row[0]))
+                placeholder = db_placeholder(conn)
+                cur.execute(f"UPDATE users SET referral_code = {placeholder} WHERE id = {placeholder}", (referral_code, user_row[0]))
 
             # Create admin_settings table
             cur.execute("""
@@ -1706,7 +1780,8 @@ def create_default_admin_if_not_exists(cur, conn):
     """Create default admin account if it doesn't exist"""
     try:
         # Check if default admin exists
-        cur.execute("SELECT id FROM admin_accounts WHERE admin_name = %s", ('admin999',))
+        placeholder = db_placeholder(conn)
+        cur.execute(f"SELECT id FROM admin_accounts WHERE admin_name = {placeholder}", ('admin999',))
         if cur.fetchone():
             print("Default admin 'admin999' already exists")
             return
@@ -1718,7 +1793,7 @@ def create_default_admin_if_not_exists(cur, conn):
 
         cur.execute("""
             INSERT INTO admin_accounts (admin_name, password_hash, is_active, created_at)
-            VALUES (%s, %s, TRUE, NOW())
+            VALUES (%s, %s, TRUE, CURRENT_TIMESTAMP)
         """, (default_admin_name, password_hash))
 
         conn.commit()
@@ -1932,35 +2007,16 @@ def get_user_buds():
         cur = conn.cursor()
 
         # Optimized query with better performance - separate review stats
-        # Check if certificate columns exist first
+        # Simplified query for actual buds table schema
         cur.execute("""
-            SELECT column_name FROM information_schema.columns 
-            WHERE table_name='buds_data' AND column_name IN ('lab_test_name', 'test_type')
-        """)
-        existing_columns = [row[0] for row in cur.fetchall()]
-        has_lab_test = 'lab_test_name' in existing_columns
-        has_test_type = 'test_type' in existing_columns
-
-        if has_lab_test and has_test_type:
-            cur.execute("""
-                SELECT b.id, b.strain_name_en, b.strain_name_th, b.breeder, b.thc_percentage, 
-                       b.cbd_percentage, b.strain_type, b.created_at, b.image_1_url, b.status,
-                       b.lab_test_name, b.test_type
-                FROM buds_data b
-                WHERE b.created_by = %s 
-                ORDER BY b.created_at DESC
-                LIMIT 50
-            """, (user_id,))
-        else:
-            cur.execute("""
-                SELECT b.id, b.strain_name_en, b.strain_name_th, b.breeder, b.thc_percentage, 
-                       b.cbd_percentage, b.strain_type, b.created_at, b.image_1_url, b.status,
-                       NULL as lab_test_name, NULL as test_type
-                FROM buds_data b
-                WHERE b.created_by = %s 
-                ORDER BY b.created_at DESC
-                LIMIT 50
-            """, (user_id,))
+            SELECT b.id, b.name, b.name as strain_name_th, 'Unknown' as breeder, b.thc_content, 
+                   b.cbd_content, b.strain_type, b.created_at, b.image_url, 'active' as status,
+                   NULL as lab_test_name, NULL as test_type
+            FROM buds b
+            WHERE b.created_by = ? 
+            ORDER BY b.created_at DESC
+            LIMIT 50
+        """, (user_id,))
 
         bud_rows = cur.fetchall()
 
@@ -1969,16 +2025,18 @@ def get_user_buds():
         review_stats = {}
 
         if bud_ids:
-            cur.execute("""
-                SELECT bud_reference_id, 
-                       COALESCE(AVG(overall_rating), 0) as avg_rating,
+            # Create placeholders for IN clause (SQLite compatible)
+            placeholders = ','.join('?' * len(bud_ids))
+            cur.execute(f"""
+                SELECT bud_id, 
+                       COALESCE(AVG(rating), 0) as avg_rating,
                        COUNT(id) as review_count
                 FROM reviews 
-                WHERE bud_reference_id = ANY(%s)
-                GROUP BY bud_reference_id
-            """, (bud_ids,))
+                WHERE bud_id IN ({placeholders})
+                GROUP BY bud_id
+            """, bud_ids)
 
-        for stats_row in cur.fetchall():
+            for stats_row in cur.fetchall():
                 review_stats[stats_row[0]] = {
                     'avg_rating': float(stats_row[1]),
                     'review_count': stats_row[2]
@@ -1997,7 +2055,7 @@ def get_user_buds():
                 'thc_percentage': float(row[4]) if row[4] else None,
                 'cbd_percentage': float(row[5]) if row[5] else None,
                 'strain_type': row[6],
-                'created_at': row[7].strftime('%Y-%m-%d %H:%M:%S') if row[7] else None,
+                'created_at': row[7].strftime('%Y-%m-%d %H:%M:%S') if row[7] and hasattr(row[7], 'strftime') else str(row[7]) if row[7] else None,
                 'image_1_url': f'/uploads/{row[8].split("/")[-1]}' if row[8] else None,
                 'status': row[9] or 'available',
                 'avg_rating': stats['avg_rating'],
@@ -2060,7 +2118,7 @@ def get_user_reviews():
             FROM reviews r
             JOIN buds_data b ON r.bud_reference_id = b.id
             JOIN users u ON r.reviewer_id = u.id
-            WHERE r.reviewer_id = %s 
+            WHERE r.reviewer_id = ? 
             ORDER BY r.created_at DESC
             LIMIT 50
         """, (user_id,))
@@ -2228,7 +2286,7 @@ def login():
         cur.execute("""
             SELECT id, username, email, is_verified, password_hash
             FROM users 
-            WHERE email = %s
+            WHERE email = ?
         """, (email,))
 
         user = cur.fetchone()
@@ -2507,7 +2565,7 @@ def reset_password():
                 SELECT pr.user_id, u.username, u.email
                 FROM password_resets pr
                 JOIN users u ON pr.user_id = u.id
-                WHERE pr.token = %s AND pr.expires_at > NOW() AND pr.is_used = FALSE
+                WHERE pr.token = ? AND pr.expires_at > CURRENT_TIMESTAMP AND pr.is_used = FALSE
             """, (token,))
 
             result = cur.fetchone()
@@ -2523,10 +2581,12 @@ def reset_password():
             password_hash = hash_password(new_password)
 
             # Update password
-            cur.execute("UPDATE users SET password_hash = %s WHERE id = %s", (password_hash, user_id))
+            placeholder = db_placeholder(conn)
+            cur.execute(f"UPDATE users SET password_hash = {placeholder} WHERE id = {placeholder}", (password_hash, user_id))
 
             # Mark token as used
-            cur.execute("UPDATE password_resets SET is_used = TRUE WHERE token = %s", (token,))
+            placeholder = db_placeholder(conn)
+            cur.execute(f"UPDATE password_resets SET is_used = TRUE WHERE token = {placeholder}", (token,))
 
             conn.commit()
 
@@ -2701,7 +2761,7 @@ def oauth2callback():
                     cur.execute("""
                         INSERT INTO users (username, email, password_hash, is_consumer, is_verified, 
                                          referral_code, is_approved, created_at)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s, NOW())
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
                         RETURNING id
                     """, (username, email, '', True, True, referral_code, True))
 
@@ -2755,7 +2815,7 @@ def verify_email(token):
                 SELECT ev.user_id, u.username, u.email 
                 FROM email_verifications ev
                 JOIN users u ON ev.user_id = u.id
-                WHERE ev.token = %s AND ev.expires_at > NOW() AND ev.is_used = FALSE
+                WHERE ev.token = ? AND ev.expires_at > CURRENT_TIMESTAMP AND ev.is_used = FALSE
             """, (token,))
 
             result = cur.fetchone()
@@ -2763,8 +2823,10 @@ def verify_email(token):
                 user_id, username, email = result
 
                 # Mark token as used and user as verified
-                cur.execute("UPDATE email_verifications SET is_used = TRUE WHERE token = %s", (token,))
-                cur.execute("UPDATE users SET is_verified = TRUE WHERE id = %s", (user_id,))
+                placeholder = db_placeholder(conn)
+                cur.execute(f"UPDATE email_verifications SET is_used = TRUE WHERE token = {placeholder}", (token,))
+                placeholder = db_placeholder(conn)
+                cur.execute(f"UPDATE users SET is_verified = TRUE WHERE id = {placeholder}", (user_id,))
                 conn.commit()
 
                 return f"""
@@ -4263,10 +4325,10 @@ def update_review(review_id):
 
             cur.execute("""
                 UPDATE reviews SET
-                    overall_rating = %s, aroma_flavors = %s, aroma_rating = %s,
-                    selected_effects = %s, short_summary = %s, full_review_content = %s,
-                    review_images = %s, video_review_url = %s, updated_at = CURRENT_TIMESTAMP
-                WHERE id = %s
+                    overall_rating = ?, aroma_flavors = ?, aroma_rating = ?,
+                    selected_effects = ?, short_summary = ?, full_review_content = ?,
+                    review_images = ?, video_review_url = ?, updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
             """, (
                 data.get('overall_rating'),
                 data.get('aroma_flavors', []),
@@ -4349,12 +4411,23 @@ def get_all_buds_report():
             return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้', 'buds': []}), 503
         cur = conn.cursor()
 
-        # Check if certificate columns exist first
-        cur.execute("""
-            SELECT column_name FROM information_schema.columns 
-            WHERE table_name='buds_data' AND column_name IN ('lab_test_name', 'test_type')
-        """)
-        existing_columns = [row[0] for row in cur.fetchall()]
+        # Check if certificate columns exist first (Postgres + SQLite)
+        try:
+            cur.execute("""
+                SELECT column_name FROM information_schema.columns 
+                WHERE table_name='buds_data' AND column_name IN ('lab_test_name', 'test_type')
+            """)
+            existing_columns = [row[0] for row in cur.fetchall()]
+        except Exception:
+            cur.execute("PRAGMA table_info(buds_data)")
+            rows = cur.fetchall()
+            col_names = []
+            for r in rows:
+                try:
+                    col_names.append(r['name'])
+                except Exception:
+                    col_names.append(r[1])
+            existing_columns = col_names
         has_lab_test = 'lab_test_name' in existing_columns
         has_test_type = 'test_type' in existing_columns
 
@@ -4524,12 +4597,23 @@ def get_bud_info(bud_id):
 
         cur = conn.cursor()
 
-        # Check if certificate columns exist first
-        cur.execute("""
-            SELECT column_name FROM information_schema.columns 
-            WHERE table_name='buds_data' AND column_name IN ('lab_test_name', 'test_type')
-        """)
-        existing_columns = [row[0] for row in cur.fetchall()]
+        # Check if certificate columns exist first (Postgres + SQLite)
+        try:
+            cur.execute("""
+                SELECT column_name FROM information_schema.columns 
+                WHERE table_name='buds_data' AND column_name IN ('lab_test_name', 'test_type')
+            """)
+            existing_columns = [row[0] for row in cur.fetchall()]
+        except Exception:
+            cur.execute("PRAGMA table_info(buds_data)")
+            rows = cur.fetchall()
+            col_names = []
+            for r in rows:
+                try:
+                    col_names.append(r['name'])
+                except Exception:
+                    col_names.append(r[1])
+            existing_columns = col_names
         has_lab_test = 'lab_test_name' in existing_columns
         has_test_type = 'test_type' in existing_columns
 
@@ -5279,7 +5363,8 @@ def admin_delete_activity(activity_id):
                 return jsonify({'error': 'ไม่พบกิจกรรมนี้'}), 404
 
             # Delete activity (CASCADE will handle participants)
-            cur.execute("DELETE FROM activities WHERE id = %s", (activity_id,))
+            placeholder = db_placeholder(conn)
+            cur.execute(f"DELETE FROM activities WHERE id = {placeholder}", (activity_id,))
             conn.commit()
 
             return jsonify({
@@ -5371,7 +5456,7 @@ def is_admin():
             cur = conn.cursor()
             cur.execute("""
                 SELECT admin_name FROM admin_accounts 
-                WHERE session_token = %s AND token_expires > NOW() AND is_active = TRUE
+                WHERE session_token = ? AND token_expires > CURRENT_TIMESTAMP AND is_active = TRUE
             """, (admin_token,))
             result = cur.fetchone()
             cur.close()
@@ -5399,7 +5484,8 @@ def create_admin_account(admin_name, password, created_by_user_id=None):
             cur = conn.cursor()
 
             # Check if admin already exists
-            cur.execute("SELECT id FROM admin_accounts WHERE admin_name = %s", (admin_name,))
+            placeholder = db_placeholder(conn)
+            cur.execute(f"SELECT id FROM admin_accounts WHERE admin_name = {placeholder}", (admin_name,))
             if cur.fetchone():
                 return False, "ชื่อ Admin นี้มีอยู่แล้ว"
 
@@ -5454,7 +5540,7 @@ def verify_admin_login(admin_name, password, ip_address=None, user_agent=None):
             # Check if admin exists in database
             cur.execute("""
                 SELECT admin_name, password_hash, login_attempts, locked_until FROM admin_accounts 
-                WHERE admin_name = %s
+                WHERE admin_name = ?
             """, (admin_name,))
 
             admin_record = cur.fetchone()
@@ -5479,7 +5565,7 @@ def verify_admin_login(admin_name, password, ip_address=None, user_agent=None):
                         UPDATE admin_accounts SET 
                             session_token = %s,
                             token_expires = %s,
-                            last_login = NOW(),
+                            last_login = CURRENT_TIMESTAMP,
                             login_attempts = 0,
                             locked_until = NULL
                         WHERE admin_name = %s
@@ -5499,10 +5585,10 @@ def verify_admin_login(admin_name, password, ip_address=None, user_agent=None):
                         UPDATE admin_accounts SET 
                             login_attempts = login_attempts + 1,
                             locked_until = CASE 
-                                WHEN login_attempts + 1 >= 5 THEN NOW() + INTERVAL '30 minutes'
+                                WHEN login_attempts + 1 >= 5 THEN datetime(CURRENT_TIMESTAMP, '+30 minutes')
                                 ELSE NULL 
                             END
-                        WHERE admin_name = %s
+                        WHERE admin_name = ?
                     """, (admin_name,))
 
                     conn.commit()
@@ -5539,7 +5625,7 @@ def log_admin_activity(admin_name, action, success=True, ip_address=None, user_a
             cur = conn.cursor()
             cur.execute("""
                 INSERT INTO admin_activity_logs (admin_name, action, ip_address, user_agent, success, details)
-                VALUES (%s, %s, %s, %s, %s, %s)
+                VALUES (?, ?, ?, ?, ?, ?)
             """, (admin_name, action, ip_address, user_agent, success, details))
             conn.commit()
             cur.close()
@@ -5601,8 +5687,13 @@ def fallback_login():
     }
 
     if email in fallback_accounts and password == fallback_accounts[email]:
-        # Create temporary session for fallback user
-        session['user_id'] = 999  # Special fallback user ID
+        # Create temporary session for fallback user - use actual user ID from database
+        fallback_user_ids = {
+            'dev@budtboy.com': 1,    # Maps to john_doe
+            'test@budtboy.com': 2,   # Maps to mary_jane  
+            'admin@budtboy.com': 3   # Maps to green_thumb
+        }
+        session['user_id'] = fallback_user_ids.get(email, 1)  # Default to user 1
         session['username'] = email.split('@')[0].title()
         session['email'] = email
         session['fallback_mode'] = True
@@ -5619,11 +5710,13 @@ def fallback_login():
             cur = None
             try:
                 cur = conn.cursor()
-                cur.execute("""
+                placeholder = db_placeholder(conn)
+                query = f"""
                     SELECT id, username, email, password_hash
                     FROM users 
-                    WHERE email = %s
-                """, (email,))
+                    WHERE email = {placeholder}
+                """
+                cur.execute(query, (email,))
 
                 user = cur.fetchone()
                 if user and verify_password(password, user[3]):
@@ -5691,7 +5784,8 @@ def fallback_signup():
             cur = conn.cursor()
 
             # Check if user exists
-            cur.execute("SELECT id FROM users WHERE username = %s OR email = %s", (username, email))
+            placeholder = db_placeholder(conn)
+            cur.execute(f"SELECT id FROM users WHERE username = {placeholder} OR email = {placeholder}", (username, email))
             if cur.fetchone():
                 return jsonify({
                     'success': False,
@@ -5703,13 +5797,12 @@ def fallback_signup():
             new_referral_code = secrets.token_urlsafe(8)
 
             # Create user - อนุมัติทันที
-            cur.execute("""
+            insert_query = f"""
                 INSERT INTO users (username, email, password_hash, is_consumer, is_verified, referral_code, is_approved)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                VALUES ({placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder})
                 RETURNING id
-            """, (username, email, password_hash, True, True, new_referral_code, True))
-
-            user_id = cur.fetchone()[0]
+            """
+            user_id = db_execute_with_id(conn, cur, insert_query, (username, email, password_hash, True, True, new_referral_code, True))
             conn.commit()
 
             # Auto login

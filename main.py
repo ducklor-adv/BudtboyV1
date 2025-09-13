@@ -2662,6 +2662,34 @@ def get_profile():
         return jsonify({'error': 'ไม่ได้เข้าสู่ระบบ'}), 401
 
     user_id = session['user_id']
+    
+    # Handle fallback mode users (Preview Mode)
+    if user_id == 999 and session.get('fallback_mode'):
+        fallback_data = {
+            'id': 999,
+            'username': session.get('username', 'Preview User'),
+            'email': session.get('email', 'preview@budtboy.com'),
+            'is_grower': True,
+            'is_budtender': True,
+            'is_consumer': True,
+            'birth_year': 2000,
+            'created_at': '2025-09-13 00:00:00',
+            'is_verified': True,
+            'grow_license_file_url': None,
+            'profile_image_url': '/attached_assets/budtboy_logo_20250907_064050.jpg',
+            'contact_facebook': None,
+            'contact_line': None,
+            'contact_instagram': None,
+            'contact_twitter': None,
+            'contact_telegram': None,
+            'contact_phone': None,
+            'contact_other': None,
+            'is_approved': True,
+            'referred_by': None,
+            'fallback_mode': True
+        }
+        return jsonify(fallback_data)
+    
     cache_key = f"profile_{user_id}"
 
     # Check cache first with longer TTL for profile data

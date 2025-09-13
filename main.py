@@ -3284,18 +3284,16 @@ def get_profile():
                 response = jsonify({'error': 'ผู้ใช้ไม่มีอยู่ในระบบ กรุณาเข้าสู่ระบบใหม่', 'logout': True})
                 response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate'
                 response.headers['Pragma'] = 'no-cache'
-                cur.close()
-                return_db_connection(conn)
+                # Don't close here - let finally block handle it
                 return response, 401
             
             # User exists, now check cache
             cached_data = get_cache(cache_key, PROFILE_CACHE_TTL)
             if cached_data:
-                cur.close()
-                return_db_connection(conn)
                 response = jsonify(cached_data)
                 response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate'
                 response.headers['Pragma'] = 'no-cache'
+                # Don't close here - let finally block handle it
                 return response
 
             # Use proper query adaptation for SQLite vs PostgreSQL

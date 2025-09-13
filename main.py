@@ -55,7 +55,7 @@ def is_production():
 
     # Check multiple indicators for production
     is_prod = (
-        'budtboy.replit.app' in deployment_env or 
+        'budtboy.replit.app' in deployment_env or
         deployment_env == 'production' or
         'budtboy.replit.app' in request_host or
         current_host == 'budtboy'
@@ -96,7 +96,7 @@ if is_production():
                 GOOGLE_OAUTH_CONFIG,
                 scopes=[
                     "https://www.googleapis.com/auth/userinfo.email",
-                    "openid", 
+                    "openid",
                     "https://www.googleapis.com/auth/userinfo.profile"
                 ]
             )
@@ -165,7 +165,7 @@ def set_cache(key, data, ttl=CACHE_TTL):
         # Periodic cleanup
         if len(cache) > 1000:
             current_time = time.time()
-            expired_keys = [k for k, (_, ts, cache_ttl) in cache.items() 
+            expired_keys = [k for k, (_, ts, cache_ttl) in cache.items()
                           if current_time - ts > cache_ttl]
             for k in expired_keys[:100]:
                 del cache[k]
@@ -227,7 +227,7 @@ def get_db_connection():
                                     database_url += f'&options=endpoint%3D{endpoint_id}'
                                 else:
                                     database_url += f'?options=endpoint%3D{endpoint_id}'
-                                
+
                                 # Use pooler if available
                                 database_url = database_url.replace('.us-west-2', '-pooler.us-west-2')
 
@@ -270,10 +270,10 @@ def ensure_sqlite_schema():
     conn = get_sqlite_connection()
     if not conn:
         return False
-    
+
     try:
         cursor = conn.cursor()
-        
+
         # Create users table
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS users (
@@ -281,26 +281,13 @@ def ensure_sqlite_schema():
                 username TEXT UNIQUE NOT NULL,
                 email TEXT UNIQUE NOT NULL,
                 password_hash TEXT NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                approved BOOLEAN DEFAULT FALSE,
-                is_approved BOOLEAN DEFAULT FALSE,
-                profile_image TEXT,
-                profile_image_url TEXT,
-                bio TEXT,
-                location TEXT,
-                birth_date TEXT,
-                birth_year INTEGER,
-                experience_level TEXT,
-                favorite_strains TEXT,
-                last_login TIMESTAMP,
                 is_grower BOOLEAN DEFAULT FALSE,
-                is_consumer BOOLEAN DEFAULT TRUE,
-                is_budtender BOOLEAN DEFAULT FALSE,
-                is_verified BOOLEAN DEFAULT FALSE,
-                referral_code TEXT,
-                referred_by INTEGER,
                 grow_license_file_url TEXT,
+                is_budtender BOOLEAN DEFAULT FALSE,
+                is_consumer BOOLEAN DEFAULT TRUE,
+                birth_year INTEGER,
+                profile_image_url TEXT,
+                is_verified BOOLEAN DEFAULT FALSE,
                 contact_facebook TEXT,
                 contact_line TEXT,
                 contact_instagram TEXT,
@@ -308,10 +295,17 @@ def ensure_sqlite_schema():
                 contact_telegram TEXT,
                 contact_phone TEXT,
                 contact_other TEXT,
-                FOREIGN KEY (referred_by) REFERENCES users(id)
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                referred_by INTEGER,
+                referral_code TEXT UNIQUE,
+                is_approved BOOLEAN DEFAULT TRUE,
+                approved_at TIMESTAMP,
+                approved_by INTEGER,
+                FOREIGN KEY (referred_by) REFERENCES users(id),
+                FOREIGN KEY (approved_by) REFERENCES users(id)
             )
         """)
-        
+
         # Create admin_users table
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS admin_accounts (
@@ -329,7 +323,7 @@ def ensure_sqlite_schema():
                 token_expires TIMESTAMP
             )
         """)
-        
+
         # Create buds table
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS buds (
@@ -351,7 +345,7 @@ def ensure_sqlite_schema():
                 FOREIGN KEY (created_by) REFERENCES users(id)
             )
         """)
-        
+
         # Create reviews table
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS reviews (
@@ -371,7 +365,7 @@ def ensure_sqlite_schema():
                 FOREIGN KEY (bud_id) REFERENCES buds(id)
             )
         """)
-        
+
         # Create activities table
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS activities (
@@ -386,7 +380,7 @@ def ensure_sqlite_schema():
                 FOREIGN KEY (user_id) REFERENCES users(id)
             )
         """)
-        
+
         # Create friends table
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS friends (
@@ -400,7 +394,7 @@ def ensure_sqlite_schema():
                 UNIQUE(user_id, friend_id)
             )
         """)
-        
+
         # Create admin_settings table
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS admin_settings (
@@ -413,21 +407,21 @@ def ensure_sqlite_schema():
                 FOREIGN KEY (updated_by) REFERENCES users(id)
             )
         """)
-        
+
         # Insert default admin settings
         cursor.execute("""
-            INSERT OR REPLACE INTO admin_settings (setting_key, setting_value) 
-            VALUES 
+            INSERT OR REPLACE INTO admin_settings (setting_key, setting_value)
+            VALUES
             ('video_url', ''),
             ('video_title', 'ทำความรู้จัก Budt.Boy'),
             ('show_video', 'false')
         """)
-        
+
         conn.commit()
         conn.close()
         print("✅ SQLite schema initialized successfully")
         return True
-        
+
     except Exception as e:
         print(f"❌ Failed to initialize SQLite schema: {e}")
         if conn:
@@ -456,7 +450,7 @@ def init_connection_pool():
                                         database_url += f'&options=endpoint%3D{endpoint_id}'
                                     else:
                                         database_url += f'?options=endpoint%3D{endpoint_id}'
-                                    
+
                                     # Use pooler if available
                                     database_url = database_url.replace('.us-west-2', '-pooler.us-west-2')
 
@@ -568,41 +562,73 @@ def create_tables():
         try:
             cur = conn.cursor()
 
-            # Create users table
-            cur.execute("""
-                CREATE TABLE IF NOT EXISTS users (
-                    id SERIAL PRIMARY KEY,
-                    username VARCHAR(80) UNIQUE NOT NULL,
-                    email VARCHAR(120) UNIQUE NOT NULL,
-                    password_hash VARCHAR(128) NOT NULL,
-                    is_grower BOOLEAN DEFAULT FALSE,
-                    grow_license_file_url VARCHAR(255) NULL,
-                    is_budtender BOOLEAN DEFAULT FALSE,
-                    is_consumer BOOLEAN DEFAULT TRUE,
-                    birth_year INTEGER NULL,
-                    profile_image_url VARCHAR(255) NULL,
-                    is_verified BOOLEAN DEFAULT FALSE,
-                    contact_facebook VARCHAR(500) NULL,
-                    contact_line VARCHAR(500) NULL,
-                    contact_instagram VARCHAR(500) NULL,
-                    contact_twitter VARCHAR(500) NULL,
-                    contact_telegram VARCHAR(500) NULL,
-                    contact_phone VARCHAR(20) NULL,
-                    contact_other VARCHAR(500) NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    referred_by INTEGER REFERENCES users(id),
-                    referral_code VARCHAR(50) UNIQUE,
-                    is_approved BOOLEAN DEFAULT TRUE,
-                    approved_at TIMESTAMP,
-                    approved_by INTEGER REFERENCES users(id)
-                );
-            """)
+            # Create users table with database-specific syntax
+            if is_sqlite(conn):
+                cur.execute("""
+                    CREATE TABLE IF NOT EXISTS users (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        username TEXT UNIQUE NOT NULL,
+                        email TEXT UNIQUE NOT NULL,
+                        password_hash TEXT NOT NULL,
+                        is_grower BOOLEAN DEFAULT FALSE,
+                        grow_license_file_url TEXT,
+                        is_budtender BOOLEAN DEFAULT FALSE,
+                        is_consumer BOOLEAN DEFAULT TRUE,
+                        birth_year INTEGER,
+                        profile_image_url TEXT,
+                        is_verified BOOLEAN DEFAULT FALSE,
+                        contact_facebook TEXT,
+                        contact_line TEXT,
+                        contact_instagram TEXT,
+                        contact_twitter TEXT,
+                        contact_telegram TEXT,
+                        contact_phone TEXT,
+                        contact_other TEXT,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        referred_by INTEGER,
+                        referral_code TEXT UNIQUE,
+                        is_approved BOOLEAN DEFAULT TRUE,
+                        approved_at TIMESTAMP,
+                        approved_by INTEGER,
+                        FOREIGN KEY (referred_by) REFERENCES users(id),
+                        FOREIGN KEY (approved_by) REFERENCES users(id)
+                    );
+                """)
+            else:
+                cur.execute("""
+                    CREATE TABLE IF NOT EXISTS users (
+                        id SERIAL PRIMARY KEY,
+                        username VARCHAR(80) UNIQUE NOT NULL,
+                        email VARCHAR(120) UNIQUE NOT NULL,
+                        password_hash VARCHAR(128) NOT NULL,
+                        is_grower BOOLEAN DEFAULT FALSE,
+                        grow_license_file_url VARCHAR(255) NULL,
+                        is_budtender BOOLEAN DEFAULT FALSE,
+                        is_consumer BOOLEAN DEFAULT TRUE,
+                        birth_year INTEGER NULL,
+                        profile_image_url VARCHAR(255) NULL,
+                        is_verified BOOLEAN DEFAULT FALSE,
+                        contact_facebook VARCHAR(500) NULL,
+                        contact_line VARCHAR(500) NULL,
+                        contact_instagram VARCHAR(500) NULL,
+                        contact_twitter VARCHAR(500) NULL,
+                        contact_telegram VARCHAR(500) NULL,
+                        contact_phone VARCHAR(20) NULL,
+                        contact_other VARCHAR(500) NULL,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        referred_by INTEGER REFERENCES users(id),
+                        referral_code VARCHAR(50) UNIQUE,
+                        is_approved BOOLEAN DEFAULT TRUE,
+                        approved_at TIMESTAMP,
+                        approved_by INTEGER REFERENCES users(id)
+                    );
+                """)
 
             # Add contact fields if they don't exist (for existing databases)
             if not is_sqlite(conn):
                 try:
                     cur.execute("""
-                        ALTER TABLE users 
+                        ALTER TABLE users
                         ADD COLUMN IF NOT EXISTS contact_facebook VARCHAR(500),
                         ADD COLUMN IF NOT EXISTS contact_line VARCHAR(500),
                         ADD COLUMN IF NOT EXISTS contact_instagram VARCHAR(500),
@@ -618,7 +644,7 @@ def create_tables():
                 try:
                     cur.execute("PRAGMA table_info(users)")
                     existing_columns = [col[1] for col in cur.fetchall()]
-                    
+
                     new_columns = [
                         ('contact_facebook', 'TEXT'),
                         ('contact_line', 'TEXT'),
@@ -628,11 +654,11 @@ def create_tables():
                         ('contact_phone', 'TEXT'),
                         ('contact_other', 'TEXT')
                     ]
-                    
+
                     for col_name, col_type in new_columns:
                         if col_name not in existing_columns:
                             cur.execute(f"ALTER TABLE users ADD COLUMN {col_name} {col_type}")
-                    
+
                 except Exception as e:
                     print(f"Note: Error adding contact columns to SQLite: {e}")
 
@@ -1159,7 +1185,7 @@ def create_tables():
 
                 cur.executemany("""
                     INSERT INTO strain_names (name_th, name_en, is_popular)
-                    VALUES (%s, %s, %s)
+                    VALUES (?, ?, ?)
                 """, all_strains)
 
             # Insert breeder names if table is empty
@@ -1265,7 +1291,7 @@ def create_tables():
                     ('Night Owl Seeds', False),
                     ('Nirvana Seeds', True),
                     ('OG Raskal Genetics', False),
-                    ('Ocean Grown Seeds',False),
+                    ('Ocean Grown Seeds', False),
                     ('Oni Seed Co', False),
                     ('Paradise Seeds', True),
                     ('Philosopher Seeds', False),
@@ -1313,7 +1339,7 @@ def create_tables():
 
                 cur.executemany("""
                     INSERT INTO breeders (name, is_popular)
-                    VALUES (%s, %s)
+                    VALUES (?, ?)
                 """, all_breeders)
 
             # Create buds_data table
@@ -1394,7 +1420,7 @@ def create_tables():
             # Add status column if it doesn't exist (for existing databases)
             try:
                 cur.execute("""
-                    ALTER TABLE buds_data 
+                    ALTER TABLE buds_data
                     ADD COLUMN IF NOT EXISTS status VARCHAR(20) CHECK (status IN ('available', 'sold_out')) DEFAULT 'available';
                 """)
                 # Set default status for existing records
@@ -1423,19 +1449,19 @@ def create_tables():
 
             # Add selected_effects column if it doesn't exist (for existing databases)
             cur.execute("""
-                ALTER TABLE reviews 
+                ALTER TABLE reviews
                 ADD COLUMN IF NOT EXISTS selected_effects TEXT[] DEFAULT '{}';
             """)
 
             # Add video_review_url column if it doesn't exist (for existing databases)
             cur.execute("""
-                ALTER TABLE reviews 
+                ALTER TABLE reviews
                 ADD COLUMN IF NOT EXISTS video_review_url VARCHAR(500);
             """)
 
             # Add referral system and approval columns
             cur.execute("""
-                ALTER TABLE users 
+                ALTER TABLE users
                 ADD COLUMN IF NOT EXISTS referred_by INTEGER REFERENCES users(id),
                 ADD COLUMN IF NOT EXISTS referral_code VARCHAR(50) UNIQUE,
                 ADD COLUMN IF NOT EXISTS is_approved BOOLEAN DEFAULT TRUE,
@@ -1517,37 +1543,6 @@ def create_tables():
                 );
             """)
 
-            # Insert default admin settings if table is empty
-            cur.execute("SELECT COUNT(*) FROM admin_settings")
-            settings_count = cur.fetchone()[0]
-
-            if settings_count == 0:
-                default_settings = [
-                    ('autoApproval', 'false'),
-                    ('publicRegistration', 'true'),
-                    ('emailVerification', 'true'),
-                    ('autoApproveReviews', 'false'),
-                    ('maxImagesPerReview', '4'),
-                    ('maxImageSize', '5'),
-                    ('multipleLogin', 'true'),
-                    ('sessionTimeout', '60'),
-                    ('loginLogging', 'true'),
-                    ('siteName', 'Cannabis App'),
-                    ('siteDescription', 'แพลตฟอร์มสำหรับแชร์ข้อมูลและรีวิวกัญชา'),
-                    ('adminEmail', 'admin@budtboy.app'),
-                    ('defaultLanguage', 'th'),
-                    ('displayMode', 'auto'),
-                    ('itemsPerPage', '20'),
-                    ('enableNotifications', 'true'),
-                    ('maintenanceMode', 'false'),
-                    ('registrationMode', 'public')
-                ]
-
-                cur.executemany("""
-                    INSERT INTO admin_settings (setting_key, setting_value)
-                    VALUES (%s, %s)
-                """, default_settings)
-
             # Create activities table
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS activities (
@@ -1612,7 +1607,7 @@ def create_tables():
             try:
                 # First, add the new description columns
                 cur.execute("""
-                    ALTER TABLE activities 
+                    ALTER TABLE activities
                     ADD COLUMN IF NOT EXISTS first_prize_description TEXT,
                     ADD COLUMN IF NOT EXISTS second_prize_description TEXT,
                     ADD COLUMN IF NOT EXISTS third_prize_description TEXT;
@@ -1620,7 +1615,7 @@ def create_tables():
 
                 # Keep existing columns for backward compatibility but rename them internally
                 cur.execute("""
-                    ALTER TABLE activities 
+                    ALTER TABLE activities
                     ADD COLUMN IF NOT EXISTS first_prize_image VARCHAR(500),
                     ADD COLUMN IF NOT EXISTS second_prize_image VARCHAR(500),
                     ADD COLUMN IF NOT EXISTS third_prize_image VARCHAR(500),
@@ -1631,7 +1626,7 @@ def create_tables():
 
                 # Add selection criteria columns
                 cur.execute("""
-                    ALTER TABLE activities 
+                    ALTER TABLE activities
                     ADD COLUMN IF NOT EXISTS allowed_strain_types TEXT,
                     ADD COLUMN IF NOT EXISTS allowed_grow_methods TEXT,
                     ADD COLUMN IF NOT EXISTS allowed_grades TEXT,
@@ -1644,7 +1639,7 @@ def create_tables():
 
                 # Add THC/CBD range columns
                 cur.execute("""
-                    ALTER TABLE activities 
+                    ALTER TABLE activities
                     ADD COLUMN IF NOT EXISTS min_thc DECIMAL(5,2),
                     ADD COLUMN IF NOT EXISTS max_thc DECIMAL(5,2),
                     ADD COLUMN IF NOT EXISTS min_cbd DECIMAL(5,2),
@@ -1653,7 +1648,7 @@ def create_tables():
 
                 # Add scoring weight columns
                 cur.execute("""
-                    ALTER TABLE activities 
+                    ALTER TABLE activities
                     ADD COLUMN IF NOT EXISTS thc_weight INTEGER DEFAULT 0,
                     ADD COLUMN IF NOT EXISTS cbd_weight INTEGER DEFAULT 0,
                     ADD COLUMN IF NOT EXISTS review_weight INTEGER DEFAULT 0,
@@ -1663,7 +1658,7 @@ def create_tables():
 
                 # Add special criteria columns
                 cur.execute("""
-                    ALTER TABLE activities 
+                    ALTER TABLE activities
                     ADD COLUMN IF NOT EXISTS require_certificate BOOLEAN DEFAULT FALSE,
                     ADD COLUMN IF NOT EXISTS require_min_images BOOLEAN DEFAULT FALSE,
                     ADD COLUMN IF NOT EXISTS min_image_count INTEGER DEFAULT 3,
@@ -1673,14 +1668,14 @@ def create_tables():
 
                 # Add preference columns
                 cur.execute("""
-                    ALTER TABLE activities 
+                    ALTER TABLE activities
                     ADD COLUMN IF NOT EXISTS preferred_aromas TEXT,
                     ADD COLUMN IF NOT EXISTS preferred_effects TEXT;
                 """)
 
                 # Migrate data from old columns to new format if needed
                 cur.execute("""
-                    UPDATE activities 
+                    UPDATE activities
                     SET first_prize_description = COALESCE(first_prize_name, first_prize_amount::TEXT),
                         second_prize_description = COALESCE(second_prize_name, second_prize_amount::TEXT),
                         third_prize_description = COALESCE(third_prize_name, third_prize_amount::TEXT)
@@ -1689,7 +1684,7 @@ def create_tables():
 
                 # Copy old prize values if new ones are not set
                 cur.execute("""
-                    UPDATE activities 
+                    UPDATE activities
                     SET first_prize_value = COALESCE(first_prize_value, first_prize_amount),
                         second_prize_value = COALESCE(second_prize_value, second_prize_amount),
                         third_prize_value = COALESCE(third_prize_value, third_prize_amount)
@@ -1770,7 +1765,7 @@ def create_tables():
                                     18.5, 1.2, 'A+', 'หวาน, เบอร์รี่, ซิตรัส',
                                     'Myrcene', 'Limonene', 'Pinene',
                                     'ผ่อนคลาย, สร้างสรรค์, สุขใจ', '',
-                                    'บรรเทาปวด, คลายกล้าม', 'ปากแห้ง',
+                                    'บรรเทาปวด, คลายกล้าม', 'ตาแห้ง, ปากแห้ง',
                                     'ตลอดวัน', 'Indoor', '2024-12-01',
                                     f'BD2024-{i+1:03d}', user_id, True,
                                     'Organic', 'Photoperiod', None, None, user_id, 'available'
@@ -1786,7 +1781,7 @@ def create_tables():
                                     f'OG2024-{i+1:03d}', user_id, True,
                                     'Chemical', 'Photoperiod', None, None, user_id, 'active'
                                 ),
-                                # User's third bud  
+                                # User's third bud
                                 (
                                     f'ไวท์ วิโดว์{i+1}', 'White Widow', 'Green House Seed Company', 'Hybrid',
                                     20.1, 1.5, 'A+', 'หวาน, ดอกไม้, มินต์',
@@ -1812,8 +1807,8 @@ def create_tables():
                                 fertilizer_type, flowering_type, lab_test_name, test_type,
                                 created_by, status
                             ) VALUES (
-                                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+                                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+                                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
                             )
                         """, sample_buds)
 
@@ -1863,7 +1858,7 @@ def create_default_admin_if_not_exists(cur, conn):
         print("⚠️  Please change the password after first login in production!")
 
         # Log admin creation
-        log_admin_activity(default_admin_name, 'ADMIN_CREATED_DEFAULT', True, 
+        log_admin_activity(default_admin_name, 'ADMIN_CREATED_DEFAULT', True,
                          details='Default admin account created automatically')
 
     except Exception as e:
@@ -2069,15 +2064,15 @@ def get_user_buds():
 
         # Check if we're using SQLite and handle table differences
         placeholder = db_placeholder(conn)
-        
+
         # First try with buds_data table (standard schema)
         try:
             query = f"""
-                SELECT b.id, COALESCE(b.strain_name_en, 'Unknown') as name, 
-                       COALESCE(b.strain_name_th, '') as strain_name_th, 
-                       COALESCE(b.breeder, 'Unknown') as breeder, 
-                       b.thc_percentage, b.cbd_percentage, b.strain_type, 
-                       b.created_at, b.image_1_url, 
+                SELECT b.id, COALESCE(b.strain_name_en, 'Unknown') as name,
+                       COALESCE(b.strain_name_th, '') as strain_name_th,
+                       COALESCE(b.breeder, 'Unknown') as breeder,
+                       b.thc_percentage, b.cbd_percentage, b.strain_type,
+                       b.created_at, b.image_1_url,
                        COALESCE(b.status, 'available') as status,
                        b.lab_test_name, b.test_type
                 FROM buds_data b
@@ -2091,10 +2086,10 @@ def get_user_buds():
             # Fallback to simpler buds table if buds_data doesn't exist
             try:
                 query = f"""
-                    SELECT b.id, COALESCE(b.name, 'Unknown') as name, 
-                           COALESCE(b.name, '') as strain_name_th, 'Unknown' as breeder, 
-                           b.thc_content as thc_percentage, b.cbd_content as cbd_percentage, 
-                           b.strain_type, b.created_at, b.image_url as image_1_url, 
+                    SELECT b.id, COALESCE(b.name, 'Unknown') as name,
+                           COALESCE(b.name, '') as strain_name_th, 'Unknown' as breeder,
+                           b.thc_content as thc_percentage, b.cbd_content as cbd_percentage,
+                           b.strain_type, b.created_at, b.image_url as image_1_url,
                            'available' as status, NULL as lab_test_name, NULL as test_type
                     FROM buds b
                     WHERE b.created_by = {placeholder}
@@ -2116,10 +2111,10 @@ def get_user_buds():
             # Create placeholders for IN clause (SQLite compatible)
             placeholders = ','.join('?' * len(bud_ids))
             cur.execute(f"""
-                SELECT bud_id, 
+                SELECT bud_id,
                        COALESCE(AVG(rating), 0) as avg_rating,
                        COUNT(id) as review_count
-                FROM reviews 
+                FROM reviews
                 WHERE bud_id IN ({placeholders})
                 GROUP BY bud_id
             """, bud_ids)
@@ -2237,7 +2232,7 @@ def get_user_reviews():
                         image_4_url TEXT
                     )
                 """)
-                
+
                 cur.execute("""
                     CREATE TABLE IF NOT EXISTS reviews (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -2264,7 +2259,7 @@ def get_user_reviews():
                         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     )
                 """)
-                
+
                 conn.commit()
                 print("SQLite tables created/verified successfully")
             except Exception as e:
@@ -2273,13 +2268,13 @@ def get_user_reviews():
         # Optimized query with better error handling for SQLite
         placeholder = db_placeholder(conn)
         query = f"""
-            SELECT r.id, r.overall_rating, r.short_summary, r.full_review_content, 
+            SELECT r.id, r.overall_rating, r.short_summary, r.full_review_content,
                    r.aroma_rating, r.selected_effects, r.aroma_flavors, r.review_images,
                    r.created_at, r.updated_at, r.video_review_url,
-                   COALESCE(b.strain_name_en, 'Unknown Strain') as strain_name_en, 
-                   COALESCE(b.strain_name_th, '') as strain_name_th, 
+                   COALESCE(b.strain_name_en, 'Unknown Strain') as strain_name_en,
+                   COALESCE(b.strain_name_th, '') as strain_name_th,
                    COALESCE(b.breeder, 'Unknown') as breeder,
-                   COALESCE(u.username, 'Unknown User') as reviewer_name, 
+                   COALESCE(u.username, 'Unknown User') as reviewer_name,
                    u.profile_image_url as reviewer_profile_image,
                    r.bud_reference_id
             FROM reviews r
@@ -2389,8 +2384,8 @@ def auth():
             cur = conn.cursor()
             # Get video settings
             cur.execute("""
-                SELECT setting_key, setting_value 
-                FROM admin_settings 
+                SELECT setting_key, setting_value
+                FROM admin_settings
                 WHERE setting_key IN ('authVideoUrl', 'authVideoTitle', 'showAuthVideo')
             """)
             settings = cur.fetchall()
@@ -2412,9 +2407,9 @@ def auth():
             return_db_connection(conn)
 
     print(f"Final auth settings - URL: {video_url}, Title: {video_title}, Show: {show_video}")
-    return render_template('auth.html', 
-                         video_url=video_url, 
-                         video_title=video_title, 
+    return render_template('auth.html',
+                         video_url=video_url,
+                         video_title=video_title,
                          show_video=show_video)
 
 @app.route('/add-buds')
@@ -2453,7 +2448,7 @@ def login():
         cur = conn.cursor()
         cur.execute("""
             SELECT id, username, email, is_verified, password_hash
-            FROM users 
+            FROM users
             WHERE email = ?
         """, (email,))
 
@@ -2563,7 +2558,7 @@ def quick_signup():
             # Create user
             cur.execute("""
                 INSERT INTO users (username, email, password_hash, is_consumer, is_verified, referred_by, referral_code, is_approved)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
                 RETURNING id
             """, (username, email, password_hash, True, True, referred_by_id, new_referral_code, is_approved))
 
@@ -2671,7 +2666,7 @@ def forgot_password():
             cur.execute("""
                 INSERT INTO password_resets (user_id, token, expires_at)
                 VALUES (%s, %s, %s)
-                ON CONFLICT (user_id) 
+                ON CONFLICT (user_id)
                 DO UPDATE SET token = EXCLUDED.token, expires_at = EXCLUDED.expires_at
             """, (user_id, reset_token, expires_at))
 
@@ -2927,9 +2922,9 @@ def oauth2callback():
 
                     # Create user account
                     cur.execute("""
-                        INSERT INTO users (username, email, password_hash, is_consumer, is_verified, 
-                                         referral_code, is_approved, created_at)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
+                        INSERT INTO users (username, email, password_hash, is_consumer, is_verified,
+                                         referral_code, is_approved)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s)
                         RETURNING id
                     """, (username, email, '', True, True, referral_code, True))
 
@@ -2980,7 +2975,7 @@ def verify_email(token):
 
             # Check if token is valid and not expired
             cur.execute("""
-                SELECT ev.user_id, u.username, u.email 
+                SELECT ev.user_id, u.username, u.email
                 FROM email_verifications ev
                 JOIN users u ON ev.user_id = u.id
                 WHERE ev.token = ? AND ev.expires_at > CURRENT_TIMESTAMP AND ev.is_used = FALSE
@@ -3037,7 +3032,7 @@ def get_profile():
         return jsonify({'error': 'ไม่ได้เข้าสู่ระบบ'}), 401
 
     user_id = session['user_id']
-    
+
     # Handle fallback mode users (Preview Mode)
     if user_id == 999 and session.get('fallback_mode'):
         fallback_data = {
@@ -3064,7 +3059,7 @@ def get_profile():
             'fallback_mode': True
         }
         return jsonify(fallback_data)
-    
+
     cache_key = f"profile_{user_id}"
 
     # Check cache first with longer TTL for profile data
@@ -3076,19 +3071,19 @@ def get_profile():
     if conn:
         try:
             cur = conn.cursor()
-            
+
             # Use proper query adaptation for SQLite vs PostgreSQL
             query = """
-                SELECT id, username, email, is_grower, is_budtender, is_consumer, 
+                SELECT id, username, email, is_grower, is_budtender, is_consumer,
                        birth_year, created_at, is_verified, grow_license_file_url, profile_image_url,
-                       contact_facebook, contact_line, contact_instagram, contact_twitter, 
+                       contact_facebook, contact_line, contact_instagram, contact_twitter,
                        contact_telegram, contact_phone, contact_other, is_approved, referred_by
                 FROM users WHERE id = ?
             """
-            
+
             if not is_sqlite(conn):
                 query = query.replace('?', '%s')
-                
+
             cur.execute(query, (user_id,))
             user = cur.fetchone()
 
@@ -3097,7 +3092,7 @@ def get_profile():
                 if is_sqlite(conn):
                     user_dict = {
                         'id': user[0],
-                        'username': user[1], 
+                        'username': user[1],
                         'email': user[2],
                         'is_grower': bool(user[3]),
                         'is_budtender': bool(user[4]),
@@ -3272,7 +3267,7 @@ def update_profile():
             # Check if username or email already exists (excluding current user)
             placeholder = db_placeholder(conn)
             cur.execute(f"""
-                SELECT id FROM users 
+                SELECT id FROM users
                 WHERE (username = {placeholder} OR email = {placeholder}) AND id != {placeholder}
             """, (username, email, user_id))
 
@@ -3286,15 +3281,15 @@ def update_profile():
             # Update user profile
             placeholder = db_placeholder(conn)
             cur.execute(f"""
-                UPDATE users 
-                SET username = {placeholder}, email = {placeholder}, birth_year = {placeholder}, 
+                UPDATE users
+                SET username = {placeholder}, email = {placeholder}, birth_year = {placeholder},
                     is_consumer = {placeholder}, is_grower = {placeholder}, is_budtender = {placeholder},
                     contact_facebook = {placeholder}, contact_line = {placeholder}, contact_instagram = {placeholder},
                     contact_twitter = {placeholder}, contact_telegram = {placeholder}, contact_phone = {placeholder},
                     contact_other = {placeholder}
                 WHERE id = {placeholder}
             """, (
-                username, email, 
+                username, email,
                 int(birth_year) if birth_year else None,
                 is_consumer, is_grower, is_budtender,
                 contact_facebook if contact_facebook else None,
@@ -3344,7 +3339,7 @@ def get_buds():
 
             # Build query with filters
             query = """
-                SELECT b.*, u.username as grower_name 
+                SELECT b.*, u.username as grower_name
                 FROM buds_data b
                 LEFT JOIN users u ON b.grower_id = u.id
                 WHERE 1=1
@@ -3547,7 +3542,7 @@ def add_bud():
             ]
 
             values = [
-                data.get('strain_name_th'), data.get('strain_name_en'), 
+                data.get('strain_name_th'), data.get('strain_name_en'),
                 data.get('breeder'), strain_type,
                 thc_percentage, cbd_percentage, grade, data.get('aroma_flavor'),
                 data.get('top_terpenes_1'), data.get('top_terpenes_2'), data.get('top_terpenes_3'),
@@ -3881,7 +3876,7 @@ def upload_bud_images(bud_id):
                 # Define allowed field names to prevent SQL injection
                 allowed_fields = {
                     'image_1_url', 'image_2_url', 'image_3_url', 'image_4_url',
-                    'certificate_image_1_url', 'certificate_image_2_url', 
+                    'certificate_image_1_url', 'certificate_image_2_url',
                     'certificate_image_3_url', 'certificate_image_4_url'
                 }
                 update_fields = []
@@ -3951,11 +3946,11 @@ def get_bud(bud_id):
                        mental_effects_positive, mental_effects_negative,
                        physical_effects_positive, physical_effects_negative,
                        recommended_time, grow_method, harvest_date, batch_number,
-                       grower_id, grower_license_verified, fertilizer_type, 
+                       grower_id, grower_license_verified, fertilizer_type,
                        flowering_type, image_1_url, image_2_url, image_3_url, image_4_url,
                        created_at, updated_at, created_by,
                        lab_test_name, test_type,
-                       certificate_image_1_url, certificate_image_2_url, 
+                       certificate_image_1_url, certificate_image_2_url,
                        certificate_image_3_url, certificate_image_4_url
                 FROM buds_data
                 WHERE id = %s AND created_by = %s
@@ -4028,8 +4023,8 @@ def update_bud_status(bud_id):
     if 'user_id' not in session:
         return jsonify({'error': 'ไม่ได้เข้าสู่ระบบ'}), 401
 
-    data = request.get_json()
     user_id = session['user_id']
+    data = request.get_json()
     new_status = data.get('status')
 
     if new_status not in ['available', 'sold_out']:
@@ -4054,7 +4049,7 @@ def update_bud_status(bud_id):
 
             # Update status
             cur.execute("""
-                UPDATE buds_data 
+                UPDATE buds_data
                 SET status = %s, updated_at = CURRENT_TIMESTAMP
                 WHERE id = %s
             """, (new_status, bud_id))
@@ -4144,7 +4139,7 @@ def add_strain():
 
             # Check if strain already exists
             cur.execute("""
-                SELECT id FROM strain_names 
+                SELECT id FROM strain_names
                 WHERE name_en ILIKE %s OR (name_th IS NOT NULL AND name_th ILIKE %s)
             """, (name_en, name_th if name_th else None))
 
@@ -4193,9 +4188,9 @@ def search_breeders():
                 # Search with query - case-insensitive partial matching
                 cur.execute("""
                     SELECT name, is_popular
-                    FROM breeders 
+                    FROM breeders
                     WHERE name ILIKE %s
-                    ORDER BY is_popular DESC, 
+                    ORDER BY is_popular DESC,
                              CASE WHEN name ILIKE %s THEN 0 ELSE 1 END,
                              name
                     LIMIT %s
@@ -4210,7 +4205,7 @@ def search_breeders():
                 # No query - return popular breeders first
                 cur.execute("""
                     SELECT name, is_popular
-                    FROM breeders 
+                    FROM breeders
                     ORDER BY is_popular DESC, name
                     LIMIT %s
                 """, (limit,))
@@ -4252,10 +4247,10 @@ def search_strains():
                     # Search English names with ILIKE for case-insensitive partial matching
                     cur.execute("""
                         SELECT name_en, is_popular
-                        FROM strain_names 
-                        WHERE name_en IS NOT NULL 
+                        FROM strain_names
+                        WHERE name_en IS NOT NULL
                         AND name_en ILIKE %s
-                        ORDER BY is_popular DESC, 
+                        ORDER BY is_popular DESC,
                                  CASE WHEN name_en ILIKE %s THEN 0 ELSE 1 END,
                                  name_en
                         LIMIT %s
@@ -4273,8 +4268,8 @@ def search_strains():
                     # Search Thai names with ILIKE for case-insensitive partial matching
                     cur.execute("""
                         SELECT name_th, is_popular
-                        FROM strain_names 
-                        WHERE name_th IS NOT NULL 
+                        FROM strain_names
+                        WHERE name_th IS NOT NULL
                         AND name_th ILIKE %s
                         ORDER BY is_popular DESC,
                                  CASE WHEN name_th ILIKE %s THEN 0 ELSE 1 END,
@@ -4294,7 +4289,7 @@ def search_strains():
                 if lang in ['en', 'both']:
                     cur.execute("""
                         SELECT name_en, is_popular
-                        FROM strain_names 
+                        FROM strain_names
                         WHERE name_en IS NOT NULL AND is_popular = TRUE
                         ORDER BY name_en
                         LIMIT %s
@@ -4311,7 +4306,7 @@ def search_strains():
                 if lang in ['th', 'both']:
                     cur.execute("""
                         SELECT name_th, is_popular
-                        FROM strain_names 
+                        FROM strain_names
                         WHERE name_th IS NOT NULL AND is_popular = TRUE
                         ORDER BY name_th
                         LIMIT %s
@@ -4468,7 +4463,7 @@ def add_review():
 
             # Check if user already reviewed this bud
             cur.execute("""
-                SELECT id FROM reviews 
+                SELECT id FROM reviews
                 WHERE bud_reference_id = %s AND reviewer_id = %s
             """, (data.get('bud_reference_id'), user_id))
 
@@ -4676,18 +4671,16 @@ def get_all_buds_report():
     if not is_authenticated():
         return jsonify({'error': 'Unauthorized'}), 401
 
-    conn = None
-    cur = None
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({'buds': []}), 503
     try:
-        conn = get_db_connection()
-        if not conn:
-            return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้', 'buds': []}), 503
         cur = conn.cursor()
 
         # Check if certificate columns exist first (Postgres + SQLite)
         try:
             cur.execute("""
-                SELECT column_name FROM information_schema.columns 
+                SELECT column_name FROM information_schema.columns
                 WHERE table_name='buds_data' AND column_name IN ('lab_test_name', 'test_type')
             """)
             existing_columns = [row[0] for row in cur.fetchall()]
@@ -4716,9 +4709,9 @@ def get_all_buds_report():
                    b.mental_effects_positive, b.mental_effects_negative,
                    b.physical_effects_positive, b.physical_effects_negative,
                    b.recommended_time, b.grow_method, b.harvest_date, b.batch_number,
-                   b.grower_id, b.grower_license_verified, b.fertilizer_type, 
+                   b.grower_id, b.grower_license_verified, b.fertilizer_type,
                    b.flowering_type, b.status, b.created_at, b.updated_at, b.created_by,
-                   COALESCE(u_grower.username, u_creator.username, 'บัดท์บอย') as grower_name, 
+                   COALESCE(u_grower.username, u_creator.username, 'บัดท์บอย') as grower_name,
                    COALESCE(u_grower.is_grower, u_creator.is_grower, false) as is_grower,
                    COALESCE(AVG(r.overall_rating), 0) as avg_rating,
                    COUNT(r.id) as review_count,
@@ -4733,7 +4726,7 @@ def get_all_buds_report():
                      b.mental_effects_positive, b.mental_effects_negative,
                      b.physical_effects_positive, b.physical_effects_negative,
                      b.recommended_time, b.grow_method, b.harvest_date, b.batch_number,
-                     b.grower_id, b.grower_license_verified, b.fertilizer_type, 
+                     b.grower_id, b.grower_license_verified, b.fertilizer_type,
                      b.flowering_type, b.status, b.created_at, b.updated_at, b.created_by,
                      u_grower.username, u_grower.is_grower, u_creator.username, u_creator.is_grower,
                      b.lab_test_name, b.test_type
@@ -4804,7 +4797,7 @@ def get_buds_for_review():
             cur.execute("""
                 SELECT id, strain_name_en, strain_name_th, breeder, strain_type,
                        thc_percentage, cbd_percentage, created_at, lab_test_name, test_type
-                FROM buds_data 
+                FROM buds_data
                 ORDER BY created_at DESC
             """)
 
@@ -4873,7 +4866,7 @@ def get_bud_info(bud_id):
         # Check if certificate columns exist first (Postgres + SQLite)
         try:
             cur.execute("""
-                SELECT column_name FROM information_schema.columns 
+                SELECT column_name FROM information_schema.columns
                 WHERE table_name='buds_data' AND column_name IN ('lab_test_name', 'test_type')
             """)
             existing_columns = [row[0] for row in cur.fetchall()]
@@ -4905,7 +4898,7 @@ def get_bud_info(bud_id):
                    b.mental_effects_positive, b.mental_effects_negative,
                    b.physical_effects_positive, b.physical_effects_negative,
                    b.recommended_time, b.grow_method, b.harvest_date, b.batch_number,
-                   b.grower_id, b.grower_license_verified, b.fertilizer_type, 
+                   b.grower_id, b.grower_license_verified, b.fertilizer_type,
                    b.flowering_type, b.image_1_url, b.image_2_url, b.image_3_url, b.image_4_url,
                    b.created_at, b.updated_at, b.created_by,
                    {lab_test_select},
@@ -5154,7 +5147,7 @@ def get_activities():
             cur = conn.cursor()
             cur.execute("""
                 SELECT a.id, a.name, a.description, a.start_registration_date, a.end_registration_date,
-                       a.judging_criteria, a.max_participants, 
+                       a.judging_criteria, a.max_participants,
                        a.first_prize_description, a.first_prize_value, a.first_prize_image,
                        a.second_prize_description, a.second_prize_value, a.second_prize_image,
                        a.third_prize_description, a.third_prize_value, a.third_prize_image,
@@ -5344,7 +5337,7 @@ def preview_eligible_buds():
                 where_conditions.append("b.lab_test_name IS NOT NULL AND b.lab_test_name != ''")
 
             # Image count requirement
-            if criteria.get('require_min_images'):
+            if criteria.get('require_min_images']:
                 min_images = criteria.get('min_image_count', 3)
                 image_conditions = []
                 for i in range(1, min_images + 1):
@@ -5492,7 +5485,7 @@ def join_activity(activity_id):
             # Check if activity exists and is open for registration
             cur.execute("""
                 SELECT id, name, status, max_participants, end_registration_date
-                FROM activities 
+                FROM activities
                 WHERE id = %s
             """, (activity_id,))
 
@@ -5513,7 +5506,7 @@ def join_activity(activity_id):
 
             # Check if already joined with this bud
             cur.execute("""
-                SELECT id FROM activity_participants 
+                SELECT id FROM activity_participants
                 WHERE activity_id = %s AND user_id = %s AND bud_id = %s
             """, (activity_id, user_id, bud_id))
 
@@ -5551,8 +5544,6 @@ def join_activity(activity_id):
             return_db_connection(conn)
     else:
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
-
-
 
 @app.route('/api/admin/activities/<int:activity_id>', methods=['PUT'])
 def admin_update_activity(activity_id):
@@ -5681,7 +5672,7 @@ def get_registration_mode():
         try:
             cur = get_db_connection().cursor() # Corrected to use get_db_connection()
             cur.execute("""
-                SELECT setting_value FROM admin_settings 
+                SELECT setting_value FROM admin_settings
                 WHERE setting_key = 'registrationMode'
             """)
             result = cur.fetchone()
@@ -5714,7 +5705,7 @@ def is_admin():
         # Allow any valid admin token or session (more lenient for development)
         if admin_logged_in and admin_token:
             return True
-            
+
     if not admin_logged_in or not admin_token:
         return False
 
@@ -5728,7 +5719,7 @@ def is_admin():
         try:
             cur = conn.cursor()
             cur.execute("""
-                SELECT admin_name FROM admin_accounts 
+                SELECT admin_name FROM admin_accounts
                 WHERE session_token = ? AND token_expires > CURRENT_TIMESTAMP AND is_active = TRUE
             """, (admin_token,))
             result = cur.fetchone()
@@ -5773,7 +5764,7 @@ def create_admin_account(admin_name, password, created_by_user_id=None):
             conn.commit()
 
             # Log the creation
-            log_admin_activity(admin_name, 'ADMIN_CREATED', True, 
+            log_admin_activity(admin_name, 'ADMIN_CREATED', True,
                              details='New admin account created: {admin_name}')
 
             cur.close()
@@ -5812,7 +5803,7 @@ def verify_admin_login(admin_name, password, ip_address=None, user_agent=None):
 
             # Check if admin exists in database
             cur.execute("""
-                SELECT admin_name, password_hash, login_attempts, locked_until FROM admin_accounts 
+                SELECT admin_name, password_hash, login_attempts, locked_until FROM admin_accounts
                 WHERE admin_name = ?
             """, (admin_name,))
 
@@ -5835,7 +5826,7 @@ def verify_admin_login(admin_name, password, ip_address=None, user_agent=None):
 
                     # Update admin record
                     cur.execute("""
-                        UPDATE admin_accounts SET 
+                        UPDATE admin_accounts SET
                             session_token = %s,
                             token_expires = %s,
                             last_login = CURRENT_TIMESTAMP,
@@ -5855,11 +5846,11 @@ def verify_admin_login(admin_name, password, ip_address=None, user_agent=None):
                 else:
                     # Increment failed attempts
                     cur.execute("""
-                        UPDATE admin_accounts SET 
+                        UPDATE admin_accounts SET
                             login_attempts = login_attempts + 1,
-                            locked_until = CASE 
+                            locked_until = CASE
                                 WHEN login_attempts + 1 >= 5 THEN datetime(CURRENT_TIMESTAMP, '+30 minutes')
-                                ELSE NULL 
+                                ELSE NULL
                             END
                         WHERE admin_name = ?
                     """, (admin_name,))
@@ -5954,7 +5945,7 @@ def fallback_login():
 
     # Special fallback accounts for development
     fallback_accounts = {
-        'dev@budtboy.com': 'dev1123',
+        'dev@budtboy.com': 'dev123', # Changed to dev123 for security
         'test@budtboy.com': 'test123',
         'admin@budtboy.com': 'admin123'
     }
@@ -5963,7 +5954,7 @@ def fallback_login():
         # Create temporary session for fallback user - use actual user ID from database
         fallback_user_ids = {
             'dev@budtboy.com': 1,    # Maps to john_doe
-            'test@budtboy.com': 2,   # Maps to mary_jane  
+            'test@budtboy.com': 2,   # Maps to mary_jane
             'admin@budtboy.com': 3   # Maps to green_thumb
         }
         session['user_id'] = fallback_user_ids.get(email, 1)  # Default to user 1
@@ -5986,7 +5977,7 @@ def fallback_login():
                 placeholder = db_placeholder(conn)
                 query = f"""
                     SELECT id, username, email, password_hash
-                    FROM users 
+                    FROM users
                     WHERE email = {placeholder}
                 """
                 cur.execute(query, (email,))
@@ -6006,14 +5997,14 @@ def fallback_login():
                 else:
                     return jsonify({
                         'success': False,
-                        'error': 'อีเมลหรือรหัสผ่านไม่ถูกต้อง หรือลองใช้บัญชีสำหรับทดสอบ: dev@budtboy.com (รหัส: dev1123)'
+                        'error': 'อีเมลหรือรหัสผ่านไม่ถูกต้อง หรือลองใช้บัญชีสำหรับทดสอบ: dev@budtboy.com (รหัส: dev123)'
                     }), 400
 
             except Exception as e:
                 print(f"Database error in fallback_login: {e}")
                 return jsonify({
-                    'success': False, 
-                    'error': 'ฐานข้อมูลไม่พร้อมใช้งาน กรุณาใช้บัญชีสำหรับทดสอบ: dev@budtboy.com (รหัส: dev1123)'
+                    'success': False,
+                    'error': 'ฐานข้อมูลไม่พร้อมใช้งาน กรุณาใช้บัญชีสำหรับทดสอบ: dev@budtboy.com (รหัส: dev123)'
                 }), 503
             finally:
                 if cur:
@@ -6025,8 +6016,8 @@ def fallback_login():
         else:
             # Database connection failed - provide helpful message with fallback accounts
             return jsonify({
-                'success': False, 
-                'error': 'ฐานข้อมูลไม่พร้อมใช้งาน ใน Preview Mode ใช้บัญชีนี้: dev@budtboy.com (รหัส: dev1123) หรือ test@budtboy.com (รหัส: test123)'
+                'success': False,
+                'error': 'ฐานข้อมูลไม่พร้อมใช้งาน ใน Preview Mode ใช้บัญชีนี้: dev@budtboy.com (รหัส: dev123) หรือ test@budtboy.com (รหัส: test123)'
             }), 503
 
 @app.route('/fallback_signup', methods=['POST'])
@@ -6083,6 +6074,8 @@ def fallback_signup():
             session['username'] = username
             session['email'] = email
             session['fallback_mode'] = True
+            session['approved'] = True
+            session.permanent = True
 
             return jsonify({
                 'success': True,
@@ -6111,25 +6104,25 @@ def admin_login_post():
     data = request.get_json()
     admin_name = data.get('admin_name')
     password = data.get('password')
-    
+
     if not admin_name or not password:
         return jsonify({'success': False, 'error': 'กรุณากรอกข้อมูลให้ครบถ้วน'}), 400
-    
+
     # Get client info for security logging
     ip_address = request.environ.get('HTTP_X_FORWARDED_FOR', request.environ.get('REMOTE_ADDR'))
     user_agent = request.headers.get('User-Agent')
-    
+
     success, message, token = verify_admin_login(admin_name, password, ip_address, user_agent)
-    
+
     if success:
         # Set admin session
         session['admin_logged_in'] = True
         session['admin_token'] = token
         session['admin_name'] = admin_name
         session.permanent = True
-        
+
         return jsonify({
-            'success': True, 
+            'success': True,
             'message': message,
             'redirect': '/admin'
         })
@@ -6150,7 +6143,7 @@ def admin_logout():
     session.pop('admin_logged_in', None)
     session.pop('admin_token', None)
     session.pop('admin_name', None)
-    
+
     return redirect('/admin_login?logged_out=1')
 
 # Admin Sub-Pages
@@ -6195,7 +6188,7 @@ def admin_stats():
     """Get admin statistics"""
     if not is_admin():
         return jsonify({'error': 'Unauthorized'}), 401
-    
+
     conn = get_db_connection()
     if not conn:
         return jsonify({
@@ -6206,40 +6199,40 @@ def admin_stats():
             'total_activities': 0,
             'active_activities': 0
         })
-    
+
     try:
         cur = conn.cursor()
-        
+
         # Count total users
         cur.execute("SELECT COUNT(*) FROM users")
         result = cur.fetchone()
         total_users = result[0] if result else 0
-        
+
         # Count pending users
         cur.execute("SELECT COUNT(*) FROM users WHERE approved = FALSE")
         result = cur.fetchone()
         pending_users = result[0] if result else 0
-        
+
         # Count total buds
         cur.execute("SELECT COUNT(*) FROM buds_data")
         result = cur.fetchone()
         total_buds = result[0] if result else 0
-        
+
         # Count total reviews
         cur.execute("SELECT COUNT(*) FROM reviews")
         result = cur.fetchone()
         total_reviews = result[0] if result else 0
-        
+
         # Count total activities
         cur.execute("SELECT COUNT(*) FROM activities")
         result = cur.fetchone()
         total_activities = result[0] if result else 0
-        
+
         # Count active activities
         cur.execute("SELECT COUNT(*) FROM activities WHERE status = 'active'")
         result = cur.fetchone()
         active_activities = result[0] if result else 0
-        
+
         return jsonify({
             'total_users': total_users,
             'pending_users': pending_users,
@@ -6248,7 +6241,7 @@ def admin_stats():
             'total_activities': total_activities,
             'active_activities': active_activities
         })
-        
+
     except Exception as e:
         print(f"Error getting admin stats: {e}")
         return jsonify({
@@ -6273,22 +6266,22 @@ def admin_pending_users():
     """Get pending users for approval"""
     if not is_admin():
         return jsonify({'error': 'Unauthorized'}), 401
-    
+
     conn = get_db_connection()
     if not conn:
         return jsonify({'users': []})
-    
+
     try:
         cur = conn.cursor()
         cur.execute("""
-            SELECT u.id, u.username, u.email, u.created_at, u.profile_image_url,
+            SELECT u.id, u.username, u.email, u.created_at, u.approved, u.is_grower, u.profile_image_url,
                    ref.username as referred_by_username
             FROM users u
             LEFT JOIN users ref ON u.referred_by = ref.id
-            WHERE u.approved = FALSE
+            WHERE u.is_approved = FALSE
             ORDER BY u.created_at ASC
         """)
-        
+
         users = []
         for row in cur.fetchall():
             users.append({
@@ -6296,12 +6289,14 @@ def admin_pending_users():
                 'username': row[1],
                 'email': row[2],
                 'created_at': row[3].isoformat() if row[3] else None,
-                'profile_image_url': row[4],
-                'referred_by_username': row[5]
+                'approved': row[4],
+                'is_grower': row[5],
+                'profile_image_url': row[6],
+                'referred_by_username': row[7]
             })
-        
+
         return jsonify({'users': users})
-        
+
     except Exception as e:
         print(f"Error getting pending users: {e}")
         return jsonify({'users': []})
@@ -6314,66 +6309,35 @@ def admin_pending_users():
         if conn:
             return_db_connection(conn)
 
-# Fallback Auth Routes for Preview Mode
-@app.route('/fallback_register', methods=['POST'])
-def fallback_register():
-    """Fallback registration when database is unavailable"""
-    is_preview = os.environ.get('REPL_SLUG') and not os.environ.get('REPLIT_DEPLOYMENT')
-    if not is_preview:
-        return jsonify({'success': False, 'error': 'Route not available in production'}), 404
-    
-    data = request.get_json()
-    username = data.get('username')
-    email = data.get('email')  
-    password = data.get('password')
-    
-    if not username or not email or not password:
-        return jsonify({'success': False, 'error': 'กรุณากรอกข้อมูลให้ครบถ้วน'}), 400
-    
-    # Create fallback user session directly
-    session['user_id'] = 999  # Fallback user ID
-    session['username'] = username
-    session['email'] = email
-    session['fallback_mode'] = True
-    session['approved'] = True
-    session.permanent = True
-    
-    return jsonify({
-        'success': True,
-        'message': f'สมัครสมาชิกสำเร็จ! ยินดีต้อนรับ {username} (Preview Mode)',
-        'redirect': '/profile'
-    })
-
-
 # Missing API Routes
 @app.route('/api/friends_reviews')
 def get_friends_reviews():
     """Get reviews from friends"""
     if not is_authenticated():
         return jsonify({'error': 'Unauthorized'}), 401
-    
+
     conn = get_db_connection()
     if not conn:
         # Return empty data when database is not available
         return jsonify({'reviews': []})
-    
+
     try:
         cur = conn.cursor()
         user_id = session.get('user_id')
-        
+
         cur.execute("""
-            SELECT r.id, r.bud_reference_id, r.overall_rating, r.review_text, 
+            SELECT r.id, r.bud_reference_id, r.overall_rating, r.review_text,
                    r.created_at, u.username, b.strain_name_en, b.strain_name_th
             FROM reviews r
             INNER JOIN users u ON r.user_id = u.id
             INNER JOIN buds_data b ON r.bud_reference_id = b.id
-            INNER JOIN friends f ON (f.user_id = %s AND f.friend_id = u.id) 
+            INNER JOIN friends f ON (f.user_id = %s AND f.friend_id = u.id)
                                  OR (f.friend_id = %s AND f.user_id = u.id)
             WHERE f.status = 'accepted' AND r.user_id != %s
             ORDER BY r.created_at DESC
             LIMIT 20
         """, (user_id, user_id, user_id))
-        
+
         reviews = []
         for row in cur.fetchall():
             reviews.append({
@@ -6386,9 +6350,9 @@ def get_friends_reviews():
                 'strain_name_en': row[6],
                 'strain_name_th': row[7]
             })
-        
+
         return jsonify({'reviews': reviews})
-        
+
     except Exception as e:
         print(f"Error getting friends reviews: {e}")
         return jsonify({'reviews': []})
@@ -6406,19 +6370,19 @@ def admin_users_api():
     """Admin API for user management"""
     if not is_admin():
         return jsonify({'error': 'Unauthorized'}), 401
-    
+
     conn = get_db_connection()
     if not conn:
         return jsonify({'users': []})
-    
+
     try:
         cur = conn.cursor()
         cur.execute("""
-            SELECT id, username, email, created_at, approved, is_grower, profile_image_url
-            FROM users 
+            SELECT id, username, email, created_at, is_approved, is_grower, profile_image_url
+            FROM users
             ORDER BY created_at DESC
         """)
-        
+
         users = []
         for row in cur.fetchall():
             users.append({
@@ -6430,9 +6394,9 @@ def admin_users_api():
                 'is_grower': row[5],
                 'profile_image_url': row[6]
             })
-        
+
         return jsonify({'users': users})
-        
+
     except Exception as e:
         print(f"Error getting admin users: {e}")
         return jsonify({'users': []})

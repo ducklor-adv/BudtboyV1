@@ -6436,8 +6436,15 @@ def fallback_signup():
                 INSERT INTO users (username, email, password_hash, is_consumer, is_verified, referral_code, is_approved)
                 VALUES ({placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder})
             """
+            print(f"🔧 DEBUG: Executing insert query for user {username}")
+            print(f"🔧 DEBUG: Query: {insert_query}")
+            print(f"🔧 DEBUG: Params: {(username, email, password_hash, True, True, new_referral_code, True)}")
+            
             user_id = db_execute_with_id(conn, cur, insert_query, (username, email, password_hash, True, True, new_referral_code, True))
+            print(f"🔧 DEBUG: User ID returned: {user_id}")
+            
             conn.commit()
+            print(f"🔧 DEBUG: Database commit completed for user {username}")
 
             # Auto login
             session['user_id'] = user_id

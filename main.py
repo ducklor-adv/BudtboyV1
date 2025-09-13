@@ -3569,10 +3569,13 @@ def upload_profile_image():
                     
                     conn.commit()
                     
+                    # Convert file path to URL
+                    image_url = f"/{file_path}" if not file_path.startswith('/') else file_path
+                    
                     return jsonify({
                         'success': True,
                         'message': 'อัพโหลดรูปโปรไฟล์สำเร็จ',
-                        'image_url': file_path
+                        'profile_image_url': image_url  # ตรงกับที่ Frontend ต้องการ
                     })
                     
                 except Exception as e:

@@ -5424,9 +5424,10 @@ def fallback_login():
             'redirect': '/profile'
         })
     else:
-        # Try regular database authentication
+        # Try regular database authentication if database is available
         conn = get_db_connection()
         if conn:
+            cur = None
             try:
                 cur = conn.cursor()
                 cur.execute("""
@@ -5450,16 +5451,28 @@ def fallback_login():
                 else:
                     return jsonify({
                         'success': False,
-                        'error': 'อีเมลหรือรหัสผ่านไม่ถูกต้อง'
+                        'error': 'อีเมลหรือรหัสผ่านไม่ถูกต้อง หรือลองใช้บัญชีสำหรับทดสอบ: dev@budtboy.com (รหัส: dev1123)'
                     }), 400
 
             except Exception as e:
-                return jsonify({'success': False, 'error': str(e)}), 500
+                print(f"Database error in fallback_login: {e}")
+                return jsonify({
+                    'success': False, 
+                    'error': 'ฐานข้อมูลไม่พร้อมใช้งาน กรุณาใช้บัญชีสำหรับทดสอบ: dev@budtboy.com (รหัส: dev1123)'
+                }), 503
             finally:
-                cur.close()
+                if cur:
+                    try:
+                        cur.close()
+                    except:
+                        pass
                 return_db_connection(conn)
-
-        return jsonify({'success': False, 'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+        else:
+            # Database connection failed - provide helpful message with fallback accounts
+            return jsonify({
+                'success': False, 
+                'error': 'ฐานข้อมูลไม่พร้อมใช้งาน ใน Preview Mode ใช้บัญชีนี้: dev@budtboy.com (รหัส: dev1123) หรือ test@budtboy.com (รหัส: test123)'
+            }), 503
 
 @app.route('/fallback_signup', methods=['POST'])
 def fallback_signup():

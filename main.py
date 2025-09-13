@@ -194,9 +194,13 @@ def get_db_connection():
                 if not database_url:
                     raise Exception("DATABASE_URL environment variable not set")
 
+                # Use connection pooler if available
+                if '.us-west-2.aws.neon.tech' in database_url and '-pooler' not in database_url:
+                    database_url = database_url.replace('.us-west-2', '-pooler.us-west-2')
+
                 return psycopg2.connect(
                     database_url,
-                    sslmode='prefer',
+                    sslmode='require',
                     connect_timeout=15,
                     application_name='cannabis_app'
                 )
@@ -217,10 +221,14 @@ def init_connection_pool():
             if connection_pool is None:
                 database_url = os.environ.get('DATABASE_URL')
                 if database_url:
+                    # Use connection pooler if available
+                    if '.us-west-2.aws.neon.tech' in database_url and '-pooler' not in database_url:
+                        database_url = database_url.replace('.us-west-2', '-pooler.us-west-2')
+
                     connection_pool = pool.ThreadedConnectionPool(
                         1, 20,  # min and max connections
                         database_url,
-                        sslmode='prefer',
+                        sslmode='require',
                         connect_timeout=15,
                         application_name='cannabis_app_pool'
                     )
@@ -1710,24 +1718,8 @@ def is_authenticated():
     return 'user_id' in session
 
 def is_approved():
-    if not is_authenticated():
-        return False
-
-    user_id = session.get('user_id')
-    conn = get_db_connection()
-    if conn:
-        try:
-            cur = conn.cursor()
-            cur.execute("SELECT is_approved FROM users WHERE id = %s", (user_id,))
-            result = cur.fetchone()
-            cur.close()
-            return_db_connection(conn)
-            return result and result[0]
-        except:
-            if conn:
-                return_db_connection(conn)
-            return False
-    return False
+    # อนุมัติทุกคนโดยอัตโนมัติ - ปิดระบบการรอการอนุมัติ
+    return True
 
 @app.route('/profile')
 def profile():
@@ -2166,20 +2158,8 @@ def quick_signup():
             import secrets
             new_referral_code = secrets.token_urlsafe(8)
 
-            # Check registration mode requirements
-            if registration_mode == 'referral_only':
-                # Referral mode: must have valid referral code
-                if not referred_by_id:
-                    return jsonify({
-                        'success': False,
-                        'error': 'การสมัครสมาชิกต้องผ่าน Referral Link เท่านั้น กรุณาใช้ลิงก์ที่เพื่อนแชร์ให้'
-                    }), 400
-                # User needs approval from referrer
-                is_approved = False
-            else:
-                # Public mode: can signup without referral code
-                # Auto-approve if no referral, or needs approval if has referral
-                is_approved = True if not referred_by_id else False
+            # อนุมัติทุกคนโดยอัตโนมัติ - ไม่ว่าจะมี referral code หรือไม่
+            is_approved = True
 
             # Create user
             cur.execute("""
@@ -2221,7 +2201,7 @@ def quick_signup():
 def health_check():
     """Ultra-lightweight health check - no DB, no business logic, instant response"""
     from flask import Response
-    
+
     # Return 204 No Content for both GET and HEAD - zero cost operation
     response = Response('', 204)
     response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
@@ -2234,7 +2214,7 @@ def api_health_check():
     if request.method == 'HEAD':
         # Instant response for Replit's health monitoring - no DB, no logic
         return '', 204
-    
+
     # Normal responses for actual API calls
     return jsonify({
         'status': 'healthy',
@@ -3637,7 +3617,7 @@ def add_strain():
 
             # Insert new strain
             cur.execute("""
-                INSERT INTO strain_names (name_en, name_name_th, is_popular)
+                INSERT INTO strain_names (name_en, name_th, is_popular)
                 VALUES (%s, %s, %s)
                 RETURNING id
             """, (name_en, name_th if name_th else None, is_popular))
@@ -4498,7 +4478,7 @@ def get_pending_friends_count():
     """Get pending friends count"""
     if not is_authenticated():
         return jsonify({'error': 'Unauthorized'}), 401
-    
+
     # For now, return 0 as placeholder - can be implemented later
     return jsonify({'count': 0})
 
@@ -4512,7 +4492,7 @@ def add_review_page():
             session['user_id'] = 1  # Mock session for testing
         else:
             return redirect('/auth')
-    
+
     # Get bud_id from query parameter
     bud_id = request.args.get('bud_id')
     return render_template('add_review.html', bud_id=bud_id)
@@ -4543,23 +4523,11 @@ def report_page():
 @app.route('/bud-report')
 @app.route('/bud-report/<int:bud_id>')
 def bud_report_page(bud_id=None):
-    # Check if user is logged in (with preview mode bypass)
+    # Check if user is logged in
     if 'user_id' not in session:
-        # Only bypass in development/preview environment
-        if os.getenv('REPLIT_DEPLOYMENT') is None:  # Preview mode
-            session['user_id'] = 1  # Mock session for testing
-        else:
-            return redirect('/auth')  # Production requires real auth
-
-    # Handle query parameter for id
-    if bud_id is None:
-        bud_id = request.args.get('id')
-        if bud_id:
-            try:
-                bud_id = int(bud_id)
-            except (ValueError, TypeError):
-                bud_id = None
-
+        return redirect('/auth')
+    if not is_approved():
+        return redirect('/profile?not_approved=1')
     return render_template('bud_report.html', bud_id=bud_id)
 
 @app.route('/search-tool')
@@ -4732,50 +4700,50 @@ def preview_eligible_buds():
 
             # Build dynamic WHERE clause based on criteria
             where_conditions = []
-            params = []
+            params = {}
 
             # Basic filters
             if criteria.get('allowed_strain_types') and criteria['allowed_strain_types'] != '':
                 types = [t.strip() for t in criteria['allowed_strain_types'].split(',') if t.strip() and t.strip() != '']
                 if types:
                     where_conditions.append(f"b.strain_type = ANY(%s)")
-                    params.append(types)
+                    params['types'] = types
 
             if criteria.get('allowed_grow_methods') and criteria['allowed_grow_methods'] != '':
                 methods = [m.strip() for m in criteria['allowed_grow_methods'].split(',') if m.strip() and m.strip() != '']
                 if methods:
                     where_conditions.append(f"b.grow_method = ANY(%s)")
-                    params.append(methods)
+                    params['methods'] = methods
 
             if criteria.get('allowed_grades') and criteria['allowed_grades'] != '':
                 grades = [g.strip() for g in criteria['allowed_grades'].split(',') if g.strip() and g.strip() != '']
                 if grades:
                     where_conditions.append(f"b.grade = ANY(%s)")
-                    params.append(grades)
+                    params['grades'] = grades
 
             if criteria.get('allowed_fertilizer_types') and criteria['allowed_fertilizer_types'] != '':
                 ferts = [f.strip() for f in criteria['allowed_fertilizer_types'].split(',') if f.strip() and f.strip() != '']
                 if ferts:
                     where_conditions.append(f"b.fertilizer_type = ANY(%s)")
-                    params.append(ferts)
+                    params['ferts'] = ferts
 
             if criteria.get('allowed_recommended_times') and criteria['allowed_recommended_times'] != '':
                 times = [t.strip() for t in criteria['allowed_recommended_times'].split(',') if t.strip() and t.strip() != '']
                 if times:
                     where_conditions.append(f"b.recommended_time = ANY(%s)")
-                    params.append(times)
+                    params['times'] = times
 
             if criteria.get('allowed_flowering_types') and criteria['allowed_flowering_types'] != '':
                 flowering = [f.strip() for f in criteria['allowed_flowering_types'].split(',') if f.strip() and f.strip() != '']
                 if flowering:
                     where_conditions.append(f"b.flowering_type = ANY(%s)")
-                    params.append(flowering)
+                    params['flowering'] = flowering
 
             if criteria.get('allowed_status') and criteria['allowed_status'] != '':
                 statuses = [s.strip() for s in criteria['allowed_status'].split(',') if s.strip() and s.strip() != '']
                 if statuses:
                     where_conditions.append(f"b.status = ANY(%s)")
-                    params.append(statuses)
+                    params['statuses'] = statuses
 
             # THC/CBD ranges
             if criteria.get('min_thc') is not None:
@@ -4799,9 +4767,9 @@ def preview_eligible_buds():
                 terpenes = [t.strip() for t in criteria['preferred_terpenes'].split(',') if t.strip() and t.strip() != '']
                 if terpenes:
                     terpene_conditions = []
-                    for terpene in terpenes:
-                        terpene_conditions.append("(b.top_terpenes_1 = %(terpene)s OR b.top_terpenes_2 = %(terpene)s OR b.top_terpenes_3 = %(terpene)s)")
-                        params['terpene'] = terpene # Note: This will use the last terpene value if multiple are provided in the same condition set, need adjustment for multiple distinct terpenes.
+                    for i, terpene in enumerate(terpenes):
+                        terpene_conditions.append(f"(b.top_terpenes_1 = %({f'terpene_{i}'})s OR b.top_terpenes_2 = %({f'terpene_{i}'})s OR b.top_terpenes_3 = %({f'terpene_{i}'})s)")
+                        params[f'terpene_{i}'] = terpene
                     where_conditions.append(f"({' OR '.join(terpene_conditions)})")
 
             # Certificate requirement
@@ -5303,7 +5271,7 @@ def verify_admin_login(admin_name, password, ip_address=None, user_agent=None):
                     conn.commit()
 
                     # Log successful login
-                    log_admin_activity(admin_name, 'LOGIN_SUCCESS', True, ip_address, user_agent)
+                    log_admin_activity(admin_name, 'LOGIN_SUCCESS, True, ip_address, user_agent)
 
                     cur.close()
                     return_db_connection(conn)
@@ -5424,7 +5392,7 @@ def fallback_login():
 
         return jsonify({
             'success': True,
-            'message': f'เข้าสู่ระบบสำเร็จ (Preview Mode)',
+            'message': 'เข้าสู่ระบบสำเร็จ (Preview Mode)',
             'redirect': '/profile'
         })
     else:
@@ -5504,7 +5472,7 @@ def fallback_signup():
             import secrets
             new_referral_code = secrets.token_urlsafe(8)
 
-            # Create user
+            # Create user - อนุมัติทันที
             cur.execute("""
                 INSERT INTO users (username, email, password_hash, is_consumer, is_verified, referral_code, is_approved)
                 VALUES (%s, %s, %s, %s, %s, %s, %s)

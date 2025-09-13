@@ -1710,8 +1710,24 @@ def is_authenticated():
     return 'user_id' in session
 
 def is_approved():
-    # อนุมัติทุกคนโดยอัตโนมัติ - ปิดระบบการรอการอนุมัติ
-    return True
+    if not is_authenticated():
+        return False
+
+    user_id = session.get('user_id')
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("SELECT is_approved FROM users WHERE id = %s", (user_id,))
+            result = cur.fetchone()
+            cur.close()
+            return_db_connection(conn)
+            return result and result[0]
+        except:
+            if conn:
+                return_db_connection(conn)
+            return False
+    return False
 
 @app.route('/profile')
 def profile():
@@ -2150,8 +2166,20 @@ def quick_signup():
             import secrets
             new_referral_code = secrets.token_urlsafe(8)
 
-            # อนุมัติทุกคนโดยอัตโนมัติ - ไม่ว่าจะมี referral code หรือไม่
-            is_approved = True
+            # Check registration mode requirements
+            if registration_mode == 'referral_only':
+                # Referral mode: must have valid referral code
+                if not referred_by_id:
+                    return jsonify({
+                        'success': False,
+                        'error': 'การสมัครสมาชิกต้องผ่าน Referral Link เท่านั้น กรุณาใช้ลิงก์ที่เพื่อนแชร์ให้'
+                    }), 400
+                # User needs approval from referrer
+                is_approved = False
+            else:
+                # Public mode: can signup without referral code
+                # Auto-approve if no referral, or needs approval if has referral
+                is_approved = True if not referred_by_id else False
 
             # Create user
             cur.execute("""
@@ -5476,7 +5504,7 @@ def fallback_signup():
             import secrets
             new_referral_code = secrets.token_urlsafe(8)
 
-            # Create user - อนุมัติทันที
+            # Create user
             cur.execute("""
                 INSERT INTO users (username, email, password_hash, is_consumer, is_verified, referral_code, is_approved)
                 VALUES (%s, %s, %s, %s, %s, %s, %s)

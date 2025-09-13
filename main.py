@@ -400,7 +400,11 @@ def ensure_sqlite_schema():
             missing_columns = [
                 ('top_terpenes_1_percentage', 'REAL'),
                 ('top_terpenes_2_percentage', 'REAL'),
-                ('top_terpenes_3_percentage', 'REAL')
+                ('top_terpenes_3_percentage', 'REAL'),
+                ('certificate_image_1_url', 'TEXT'),
+                ('certificate_image_2_url', 'TEXT'),
+                ('certificate_image_3_url', 'TEXT'),
+                ('certificate_image_4_url', 'TEXT')
             ]
             
             for col_name, col_type in missing_columns:
@@ -4100,126 +4104,192 @@ def get_bud(bud_id):
             'bud': cached_data
         })
 
-    conn = get_db_connection()
-    if conn:
+    conn = None
+    cur = None
+    try:
+        print(f"Loading bud detail for editing - ID: {bud_id}, User: {user_id}")
+        conn = get_db_connection()
+        if not conn:
+            print("Failed to get database connection")
+            return jsonify({'error': 'Database connection failed'}), 500
+
+        cur = conn.cursor()
+
+        # Check if certificate columns exist first (Postgres + SQLite compatibility)
         try:
-            cur = conn.cursor()
-
-            query = """
-                SELECT id, strain_name_th, strain_name_en, breeder, strain_type,
-                       thc_percentage, cbd_percentage, grade, aroma_flavor,
-                       top_terpenes_1, top_terpenes_2, top_terpenes_3,
-                       top_terpenes_1_percentage, top_terpenes_2_percentage, top_terpenes_3_percentage,
-                       mental_effects_positive, mental_effects_negative,
-                       physical_effects_positive, physical_effects_negative,
-                       recommended_time, grow_method, harvest_date, batch_number,
-                       grower_id, grower_license_verified, fertilizer_type,
-                       flowering_type, image_1_url, image_2_url, image_3_url, image_4_url,
-                       created_at, updated_at, created_by,
-                       lab_test_name, test_type,
-                       certificate_image_1_url, certificate_image_2_url,
-                       certificate_image_3_url, certificate_image_4_url
-                FROM buds_data
-                WHERE id = %s AND created_by = %s
-            """
-            db_execute(conn, cur, query, (bud_id, user_id))
-
-            result = cur.fetchone()
-            if not result:
-                return jsonify({'error': 'ไม่พบข้อมูลดอกหรือไม่มีสิทธิ์เข้าถึง'}), 404
-
-            # Convert result to dictionary for name-based access
-            if hasattr(result, 'keys'):  # Already dict-like (SQLite Row)
-                row = dict(result) if hasattr(result, 'keys') else result
-            else:  # Tuple result - convert using cursor description
-                columns = [desc[0] for desc in cur.description]
-                row = dict(zip(columns, result))
-
-            # Helper function to format date safely
-            def format_date_safely(date_value, format_type='date'):
-                if not date_value:
-                    return None
+            cur.execute("""
+                SELECT column_name FROM information_schema.columns
+                WHERE table_name='buds_data' AND column_name IN ('lab_test_name', 'test_type', 'certificate_image_1_url', 'certificate_image_2_url', 'certificate_image_3_url', 'certificate_image_4_url')
+            """)
+            existing_columns = [row[0] for row in cur.fetchall()]
+        except Exception:
+            cur.execute("PRAGMA table_info(buds_data)")
+            rows = cur.fetchall()
+            col_names = []
+            for r in rows:
                 try:
-                    # If it's already a string, return as is for date fields
-                    if isinstance(date_value, str):
-                        if format_type == 'datetime':
-                            # Try to parse and reformat if needed
-                            from datetime import datetime
-                            try:
-                                parsed_date = datetime.strptime(date_value, '%Y-%m-%d %H:%M:%S')
-                                return parsed_date.strftime('%Y-%m-%d %H:%M:%S')
-                            except:
-                                return date_value
-                        else:
-                            # For date fields, return as is if it's already a string
+                    col_names.append(r['name'])
+                except Exception:
+                    col_names.append(r[1])
+            existing_columns = col_names
+
+        # Build query based on available columns
+        has_lab_test = 'lab_test_name' in existing_columns
+        has_test_type = 'test_type' in existing_columns
+        has_cert_1 = 'certificate_image_1_url' in existing_columns
+        has_cert_2 = 'certificate_image_2_url' in existing_columns
+        has_cert_3 = 'certificate_image_3_url' in existing_columns
+        has_cert_4 = 'certificate_image_4_url' in existing_columns
+
+        if has_lab_test and has_test_type:
+            lab_test_select = "lab_test_name, test_type"
+        else:
+            lab_test_select = "NULL as lab_test_name, NULL as test_type"
+
+        cert_selects = []
+        if has_cert_1:
+            cert_selects.append("certificate_image_1_url")
+        else:
+            cert_selects.append("NULL as certificate_image_1_url")
+        if has_cert_2:
+            cert_selects.append("certificate_image_2_url")
+        else:
+            cert_selects.append("NULL as certificate_image_2_url")
+        if has_cert_3:
+            cert_selects.append("certificate_image_3_url")
+        else:
+            cert_selects.append("NULL as certificate_image_3_url")
+        if has_cert_4:
+            cert_selects.append("certificate_image_4_url")
+        else:
+            cert_selects.append("NULL as certificate_image_4_url")
+
+        cert_select = ", " + ", ".join(cert_selects)
+
+        query = f"""
+            SELECT id, strain_name_th, strain_name_en, breeder, strain_type,
+                   thc_percentage, cbd_percentage, grade, aroma_flavor,
+                   top_terpenes_1, top_terpenes_2, top_terpenes_3,
+                   top_terpenes_1_percentage, top_terpenes_2_percentage, top_terpenes_3_percentage,
+                   mental_effects_positive, mental_effects_negative,
+                   physical_effects_positive, physical_effects_negative,
+                   recommended_time, grow_method, harvest_date, batch_number,
+                   grower_id, grower_license_verified, fertilizer_type,
+                   flowering_type, image_1_url, image_2_url, image_3_url, image_4_url,
+                   created_at, updated_at, created_by,
+                   {lab_test_select}{cert_select}
+            FROM buds_data
+            WHERE id = %s AND created_by = %s
+        """
+        
+        # Use db_execute for proper database compatibility
+        db_execute(conn, cur, query, (bud_id, user_id))
+
+        result = cur.fetchone()
+        print(f"Query result: {result is not None}")
+        
+        if not result:
+            print(f"No bud found with ID {bud_id} for user {user_id}")
+            return jsonify({'error': 'ไม่พบข้อมูลดอกหรือไม่มีสิทธิ์เข้าถึง'}), 404
+
+        # Convert result to dictionary for name-based access
+        if hasattr(result, 'keys'):  # Already dict-like (SQLite Row)
+            row = dict(result) if hasattr(result, 'keys') else result
+        else:  # Tuple result - convert using cursor description
+            columns = [desc[0] for desc in cur.description]
+            row = dict(zip(columns, result))
+
+        # Helper function to format date safely
+        def format_date_safely(date_value, format_type='date'):
+            if not date_value:
+                return None
+            try:
+                # If it's already a string, return as is for date fields
+                if isinstance(date_value, str):
+                    if format_type == 'datetime':
+                        # Try to parse and reformat if needed
+                        from datetime import datetime
+                        try:
+                            parsed_date = datetime.strptime(date_value, '%Y-%m-%d %H:%M:%S')
+                            return parsed_date.strftime('%Y-%m-%d %H:%M:%S')
+                        except:
                             return date_value
-                    # If it's a datetime object, format it
-                    elif hasattr(date_value, 'strftime'):
-                        if format_type == 'datetime':
-                            return date_value.strftime('%Y-%m-%d %H:%M:%S')
-                        else:
-                            return date_value.strftime('%Y-%m-%d')
-                    return str(date_value) if date_value else None
-                except Exception as e:
-                    print(f"Date formatting error: {e}, value: {date_value}")
-                    return str(date_value) if date_value else None
+                    else:
+                        # For date fields, return as is if it's already a string
+                        return date_value
+                # If it's a datetime object, format it
+                elif hasattr(date_value, 'strftime'):
+                    if format_type == 'datetime':
+                        return date_value.strftime('%Y-%m-%d %H:%M:%S')
+                    else:
+                        return date_value.strftime('%Y-%m-%d')
+                return str(date_value) if date_value else None
+            except Exception as e:
+                print(f"Date formatting error: {e}, value: {date_value}")
+                return str(date_value) if date_value else None
 
-            bud_data = {
-                'id': row.get('id'),
-                'strain_name_th': row.get('strain_name_th'),
-                'strain_name_en': row.get('strain_name_en'),
-                'breeder': row.get('breeder'),
-                'strain_type': row.get('strain_type'),
-                'thc_percentage': safe_float(row.get('thc_percentage')),
-                'cbd_percentage': safe_float(row.get('cbd_percentage')),
-                'grade': row.get('grade'),
-                'aroma_flavor': row.get('aroma_flavor'),
-                'top_terpenes_1': row.get('top_terpenes_1'),
-                'top_terpenes_2': row.get('top_terpenes_2'),
-                'top_terpenes_3': row.get('top_terpenes_3'),
-                'top_terpenes_1_percentage': safe_float(row.get('top_terpenes_1_percentage')),
-                'top_terpenes_2_percentage': safe_float(row.get('top_terpenes_2_percentage')),
-                'top_terpenes_3_percentage': safe_float(row.get('top_terpenes_3_percentage')),
-                'mental_effects_positive': row.get('mental_effects_positive'),
-                'mental_effects_negative': row.get('mental_effects_negative'),
-                'physical_effects_positive': row.get('physical_effects_positive'),
-                'physical_effects_negative': row.get('physical_effects_negative'),
-                'recommended_time': row.get('recommended_time'),
-                'grow_method': row.get('grow_method'),
-                'harvest_date': format_date_safely(row.get('harvest_date'), 'date'),
-                'batch_number': row.get('batch_number'),
-                'grower_id': row.get('grower_id'),
-                'grower_license_verified': row.get('grower_license_verified'),
-                'fertilizer_type': row.get('fertilizer_type'),
-                'flowering_type': row.get('flowering_type'),
-                'image_1_url': row.get('image_1_url'),
-                'image_2_url': row.get('image_2_url'),
-                'image_3_url': row.get('image_3_url'),
-                'image_4_url': row.get('image_4_url'),
-                'created_at': format_date_safely(row.get('created_at'), 'datetime'),
-                'updated_at': format_date_safely(row.get('updated_at'), 'datetime'),
-                'created_by': row.get('created_by'),
-                'lab_test_name': row.get('lab_test_name'),
-                'test_type': row.get('test_type'),
-                'certificate_image_1_url': row.get('certificate_image_1_url'),
-                'certificate_image_2_url': row.get('certificate_image_2_url'),
-                'certificate_image_3_url': row.get('certificate_image_3_url'),
-                'certificate_image_4_url': row.get('certificate_image_4_url')
-            }
+        bud_data = {
+            'id': row.get('id'),
+            'strain_name_th': row.get('strain_name_th'),
+            'strain_name_en': row.get('strain_name_en'),
+            'breeder': row.get('breeder'),
+            'strain_type': row.get('strain_type'),
+            'thc_percentage': safe_float(row.get('thc_percentage')),
+            'cbd_percentage': safe_float(row.get('cbd_percentage')),
+            'grade': row.get('grade'),
+            'aroma_flavor': row.get('aroma_flavor'),
+            'top_terpenes_1': row.get('top_terpenes_1'),
+            'top_terpenes_2': row.get('top_terpenes_2'),
+            'top_terpenes_3': row.get('top_terpenes_3'),
+            'top_terpenes_1_percentage': safe_float(row.get('top_terpenes_1_percentage')),
+            'top_terpenes_2_percentage': safe_float(row.get('top_terpenes_2_percentage')),
+            'top_terpenes_3_percentage': safe_float(row.get('top_terpenes_3_percentage')),
+            'mental_effects_positive': row.get('mental_effects_positive'),
+            'mental_effects_negative': row.get('mental_effects_negative'),
+            'physical_effects_positive': row.get('physical_effects_positive'),
+            'physical_effects_negative': row.get('physical_effects_negative'),
+            'recommended_time': row.get('recommended_time'),
+            'grow_method': row.get('grow_method'),
+            'harvest_date': format_date_safely(row.get('harvest_date'), 'date'),
+            'batch_number': row.get('batch_number'),
+            'grower_id': row.get('grower_id'),
+            'grower_license_verified': row.get('grower_license_verified'),
+            'fertilizer_type': row.get('fertilizer_type'),
+            'flowering_type': row.get('flowering_type'),
+            'image_1_url': row.get('image_1_url'),
+            'image_2_url': row.get('image_2_url'),
+            'image_3_url': row.get('image_3_url'),
+            'image_4_url': row.get('image_4_url'),
+            'created_at': format_date_safely(row.get('created_at'), 'datetime'),
+            'updated_at': format_date_safely(row.get('updated_at'), 'datetime'),
+            'created_by': row.get('created_by'),
+            'lab_test_name': row.get('lab_test_name'),
+            'test_type': row.get('test_type'),
+            'certificate_image_1_url': row.get('certificate_image_1_url'),
+            'certificate_image_2_url': row.get('certificate_image_2_url'),
+            'certificate_image_3_url': row.get('certificate_image_3_url'),
+            'certificate_image_4_url': row.get('certificate_image_4_url')
+        }
 
-            cur.close()
-            return_db_connection(conn)
-            return jsonify(bud_data)
+        # Set cache before connection cleanup
+        set_cache(cache_key, bud_data)
+        
+        return jsonify({
+            'success': True,
+            'bud': bud_data
+        })
 
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
-        finally:
-            if cur:
+    except Exception as e:
+        print(f"Error in get_bud: {e}")
+        return jsonify({'error': str(e)}), 500
+    finally:
+        if cur:
+            try:
                 cur.close()
-            if conn:
-                return_db_connection(conn)
-    else:
-        return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+            except:
+                pass
+        if conn:
+            return_db_connection(conn)
 
 @app.route('/api/buds/<int:bud_id>/status', methods=['PUT'])
 def update_bud_status(bud_id):

@@ -811,7 +811,7 @@
 
                 // สร้าง avatar สำหรับคนรีวิว
                 const reviewerAvatar = review.reviewer_profile_image ? 
-                    `<img src="${review.reviewer_profile_image}" alt="Profile">` :
+                    `<img src="${review.reviewer_profile_image}" alt="Profile" onerror="if (this.dataset.fallbackUsed !== 'true') { this.dataset.fallbackUsed = 'true'; this.src = '/uploads/budtboy_avatar.png'; this.alt = 'Default Profile'; }">` :
                     (review.reviewer_name ? review.reviewer_name.charAt(0).toUpperCase() : '👤');
 
                 // สร้าง effects tags

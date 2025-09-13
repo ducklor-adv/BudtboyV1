@@ -378,7 +378,7 @@
 
         // reCAPTCHA callback function
         function onCaptchaSuccess(token) {
-            console.log('reCAPTCHA verified successfully');
+            // reCAPTCHA verified successfully
             captchaVerified = true;
 
             // Update CAPTCHA message
@@ -501,7 +501,7 @@
             const googleAuthSection = document.getElementById('google-auth-section');
             const fallbackAuthSection = document.getElementById('fallback-auth-section');
             
-            console.log(`🌐 Current host: ${currentHost}`);
+            // Current host detected
             console.log(`🔍 Is production: ${isProduction}, Is preview: ${isPreview}`);
             
             if (isProduction) {

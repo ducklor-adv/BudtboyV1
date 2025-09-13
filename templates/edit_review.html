@@ -930,8 +930,8 @@
                     return;
                 }
 
-                console.log('Review ID from URL:', reviewId);
-                console.log('Loading review data for ID:', reviewId);
+                // Review ID from URL parsed
+                // Loading review data for ID
 
                 // โหลดข้อมูลรีวิว
                 const response = await fetch(`/api/reviews/${reviewId}`);
@@ -940,7 +940,7 @@
                 }
 
                 reviewData = await response.json();
-                console.log('API Response:', reviewData);
+                // API Response received
 
                 // ซ่อน loading และแสดงฟอร์ม
                 document.getElementById('loadingContainer').style.display = 'none';

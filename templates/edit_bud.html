@@ -2828,7 +2828,7 @@
 
         // Function to load terpene data into the UI
         function loadTerpeneData(budData) {
-            console.log('🧪 loadTerpeneData called with:', budData);
+            // 🧪 loadTerpeneData called
             
             // Load existing top terpenes and percentages
             for (let i = 1; i <= 3; i++) {
@@ -2836,15 +2836,11 @@
                 const dropdown = document.getElementById(`terpene_${i}_select`);
                 const percentageInput = document.getElementById(`terpene_${i}_percentage`);
                 
-                console.log(`🧪 Terpene ${i}:`, {
-                    terpene_name: budData[`top_terpenes_${i}`],
-                    percentage: budData[`top_terpenes_${i}_percentage`],
-                    percentageInput_exists: !!percentageInput
-                });
+                // 🧪 Processing terpene data
                 
                 if (hiddenInput && budData[`top_terpenes_${i}`]) {
                     hiddenInput.value = budData[`top_terpenes_${i}`];
-                    console.log(`🧪 Set terpene ${i} name:`, budData[`top_terpenes_${i}`]);
+                    // 🧪 Set terpene name
                     
                     if (dropdown) {
                         dropdown.value = budData[`top_terpenes_${i}`];
@@ -2853,9 +2849,9 @@
                 
                 if (percentageInput && budData[`top_terpenes_${i}_percentage`]) {
                     percentageInput.value = budData[`top_terpenes_${i}_percentage`];
-                    console.log(`🧪 Set terpene ${i} percentage:`, budData[`top_terpenes_${i}_percentage`]);
+                    // 🧪 Set terpene percentage
                 } else if (percentageInput) {
-                    console.log(`🧪 Percentage input exists but no data for terpene ${i}`);
+                    // 🧪 Percentage input exists but no data
                 }
             }
         }
@@ -2867,11 +2863,11 @@
         // Initialize page when DOM is ready
         document.addEventListener('DOMContentLoaded', function() {
             if (isPageInitialized) {
-                console.log('Page already initialized, skipping...');
+                // Page already initialized, skipping...
                 return;
             }
 
-            console.log('Edit bud page initialized');
+            // Edit bud page initialized
             isPageInitialized = true;
 
             const editForm = document.getElementById('editBudForm');

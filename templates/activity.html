@@ -1424,7 +1424,18 @@
                     </div>
                 `;
 
-                const response = await fetch('/api/user_reviews');
+                // Use AbortController for timeout management
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+                const response = await fetch('/api/user_reviews', {
+                    signal: controller.signal,
+                    headers: {
+                        'Cache-Control': 'max-age=300' // 5 minute cache
+                    }
+                });
+
+                clearTimeout(timeoutId);
 
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -1570,7 +1581,7 @@
 
                 // สร้าง avatar สำหรับคนรีวิว
                 const reviewerAvatar = review.reviewer_profile_image ? 
-                    `<img src="${review.reviewer_profile_image}" alt="Profile" class="reviewer-avatar-img">` :
+                    `<img src="${review.reviewer_profile_image}" alt="Profile" class="reviewer-avatar-img" onerror="if (this.dataset.fallbackUsed !== 'true') { this.dataset.fallbackUsed = 'true'; this.src = '/uploads/budtboy_avatar.png'; this.alt = 'Default Profile'; }">` :
                     (review.reviewer_name ? review.reviewer_name.charAt(0).toUpperCase() : '👤');
 
                 // สร้าง effects tags
@@ -1996,7 +2007,18 @@
                     </div>
                 `;
 
-                const response = await fetch('/api/friends_reviews');
+                // Use AbortController for timeout management
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+                const response = await fetch('/api/friends_reviews', {
+                    signal: controller.signal,
+                    headers: {
+                        'Cache-Control': 'max-age=300' // 5 minute cache
+                    }
+                });
+
+                clearTimeout(timeoutId);
 
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -2054,7 +2076,7 @@
 
                 // สร้าง avatar สำหรับคนรีวิว
                 const reviewerAvatar = review.reviewer_profile_image ? 
-                    `<img src="${review.reviewer_profile_image}" alt="Profile" class="reviewer-avatar-img">` :
+                    `<img src="${review.reviewer_profile_image}" alt="Profile" class="reviewer-avatar-img" onerror="if (this.dataset.fallbackUsed !== 'true') { this.dataset.fallbackUsed = 'true'; this.src = '/uploads/budtboy_avatar.png'; this.alt = 'Default Profile'; }">` :
                     (review.reviewer_name ? review.reviewer_name.charAt(0).toUpperCase() : '👤');
 
                 // สร้าง effects tags
@@ -2164,7 +2186,7 @@
 
         // Initialize when DOM is ready with improved performance
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, initializing...');
+            // DOM loaded, initializing...
 
             // ตรวจสอบว่า elements พร้อมใช้งาน
             const budsList = document.getElementById('budsList');

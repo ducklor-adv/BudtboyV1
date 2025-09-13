@@ -455,7 +455,7 @@
             }
 
             async init() {
-                console.log('General Settings: Starting initialization');
+                // General Settings: Starting initialization
                 this.setupEventListeners();
                 await this.loadSettings();
             }
@@ -474,7 +474,7 @@
 
                 // Event listener for show video toggle
                 document.getElementById('showAuthVideo').addEventListener('change', (e) => {
-                    console.log('Show video toggle changed:', e.target.checked);
+                    // Show video toggle changed
                 });
             }
 
@@ -549,7 +549,7 @@
                 settings.showAuthVideo = document.getElementById('showAuthVideo').checked;
 
                 try {
-                    console.log('Saving general settings:', settings);
+                    // Saving general settings
 
                     const response = await fetch('/api/admin/settings/general', {
                         method: 'POST',
@@ -558,7 +558,7 @@
                     });
 
                     const result = await response.json();
-                    console.log('Save response:', result);
+                    // Save response received
 
                     if (response.ok && result.success) {
                         this.showMessage(`✅ บันทึกการตั้งค่าสำเร็จ! (${result.saved_count || 'หลายรายการ'})`, 'success');

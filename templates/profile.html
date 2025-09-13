@@ -756,7 +756,7 @@
             },
 
             start() {
-                console.log('Profile: Starting initialization');
+                // Profile: Starting initialization
                 this.loadProfile();
                 this.setupEventListeners();
                 this.handleUrlParams();
@@ -796,7 +796,7 @@
                         // เริ่ม pending friends check หลังจากโหลด profile สำเร็จ
                         setTimeout(() => this.startPendingFriendsCheck(), 2000);
 
-                        console.log('Profile: Loaded successfully');
+                        // Profile: Loaded successfully
                     } else {
                         const errorData = await response.json().catch(() => ({}));
                         this.showError(errorData.error || 'ไม่สามารถโหลดข้อมูลโปรไฟล์ได้');
@@ -941,6 +941,13 @@
 
                 if (user.profile_image_url) {
                     avatarImage.src = user.profile_image_url;
+                    avatarImage.onerror = function() {
+                        if (this.dataset.fallbackUsed !== 'true') {
+                            this.dataset.fallbackUsed = 'true';
+                            this.src = '/uploads/budtboy_avatar.png';
+                            this.alt = 'Default Profile';
+                        }
+                    };
                     avatarImage.style.display = 'block';
                     avatarPlaceholder.style.display = 'none';
                 } else {
@@ -975,7 +982,7 @@
                     return;
                 }
 
-                console.log('Starting pending friends check');
+                // Starting pending friends check
                 this.checkPendingFriends(); // Check immediately
 
                 // Set interval for periodic checks (every 5 minutes for mobile)
@@ -988,7 +995,7 @@
                 if (this.state.pendingFriendsInterval) {
                     clearInterval(this.state.pendingFriendsInterval);
                     this.state.pendingFriendsInterval = null;
-                    console.log('Stopped pending friends check');
+                    // Stopped pending friends check
                 }
             },
 
@@ -1026,7 +1033,7 @@
                     }
                 } catch (error) {
                     if (error.name !== 'AbortError') {
-                        console.log('API error in pending friends check');
+                        console.error('API error in pending friends check');
                     }
                     this.hidePendingNotification();
                 } finally {
@@ -1084,7 +1091,7 @@
                 });
 
                 this.state.eventListenersSetup = true;
-                console.log('Event listeners setup completed');
+                // Event listeners setup completed
             },
 
             // Handle URL parameters
@@ -1152,6 +1159,13 @@
 
                         if (avatarImage && avatarPlaceholder) {
                             avatarImage.src = result.profile_image_url;
+                            avatarImage.onerror = function() {
+                                if (this.dataset.fallbackUsed !== 'true') {
+                                    this.dataset.fallbackUsed = 'true';
+                                    this.src = '/uploads/budtboy_avatar.png';
+                                    this.alt = 'Default Profile';
+                                }
+                            };
                             avatarImage.style.display = 'block';
                             avatarPlaceholder.style.display = 'none';
                         }
@@ -1305,7 +1319,7 @@
         }
 
         function retryLoadProfile() {
-            console.log('Retrying profile load...');
+            // Retrying profile load...
             ProfileManager.state.isLoading = false;
             ProfileManager.state.isProfileLoaded = false;
             ProfileManager.stopPendingFriendsCheck();

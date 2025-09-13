@@ -568,7 +568,7 @@
             },
 
             async init() {
-                console.log('Admin Dashboard: Starting initialization');
+                // Admin Dashboard: Starting initialization
                 await this.loadDashboardData();
                 this.setupNavTabs();
             },
@@ -587,7 +587,7 @@
                     await this.loadPendingUsers();
 
                     this.showContent();
-                    console.log('Admin Dashboard: Data loaded successfully');
+                    // Admin Dashboard: Data loaded successfully
                 } catch (error) {
                     console.error('Error loading dashboard data:', error);
                     this.showError('เกิดข้อผิดพลาดในการโหลดข้อมูล: ' + error.message);
@@ -776,7 +776,7 @@
                         tab.classList.add('active');
 
                         const targetUrl = tab.getAttribute('href');
-                        console.log(`Navigating to: ${targetUrl}`);
+                        // Navigating to URL
 
                         // Navigate to the target URL
                         window.location.href = targetUrl;

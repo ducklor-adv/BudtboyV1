@@ -1284,7 +1284,7 @@
                 return;
             }
 
-            console.log(`Loading bud data for ID: ${currentBudId}`);
+            // Loading bud data for currentBudId
 
             try {
                 const response = await fetch(`/api/buds/${currentBudId}/info`);
@@ -1293,7 +1293,7 @@
                 }
 
                 const data = await response.json();
-                console.log('Bud data loaded:', data);
+                // Bud data loaded successfully
 
                 budData = data.bud || data;
                 displayBudData();
@@ -1326,7 +1326,7 @@
         function displayBudData() {
             if (!budData) return;
 
-            console.log('Displaying bud data:', budData);
+            // Displaying bud data
 
             // Update header
             document.getElementById('headerStrainName').textContent = budData.strain_name_en || budData.strain_name_th || 'ไม่มีชื่อ';
@@ -1335,38 +1335,37 @@
             // Update grower profile image
             const growerProfileImg = document.getElementById('growerProfileImage');
             
-            console.log('Grower profile image data:', {
-                grower_profile_image: budData.grower_profile_image,
-                creator_profile_image: budData.creator_profile_image,
-                grower_name: budData.grower_name
-            });
+            // Debug: Profile image data available
 
             // First try grower_profile_image
             if (budData.grower_profile_image && budData.grower_profile_image.trim() !== '') {
                 const imageSrc = budData.grower_profile_image.startsWith('/') ? budData.grower_profile_image : `/${budData.grower_profile_image}`;
                 growerProfileImg.src = imageSrc;
                 growerProfileImg.alt = `${budData.grower_name || 'Grower'} Profile`;
-                console.log('Using grower profile image:', imageSrc);
+                // Using grower profile image
             } 
             // Then try creator_profile_image
             else if (budData.creator_profile_image && budData.creator_profile_image.trim() !== '') {
                 const imageSrc = budData.creator_profile_image.startsWith('/') ? budData.creator_profile_image : `/${budData.creator_profile_image}`;
                 growerProfileImg.src = imageSrc;
                 growerProfileImg.alt = `${budData.grower_name || 'Creator'} Profile`;
-                console.log('Using creator profile image:', imageSrc);
+                // Using creator profile image
             } 
             // Finally use default if no profile images available
             else {
                 growerProfileImg.src = "/uploads/budtboy_avatar.png";
                 growerProfileImg.alt = "Budtboy Default Profile";
-                console.log('Using default budtboy avatar');
+                // Using default budtboy avatar
             }
 
             // Add error handler for image loading
+            // Add one-time error handler to prevent loading loops
             growerProfileImg.onerror = function() {
-                console.log('Failed to load profile image, using default');
-                this.src = "/uploads/budtboy_avatar.png";
-                this.alt = "Budtboy Default Profile";
+                if (this.dataset.fallbackUsed !== 'true') {
+                    this.dataset.fallbackUsed = 'true';
+                    this.src = "/uploads/budtboy_avatar.png";
+                    this.alt = "Budtboy Default Profile";
+                }
             };
 
             // Update basic info
@@ -1459,11 +1458,11 @@
         // Load reviews
         async function loadReviews() {
             if (!currentBudId) {
-                console.log('No currentBudId, cannot load reviews');
+                console.error('No currentBudId, cannot load reviews');
                 return;
             }
 
-            console.log(`Loading reviews for bud ID: ${currentBudId}`);
+            // Loading reviews for bud ID
 
             const reviewsContainer = document.getElementById('reviewsContainer');
             if (!reviewsContainer) {
@@ -1473,20 +1472,20 @@
 
             try {
                 const url = `/api/reviews?bud_id=${currentBudId}`;
-                console.log(`Fetching reviews from: ${url}`);
+                // Fetching reviews from URL
 
                 const response = await fetch(url);
-                console.log(`Reviews response status: ${response.status}`);
+                // Reviews response received
 
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
 
                 const data = await response.json();
-                console.log('Raw reviews data:', data);
+                // Raw reviews data received
 
                 const reviews = Array.isArray(data) ? data : (data.reviews || []);
-                console.log(`Processed ${reviews.length} reviews:`, reviews);
+                // Processed reviews data
 
                 displayReviews(reviews);
             } catch (error) {
@@ -1504,7 +1503,7 @@
 
         // Display reviews
         function displayReviews(reviews) {
-            console.log('Starting displayReviews with:', reviews);
+            // Starting displayReviews
 
             const container = document.getElementById('reviewsContainer');
             if (!container) {
@@ -1513,7 +1512,7 @@
             }
 
             if (!reviews || reviews.length === 0) {
-                console.log('No reviews found, showing empty state');
+                // No reviews found, showing empty state
                 container.innerHTML = `
                     <div class="no-reviews">
                         <div style="font-size: 64px; margin-bottom: 20px; opacity: 0.3;">💬</div>
@@ -1525,11 +1524,11 @@
                 return;
             }
 
-            console.log(`Building HTML for ${reviews.length} reviews`);
+            // Building HTML for reviews
             let reviewsHtml = '';
 
             reviews.forEach((review, index) => {
-                console.log(`Processing review ${index + 1}:`, review);
+                // Processing review
 
                 const reviewDate = new Date(review.created_at).toLocaleDateString('th-TH');
                 const reviewerAvatar = review.reviewer_name ? review.reviewer_name.charAt(0).toUpperCase() : '👤';
@@ -1613,9 +1612,9 @@
                 `;
             });
 
-            console.log('Setting reviews HTML to container');
+            // Setting reviews HTML to container
             container.innerHTML = reviewsHtml;
-            console.log(`Successfully displayed ${reviews.length} reviews`);
+            // Successfully displayed reviews
         }
 
         // Load ratings
@@ -1765,9 +1764,9 @@
                     throw new Error('Container ไม่มีเนื้อหาที่มองเห็นได้');
                 }
                 
-                console.log('Using container:', reportContainer.id || reportContainer.className || 'body');
-                console.log('Container dimensions:', reportContainer.offsetWidth, 'x', reportContainer.offsetHeight);
-                console.log('Container scroll dimensions:', reportContainer.scrollWidth, 'x', reportContainer.scrollHeight);
+                // Using container for printing
+                // Container dimensions available
+                // Container scroll dimensions available
                 
                 // Add temporary class to disable animations during capture
                 const originalClasses = reportContainer.className;
@@ -1793,9 +1792,9 @@
                 const targetResolution = 2048;
                 const targetScale = Math.min(4, Math.max(0.25, targetResolution / longestSide)); // Lower minimum to 0.25 for precise targeting
                 
-                console.log('Target scale for maximum quality:', targetScale);
-                console.log('Container dimensions (scroll):', scrollWidth, 'x', scrollHeight, '- longest side:', longestSide);
-                console.log('Expected final longest side:', Math.round(longestSide * targetScale), 'px');
+                // Target scale calculated
+                // Container dimensions calculated
+                // Expected final dimensions calculated
                 
                 // Retry scales - always decrease after first attempt for memory safety
                 const baseScales = targetScale < 1 ? 
@@ -1811,13 +1810,13 @@
                     }
                 }
                 
-                console.log('Retry scales sequence:', retryScales);
+                // Retry scales sequence prepared
                 let canvas;
                 let usedScale;
                 
                 for (const scale of retryScales) {
                     try {
-                        console.log('Attempting render with scale:', scale);
+                        // Attempting render with scale
                         
                         // Configure html2canvas for maximum quality
                         canvas = await html2canvas(reportContainer, {
@@ -1847,14 +1846,14 @@
                         });
                         
                         usedScale = scale;
-                        console.log('Canvas created successfully with scale', scale + ':', canvas.width, 'x', canvas.height);
+                        // Canvas created successfully
                         
                         // Verify precision when not clamped
                         const finalLongestSide = Math.max(canvas.width, canvas.height);
                         if (targetScale !== 0.25 && Math.abs(finalLongestSide - 2048) > 2) {
                             console.warn('Precision warning: expected ~2048px, got', finalLongestSide, 'px');
                         } else {
-                            console.log('Precision verified: longest side', finalLongestSide, 'px (target: 2048px)');
+                            // Precision verified
                         }
                         break;
                         
@@ -1908,8 +1907,8 @@
                     URL.revokeObjectURL(url);
                 }
                 
-                console.log('High-quality report saved successfully as:', link.download);
-                console.log('Final dimensions:', canvas.width, 'x', canvas.height, 'with scale:', usedScale);
+                // High-quality report saved successfully
+                // Final dimensions calculated
                 
                 // Show success message with quality info
                 button.innerHTML = `✅ บันทึกสำเร็จ! (${canvas.width}×${canvas.height})`;
@@ -1947,7 +1946,7 @@
 
         // Event listeners
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, initializing bud report...');
+            // DOM loaded, initializing bud report...
 
             // Close modal events
             document.querySelector('.close').onclick = closeImageModal;

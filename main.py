@@ -6414,10 +6414,19 @@ def fallback_signup():
             new_referral_code = secrets.token_urlsafe(8)
 
             # Create user - อนุมัติทันที - use helper function for database compatibility
-            insert_query = f"""
-                INSERT INTO users (username, email, password_hash, is_consumer, is_verified, referral_code, is_approved)
-                VALUES ({placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder})
-            """
+            # Add RETURNING clause for PostgreSQL compatibility
+            if is_sqlite(conn):
+                insert_query = f"""
+                    INSERT INTO users (username, email, password_hash, is_consumer, is_verified, referral_code, is_approved)
+                    VALUES ({placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder})
+                """
+            else:
+                # PostgreSQL needs RETURNING clause
+                insert_query = f"""
+                    INSERT INTO users (username, email, password_hash, is_consumer, is_verified, referral_code, is_approved)
+                    VALUES ({placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder})
+                    RETURNING id
+                """
             user_id = db_execute_with_id(conn, cur, insert_query, (username, email, password_hash, True, True, new_referral_code, True))
             conn.commit()
 

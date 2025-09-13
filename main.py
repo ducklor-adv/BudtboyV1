@@ -3525,6 +3525,70 @@ def update_profile():
     else:
         return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
+@app.route('/api/upload_profile_image', methods=['POST'])
+def upload_profile_image():
+    """Upload profile image for user"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'ไม่ได้เข้าสู่ระบบ'}), 401
+
+    user_id = session['user_id']
+
+    # Check if file is in request
+    if 'profile_image' not in request.files:
+        return jsonify({'error': 'ไม่พบไฟล์รูปภาพ'}), 400
+
+    file = request.files['profile_image']
+    
+    if file.filename == '':
+        return jsonify({'error': 'ไม่ได้เลือกไฟล์'}), 400
+
+    if file and allowed_file(file.filename):
+        try:
+            # Generate secure filename
+            filename = secure_filename(file.filename)
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_')
+            filename = f"{timestamp}profile_{user_id}_{filename}"
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            
+            # Save file
+            file.save(file_path)
+            
+            # Update database with new image URL
+            conn = get_db_connection()
+            if conn:
+                try:
+                    cur = conn.cursor()
+                    placeholder = db_placeholder(conn)
+                    
+                    # Update profile_image_url in users table
+                    cur.execute(f"""
+                        UPDATE users 
+                        SET profile_image_url = {placeholder} 
+                        WHERE id = {placeholder}
+                    """, (file_path, user_id))
+                    
+                    conn.commit()
+                    
+                    return jsonify({
+                        'success': True,
+                        'message': 'อัพโหลดรูปโปรไฟล์สำเร็จ',
+                        'image_url': file_path
+                    })
+                    
+                except Exception as e:
+                    conn.rollback()
+                    return jsonify({'error': f'Database error: {str(e)}'}), 500
+                finally:
+                    cur.close()
+                    return_db_connection(conn)
+            else:
+                return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
+                
+        except Exception as e:
+            return jsonify({'error': f'File upload error: {str(e)}'}), 500
+    else:
+        return jsonify({'error': 'ไฟล์ไม่ถูกต้อง (รองรับ: PNG, JPG, JPEG, PDF)'}), 400
+
 @app.route('/api/buds', methods=['GET'])
 def get_buds():
     """Get all buds data with optional filtering"""

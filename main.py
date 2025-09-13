@@ -194,9 +194,23 @@ def get_db_connection():
                 if not database_url:
                     raise Exception("DATABASE_URL environment variable not set")
 
-                # Use connection pooler if available
-                if '.us-west-2.aws.neon.tech' in database_url and '-pooler' not in database_url:
-                    database_url = database_url.replace('.us-west-2', '-pooler.us-west-2')
+                # Fix Neon connection string for SNI support
+                if '.us-west-2.aws.neon.tech' in database_url:
+                    # Extract endpoint ID from URL
+                    if 'postgresql://' in database_url:
+                        parts = database_url.split('@')
+                        if len(parts) > 1:
+                            host_part = parts[1].split('/')[0]
+                            if '-pooler' not in host_part:
+                                endpoint_id = host_part.split('.')[0]
+                                # Add endpoint parameter for SNI support
+                                if '?' in database_url:
+                                    database_url += f'&options=endpoint%3D{endpoint_id}'
+                                else:
+                                    database_url += f'?options=endpoint%3D{endpoint_id}'
+                                
+                                # Use pooler if available
+                                database_url = database_url.replace('.us-west-2', '-pooler.us-west-2')
 
                 return psycopg2.connect(
                     database_url,
@@ -221,9 +235,23 @@ def init_connection_pool():
             if connection_pool is None:
                 database_url = os.environ.get('DATABASE_URL')
                 if database_url:
-                    # Use connection pooler if available
-                    if '.us-west-2.aws.neon.tech' in database_url and '-pooler' not in database_url:
-                        database_url = database_url.replace('.us-west-2', '-pooler.us-west-2')
+                    # Fix Neon connection string for SNI support
+                    if '.us-west-2.aws.neon.tech' in database_url:
+                        # Extract endpoint ID from URL
+                        if 'postgresql://' in database_url:
+                            parts = database_url.split('@')
+                            if len(parts) > 1:
+                                host_part = parts[1].split('/')[0]
+                                if '-pooler' not in host_part:
+                                    endpoint_id = host_part.split('.')[0]
+                                    # Add endpoint parameter for SNI support
+                                    if '?' in database_url:
+                                        database_url += f'&options=endpoint%3D{endpoint_id}'
+                                    else:
+                                        database_url += f'?options=endpoint%3D{endpoint_id}'
+                                    
+                                    # Use pooler if available
+                                    database_url = database_url.replace('.us-west-2', '-pooler.us-west-2')
 
                     connection_pool = pool.ThreadedConnectionPool(
                         1, 20,  # min and max connections

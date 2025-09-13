@@ -799,6 +799,19 @@
                         // Profile: Loaded successfully
                     } else {
                         const errorData = await response.json().catch(() => ({}));
+                        
+                        // Check if this is a logout response (user deleted from database or session expired)
+                        if (response.status === 401) {
+                            // Handle both explicit logout flag and general 401 responses
+                            if (errorData.logout) {
+                                alert(errorData.error || 'ผู้ใช้ไม่มีอยู่ในระบบ กรุณาเข้าสู่ระบบใหม่');
+                            } else {
+                                alert('เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่');
+                            }
+                            window.location.href = '/logout';
+                            return;
+                        }
+                        
                         this.showError(errorData.error || 'ไม่สามารถโหลดข้อมูลโปรไฟล์ได้');
                     }
                 } catch (error) {

@@ -3085,7 +3085,7 @@ def oauth2callback():
 
                 # Check if user exists
                 check_query = normalize_sql_for_sqlite("SELECT id, username FROM users WHERE email = ?")
-            cur.execute(check_query, (email,))
+                cur.execute(check_query, (email,))
                 existing_user = cur.fetchone()
 
                 if existing_user:
@@ -3263,15 +3263,40 @@ def get_profile():
 
     cache_key = f"profile_{user_id}"
 
-    # Check cache first with longer TTL for profile data
-    cached_data = get_cache(cache_key, PROFILE_CACHE_TTL)
-    if cached_data:
-        return jsonify(cached_data)
-
+    # First, verify user exists before checking cache to prevent serving stale data for deleted users
     conn = get_db_connection()
     if conn:
         try:
             cur = conn.cursor()
+            
+            # Quick existence check first
+            existence_query = "SELECT 1 FROM users WHERE id = ?" if is_sqlite(conn) else "SELECT 1 FROM users WHERE id = %s"
+            cur.execute(existence_query, (user_id,))
+            user_exists = cur.fetchone()
+            
+            if not user_exists:
+                # User doesn't exist - clear cache and session
+                print(f"User {user_id} not found in database, clearing session")
+                clear_cache_pattern(f"profile_{user_id}")
+                session.clear()
+                
+                # Return error to force logout with cache-control headers
+                response = jsonify({'error': 'ผู้ใช้ไม่มีอยู่ในระบบ กรุณาเข้าสู่ระบบใหม่', 'logout': True})
+                response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate'
+                response.headers['Pragma'] = 'no-cache'
+                cur.close()
+                return_db_connection(conn)
+                return response, 401
+            
+            # User exists, now check cache
+            cached_data = get_cache(cache_key, PROFILE_CACHE_TTL)
+            if cached_data:
+                cur.close()
+                return_db_connection(conn)
+                response = jsonify(cached_data)
+                response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate'
+                response.headers['Pragma'] = 'no-cache'
+                return response
 
             # Use proper query adaptation for SQLite vs PostgreSQL
             query = """
@@ -3349,32 +3374,26 @@ def get_profile():
                 # Cache the result for longer time
                 set_cache(cache_key, user_dict, PROFILE_CACHE_TTL)
 
-                return jsonify(user_dict)
+                # Add cache-control headers to prevent browser caching
+                response = jsonify(user_dict)
+                response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate'
+                response.headers['Pragma'] = 'no-cache'
+                return response
             else:
-                # Return fallback data for missing user
-                fallback_data = {
-                    'id': user_id,
-                    'username': f'User{user_id}',
-                    'email': f'user{user_id}@budtboy.com',
-                    'is_grower': True,
-                    'is_budtender': False,
-                    'is_consumer': True,
-                    'birth_year': 2000,
-                    'created_at': '2025-09-13 00:00:00',
-                    'is_verified': True,
-                    'grow_license_file_url': None,
-                    'profile_image_url': '/attached_assets/budtboy_logo_20250907_064050.jpg',
-                    'contact_facebook': None,
-                    'contact_line': None,
-                    'contact_instagram': None,
-                    'contact_twitter': None,
-                    'contact_telegram': None,
-                    'contact_phone': None,
-                    'contact_other': None,
-                    'is_approved': True,
-                    'referred_by': None
-                }
-                return jsonify(fallback_data)
+                # User not found in database - clear session and cache
+                print(f"User {user_id} not found in database, clearing session")
+                
+                # Clear cache for this user using proper global cache helper
+                clear_cache_pattern(f"profile_{user_id}")
+                
+                # Clear session
+                session.clear()
+                
+                # Return error to force logout with cache-control headers
+                response = jsonify({'error': 'ผู้ใช้ไม่มีอยู่ในระบบ กรุณาเข้าสู่ระบบใหม่', 'logout': True})
+                response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate'
+                response.headers['Pragma'] = 'no-cache'
+                return response, 401
 
         except Exception as e:
             print(f"Error in get_profile: {e}")

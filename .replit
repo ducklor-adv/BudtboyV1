@@ -16,7 +16,7 @@ run = ["sh", "-c", "python main.py"]
 deploymentTarget = "cloudrun"
 
 [workflows]
-runButton = "Project"
+runButton = "Start Flask Server"
 
 [[workflows.workflow]]
 name = "Run Flask App"
@@ -47,6 +47,15 @@ waitForPort = 5000
 
 [workflows.workflow.metadata]
 outputType = "webview"
+
+[[workflows.workflow]]
+name = "Start Flask Server"
+author = 45446176
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python main.py"
 
 [[ports]]
 localPort = 3000

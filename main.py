@@ -2218,9 +2218,14 @@ def health_check():
     response.headers['Pragma'] = 'no-cache'
     return response
 
-@app.route('/api', methods=['GET', 'POST'])
+@app.route('/api', methods=['GET', 'POST', 'HEAD'])
 def api_health_check():
-    """Main API endpoint - only accept GET and POST, block HEAD monitoring"""
+    """Ultra-fast API endpoint - instant HEAD responses for Replit monitoring"""
+    if request.method == 'HEAD':
+        # Instant response for Replit's health monitoring - no DB, no logic
+        return '', 204
+    
+    # Normal responses for actual API calls
     return jsonify({
         'status': 'healthy',
         'service': 'budtboy-cannabis-app',

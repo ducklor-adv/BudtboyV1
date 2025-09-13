@@ -2926,12 +2926,13 @@ def get_profile():
     if conn:
         try:
             cur = conn.cursor()
-            cur.execute("""
+            placeholder = db_placeholder(conn)
+            cur.execute(f"""
                 SELECT id, username, email, is_grower, is_budtender, is_consumer, 
                        birth_year, created_at, is_verified, grow_license_file_url, profile_image_url,
                        contact_facebook, contact_line, contact_instagram, contact_twitter, 
                        contact_telegram, contact_phone, contact_other, is_approved, referred_by
-                FROM users WHERE id = %s
+                FROM users WHERE id = {placeholder}
             """, (user_id,))
             user = cur.fetchone()
 
@@ -3017,9 +3018,10 @@ def update_profile():
             cur = conn.cursor()
 
             # Check if username or email already exists (excluding current user)
-            cur.execute("""
+            placeholder = db_placeholder(conn)
+            cur.execute(f"""
                 SELECT id FROM users 
-                WHERE (username = %s OR email = %s) AND id != %s
+                WHERE (username = {placeholder} OR email = {placeholder}) AND id != {placeholder}
             """, (username, email, user_id))
 
             existing_user = cur.fetchone()
@@ -3030,14 +3032,15 @@ def update_profile():
                 }), 400
 
             # Update user profile
-            cur.execute("""
+            placeholder = db_placeholder(conn)
+            cur.execute(f"""
                 UPDATE users 
-                SET username = %s, email = %s, birth_year = %s, 
-                    is_consumer = %s, is_grower = %s, is_budtender = %s,
-                    contact_facebook = %s, contact_line = %s, contact_instagram = %s,
-                    contact_twitter = %s, contact_telegram = %s, contact_phone = %s,
-                    contact_other = %s
-                WHERE id = %s
+                SET username = {placeholder}, email = {placeholder}, birth_year = {placeholder}, 
+                    is_consumer = {placeholder}, is_grower = {placeholder}, is_budtender = {placeholder},
+                    contact_facebook = {placeholder}, contact_line = {placeholder}, contact_instagram = {placeholder},
+                    contact_twitter = {placeholder}, contact_telegram = {placeholder}, contact_phone = {placeholder},
+                    contact_other = {placeholder}
+                WHERE id = {placeholder}
             """, (
                 username, email, 
                 int(birth_year) if birth_year else None,

@@ -4196,8 +4196,12 @@ def get_all_buds_report():
     if not is_authenticated():
         return jsonify({'error': 'Unauthorized'}), 401
 
+    conn = None
+    cur = None
     try:
         conn = get_db_connection()
+        if not conn:
+            return jsonify({'error': 'เชื่อมต่อฐานข้อมูลไม่ได้', 'buds': []}), 503
         cur = conn.cursor()
 
         # Check if certificate columns exist first
@@ -4288,8 +4292,13 @@ def get_all_buds_report():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     finally:
-        cur.close()
-        return_db_connection(conn)
+        if cur:
+            try:
+                cur.close()
+            except:
+                pass
+        if conn:
+            return_db_connection(conn)
 
 @app.route('/api/buds/for-review')
 def get_buds_for_review():

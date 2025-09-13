@@ -328,7 +328,7 @@ def ensure_sqlite_schema():
             )
         """)
 
-        # Create buds table
+        # Create buds table (simple/legacy)
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS buds (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -350,38 +350,112 @@ def ensure_sqlite_schema():
             )
         """)
 
-        # Create reviews table
+        # Create buds_data table (matching PostgreSQL schema for detailed bud info)
         cursor.execute("""
-            CREATE TABLE IF NOT EXISTS reviews (
+            CREATE TABLE IF NOT EXISTS buds_data (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER NOT NULL,
-                bud_id INTEGER NOT NULL,
-                rating INTEGER CHECK(rating >= 1 AND rating <= 5),
-                title TEXT,
-                content TEXT,
-                taste_rating INTEGER CHECK(taste_rating >= 1 AND taste_rating <= 5),
-                potency_rating INTEGER CHECK(potency_rating >= 1 AND potency_rating <= 5),
-                appearance_rating INTEGER CHECK(appearance_rating >= 1 AND appearance_rating <= 5),
-                aroma_rating INTEGER CHECK(aroma_rating >= 1 AND aroma_rating <= 5),
+                strain_name_th TEXT,
+                strain_name_en TEXT NOT NULL,
+                breeder TEXT,
+                strain_type TEXT,
+                thc_percentage REAL,
+                cbd_percentage REAL,
+                grade TEXT,
+                aroma_flavor TEXT,
+                top_terpenes_1 TEXT,
+                top_terpenes_2 TEXT,
+                top_terpenes_3 TEXT,
+                mental_effects_positive TEXT,
+                mental_effects_negative TEXT,
+                physical_effects_positive TEXT,
+                physical_effects_negative TEXT,
+                recommended_time TEXT,
+                grow_method TEXT,
+                harvest_date DATE,
+                batch_number TEXT,
+                grower_id INTEGER,
+                grower_license_verified BOOLEAN DEFAULT FALSE,
+                fertilizer_type TEXT,
+                flowering_type TEXT,
+                status TEXT DEFAULT 'available',
+                lab_test_name TEXT,
+                test_type TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES users(id),
-                FOREIGN KEY (bud_id) REFERENCES buds(id)
+                created_by INTEGER,
+                image_1_url TEXT,
+                image_2_url TEXT,
+                image_3_url TEXT,
+                image_4_url TEXT,
+                FOREIGN KEY (created_by) REFERENCES users(id),
+                FOREIGN KEY (grower_id) REFERENCES users(id)
             )
         """)
 
-        # Create activities table
+        # Create reviews table (matching PostgreSQL schema)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS reviews (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                bud_reference_id INTEGER NOT NULL,
+                reviewer_id INTEGER NOT NULL,
+                overall_rating INTEGER CHECK(overall_rating >= 1 AND overall_rating <= 5),
+                short_summary TEXT,
+                full_review_content TEXT,
+                aroma_rating INTEGER CHECK(aroma_rating >= 1 AND aroma_rating <= 5),
+                selected_effects TEXT,
+                aroma_flavors TEXT,
+                review_images TEXT,
+                video_review_url TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (reviewer_id) REFERENCES users(id),
+                FOREIGN KEY (bud_reference_id) REFERENCES buds_data(id)
+            )
+        """)
+
+        # Create activities table (complete schema for contests)
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS activities (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER NOT NULL,
-                activity_type TEXT NOT NULL,
+                name TEXT NOT NULL,
                 description TEXT,
-                target_id INTEGER,
-                target_type TEXT,
-                metadata TEXT,
+                start_registration_date TIMESTAMP,
+                end_registration_date TIMESTAMP,
+                judging_criteria TEXT,
+                max_participants INTEGER DEFAULT 0,
+                status TEXT DEFAULT 'upcoming',
+                first_prize_description TEXT,
+                first_prize_value REAL DEFAULT 0,
+                first_prize_image TEXT,
+                second_prize_description TEXT,
+                second_prize_value REAL DEFAULT 0,
+                second_prize_image TEXT,
+                third_prize_description TEXT,
+                third_prize_value REAL DEFAULT 0,
+                third_prize_image TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES users(id)
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                created_by INTEGER,
+                FOREIGN KEY (created_by) REFERENCES users(id)
+            )
+        """)
+
+        # Create activity_participants table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS activity_participants (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                activity_id INTEGER NOT NULL,
+                user_id INTEGER NOT NULL,
+                bud_id INTEGER NOT NULL,
+                submission_images TEXT,
+                submission_description TEXT,
+                rank INTEGER,
+                prize_amount REAL,
+                registered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (activity_id) REFERENCES activities(id) ON DELETE CASCADE,
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                FOREIGN KEY (bud_id) REFERENCES buds_data(id) ON DELETE CASCADE,
+                UNIQUE(activity_id, user_id, bud_id)
             )
         """)
 
@@ -399,29 +473,96 @@ def ensure_sqlite_schema():
             )
         """)
 
-        # Create admin_settings table
+        # Create email_verifications table
         cursor.execute("""
-            CREATE TABLE IF NOT EXISTS admin_settings (
+            CREATE TABLE IF NOT EXISTS email_verifications (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                setting_key TEXT UNIQUE NOT NULL,
-                setting_value TEXT,
+                user_id INTEGER NOT NULL,
+                token TEXT UNIQUE NOT NULL,
+                expires_at TIMESTAMP NOT NULL,
+                is_used BOOLEAN DEFAULT FALSE,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_by INTEGER,
-                FOREIGN KEY (updated_by) REFERENCES users(id)
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
             )
         """)
 
-        # Insert default admin settings
+        # Create password_resets table
         cursor.execute("""
-            INSERT OR REPLACE INTO admin_settings (setting_key, setting_value)
-            VALUES
-            ('video_url', ''),
-            ('video_title', 'ทำความรู้จัก Budt.Boy'),
-            ('show_video', 'false')
+            CREATE TABLE IF NOT EXISTS password_resets (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                token TEXT UNIQUE NOT NULL,
+                expires_at TIMESTAMP NOT NULL,
+                is_used BOOLEAN DEFAULT FALSE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                UNIQUE(user_id)
+            )
         """)
 
+        # Create strain_names table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS strain_names (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name_th TEXT NOT NULL,
+                name_en TEXT NOT NULL,
+                is_popular BOOLEAN DEFAULT FALSE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+        # Create breeders table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS breeders (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT UNIQUE NOT NULL,
+                is_popular BOOLEAN DEFAULT FALSE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+        # Create admin_settings table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS admin_settings (
+                setting_key TEXT PRIMARY KEY,
+                setting_value TEXT NOT NULL,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+        # Commit all DDL first
         conn.commit()
+
+        # Insert default admin settings in separate transaction
+        try:
+            cursor.execute("""
+                INSERT OR REPLACE INTO admin_settings (setting_key, setting_value)
+                VALUES
+                ('video_url', ''),
+                ('video_title', 'ทำความรู้จัก Budt.Boy'),
+                ('show_video', 'false')
+            """)
+            conn.commit()
+        except Exception as e:
+            print(f"Warning: Could not insert default admin settings: {e}")
+            # Continue without aborting - DDL already committed
+
+        # Seed preview-only test user when users table is empty
+        if FALLBACK_AUTH_ENABLED:
+            user_count = cursor.execute("SELECT COUNT(*) FROM users").fetchone()[0]
+            if user_count == 0:
+                import bcrypt
+                password_hash = bcrypt.hashpw('123456'.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+                try:
+                    cursor.execute("""
+                        INSERT INTO users (email, username, password_hash, is_consumer, is_verified, created_at)
+                        VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+                    """, ('test2@example.com', 'testuser', password_hash, True, True))
+                    conn.commit()
+                    print("🔧 Seeded preview test user: test2@example.com/123456")
+                except Exception as e:
+                    print(f"Warning: Could not seed preview test user: {e}")
+
         conn.close()
         print("✅ SQLite schema initialized successfully")
         return True
@@ -2248,7 +2389,9 @@ def get_user_reviews():
 
         # Optimized query with better error handling for SQLite
         placeholder = db_placeholder(conn)
-        query = f"""
+        
+        # Use unified query with proper schema columns and SQL dialect compatibility
+        query = """
             SELECT r.id, r.overall_rating, r.short_summary, r.full_review_content,
                    r.aroma_rating, r.selected_effects, r.aroma_flavors, r.review_images,
                    r.created_at, r.updated_at, r.video_review_url,
@@ -2261,10 +2404,13 @@ def get_user_reviews():
             FROM reviews r
             LEFT JOIN buds_data b ON r.bud_reference_id = b.id
             LEFT JOIN users u ON r.reviewer_id = u.id
-            WHERE r.reviewer_id = {placeholder}
+            WHERE r.reviewer_id = %s
             ORDER BY r.created_at DESC
             LIMIT 50
         """
+        
+        # Adapt query for database dialect
+        query = adapt_sql_for_db(conn, query)
         cur.execute(query, (user_id,))
 
         print(f"Debug: Query executed for user_id {user_id}")
@@ -2513,8 +2659,9 @@ def quick_signup():
         try:
             cur = conn.cursor()
 
-            # Check if user exists
-            cur.execute("SELECT id FROM users WHERE username = %s OR email = %s", (username, email))
+            # Check if user exists - use SQLite/PostgreSQL compatible placeholders
+            placeholder = db_placeholder(conn)
+            cur.execute(f"SELECT id FROM users WHERE username = {placeholder} OR email = {placeholder}", (username, email))
             if cur.fetchone():
                 return jsonify({
                     'success': False,
@@ -2524,7 +2671,7 @@ def quick_signup():
             # Check referral code if provided
             referred_by_id = None
             if referral_code:
-                cur.execute("SELECT id FROM users WHERE referral_code = %s", (referral_code,))
+                cur.execute(f"SELECT id FROM users WHERE referral_code = {placeholder}", (referral_code,))
                 referrer = cur.fetchone()
                 if referrer:
                     referred_by_id = referrer[0]
@@ -2536,14 +2683,13 @@ def quick_signup():
             # อนุมัติทุกคนโดยอัตโนมัติ - ไม่ว่าจะมี referral code หรือไม่
             is_approved = True
 
-            # Create user
-            cur.execute("""
+            # Create user - use correct helper function name and proper placeholder count
+            query = f"""
                 INSERT INTO users (username, email, password_hash, is_consumer, is_verified, referred_by, referral_code, is_approved)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
-                RETURNING id
-            """, (username, email, password_hash, True, True, referred_by_id, new_referral_code, is_approved))
-
-            user_id = cur.fetchone()[0]
+                VALUES ({placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder})
+            """
+            params = (username, email, password_hash, True, True, referred_by_id, new_referral_code, is_approved)
+            user_id = db_execute_with_id(conn, cur, query, params)
             conn.commit()
 
             # Auto login
@@ -2888,11 +3034,12 @@ def oauth2callback():
                     # Create new user
                     username = name or email.split('@')[0]
 
-                    # Make sure username is unique
+                    # Make sure username is unique - use helper function for database compatibility
+                    placeholder = db_placeholder(conn)
                     base_username = username
                     counter = 1
                     while True:
-                        cur.execute("SELECT id FROM users WHERE username = %s", (username,))
+                        cur.execute(f"SELECT id FROM users WHERE username = {placeholder}", (username,))
                         if not cur.fetchone():
                             break
                         username = f"{base_username}_{counter}"
@@ -2901,15 +3048,13 @@ def oauth2callback():
                     # Generate referral code
                     referral_code = secrets.token_urlsafe(8)
 
-                    # Create user account
-                    cur.execute("""
+                    # Create user account - use helper function for database compatibility
+                    query = f"""
                         INSERT INTO users (username, email, password_hash, is_consumer, is_verified,
                                          referral_code, is_approved)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s)
-                        RETURNING id
-                    """, (username, email, '', True, True, referral_code, True))
-
-                    user_id = cur.fetchone()[0]
+                        VALUES ({placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder})
+                    """
+                    user_id = db_execute_with_id(conn, cur, query, (username, email, '', True, True, referral_code, True))
                     conn.commit()
 
                     # Log them in
@@ -4117,24 +4262,29 @@ def add_strain():
     if conn:
         try:
             cur = conn.cursor()
+            placeholder = db_placeholder(conn)
 
-            # Check if strain already exists
-            cur.execute("""
-                SELECT id FROM strain_names
-                WHERE name_en ILIKE %s OR (name_th IS NOT NULL AND name_th ILIKE %s)
-            """, (name_en, name_th if name_th else None))
+            # Check if strain already exists - use LIKE instead of ILIKE for SQLite compatibility
+            if is_sqlite(conn):
+                cur.execute(f"""
+                    SELECT id FROM strain_names
+                    WHERE LOWER(name_en) LIKE LOWER({placeholder}) OR (name_th IS NOT NULL AND LOWER(name_th) LIKE LOWER({placeholder}))
+                """, (name_en, name_th if name_th else None))
+            else:
+                cur.execute(f"""
+                    SELECT id FROM strain_names
+                    WHERE name_en ILIKE {placeholder} OR (name_th IS NOT NULL AND name_th ILIKE {placeholder})
+                """, (name_en, name_th if name_th else None))
 
             if cur.fetchone():
                 return jsonify({'error': 'สายพันธุ์นี้มีในระบบแล้ว'}), 400
 
-            # Insert new strain
-            cur.execute("""
+            # Insert new strain - use helper function for database compatibility
+            query = f"""
                 INSERT INTO strain_names (name_en, name_th, is_popular)
-                VALUES (%s, %s, %s)
-                RETURNING id
-            """, (name_en, name_th if name_th else None, is_popular))
-
-            strain_id = cur.fetchone()[0]
+                VALUES ({placeholder}, {placeholder}, {placeholder})
+            """
+            strain_id = db_execute_with_id(conn, cur, query, (name_en, name_th if name_th else None, is_popular))
             conn.commit()
 
             return jsonify({
@@ -4348,7 +4498,9 @@ def get_reviews():
         try:
             cur = conn.cursor()
 
-            # Build query with filters
+            # Build query with filters - using unified schema
+            placeholder = db_placeholder(conn)
+            
             query = """
                 SELECT r.id, r.overall_rating, r.short_summary, r.full_review_content,
                        r.aroma_rating, r.selected_effects, r.aroma_flavors, r.review_images,
@@ -4363,17 +4515,19 @@ def get_reviews():
             params = []
 
             if bud_id:
-                query += " AND r.bud_reference_id = %s"
+                query += f" AND r.bud_reference_id = {placeholder}"
                 params.append(bud_id)
             if reviewer_id:
-                query += " AND r.reviewer_id = %s"
+                query += f" AND r.reviewer_id = {placeholder}"
                 params.append(reviewer_id)
             if min_rating:
-                query += " AND r.overall_rating >= %s"
+                query += f" AND r.overall_rating >= {placeholder}"
                 params.append(min_rating)
 
             query += " ORDER BY r.created_at DESC"
-
+            
+            # Adapt query for database dialect
+            query = adapt_sql_for_db(conn, query)
             cur.execute(query, params)
             reviews = cur.fetchall()
 
@@ -4436,30 +4590,33 @@ def add_review():
     if conn:
         try:
             cur = conn.cursor()
+            placeholder = db_placeholder(conn)
 
-            # Check if bud exists
-            cur.execute("SELECT id FROM buds_data WHERE id = %s", (data.get('bud_reference_id'),))
+            # Check if bud exists - use helper function for database compatibility
+            cur.execute(f"SELECT id FROM buds_data WHERE id = {placeholder}", (data.get('bud_reference_id'),))
             if not cur.fetchone():
                 return jsonify({'error': 'ไม่พบข้อมูลดอกที่อ้างอิง'}), 400
 
-            # Check if user already reviewed this bud
-            cur.execute("""
+            # Check if user already reviewed this bud - use helper function for database compatibility
+            cur.execute(f"""
                 SELECT id FROM reviews
-                WHERE bud_reference_id = %s AND reviewer_id = %s
+                WHERE bud_reference_id = {placeholder} AND reviewer_id = {placeholder}
             """, (data.get('bud_reference_id'), user_id))
 
             if cur.fetchone():
                 return jsonify({'error': 'คุณได้รีวิวดอกนี้แล้ว'}), 400
 
-            cur.execute("""
+            # Insert review - use helper function for database compatibility
+            query = f"""
                 INSERT INTO reviews (
                     bud_reference_id, reviewer_id, overall_rating, aroma_flavors,
                     aroma_rating, selected_effects, short_summary, full_review_content,
                     review_images
                 ) VALUES (
-                    %s, %s, %s, %s, %s, %s, %s, %s, %s
-                ) RETURNING id
-            """, (
+                    {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}
+                )
+            """
+            review_id = db_execute_with_id(conn, cur, query, (
                 data.get('bud_reference_id'),
                 user_id,
                 data.get('overall_rating'),
@@ -4470,8 +4627,6 @@ def add_review():
                 data.get('full_review_content'),
                 data.get('review_images', [])
             ))
-
-            review_id = cur.fetchone()[0]
             conn.commit()
 
             return jsonify({
@@ -5415,8 +5570,10 @@ def admin_create_activity():
     if conn:
         try:
             cur = conn.cursor()
+            placeholder = db_placeholder(conn)
 
-            cur.execute("""
+            # Insert activity - use helper function for database compatibility
+            query = f"""
                 INSERT INTO activities (
                     name, description, start_registration_date, end_registration_date,
                     judging_criteria, max_participants, status,
@@ -5424,9 +5581,10 @@ def admin_create_activity():
                     second_prize_description, second_prize_value, second_prize_image,
                     third_prize_description, third_prize_value, third_prize_image
                 ) VALUES (
-                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
-                ) RETURNING id
-            """, (
+                    {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}
+                )
+            """
+            activity_id = db_execute_with_id(conn, cur, query, (
                 data.get('name'),
                 data.get('description'),
                 data.get('start_registration_date'),
@@ -5444,8 +5602,6 @@ def admin_create_activity():
                 data.get('third_prize_value', 0),
                 data.get('third_prize_image')
             ))
-
-            activity_id = cur.fetchone()[0]
             conn.commit()
 
             return jsonify({
@@ -5499,35 +5655,36 @@ def join_activity(activity_id):
             if activity[4] and activity[4] < datetime.now():
                 return jsonify({'error': 'หมดเวลาการสมัครแล้ว'}), 400
 
-            # Check if user owns the bud
-            cur.execute("SELECT id FROM buds_data WHERE id = %s AND created_by = %s", (bud_id, user_id))
+            # Get placeholder for database compatibility
+            placeholder = db_placeholder(conn)
+
+            # Check if user owns the bud - use helper function for database compatibility
+            cur.execute(f"SELECT id FROM buds_data WHERE id = {placeholder} AND created_by = {placeholder}", (bud_id, user_id))
             if not cur.fetchone():
                 return jsonify({'error': 'ไม่พบดอกนี้หรือคุณไม่ใช่เจ้าของ'}), 403
 
-            # Check if already joined with this bud
-            cur.execute("""
+            # Check if already joined with this bud - use helper function for database compatibility
+            cur.execute(f"""
                 SELECT id FROM activity_participants
-                WHERE activity_id = %s AND user_id = %s AND bud_id = %s
+                WHERE activity_id = {placeholder} AND user_id = {placeholder} AND bud_id = {placeholder}
             """, (activity_id, user_id, bud_id))
 
             if cur.fetchone():
                 return jsonify({'error': 'คุณได้ส่งดอกนี้เข้าร่วมกิจกรรมแล้ว'}), 400
 
-            # Check participant limit
+            # Check participant limit - use helper function for database compatibility
             if activity[3] > 0:  # max_participants
-                cur.execute("SELECT COUNT(*) FROM activity_participants WHERE activity_id = %s", (activity_id,))
+                cur.execute(f"SELECT COUNT(*) FROM activity_participants WHERE activity_id = {placeholder}", (activity_id,))
                 current_count = cur.fetchone()[0]
                 if current_count >= activity[3]:
                     return jsonify({'error': 'กิจกรรมนี้เต็มแล้ว'}), 400
 
-            # Join activity
-            cur.execute("""
+            # Join activity - use helper function for database compatibility
+            query = f"""
                 INSERT INTO activity_participants (activity_id, user_id, bud_id, submission_description)
-                VALUES (%s, %s, %s, %s)
-                RETURNING id
-            """, (activity_id, user_id, bud_id, submission_description))
-
-            participant_id = cur.fetchone()[0]
+                VALUES ({placeholder}, {placeholder}, {placeholder}, {placeholder})
+            """
+            participant_id = db_execute_with_id(conn, cur, query, (activity_id, user_id, bud_id, submission_description))
             conn.commit()
 
             return jsonify({
@@ -5753,14 +5910,12 @@ def create_admin_account(admin_name, password, created_by_user_id=None):
             if cur.fetchone():
                 return False, "ชื่อ Admin นี้มีอยู่แล้ว"
 
-            # Insert new admin
-            cur.execute("""
+            # Insert new admin - use helper function for database compatibility
+            query = f"""
                 INSERT INTO admin_accounts (admin_name, password_hash, created_by)
-                VALUES (%s, %s, %s)
-                RETURNING id
-            """, (admin_name, password_hash, created_by_user_id))
-
-            admin_id = cur.fetchone()[0]
+                VALUES ({placeholder}, {placeholder}, {placeholder})
+            """
+            admin_id = db_execute_with_id(conn, cur, query, (admin_name, password_hash, created_by_user_id))
             conn.commit()
 
             # Log the creation
@@ -6060,11 +6215,10 @@ def fallback_signup():
             import secrets
             new_referral_code = secrets.token_urlsafe(8)
 
-            # Create user - อนุมัติทันที
+            # Create user - อนุมัติทันที - use helper function for database compatibility
             insert_query = f"""
                 INSERT INTO users (username, email, password_hash, is_consumer, is_verified, referral_code, is_approved)
                 VALUES ({placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder})
-                RETURNING id
             """
             user_id = db_execute_with_id(conn, cur, insert_query, (username, email, password_hash, True, True, new_referral_code, True))
             conn.commit()
@@ -6325,18 +6479,23 @@ def get_friends_reviews():
         cur = conn.cursor()
         user_id = session.get('user_id')
 
-        cur.execute("""
-            SELECT r.id, r.bud_reference_id, r.overall_rating, r.review_text,
+        # Use proper schema columns and SQL dialect compatibility
+        query = """
+            SELECT r.id, r.bud_reference_id, r.overall_rating, r.short_summary,
                    r.created_at, u.username, b.strain_name_en, b.strain_name_th
             FROM reviews r
-            INNER JOIN users u ON r.user_id = u.id
+            INNER JOIN users u ON r.reviewer_id = u.id
             INNER JOIN buds_data b ON r.bud_reference_id = b.id
             INNER JOIN friends f ON (f.user_id = %s AND f.friend_id = u.id)
                                  OR (f.friend_id = %s AND f.user_id = u.id)
-            WHERE f.status = 'accepted' AND r.user_id != %s
+            WHERE f.status = 'accepted' AND r.reviewer_id != %s
             ORDER BY r.created_at DESC
             LIMIT 20
-        """, (user_id, user_id, user_id))
+        """
+        
+        # Adapt query for database dialect
+        query = adapt_sql_for_db(conn, query)
+        cur.execute(query, (user_id, user_id, user_id))
 
         reviews = []
         for row in cur.fetchall():
@@ -6344,7 +6503,7 @@ def get_friends_reviews():
                 'id': row[0],
                 'bud_reference_id': row[1],
                 'overall_rating': row[2],
-                'review_text': row[3],
+                'review_text': row[3],  # This is actually short_summary from the query
                 'created_at': row[4].isoformat() if row[4] else None,
                 'username': row[5],
                 'strain_name_en': row[6],

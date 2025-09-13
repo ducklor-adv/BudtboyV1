@@ -5803,6 +5803,137 @@ def admin_pending_users():
         if conn:
             return_db_connection(conn)
 
+# Fallback Auth Routes for Preview Mode
+@app.route('/fallback_register', methods=['POST'])
+def fallback_register():
+    """Fallback registration when database is unavailable"""
+    is_preview = os.environ.get('REPL_SLUG') and not os.environ.get('REPLIT_DEPLOYMENT')
+    if not is_preview:
+        return jsonify({'success': False, 'error': 'Route not available in production'}), 404
+    
+    data = request.get_json()
+    username = data.get('username')
+    email = data.get('email')  
+    password = data.get('password')
+    
+    if not username or not email or not password:
+        return jsonify({'success': False, 'error': 'กรุณากรอกข้อมูลให้ครบถ้วน'}), 400
+    
+    # Create fallback user session directly
+    session['user_id'] = 999  # Fallback user ID
+    session['username'] = username
+    session['email'] = email
+    session['fallback_mode'] = True
+    session['approved'] = True
+    session.permanent = True
+    
+    return jsonify({
+        'success': True,
+        'message': f'สมัครสมาชิกสำเร็จ! ยินดีต้อนรับ {username} (Preview Mode)',
+        'redirect': '/profile'
+    })
+
+
+# Missing API Routes
+@app.route('/api/friends_reviews')
+def get_friends_reviews():
+    """Get reviews from friends"""
+    if not is_authenticated():
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    conn = get_db_connection()
+    if not conn:
+        # Return empty data when database is not available
+        return jsonify({'reviews': []})
+    
+    try:
+        cur = conn.cursor()
+        user_id = session.get('user_id')
+        
+        cur.execute("""
+            SELECT r.id, r.bud_reference_id, r.overall_rating, r.review_text, 
+                   r.created_at, u.username, b.strain_name_en, b.strain_name_th
+            FROM reviews r
+            INNER JOIN users u ON r.user_id = u.id
+            INNER JOIN buds_data b ON r.bud_reference_id = b.id
+            INNER JOIN friends f ON (f.user_id = %s AND f.friend_id = u.id) 
+                                 OR (f.friend_id = %s AND f.user_id = u.id)
+            WHERE f.status = 'accepted' AND r.user_id != %s
+            ORDER BY r.created_at DESC
+            LIMIT 20
+        """, (user_id, user_id, user_id))
+        
+        reviews = []
+        for row in cur.fetchall():
+            reviews.append({
+                'id': row[0],
+                'bud_reference_id': row[1],
+                'overall_rating': row[2],
+                'review_text': row[3],
+                'created_at': row[4].isoformat() if row[4] else None,
+                'username': row[5],
+                'strain_name_en': row[6],
+                'strain_name_th': row[7]
+            })
+        
+        return jsonify({'reviews': reviews})
+        
+    except Exception as e:
+        print(f"Error getting friends reviews: {e}")
+        return jsonify({'reviews': []})
+    finally:
+        if cur:
+            try:
+                cur.close()
+            except:
+                pass
+        if conn:
+            return_db_connection(conn)
+
+@app.route('/api/admin/users')
+def admin_users_api():
+    """Admin API for user management"""
+    if not is_admin():
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({'users': []})
+    
+    try:
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT id, username, email, created_at, approved, is_grower, profile_image_url
+            FROM users 
+            ORDER BY created_at DESC
+        """)
+        
+        users = []
+        for row in cur.fetchall():
+            users.append({
+                'id': row[0],
+                'username': row[1],
+                'email': row[2],
+                'created_at': row[3].isoformat() if row[3] else None,
+                'approved': row[4],
+                'is_grower': row[5],
+                'profile_image_url': row[6]
+            })
+        
+        return jsonify({'users': users})
+        
+    except Exception as e:
+        print(f"Error getting admin users: {e}")
+        return jsonify({'users': []})
+    finally:
+        if cur:
+            try:
+                cur.close()
+            except:
+                pass
+        if conn:
+            return_db_connection(conn)
+
 if __name__ == '__main__':
     # Initialize connection pool
     init_connection_pool()

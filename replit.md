@@ -31,6 +31,14 @@ Preferred communication style: Simple, everyday language.
   - Modified `/add-review` route to accept and pass bud_id parameter to template
   - Enhanced add_review.html with JavaScript auto-fill functionality for pre-selected bud
   - Users can now click "เขียนรีวิว" button and seamlessly continue to review form without manual bud ID input
+- **CRITICAL BUG FIX: Profile Data Persistence After User Deletion**: Resolved issue where deleted users' profile data remained visible
+  - **Root cause identified**: Deleted users were served cached fallback data instead of having sessions properly invalidated
+  - **Backend fix**: Modified `/api/profile` endpoint to check user existence BEFORE reading cache to prevent stale data serving
+  - **Cache invalidation fix**: Implemented proper global cache invalidation using `clear_cache_pattern()` instead of incorrect thread-local approach
+  - **Frontend enhancement**: Updated profile.html to handle all 401 responses (not just explicit logout flags) and redirect appropriately
+  - **Cache control**: Added cache-control headers to prevent browser-level caching of profile data
+  - **Security improvement**: Ensures deleted users cannot access their old profile data through any caching mechanism
+  - **Data consistency**: Prioritized data accuracy over availability - system always verifies user existence before serving any profile information
 
 ## System Architecture
 

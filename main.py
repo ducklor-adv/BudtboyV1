@@ -2230,15 +2230,20 @@ def get_user_buds():
         review_stats = {}
 
         if bud_ids:
-            # Create placeholders for IN clause (SQLite compatible)
-            placeholders = ','.join('?' * len(bud_ids))
+            # Create placeholders for IN clause (database compatible)
+            if is_sqlite(conn):
+                placeholders = ','.join('?' * len(bud_ids))
+            else:
+                placeholders = ','.join('%s' * len(bud_ids))
+            
+            # Use new schema column names: bud_reference_id and overall_rating
             cur.execute(f"""
-                SELECT bud_id,
-                       COALESCE(AVG(rating), 0) as avg_rating,
+                SELECT bud_reference_id,
+                       COALESCE(AVG(overall_rating), 0) as avg_rating,
                        COUNT(id) as review_count
                 FROM reviews
-                WHERE bud_id IN ({placeholders})
-                GROUP BY bud_id
+                WHERE bud_reference_id IN ({placeholders})
+                GROUP BY bud_reference_id
             """, bud_ids)
 
             for stats_row in cur.fetchall():
@@ -5306,8 +5311,8 @@ def get_activities():
                     'id': row[0],
                     'name': row[1],
                     'description': row[2],
-                    'start_registration_date': row[3].strftime('%Y-%m-%d %H:%M:%S') if row[3] else None,
-                    'end_registration_date': row[4].strftime('%Y-%m-%d %H:%M:%S') if row[4] else None,
+                    'start_registration_date': safe_datetime_format(row[3]),
+                    'end_registration_date': safe_datetime_format(row[4]),
                     'judging_criteria': row[5],
                     'max_participants': row[6],
                     'first_prize_description': row[7],
@@ -5320,7 +5325,7 @@ def get_activities():
                     'third_prize_value': float(row[14]) if row[14] else 0,
                     'third_prize_image': row[15],
                     'status': row[16],
-                    'created_at': row[17].strftime('%Y-%m-%d %H:%M:%S') if row[17] else None,
+                    'created_at': safe_datetime_format(row[17]),
                     'participant_count': row[18]
                 })
 
@@ -6363,7 +6368,7 @@ def admin_stats():
         total_users = result[0] if result else 0
 
         # Count pending users
-        cur.execute("SELECT COUNT(*) FROM users WHERE approved = FALSE")
+        cur.execute("SELECT COUNT(*) FROM users WHERE is_approved = FALSE")
         result = cur.fetchone()
         pending_users = result[0] if result else 0
 
@@ -6428,7 +6433,7 @@ def admin_pending_users():
     try:
         cur = conn.cursor()
         cur.execute("""
-            SELECT u.id, u.username, u.email, u.created_at, u.approved, u.is_grower, u.profile_image_url,
+            SELECT u.id, u.username, u.email, u.created_at, u.is_approved, u.is_grower, u.profile_image_url,
                    ref.username as referred_by_username
             FROM users u
             LEFT JOIN users ref ON u.referred_by = ref.id
@@ -6438,12 +6443,22 @@ def admin_pending_users():
 
         users = []
         for row in cur.fetchall():
+            # Handle created_at - could be string or datetime
+            created_at = row[3]
+            if created_at:
+                if hasattr(created_at, 'isoformat'):
+                    created_at_str = created_at.isoformat()
+                else:
+                    created_at_str = str(created_at)
+            else:
+                created_at_str = None
+                
             users.append({
                 'id': row[0],
                 'username': row[1],
                 'email': row[2],
-                'created_at': row[3].isoformat() if row[3] else None,
-                'approved': row[4],
+                'created_at': created_at_str,
+                'approved': row[4],  # This is is_approved column
                 'is_grower': row[5],
                 'profile_image_url': row[6],
                 'referred_by_username': row[7]
@@ -6544,12 +6559,22 @@ def admin_users_api():
 
         users = []
         for row in cur.fetchall():
+            # Handle created_at - could be string or datetime
+            created_at = row[3]
+            if created_at:
+                if hasattr(created_at, 'isoformat'):
+                    created_at_str = created_at.isoformat()
+                else:
+                    created_at_str = str(created_at)
+            else:
+                created_at_str = None
+                
             users.append({
                 'id': row[0],
                 'username': row[1],
                 'email': row[2],
-                'created_at': row[3].isoformat() if row[3] else None,
-                'approved': row[4],
+                'created_at': created_at_str,
+                'approved': row[4],  # This is is_approved column
                 'is_grower': row[5],
                 'profile_image_url': row[6]
             })

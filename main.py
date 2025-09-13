@@ -17,6 +17,16 @@ import requests
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'budtboy-secret-key-2024')
 
+# Custom logging filter to hide HEAD requests from logs
+import logging
+class NoHEADFilter(logging.Filter):
+    def filter(self, record):
+        # Hide HEAD requests to reduce log noise
+        return not ('HEAD' in str(record.getMessage()) and '/api' in str(record.getMessage()))
+
+# Apply the filter to werkzeug logger
+logging.getLogger('werkzeug').addFilter(NoHEADFilter())
+
 # Environment detection
 def is_production():
     """Check if running in production deployment"""

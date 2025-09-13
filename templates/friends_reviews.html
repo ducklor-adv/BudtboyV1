@@ -816,9 +816,9 @@
 
                 // สร้าง effects tags
                 const effectsTags = review.selected_effects && review.selected_effects.length > 0 ? 
-                    review.selected_effects.slice(0, 6).map(effect => 
+                    (Array.isArray(review.selected_effects) ? review.selected_effects : []).slice(0, 6).map(effect => 
                         `<span class="effect-tag">${effect}</span>`
-                    ).join('') + (review.selected_effects.length > 6 ? `<span class="more-tag">+${review.selected_effects.length - 6}</span>` : '') : '';
+                    ).join('') + ((Array.isArray(review.selected_effects) ? review.selected_effects : []).length > 6 ? `<span class="more-tag">+${(Array.isArray(review.selected_effects) ? review.selected_effects : []).length - 6}</span>` : '') : '';
 
                 // สร้าง aroma tags
                 const aromaTags = review.aroma_flavors && review.aroma_flavors.length > 0 ? 

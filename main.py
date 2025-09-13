@@ -2846,7 +2846,8 @@ def forgot_password():
             cur = conn.cursor()
 
             # Check if user exists
-            cur.execute("SELECT id, username FROM users WHERE email = %s", (email,))
+            check_query = normalize_sql_for_sqlite("SELECT id, username FROM users WHERE email = ?")
+            cur.execute(check_query, (email,))
             user = cur.fetchone()
 
             if not user:
@@ -3083,7 +3084,8 @@ def oauth2callback():
                 cur = conn.cursor()
 
                 # Check if user exists
-                cur.execute("SELECT id, username FROM users WHERE email = %s", (email,))
+                check_query = normalize_sql_for_sqlite("SELECT id, username FROM users WHERE email = ?")
+            cur.execute(check_query, (email,))
                 existing_user = cur.fetchone()
 
                 if existing_user:
@@ -4342,10 +4344,11 @@ def update_bud_status(bud_id):
         try:
             cur = conn.cursor()
 
-            # Check if user has permission to update (owner of the bud)
-            cur.execute("""
-                SELECT created_by FROM buds_data WHERE id = %s
-            """, (bud_id,))
+            # Check if user has permission to update (owner of the bud) - SQLite compatible
+            check_query = normalize_sql_for_sqlite("""
+                SELECT created_by FROM buds_data WHERE id = ?
+            """)
+            cur.execute(check_query, (bud_id,))
             result = cur.fetchone()
 
             if not result:
@@ -4354,12 +4357,13 @@ def update_bud_status(bud_id):
             if result[0] != user_id:
                 return jsonify({'error': 'ไม่มีสิทธิ์เปลี่ยนสถานะของ Bud นี้'}), 403
 
-            # Update status
-            cur.execute("""
+            # Update status - SQLite compatible
+            update_query = normalize_sql_for_sqlite("""
                 UPDATE buds_data
-                SET status = %s, updated_at = CURRENT_TIMESTAMP
-                WHERE id = %s
-            """, (new_status, bud_id))
+                SET status = ?, updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+            """)
+            cur.execute(update_query, (new_status, bud_id))
 
             conn.commit()
 
@@ -4396,10 +4400,11 @@ def delete_bud(bud_id):
         try:
             cur = conn.cursor()
 
-            # Check if user has permission to delete
-            cur.execute("""
-                SELECT created_by FROM buds_data WHERE id = %s
-            """, (bud_id,))
+            # Check if user has permission to delete - SQLite compatible  
+            check_query = normalize_sql_for_sqlite("""
+                SELECT created_by FROM buds_data WHERE id = ?
+            """)
+            cur.execute(check_query, (bud_id,))
             result = cur.fetchone()
 
             if not result:
@@ -4408,7 +4413,8 @@ def delete_bud(bud_id):
             if result[0] != user_id:
                 return jsonify({'error': 'ไม่มีสิทธิ์ลบข้อมูลนี้'}), 403
 
-            cur.execute("DELETE FROM buds_data WHERE id = %s", (bud_id,))
+            delete_query = normalize_sql_for_sqlite("DELETE FROM buds_data WHERE id = ?")
+            cur.execute(delete_query, (bud_id,))
             conn.commit()
 
             return jsonify({
@@ -4898,8 +4904,9 @@ def update_review(review_id):
         try:
             cur = conn.cursor()
 
-            # Check if user has permission to update
-            cur.execute("SELECT reviewer_id FROM reviews WHERE id = %s", (review_id,))
+            # Check if user has permission to update - SQLite compatible
+            check_query = normalize_sql_for_sqlite("SELECT reviewer_id FROM reviews WHERE id = ?")
+            cur.execute(check_query, (review_id,))
             result = cur.fetchone()
 
             if not result:
@@ -4956,7 +4963,8 @@ def delete_review(review_id):
             cur = conn.cursor()
 
             # Check if user has permission to delete
-            cur.execute("SELECT reviewer_id FROM reviews WHERE id = %s", (review_id,))
+            check_query = normalize_sql_for_sqlite("SELECT reviewer_id FROM reviews WHERE id = ?")
+            cur.execute(check_query, (review_id,))
             result = cur.fetchone()
 
             if not result:
@@ -4965,7 +4973,8 @@ def delete_review(review_id):
             if result[0] != user_id:
                 return jsonify({'error': 'ไม่มีสิทธิ์ลบรีวิวนี้'}), 403
 
-            cur.execute("DELETE FROM reviews WHERE id = %s", (review_id,))
+            delete_query = normalize_sql_for_sqlite("DELETE FROM reviews WHERE id = ?")
+            cur.execute(delete_query, (review_id,))
             conn.commit()
 
             return jsonify({
@@ -5905,7 +5914,8 @@ def admin_update_activity(activity_id):
             cur = conn.cursor()
 
             # Check if activity exists
-            cur.execute("SELECT id FROM activities WHERE id = %s", (activity_id,))
+            check_query = normalize_sql_for_sqlite("SELECT id FROM activities WHERE id = ?")
+            cur.execute(check_query, (activity_id,))
             if not cur.fetchone():
                 return jsonify({'error': 'ไม่พบกิจกรรมนี้'}), 404
 

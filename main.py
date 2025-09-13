@@ -182,9 +182,10 @@ def allowed_file(filename):
 # Database connection function
 def get_db_connection():
     """Get database connection with improved error handling"""
-    # Preview mode: Use SQLite directly
-    if is_preview():
-        return get_sqlite_connection()
+    # Force PostgreSQL usage - we migrated all data to PostgreSQL
+    # No longer using SQLite to ensure consistency with Replit Database interface
+    # if is_preview():
+    #     return get_sqlite_connection()
     
     global connection_pool
     max_retries = 3
@@ -217,27 +218,10 @@ def get_db_connection():
                 if not database_url:
                     raise Exception("DATABASE_URL environment variable not set")
 
-                # Fix Neon connection string for SNI support
-                if '.us-west-2.aws.neon.tech' in database_url:
-                    # Extract endpoint ID from URL
-                    if 'postgresql://' in database_url:
-                        parts = database_url.split('@')
-                        if len(parts) > 1:
-                            host_part = parts[1].split('/')[0]
-                            if '-pooler' not in host_part:
-                                endpoint_id = host_part.split('.')[0]
-                                # Add endpoint parameter for SNI support
-                                if '?' in database_url:
-                                    database_url += f'&options=endpoint%3D{endpoint_id}'
-                                else:
-                                    database_url += f'?options=endpoint%3D{endpoint_id}'
-
-                                # Use pooler if available
-                                database_url = database_url.replace('.us-west-2', '-pooler.us-west-2')
-
+                # Use direct connection without Neon processing to fix authentication issues
+                print(f"🔧 Using direct PostgreSQL connection (attempt {retry_count + 1})")
                 return psycopg2.connect(
                     database_url,
-                    sslmode='require',
                     connect_timeout=15,
                     application_name='cannabis_app'
                 )
@@ -245,10 +229,8 @@ def get_db_connection():
         except Exception as e:
             if retry_count == max_retries - 1:
                 print(f"Database connection failed: {e}")
-                # Fallback to SQLite for development/preview mode
-                if is_preview():
-                    print("🔄 Falling back to SQLite database for preview mode")
-                    return get_sqlite_connection()
+                # No fallback to SQLite - use PostgreSQL only for data consistency
+                # All data has been migrated to PostgreSQL
                 return None
             time.sleep(0.1)
 

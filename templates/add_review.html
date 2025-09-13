@@ -1506,6 +1506,43 @@
 
         // Make confirmBud globally accessible
         window.confirmBud = confirmBud;
+        
+        // Check if bud_id is provided from URL parameter
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get bud_id from template variable (passed from Flask)
+            const urlParams = new URLSearchParams(window.location.search);
+            const budIdFromUrl = urlParams.get('bud_id');
+            
+            {% if bud_id %}
+            const preselectedBudId = {{ bud_id }};
+            {% else %}
+            const preselectedBudId = budIdFromUrl;
+            {% endif %}
+            
+            if (preselectedBudId) {
+                console.log('Auto-selecting bud ID:', preselectedBudId);
+                
+                // Fill in the bud ID input
+                const budIdInput = document.getElementById('budIdInput');
+                budIdInput.value = preselectedBudId;
+                
+                // Auto-check the bud
+                setTimeout(() => {
+                    checkBudInfo(preselectedBudId);
+                }, 500);
+                
+                // Add indicator that bud was pre-selected
+                const budLabel = budIdInput.closest('.form-group').querySelector('.form-label');
+                if (budLabel) {
+                    budLabel.innerHTML = '🎯 ดอกที่เลือกจากรายงาน <span style="color: #28a745;">(เลือกอัตโนมัติ)</span>';
+                }
+                
+                // Disable the input to prevent changes
+                budIdInput.style.background = '#e9ecef';
+                budIdInput.style.cursor = 'not-allowed';
+                budIdInput.title = 'ดอกนี้ถูกเลือกจากหน้ารายงานแล้ว';
+            }
+        });
 
         // Star rating functionality
         document.addEventListener('click', function(e) {

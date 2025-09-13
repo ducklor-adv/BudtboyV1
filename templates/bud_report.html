@@ -1936,8 +1936,13 @@
         }
 
         function openReviewModal() {
-            alert('ฟีเจอร์รีวิวจะเปิดใช้งานเร็วๆ นี้! 🌟');
-            // TODO: Implement review modal or redirect to review page
+            if (!currentBudId) {
+                alert('ไม่พบ ID ของดอก กรุณาลองใหม่อีกครั้ง');
+                return;
+            }
+            
+            // เปิดหน้า add-review พร้อมส่ง bud ID
+            window.location.href = `/add-review?bud_id=${currentBudId}`;
         }
 
         // Event listeners

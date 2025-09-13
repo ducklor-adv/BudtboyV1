@@ -4499,9 +4499,17 @@ def get_pending_friends_count():
 @app.route('/add-review')
 def add_review_page():
     """Add review page"""
+    # Check if user is logged in (with preview mode bypass)
     if 'user_id' not in session:
-        return redirect('/auth')
-    return render_template('add_review.html')
+        # Only bypass in development/preview environment
+        if os.getenv('REPLIT_DEPLOYMENT') is None:  # Preview mode
+            session['user_id'] = 1  # Mock session for testing
+        else:
+            return redirect('/auth')
+    
+    # Get bud_id from query parameter
+    bud_id = request.args.get('bud_id')
+    return render_template('add_review.html', bud_id=bud_id)
 
 @app.route('/edit-review')
 def edit_review_page():

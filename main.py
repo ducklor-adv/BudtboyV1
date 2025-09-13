@@ -18,6 +18,24 @@ import requests
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'budtboy-secret-key-2024')
 
+# Helper function to safely format datetime values
+def safe_datetime_format(dt_value):
+    """Safely format datetime values, handling both datetime objects and strings"""
+    if not dt_value:
+        return None
+    try:
+        # If it's already a string, return as is
+        if isinstance(dt_value, str):
+            return dt_value
+        # If it has strftime method (datetime object), format it
+        elif hasattr(dt_value, 'strftime'):
+            return dt_value.strftime('%Y-%m-%d %H:%M:%S')
+        # Otherwise convert to string
+        else:
+            return str(dt_value)
+    except:
+        return str(dt_value) if dt_value else None
+
 # Custom logging filter to hide HEAD requests from logs
 import logging
 class NoHEADFilter(logging.Filter):
@@ -2073,7 +2091,7 @@ def get_user_buds():
                 'thc_percentage': float(row[4]) if row[4] else None,
                 'cbd_percentage': float(row[5]) if row[5] else None,
                 'strain_type': row[6],
-                'created_at': row[7].strftime('%Y-%m-%d %H:%M:%S') if row[7] and hasattr(row[7], 'strftime') else str(row[7]) if row[7] else None,
+                'created_at': safe_datetime_format(row[7]),
                 'image_1_url': f'/uploads/{row[8].split("/")[-1]}' if row[8] else None,
                 'status': row[9] or 'available',
                 'avg_rating': stats['avg_rating'],
@@ -2164,8 +2182,8 @@ def get_user_reviews():
                 'selected_effects': row[5] if row[5] else [],
                 'aroma_flavors': row[6] if row[6] else [],
                 'review_images': row[7] if row[7] else [],
-                'created_at': row[8].strftime('%Y-%m-%d %H:%M:%S') if row[8] else None,
-                'updated_at': row[9].strftime('%Y-%m-%d %H:%M:%S') if row[9] else None,
+                'created_at': safe_datetime_format(row[8]),
+                'updated_at': safe_datetime_format(row[9]),
                 'video_review_url': row[10],
                 'strain_name_en': row[11],
                 'strain_name_th': row[12],
@@ -2947,6 +2965,23 @@ def get_profile():
                     else:
                         profile_image_url = f'/uploads/{user[10].split("/")[-1]}'
 
+                # Helper function to safely format datetime
+                def safe_datetime_format(dt_value):
+                    if not dt_value:
+                        return None
+                    try:
+                        # If it's already a string, return as is
+                        if isinstance(dt_value, str):
+                            return dt_value
+                        # If it has strftime method (datetime object), format it
+                        elif hasattr(dt_value, 'strftime'):
+                            return dt_value.strftime('%Y-%m-%d %H:%M:%S')
+                        # Otherwise convert to string
+                        else:
+                            return str(dt_value)
+                    except:
+                        return str(dt_value) if dt_value else None
+
                 user_data = {
                     'id': user[0],
                     'username': user[1],
@@ -2955,7 +2990,7 @@ def get_profile():
                     'is_budtender': user[4],
                     'is_consumer': user[5],
                     'birth_year': user[6],
-                    'created_at': user[7].strftime('%Y-%m-%d %H:%M:%S') if user[7] else None,
+                    'created_at': safe_datetime_format(user[7]),
                     'is_verified': user[8],
                     'grow_license_file_url': user[9],
                     'profile_image_url': profile_image_url,

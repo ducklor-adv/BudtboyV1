@@ -534,6 +534,48 @@ def ensure_sqlite_schema():
             )
         """)
 
+        # Create referrals table for tracking referral system
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS referrals (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                referrer_user_id INTEGER NOT NULL,
+                referred_user_id INTEGER,
+                referral_code_used TEXT NOT NULL,
+                status TEXT DEFAULT 'clicked',
+                first_seen_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                signed_up_at TIMESTAMP,
+                verified_at TIMESTAMP,
+                converted_at TIMESTAMP,
+                utm_source TEXT,
+                utm_medium TEXT,
+                utm_campaign TEXT,
+                ip_hash TEXT,
+                user_agent_hash TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (referrer_user_id) REFERENCES users(id) ON DELETE CASCADE,
+                FOREIGN KEY (referred_user_id) REFERENCES users(id) ON DELETE CASCADE,
+                CHECK (referrer_user_id != referred_user_id)
+            )
+        """)
+
+        # Create indexes for referrals table
+        cursor.execute("""
+            CREATE INDEX IF NOT EXISTS idx_referrals_referral_code 
+            ON referrals(referral_code_used)
+        """)
+        
+        cursor.execute("""
+            CREATE INDEX IF NOT EXISTS idx_referrals_referrer_status 
+            ON referrals(referrer_user_id, status, created_at)
+        """)
+        
+        cursor.execute("""
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_referrals_unique_pair 
+            ON referrals(referrer_user_id, referred_user_id) 
+            WHERE referred_user_id IS NOT NULL
+        """)
+
         # Commit all DDL first
         conn.commit()
 

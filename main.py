@@ -5271,7 +5271,7 @@ def verify_admin_login(admin_name, password, ip_address=None, user_agent=None):
                     conn.commit()
 
                     # Log successful login
-                    log_admin_activity(admin_name, 'LOGIN_SUCCESS, True, ip_address, user_agent)
+                    log_admin_activity(admin_name, 'LOGIN_SUCCESS', True, ip_address, user_agent)
 
                     cur.close()
                     return_db_connection(conn)

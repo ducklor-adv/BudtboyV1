@@ -690,18 +690,48 @@ def db_now(conn):
     """Return appropriate NOW function for database type"""
     return 'CURRENT_TIMESTAMP' if is_sqlite(conn) else 'NOW()'
 
+def normalize_sql_for_sqlite(query, params=None):
+    """
+    Normalize SQL for SQLite compatibility
+    - Errors when receiving a Composed object 
+    - Strips RETURNING id clauses
+    - Converts %s placeholders to ?
+    """
+    # Error if we receive a Composed object - these should be handled differently
+    if hasattr(query, 'as_string'):
+        raise ValueError("Composed SQL objects should not be passed to SQLite. Use conditional SQL creation instead.")
+    
+    # Ensure we're working with a string
+    if not isinstance(query, str):
+        query = str(query)
+    
+    # Strip RETURNING id clause
+    query = query.replace(' RETURNING id', '').replace(' returning id', '')
+    
+    # Convert %s placeholders to ?
+    query = query.replace('%s', '?')
+    
+    # Replace NOW() with CURRENT_TIMESTAMP
+    query = query.replace('NOW()', 'CURRENT_TIMESTAMP')
+    
+    # Replace INTERVAL syntax (basic case)
+    query = query.replace("NOW() + INTERVAL '30 minutes'", "datetime(CURRENT_TIMESTAMP, '+30 minutes')")
+    
+    return query
+
 def db_execute_with_id(conn, cur, query, params=None):
     """Execute query and return ID, handling RETURNING clause compatibility"""
     if is_sqlite(conn):
-        # SQLite: remove RETURNING clause and use lastrowid
-        query_clean = query.replace(' RETURNING id', '')
+        # SQLite: use normalize_sql_for_sqlite helper
+        normalized_query = normalize_sql_for_sqlite(query, params)
+        
         if params:
-            cur.execute(query_clean, params)
+            cur.execute(normalized_query, params)
         else:
-            cur.execute(query_clean)
+            cur.execute(normalized_query)
         return cur.lastrowid
     else:
-        # PostgreSQL: use RETURNING clause
+        # PostgreSQL: use RETURNING clause as-is
         if params:
             cur.execute(query, params)
         else:
@@ -719,10 +749,8 @@ def safe_float(v):
 def db_execute(conn, cur, query, params=None):
     """Execute query with database-specific SQL adaptation"""
     if is_sqlite(conn):
-        # Replace %s with ? for SQLite
-        adapted_query = query.replace('%s', '?')
-        # Replace NOW() with CURRENT_TIMESTAMP for SQLite
-        adapted_query = adapted_query.replace('NOW()', 'CURRENT_TIMESTAMP')
+        # Use normalize_sql_for_sqlite helper
+        adapted_query = normalize_sql_for_sqlite(query, params)
     else:
         adapted_query = query
     return cur.execute(adapted_query, params or ())
@@ -3728,15 +3756,20 @@ def add_bud():
                 user_id, 'active'
             ]
 
-            # Build the SQL query
-            query = sql.SQL("INSERT INTO buds_data ({}) VALUES ({}) RETURNING id").format(
-                sql.SQL(', ').join(map(sql.Identifier, query_fields)),
-                sql.SQL(', ').join(sql.Placeholder() * len(query_fields))
-            )
+            # Build the SQL query conditionally based on database type
+            if is_sqlite(conn):
+                # SQLite: use plain string with ? placeholders (no RETURNING)
+                field_names = ', '.join(query_fields)
+                placeholders = ', '.join(['?' for _ in query_fields])
+                query = f"INSERT INTO buds_data ({field_names}) VALUES ({placeholders})"
+            else:
+                # PostgreSQL: use Composed objects with RETURNING
+                query = sql.SQL("INSERT INTO buds_data ({}) VALUES ({}) RETURNING id").format(
+                    sql.SQL(', ').join(map(sql.Identifier, query_fields)),
+                    sql.SQL(', ').join(sql.Placeholder() * len(query_fields))
+                )
 
-            cur.execute(query, values)
-
-            bud_id = cur.fetchone()[0]
+            bud_id = db_execute_with_id(conn, cur, query, values)
             conn.commit()
 
             return jsonify({

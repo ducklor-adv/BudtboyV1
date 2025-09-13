@@ -5205,6 +5205,13 @@ def is_admin():
 
     print(f"Admin check - logged_in: {admin_logged_in}, has_token: {bool(admin_token)}, admin_name: {admin_name}")
 
+    # In preview mode, allow fallback admin access
+    is_preview = os.environ.get('REPL_SLUG') and not os.environ.get('REPLIT_DEPLOYMENT')
+    if is_preview:
+        # Allow any valid admin token or session (more lenient for development)
+        if admin_logged_in and admin_token:
+            return True
+            
     if not admin_logged_in or not admin_token:
         return False
 

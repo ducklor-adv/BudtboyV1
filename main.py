@@ -1924,6 +1924,42 @@ def create_tables():
                 );
             """)
 
+            # Create friends table
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS friends (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                    friend_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                    status VARCHAR(20) DEFAULT 'pending',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    UNIQUE(user_id, friend_id),
+                    CHECK (user_id != friend_id)
+                );
+            """)
+
+            # Create referrals table for tracking referral system
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS referrals (
+                    id SERIAL PRIMARY KEY,
+                    referrer_user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                    referred_user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                    referral_code_used VARCHAR(50) NOT NULL,
+                    status VARCHAR(20) DEFAULT 'clicked',
+                    first_seen_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    signed_up_at TIMESTAMP,
+                    verified_at TIMESTAMP,
+                    converted_at TIMESTAMP,
+                    utm_source VARCHAR(100),
+                    utm_medium VARCHAR(100),
+                    utm_campaign VARCHAR(100),
+                    ip_hash VARCHAR(64),
+                    user_agent_hash VARCHAR(64),
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    CHECK (referrer_user_id != referred_user_id)
+                );
+            """)
+
             # Create index for better performance
             cur.execute("""
                 CREATE INDEX IF NOT EXISTS idx_strain_names_th ON strain_names(name_th);

@@ -3417,7 +3417,10 @@ def get_bud(bud_id):
     cached_data = get_cache(cache_key)
     if cached_data:
         print(f"Returning cached data for bud {bud_id}")
-        return jsonify(cached_data)
+        return jsonify({
+            'success': True,
+            'bud': cached_data
+        })
 
     conn = get_db_connection()
     if conn:
@@ -4315,7 +4318,10 @@ def get_bud_info(bud_id):
     cached_data = get_cache(cache_key)
     if cached_data:
         print(f"Returning cached data for bud {bud_id}")
-        return jsonify(cached_data)
+        return jsonify({
+            'success': True,
+            'bud': cached_data
+        })
 
     conn = None
     cur = None

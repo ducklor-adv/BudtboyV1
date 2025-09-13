@@ -5642,6 +5642,42 @@ def admin_logout():
     
     return redirect('/admin_login?logged_out=1')
 
+# Admin Sub-Pages
+@app.route('/admin/users')
+def admin_users():
+    """Admin users management page"""
+    if not is_admin():
+        return redirect('/admin_login')
+    return render_template('admin_users.html')
+
+@app.route('/admin/buds')
+def admin_buds():
+    """Admin buds management page"""
+    if not is_admin():
+        return redirect('/admin_login')
+    return render_template('admin_buds.html')
+
+@app.route('/admin/reviews')
+def admin_reviews():
+    """Admin reviews management page"""
+    if not is_admin():
+        return redirect('/admin_login')
+    return render_template('admin_reviews.html')
+
+@app.route('/admin/activities')
+def admin_activities():
+    """Admin activities management page"""
+    if not is_admin():
+        return redirect('/admin_login')
+    return render_template('admin_activities.html')
+
+@app.route('/admin/settings')
+def admin_settings():
+    """Admin settings page"""
+    if not is_admin():
+        return redirect('/admin_login')
+    return render_template('admin_settings.html')
+
 # Admin API Routes for Dashboard
 @app.route('/api/admin/stats')
 def admin_stats():

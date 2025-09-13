@@ -182,6 +182,10 @@ def allowed_file(filename):
 # Database connection function
 def get_db_connection():
     """Get database connection with improved error handling"""
+    # Preview mode: Use SQLite directly
+    if is_preview():
+        return get_sqlite_connection()
+    
     global connection_pool
     max_retries = 3
 
@@ -430,6 +434,10 @@ def ensure_sqlite_schema():
 
 def init_connection_pool():
     """Initialize connection pool"""
+    # Skip PostgreSQL in preview mode
+    if is_preview():
+        return
+        
     global connection_pool
     try:
         with pool_lock:
@@ -564,10 +572,10 @@ def create_tables():
 
             # Create users table with database-specific syntax
             if is_sqlite(conn):
-                cur.execute("""
-                    CREATE TABLE IF NOT EXISTS users (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        username TEXT UNIQUE NOT NULL,
+                # Use ensure_sqlite_schema for SQLite
+                ensure_sqlite_schema()
+                return
+            else:
                         email TEXT UNIQUE NOT NULL,
                         password_hash TEXT NOT NULL,
                         is_grower BOOLEAN DEFAULT FALSE,
@@ -5266,43 +5274,60 @@ def preview_eligible_buds():
             if criteria.get('allowed_strain_types') and criteria['allowed_strain_types'] != '':
                 types = [t.strip() for t in criteria['allowed_strain_types'].split(',') if t.strip() and t.strip() != '']
                 if types:
-                    where_conditions.append(f"b.strain_type = ANY(%s)")
-                    params['types'] = types
+                    if is_sqlite(conn):
+                        placeholders = ','.join(['?' for _ in types])
+                        where_conditions.append(f"b.strain_type IN ({placeholders})")
+                        params = list(params.values()) + types
+                    else:
+                        where_conditions.append("b.strain_type = ANY(%(types)s)")
+                        params['types'] = types
 
             if criteria.get('allowed_grow_methods') and criteria['allowed_grow_methods'] != '':
                 methods = [m.strip() for m in criteria['allowed_grow_methods'].split(',') if m.strip() and m.strip() != '']
                 if methods:
-                    where_conditions.append(f"b.grow_method = ANY(%s)")
-                    params['methods'] = methods
+                    if is_sqlite(conn):
+                        placeholders = ','.join(['?' for _ in methods])
+                        where_conditions.append(f"b.grow_method IN ({placeholders})")
+                    else:
+                        where_conditions.append("b.grow_method = ANY(%(methods)s)")
+                        params['methods'] = methods
 
             if criteria.get('allowed_grades') and criteria['allowed_grades'] != '':
                 grades = [g.strip() for g in criteria['allowed_grades'].split(',') if g.strip() and g.strip() != '']
                 if grades:
-                    where_conditions.append(f"b.grade = ANY(%s)")
-                    params['grades'] = grades
+                    if is_sqlite(conn):
+                        placeholders = ','.join(['?' for _ in grades])
+                        where_conditions.append(f"b.grade IN ({placeholders})")
+                    else:
+                        where_conditions.append("b.grade = ANY(%(grades)s)")
+                        params['grades'] = grades
 
             if criteria.get('allowed_fertilizer_types') and criteria['allowed_fertilizer_types'] != '':
                 ferts = [f.strip() for f in criteria['allowed_fertilizer_types'].split(',') if f.strip() and f.strip() != '']
                 if ferts:
-                    where_conditions.append(f"b.fertilizer_type = ANY(%s)")
-                    params['ferts'] = ferts
+                    if is_sqlite(conn):
+                        placeholders = ','.join(['?' for _ in ferts])
+                        where_conditions.append(f"b.fertilizer_type IN ({placeholders})")
+                    else:
+                        where_conditions.append("b.fertilizer_type = ANY(%(ferts)s)")
+                        params['ferts'] = ferts
 
             if criteria.get('allowed_recommended_times') and criteria['allowed_recommended_times'] != '':
                 times = [t.strip() for t in criteria['allowed_recommended_times'].split(',') if t.strip() and t.strip() != '']
                 if times:
-                    where_conditions.append(f"b.recommended_time = ANY(%s)")
+                    where_conditions.append("b.recommended_time = ANY(%(times)s)")
                     params['times'] = times
 
             if criteria.get('allowed_flowering_types') and criteria['allowed_flowering_types'] != '':
                 flowering = [f.strip() for f in criteria['allowed_flowering_types'].split(',') if f.strip() and f.strip() != '']
                 if flowering:
-                    where_conditions.append(f"b.flowering_type = ANY(%s)")
+                    where_conditions.append("b.flowering_type = ANY(%(flowering)s)")
                     params['flowering'] = flowering
 
             if criteria.get('allowed_status') and criteria['allowed_status'] != '':
                 statuses = [s.strip() for s in criteria['allowed_status'].split(',') if s.strip() and s.strip() != '']
                 if statuses:
-                    where_conditions.append(f"b.status = ANY(%s)")
+                    where_conditions.append("b.status = ANY(%(statuses)s)")
                     params['statuses'] = statuses
 
             # THC/CBD ranges
@@ -5328,7 +5353,9 @@ def preview_eligible_buds():
                 if terpenes:
                     terpene_conditions = []
                     for i, terpene in enumerate(terpenes):
-                        terpene_conditions.append(f"(b.top_terpenes_1 = %({f'terpene_{i}'})s OR b.top_terpenes_2 = %({f'terpene_{i}'})s OR b.top_terpenes_3 = %({f'terpene_{i}'})s)")
+                        terpene_param_name = f"terpene_{i}"
+                        sql_condition = "(b.top_terpenes_1 = %(" + terpene_param_name + ")s OR b.top_terpenes_2 = %(" + terpene_param_name + ")s OR b.top_terpenes_3 = %(" + terpene_param_name + ")s)"
+                        terpene_conditions.append(sql_condition)
                         params[f'terpene_{i}'] = terpene
                     where_conditions.append(f"({' OR '.join(terpene_conditions)})")
 
@@ -5337,7 +5364,7 @@ def preview_eligible_buds():
                 where_conditions.append("b.lab_test_name IS NOT NULL AND b.lab_test_name != ''")
 
             # Image count requirement
-            if criteria.get('require_min_images']:
+            if criteria.get('require_min_images'):
                 min_images = criteria.get('min_image_count', 3)
                 image_conditions = []
                 for i in range(1, min_images + 1):

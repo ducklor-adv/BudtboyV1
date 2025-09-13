@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify, url_for, session, re
 import psycopg2
 from psycopg2 import pool, sql
 from psycopg2.extras import RealDictCursor
+import sqlite3
 import os
 from datetime import datetime, timedelta
 from werkzeug.utils import secure_filename
@@ -222,10 +223,154 @@ def get_db_connection():
         except Exception as e:
             if retry_count == max_retries - 1:
                 print(f"Database connection failed: {e}")
+                # Fallback to SQLite for development/preview mode
+                if is_preview():
+                    print("🔄 Falling back to SQLite database for preview mode")
+                    return get_sqlite_connection()
                 return None
             time.sleep(0.1)
 
     return None
+
+# SQLite fallback functions for preview mode
+def get_sqlite_connection():
+    """Get SQLite connection as fallback"""
+    try:
+        db_path = 'budtboy_preview.db'
+        conn = sqlite3.connect(db_path, check_same_thread=False)
+        conn.row_factory = sqlite3.Row  # Enable dict-like access
+        conn.execute("PRAGMA journal_mode=WAL")  # Better concurrency
+        conn.execute("PRAGMA synchronous=NORMAL")  # Better performance
+        conn.execute("PRAGMA foreign_keys=ON")  # Enable foreign keys
+        return conn
+    except Exception as e:
+        print(f"SQLite connection failed: {e}")
+        return None
+
+def ensure_sqlite_schema():
+    """Ensure SQLite has the required schema"""
+    conn = get_sqlite_connection()
+    if not conn:
+        return False
+    
+    try:
+        cursor = conn.cursor()
+        
+        # Create users table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT UNIQUE NOT NULL,
+                email TEXT UNIQUE NOT NULL,
+                password_hash TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                approved BOOLEAN DEFAULT FALSE,
+                profile_image TEXT,
+                bio TEXT,
+                location TEXT,
+                birth_date TEXT,
+                experience_level TEXT,
+                favorite_strains TEXT,
+                last_login TIMESTAMP
+            )
+        """)
+        
+        # Create admin_users table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS admin_users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                admin_name TEXT UNIQUE NOT NULL,
+                password_hash TEXT NOT NULL,
+                email TEXT,
+                permissions TEXT DEFAULT 'full',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                last_login TIMESTAMP,
+                is_active BOOLEAN DEFAULT TRUE
+            )
+        """)
+        
+        # Create buds table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS buds (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                strain_type TEXT,
+                thc_content REAL,
+                cbd_content REAL,
+                description TEXT,
+                effects TEXT,
+                medical_uses TEXT,
+                growing_info TEXT,
+                price_per_gram REAL,
+                availability TEXT,
+                image_url TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                created_by INTEGER,
+                FOREIGN KEY (created_by) REFERENCES users(id)
+            )
+        """)
+        
+        # Create reviews table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS reviews (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                bud_id INTEGER NOT NULL,
+                rating INTEGER CHECK(rating >= 1 AND rating <= 5),
+                title TEXT,
+                content TEXT,
+                taste_rating INTEGER CHECK(taste_rating >= 1 AND taste_rating <= 5),
+                potency_rating INTEGER CHECK(potency_rating >= 1 AND potency_rating <= 5),
+                appearance_rating INTEGER CHECK(appearance_rating >= 1 AND appearance_rating <= 5),
+                aroma_rating INTEGER CHECK(aroma_rating >= 1 AND aroma_rating <= 5),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users(id),
+                FOREIGN KEY (bud_id) REFERENCES buds(id)
+            )
+        """)
+        
+        # Create activities table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS activities (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                activity_type TEXT NOT NULL,
+                description TEXT,
+                target_id INTEGER,
+                target_type TEXT,
+                metadata TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users(id)
+            )
+        """)
+        
+        # Create friends table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS friends (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                friend_id INTEGER NOT NULL,
+                status TEXT DEFAULT 'pending',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users(id),
+                FOREIGN KEY (friend_id) REFERENCES users(id),
+                UNIQUE(user_id, friend_id)
+            )
+        """)
+        
+        conn.commit()
+        conn.close()
+        print("✅ SQLite schema initialized successfully")
+        return True
+        
+    except Exception as e:
+        print(f"❌ Failed to initialize SQLite schema: {e}")
+        if conn:
+            conn.close()
+        return False
 
 def init_connection_pool():
     """Initialize connection pool"""
@@ -5937,6 +6082,16 @@ def admin_users_api():
 if __name__ == '__main__':
     # Initialize connection pool
     init_connection_pool()
+
+    # Check if we're in preview mode and initialize SQLite if needed
+    if is_preview():
+        print("🌍 Environment: Preview")
+        print("🔐 Fallback Auth: Enabled")
+        # Initialize SQLite schema for preview mode
+        ensure_sqlite_schema()
+    else:
+        print("🌍 Environment: Production")
+        print("🔐 OAuth: Enabled")
 
     # Create tables on startup
     create_tables()

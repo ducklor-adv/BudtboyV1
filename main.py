@@ -5581,6 +5581,185 @@ def fallback_signup():
     else:
         return jsonify({'success': False, 'error': 'เชื่อมต่อฐานข้อมูลไม่ได้'}), 500
 
+# Admin Routes
+@app.route('/admin_login')
+def admin_login_page():
+    """Display admin login page"""
+    return render_template('admin_login.html')
+
+@app.route('/admin_login', methods=['POST'])
+def admin_login_post():
+    """Process admin login"""
+    data = request.get_json()
+    admin_name = data.get('admin_name')
+    password = data.get('password')
+    
+    if not admin_name or not password:
+        return jsonify({'success': False, 'error': 'กรุณากรอกข้อมูลให้ครบถ้วน'}), 400
+    
+    # Get client info for security logging
+    ip_address = request.environ.get('HTTP_X_FORWARDED_FOR', request.environ.get('REMOTE_ADDR'))
+    user_agent = request.headers.get('User-Agent')
+    
+    success, message, token = verify_admin_login(admin_name, password, ip_address, user_agent)
+    
+    if success:
+        # Set admin session
+        session['admin_logged_in'] = True
+        session['admin_token'] = token
+        session['admin_name'] = admin_name
+        session.permanent = True
+        
+        return jsonify({
+            'success': True, 
+            'message': message,
+            'redirect': '/admin'
+        })
+    else:
+        return jsonify({'success': False, 'error': message}), 401
+
+@app.route('/admin')
+def admin_dashboard():
+    """Display admin dashboard"""
+    if not is_admin():
+        return redirect('/admin_login')
+    return render_template('admin.html')
+
+@app.route('/admin_logout')
+def admin_logout():
+    """Admin logout"""
+    # Clear admin session
+    session.pop('admin_logged_in', None)
+    session.pop('admin_token', None)
+    session.pop('admin_name', None)
+    
+    return redirect('/admin_login?logged_out=1')
+
+# Admin API Routes for Dashboard
+@app.route('/api/admin/stats')
+def admin_stats():
+    """Get admin statistics"""
+    if not is_admin():
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({
+            'total_users': 0,
+            'pending_users': 0,
+            'total_buds': 0,
+            'total_reviews': 0,
+            'total_activities': 0,
+            'active_activities': 0
+        })
+    
+    try:
+        cur = conn.cursor()
+        
+        # Count total users
+        cur.execute("SELECT COUNT(*) FROM users")
+        result = cur.fetchone()
+        total_users = result[0] if result else 0
+        
+        # Count pending users
+        cur.execute("SELECT COUNT(*) FROM users WHERE approved = FALSE")
+        result = cur.fetchone()
+        pending_users = result[0] if result else 0
+        
+        # Count total buds
+        cur.execute("SELECT COUNT(*) FROM buds_data")
+        result = cur.fetchone()
+        total_buds = result[0] if result else 0
+        
+        # Count total reviews
+        cur.execute("SELECT COUNT(*) FROM reviews")
+        result = cur.fetchone()
+        total_reviews = result[0] if result else 0
+        
+        # Count total activities
+        cur.execute("SELECT COUNT(*) FROM activities")
+        result = cur.fetchone()
+        total_activities = result[0] if result else 0
+        
+        # Count active activities
+        cur.execute("SELECT COUNT(*) FROM activities WHERE status = 'active'")
+        result = cur.fetchone()
+        active_activities = result[0] if result else 0
+        
+        return jsonify({
+            'total_users': total_users,
+            'pending_users': pending_users,
+            'total_buds': total_buds,
+            'total_reviews': total_reviews,
+            'total_activities': total_activities,
+            'active_activities': active_activities
+        })
+        
+    except Exception as e:
+        print(f"Error getting admin stats: {e}")
+        return jsonify({
+            'total_users': 0,
+            'pending_users': 0,
+            'total_buds': 0,
+            'total_reviews': 0,
+            'total_activities': 0,
+            'active_activities': 0
+        })
+    finally:
+        if cur:
+            try:
+                cur.close()
+            except:
+                pass
+        if conn:
+            return_db_connection(conn)
+
+@app.route('/api/admin/pending_users')
+def admin_pending_users():
+    """Get pending users for approval"""
+    if not is_admin():
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({'users': []})
+    
+    try:
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT u.id, u.username, u.email, u.created_at, u.profile_image_url,
+                   ref.username as referred_by_username
+            FROM users u
+            LEFT JOIN users ref ON u.referred_by = ref.id
+            WHERE u.approved = FALSE
+            ORDER BY u.created_at ASC
+        """)
+        
+        users = []
+        for row in cur.fetchall():
+            users.append({
+                'id': row[0],
+                'username': row[1],
+                'email': row[2],
+                'created_at': row[3].isoformat() if row[3] else None,
+                'profile_image_url': row[4],
+                'referred_by_username': row[5]
+            })
+        
+        return jsonify({'users': users})
+        
+    except Exception as e:
+        print(f"Error getting pending users: {e}")
+        return jsonify({'users': []})
+    finally:
+        if cur:
+            try:
+                cur.close()
+            except:
+                pass
+        if conn:
+            return_db_connection(conn)
+
 if __name__ == '__main__':
     # Initialize connection pool
     init_connection_pool()

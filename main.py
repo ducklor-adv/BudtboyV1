@@ -5433,6 +5433,92 @@ def get_bud_info(bud_id):
         if conn:
             return_db_connection(conn)
 
+@app.route('/api/friends')
+def get_friends():
+    """Get friends list for current user"""
+    if not is_authenticated():
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    user_id = session['user_id']
+    conn = get_db_connection()
+    
+    if conn:
+        try:
+            cur = conn.cursor()
+            placeholder = db_placeholder(conn)
+            
+            # Get friends list with user details
+            # A friendship exists when user_id -> friend_id OR friend_id -> user_id with status='accepted'
+            cur.execute(f"""
+                SELECT 
+                    u.id, u.username, u.email, u.profile_image_url,
+                    u.is_consumer, u.is_grower, u.is_budtender,
+                    f.status, f.created_at as friend_since
+                FROM friends f
+                JOIN users u ON (
+                    (f.user_id = {placeholder} AND f.friend_id = u.id) OR 
+                    (f.friend_id = {placeholder} AND f.user_id = u.id)
+                )
+                WHERE f.status = 'accepted'
+                AND u.id != {placeholder}
+                ORDER BY f.created_at DESC
+            """, (user_id, user_id, user_id))
+
+            friends = []
+            for row in cur.fetchall():
+                if is_sqlite(conn):
+                    profile_image = row[3] if row[3] else None
+                    friend_data = {
+                        'id': row[0],
+                        'username': row[1], 
+                        'email': row[2],
+                        'profile_image_url': profile_image,
+                        'is_consumer': bool(row[4]),
+                        'is_grower': bool(row[5]),
+                        'is_budtender': bool(row[6]),
+                        'status': row[7],
+                        'friend_since': row[8]
+                    }
+                else:
+                    # PostgreSQL cursor with RealDictCursor
+                    profile_image = row['profile_image_url'] if row['profile_image_url'] else None
+                    friend_data = {
+                        'id': row['id'],
+                        'username': row['username'],
+                        'email': row['email'], 
+                        'profile_image_url': profile_image,
+                        'is_consumer': bool(row['is_consumer']),
+                        'is_grower': bool(row['is_grower']),
+                        'is_budtender': bool(row['is_budtender']),
+                        'status': row['status'],
+                        'friend_since': row['friend_since']
+                    }
+
+                # Format profile image URL if exists
+                if friend_data['profile_image_url']:
+                    if not friend_data['profile_image_url'].startswith('/'):
+                        friend_data['profile_image_url'] = f"/{friend_data['profile_image_url']}"
+
+                friends.append(friend_data)
+
+            return jsonify({
+                'friends': friends,
+                'total': len(friends)
+            })
+
+        except Exception as e:
+            return jsonify({'error': f'Database error: {str(e)}'}), 500
+        finally:
+            cur.close()
+            return_db_connection(conn)
+    else:
+        # Fallback for preview mode
+        return jsonify({
+            'friends': [],
+            'total': 0,
+            'message': 'ไม่มีเพื่อนในโหมดทดสอบ'
+        })
+
 @app.route('/api/pending_friends_count')
 def get_pending_friends_count():
     """Get pending friends count"""

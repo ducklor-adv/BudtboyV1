@@ -157,4 +157,43 @@ cython_debug/
 #  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
-#.idea/
+.idea/
+.vscode/
+
+# Database files
+*.db
+*.db-journal
+*.db.bak-*
+*.sqlite
+*.sqlite3
+budtboy_*.db
+
+# Logs
+logs/
+
+# Uploads and user data
+uploads/*
+!uploads/.gitkeep
+attached_assets/*
+!attached_assets/.gitkeep
+
+# Replit specific (not needed for local)
+.replit
+replit.md
+.config/
+.local/
+uv.lock
+
+# Cookies and session data
+*cookies.txt
+admin_cookies.txt
+test_cookies.txt
+
+# Backup files
+*.bak
+*.backup
+
+# OS specific
+.DS_Store
+Thumbs.db
+desktop.ini

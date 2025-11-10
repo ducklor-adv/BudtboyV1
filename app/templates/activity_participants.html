@@ -1,0 +1,681 @@
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cannabis App - ผู้เข้าร่วมกิจกรรม</title>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e8f5e8 0%, #f0f8ff 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0;
+            background: white;
+            border-radius: 0;
+            box-shadow: none;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            padding: 20px 30px;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .header-title {
+            text-align: center;
+            flex: 1;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .content {
+            padding: 20px;
+            padding-bottom: 100px;
+        }
+
+        .activity-info {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .activity-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border: 1px solid #e1e5e9;
+        }
+
+        .activity-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .activity-title {
+            color: #2c5530;
+            margin: 0;
+            font-size: 22px;
+            flex: 1;
+        }
+
+        .activity-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .status-upcoming { background: #e3f2fd; color: #1976d2; }
+        .status-registration_open { background: #e8f5e9; color: #2e7d32; }
+        .status-registration_closed { background: #fff3e0; color: #f57c00; }
+        .status-judging { background: #f3e5f5; color: #7b1fa2; }
+        .status-completed { background: #e0e0e0; color: #616161; }
+
+        .activity-description {
+            color: #555;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .activity-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .detail-icon {
+            font-size: 18px;
+        }
+
+        .prizes {
+            background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .prizes-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #f57c00;
+            font-size: 16px;
+        }
+
+        .prize-list {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .prize-item {
+            flex: 1;
+            min-width: 120px;
+            text-align: center;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .prize-medal {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .prize-name {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .prize-amount {
+            font-weight: 600;
+            color: #f57c00;
+            font-size: 14px;
+        }
+
+        .activity-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e1e5e9;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .participants-count {
+            font-weight: 600;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-secondary {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .btn-secondary:hover {
+            background: #c8e6c9;
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #45a049;
+            transform: translateY(-1px);
+        }
+
+        .participants-list {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+        }
+
+        .participant-card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+            border: 1px solid #e1e5e9;
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            justify-content: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .participant-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .participant-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+
+        .participant-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #a78bfa, #60a5fa);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .participant-info {
+            width: 100%;
+        }
+
+        .participant-name {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .participant-strain {
+            font-size: 12px;
+            color: #666;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .rank-badge {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .rank-1 { background: #ffd700; color: #b8860b; }
+        .rank-2 { background: #c0c0c0; color: #708090; }
+        .rank-3 { background: #cd7f32; color: #8b4513; }
+
+        .participant-submission {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #4CAF50;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+            grid-column: 1 / -1;
+        }
+
+        @media (max-width: 1200px) {
+            .participants-list {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width: 900px) {
+            .participants-list {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .participants-list {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .participant-avatar {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+
+            .participant-name {
+                font-size: 13px;
+            }
+
+            .participant-strain {
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="/activities" class="back-btn">← กลับ</a>
+            <div class="header-title">
+                <h1>👥 ผู้เข้าร่วมกิจกรรม</h1>
+            </div>
+            <button class="back-btn" onclick="captureScreenshot()" style="border: none;">📸 บันทึกรูป</button>
+        </div>
+
+        <div class="content">
+            <div class="activity-info" id="activityInfo">
+                <div class="loading-spinner"></div>
+                <p>กำลังโหลดข้อมูลกิจกรรม...</p>
+            </div>
+
+            <h2 style="margin: 20px 0 15px 0; color: #2c5530; font-size: 20px;">👥 ผู้เข้าร่วมกิจกรรม</h2>
+
+            <div class="participants-list" id="participantsList">
+                <div class="empty-state">
+                    <div class="loading-spinner"></div>
+                    <p>กำลังโหลดผู้เข้าร่วม...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const activityId = {{ activity_id }};
+
+        async function loadActivityInfo() {
+            try {
+                const response = await fetch(`/api/activities/${activityId}/participants`);
+                const data = await response.json();
+
+                if (data.activity) {
+                    const activity = data.activity;
+                    activity.participant_count = data.total || 0;
+
+                    document.getElementById('activityInfo').innerHTML = `
+                        <div class="activity-card">
+                            <div class="activity-header">
+                                <h3 class="activity-title">${activity.name}</h3>
+                                <span class="activity-status status-${activity.status}">
+                                    ${getStatusText(activity.status)}
+                                </span>
+                            </div>
+
+                            ${activity.description ? `<div class="activity-description">${activity.description}</div>` : ''}
+
+                            ${activity.judging_criteria ? `
+                                <div class="activity-description" style="margin-top: 10px; padding: 10px; background: #f0f8ff; border-left: 3px solid #4CAF50; border-radius: 5px;">
+                                    <strong>⚖️ เกณฑ์ตัดสิน:</strong> ${activity.judging_criteria}
+                                </div>
+                            ` : ''}
+
+                            <div class="activity-details">
+                                <div class="detail-item">
+                                    <span class="detail-icon">📅</span>
+                                    <span>เปิดสมัคร: ${formatDate(activity.start_registration_date)}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-icon">⏰</span>
+                                    <span>ปิดสมัคร: ${formatDate(activity.end_registration_date)}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-icon">👥</span>
+                                    <span>ผู้เข้าร่วม: ${activity.participant_count}${activity.max_participants > 0 ? '/' + activity.max_participants : ''} คน</span>
+                                </div>
+                            </div>
+
+                            ${renderPrizes(activity)}
+
+                            <div class="activity-actions">
+                                <div class="participants-count">
+                                    ผู้เข้าร่วม ${activity.participant_count} คน
+                                </div>
+                                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                    <button class="btn btn-secondary" onclick="window.location.href='/activities'">
+                                        📋 รายละเอียด
+                                    </button>
+                                    <button class="btn btn-secondary" onclick="window.location.href='/activities/${activityId}/participants'" style="background: #4CAF50; color: white;">
+                                        👥 ดูผู้เข้าร่วม
+                                    </button>
+                                    ${activity.status === 'registration_open' ?
+                                        '<button class="btn btn-primary" onclick="window.location.href=\'/activities/' + activityId + '/join\'">เข้าร่วมกิจกรรม</button>'
+                                    : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading activity info:', error);
+            }
+        }
+
+        function renderPrizes(activity) {
+            if (!activity.first_prize_value && !activity.second_prize_value && !activity.third_prize_value &&
+                !activity.first_prize_description && !activity.second_prize_description && !activity.third_prize_description) {
+                return '';
+            }
+
+            return `
+                <div class="prizes">
+                    <div class="prizes-title">🏆 รางวัล</div>
+                    <div class="prize-list">
+                        ${activity.first_prize_description || activity.first_prize_value > 0 ? `
+                            <div class="prize-item">
+                                <div class="prize-medal">🥇</div>
+                                ${activity.first_prize_image ? `<img src="${activity.first_prize_image}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px; margin: 5px 0;" alt="รางวัลที่ 1">` : ''}
+                                <div class="prize-name">${activity.first_prize_description || 'รางวัลที่ 1'}</div>
+                                <div class="prize-amount">${formatMoney(activity.first_prize_value)}</div>
+                            </div>
+                        ` : ''}
+                        ${activity.second_prize_description || activity.second_prize_value > 0 ? `
+                            <div class="prize-item">
+                                <div class="prize-medal">🥈</div>
+                                ${activity.second_prize_image ? `<img src="${activity.second_prize_image}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px; margin: 5px 0;" alt="รางวัลที่ 2">` : ''}
+                                <div class="prize-name">${activity.second_prize_description || 'รางวัลที่ 2'}</div>
+                                <div class="prize-amount">${formatMoney(activity.second_prize_value)}</div>
+                            </div>
+                        ` : ''}
+                        ${activity.third_prize_description || activity.third_prize_value > 0 ? `
+                            <div class="prize-item">
+                                <div class="prize-medal">🥉</div>
+                                ${activity.third_prize_image ? `<img src="${activity.third_prize_image}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px; margin: 5px 0;" alt="รางวัลที่ 3">` : ''}
+                                <div class="prize-name">${activity.third_prize_description || 'รางวัลที่ 3'}</div>
+                                <div class="prize-amount">${formatMoney(activity.third_prize_value)}</div>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        async function loadParticipants() {
+            try {
+                const response = await fetch(`/api/activities/${activityId}/participants`);
+                const data = await response.json();
+
+                if (data.participants) {
+                    displayParticipants(data.participants);
+                } else {
+                    showError('ไม่สามารถโหลดข้อมูลผู้เข้าร่วมได้');
+                }
+            } catch (error) {
+                console.error('Error loading participants:', error);
+                showError('เกิดข้อผิดพลาดในการโหลดข้อมูล');
+            }
+        }
+
+        function displayParticipants(participants) {
+            const participantsList = document.getElementById('participantsList');
+
+            if (!participants || participants.length === 0) {
+                participantsList.innerHTML = `
+                    <div class="empty-state">
+                        <p>ยังไม่มีผู้เข้าร่วมกิจกรรม</p>
+                    </div>
+                `;
+                return;
+            }
+
+            participantsList.innerHTML = participants.map(participant => `
+                <div class="participant-card">
+                    <div class="participant-avatar">
+                        ${participant.profile_image_url ?
+                            `<img src="${participant.profile_image_url}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" alt="Profile">` :
+                            (participant.display_name || participant.username).charAt(0).toUpperCase()
+                        }
+                    </div>
+                    <div class="participant-info">
+                        <div class="participant-name" title="${participant.display_name || participant.username}">${participant.display_name || participant.username}</div>
+                        ${participant.bud_id ? `
+                            <div class="participant-strain" title="${participant.strain_name_th || participant.strain_name_en || 'ไม่ระบุ'}">
+                                ${participant.image_1_url ? `<div style="width: 50px; height: 50px; margin: 8px auto; border-radius: 8px; overflow: hidden;"><img src="${participant.image_1_url}" style="width: 100%; height: 100%; object-fit: cover;" alt="Bud"></div>` : ''}
+                                ${participant.strain_name_th || participant.strain_name_en || 'ไม่ระบุ'}
+                            </div>
+                            ${participant.grade ? `
+                                <div style="font-size: 11px; color: #4CAF50; font-weight: 600; margin-top: 5px;">
+                                    ${participant.grade}
+                                </div>
+                            ` : ''}
+                        ` : '<div class="participant-strain" style="color: #999; font-style: italic; font-size: 11px;">ยังไม่ส่งดอก</div>'}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getStatusText(status) {
+            const statusMap = {
+                'upcoming': 'เร็วๆ นี้',
+                'registration_open': 'เปิดรับสมัคร',
+                'registration_closed': 'ปิดรับสมัคร',
+                'judging': 'กำลังตัดสิน',
+                'completed': 'เสร็จสิ้น'
+            };
+            return statusMap[status] || status;
+        }
+
+        function formatMoney(amount) {
+            if (!amount || amount === 0) return '-';
+            return new Intl.NumberFormat('th-TH', {
+                style: 'currency',
+                currency: 'THB'
+            }).format(amount);
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '-';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('th-TH', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function showError(message) {
+            const participantsList = document.getElementById('participantsList');
+            participantsList.innerHTML = `
+                <div class="empty-state">
+                    <p>${message}</p>
+                    <button onclick="loadParticipants()" style="background: #4CAF50; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">ลองใหม่</button>
+                </div>
+            `;
+        }
+
+        // Load data on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadActivityInfo();
+            loadParticipants();
+        });
+
+        async function captureScreenshot() {
+            try {
+                const button = event.target;
+                const originalText = button.textContent;
+                button.textContent = '⏳ กำลังบันทึก...';
+                button.disabled = true;
+
+                // Hide the screenshot button temporarily
+                button.style.visibility = 'hidden';
+
+                // Scroll to top to ensure everything is visible
+                window.scrollTo(0, 0);
+
+                // Wait a moment for render
+                await new Promise(resolve => setTimeout(resolve, 300));
+
+                // Capture the entire page with maximum quality
+                const canvas = await html2canvas(document.body, {
+                    scale: 3, // Increased from 2 to 3 for higher quality
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: '#ffffff',
+                    logging: false,
+                    windowWidth: document.documentElement.scrollWidth,
+                    windowHeight: document.documentElement.scrollHeight,
+                    // Additional quality settings
+                    imageTimeout: 0,
+                    removeContainer: true,
+                    scrollX: 0,
+                    scrollY: 0,
+                    width: document.documentElement.scrollWidth,
+                    height: document.documentElement.scrollHeight,
+                    // Improve font rendering
+                    foreignObjectRendering: false,
+                    // Better image quality
+                    letterRendering: true
+                });
+
+                // Show the button again
+                button.style.visibility = 'visible';
+                button.textContent = originalText;
+                button.disabled = false;
+
+                // Convert to blob with maximum quality (1.0 = 100%)
+                canvas.toBlob(function(blob) {
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+                    link.download = `activity-${activityId}-participants-${timestamp}.png`;
+                    link.href = url;
+                    link.click();
+                    URL.revokeObjectURL(url);
+                }, 'image/png', 1.0); // PNG format with quality 1.0 (maximum)
+
+            } catch (error) {
+                console.error('Error capturing screenshot:', error);
+                alert('เกิดข้อผิดพลาดในการบันทึกรูป กรุณาลองใหม่อีกครั้ง');
+                const button = event.target;
+                button.textContent = '📸 บันทึกรูป';
+                button.disabled = false;
+                button.style.visibility = 'visible';
+            }
+        }
+    </script>
+</body>
+</html>

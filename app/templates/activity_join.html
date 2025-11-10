@@ -1,0 +1,572 @@
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cannabis App - เข้าร่วมกิจกรรม</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e8f5e8 0%, #f0f8ff 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0;
+            background: white;
+            border-radius: 0;
+            box-shadow: none;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            padding: 20px 30px;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .header-title {
+            text-align: center;
+            flex: 1;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .content {
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .activity-info {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border: 1px solid #e1e5e9;
+        }
+
+        .form-section {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border: 1px solid #e1e5e9;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        .form-textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            min-height: 100px;
+            resize: vertical;
+            font-family: inherit;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-textarea:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        .btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .btn:hover {
+            background: #45a049;
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .bud-card {
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .bud-card:hover {
+            border-color: #4CAF50;
+            background: #f8fff8;
+        }
+
+        .bud-card.selected {
+            border-color: #4CAF50;
+            background: #e8f5e8;
+        }
+
+        .bud-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .bud-details {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #4CAF50;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Responsive Design for Mobile */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px 10px 90px 10px;
+            }
+
+            .container {
+                margin: 0;
+                border-radius: 12px;
+            }
+
+            .header {
+                padding: 20px 15px;
+                border-radius: 12px 12px 0 0;
+            }
+
+            .header h1 {
+                font-size: 1.6em;
+            }
+
+            .back-btn {
+                padding: 8px 16px;
+                font-size: 13px;
+            }
+
+            .content {
+                padding: 20px 15px;
+            }
+
+            .activity-info {
+                padding: 20px;
+            }
+
+            .activity-info h2 {
+                font-size: 1.4em;
+            }
+
+            .activity-info p {
+                font-size: 14px;
+            }
+
+            .info-item {
+                padding: 12px;
+                font-size: 14px;
+            }
+
+            .join-btn {
+                padding: 14px 24px;
+                font-size: 16px;
+                min-height: 48px;
+            }
+
+            .loading-spinner {
+                width: 35px;
+                height: 35px;
+            }
+
+            .alert {
+                padding: 14px;
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 5px 5px 90px 5px;
+            }
+
+            .container {
+                border-radius: 10px;
+            }
+
+            .header {
+                padding: 18px 12px;
+                border-radius: 10px 10px 0 0;
+            }
+
+            .header h1 {
+                font-size: 1.4em;
+            }
+
+            .back-btn {
+                padding: 7px 14px;
+                font-size: 12px;
+            }
+
+            .content {
+                padding: 15px 12px;
+            }
+
+            .activity-info {
+                padding: 18px;
+            }
+
+            .activity-info h2 {
+                font-size: 1.2em;
+            }
+
+            .activity-info p {
+                font-size: 13px;
+            }
+
+            .info-item {
+                padding: 10px;
+                font-size: 13px;
+            }
+
+            .join-btn {
+                padding: 12px 20px;
+                font-size: 15px;
+                min-height: 48px;
+            }
+
+            .loading-spinner {
+                width: 30px;
+                height: 30px;
+            }
+
+            .alert {
+                padding: 12px;
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="/activities" class="back-btn">← กลับ</a>
+            <div class="header-title">
+                <h1>🎯 เข้าร่วมกิจกรรม</h1>
+            </div>
+            <div style="width: 60px;"></div>
+        </div>
+
+        <div class="content">
+            <div class="activity-info" id="activityInfo">
+                <div class="loading-spinner"></div>
+                <p>กำลังโหลดข้อมูลกิจกรรม...</p>
+            </div>
+
+            <div class="form-section" id="joinForm" style="display: none;">
+                <h3>เลือกดอกที่ต้องการส่งเข้าประกวด</h3>
+                
+                <div class="form-group">
+                    <label class="form-label">ดอกของคุณ</label>
+                    <div id="budsList">
+                        <div class="loading-spinner"></div>
+                        <p>กำลังโหลดรายการดอก...</p>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">คำอธิบายเพิ่มเติม (ไม่บังคับ)</label>
+                    <textarea id="submissionDescription" class="form-textarea" placeholder="เล่าเกี่ยวกับดอกที่คุณส่งเข้าประกวด..."></textarea>
+                </div>
+
+                <button class="btn" id="joinBtn" onclick="submitJoin()" disabled>
+                    🎯 เข้าร่วมกิจกรรม
+                </button>
+            </div>
+
+            <div id="alertContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        const activityId = {{ activity_id }};
+        let selectedBudId = null;
+        let userBuds = [];
+
+        async function loadActivityInfo() {
+            try {
+                const response = await fetch('/api/activities');
+                const data = await response.json();
+                
+                if (data.activities) {
+                    const activity = data.activities.find(a => a.id === activityId);
+                    if (activity) {
+                        displayActivityInfo(activity);
+                        
+                        if (activity.status === 'registration_open') {
+                            document.getElementById('joinForm').style.display = 'block';
+                            loadUserBuds();
+                        } else {
+                            showAlert('กิจกรรมนี้ไม่เปิดรับสมัครแล้ว', 'error');
+                        }
+                    } else {
+                        showAlert('ไม่พบกิจกรรมนี้', 'error');
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading activity info:', error);
+                showAlert('เกิดข้อผิดพลาดในการโหลดข้อมูลกิจกรรม', 'error');
+            }
+        }
+
+        function displayActivityInfo(activity) {
+            document.getElementById('activityInfo').innerHTML = `
+                <h2>${activity.name}</h2>
+                <p>${activity.description || 'ไม่มีคำอธิบาย'}</p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                    <div><strong>สถานะ:</strong> ${getStatusText(activity.status)}</div>
+                    <div><strong>ผู้เข้าร่วม:</strong> ${activity.participant_count}${activity.max_participants > 0 ? `/${activity.max_participants}` : ''} คน</div>
+                    <div><strong>ปิดรับสมัคร:</strong> ${formatDate(activity.end_registration_date)}</div>
+                    <div><strong>เกณฑ์ตัดสิน:</strong> ${activity.judging_criteria || 'ยังไม่ระบุ'}</div>
+                </div>
+            `;
+        }
+
+        async function loadUserBuds() {
+            try {
+                const response = await fetch('/api/user_buds');
+                const data = await response.json();
+
+                if (data.buds) {
+                    userBuds = data.buds;
+                    displayBuds(data.buds);
+                } else {
+                    showAlert('ไม่สามารถโหลดรายการดอกได้', 'error');
+                }
+            } catch (error) {
+                console.error('Error loading user buds:', error);
+                showAlert('เกิดข้อผิดพลาดในการโหลดรายการดอก', 'error');
+            }
+        }
+
+        function displayBuds(buds) {
+            const budsList = document.getElementById('budsList');
+
+            if (!buds || buds.length === 0) {
+                budsList.innerHTML = `
+                    <p style="text-align: center; color: #666;">
+                        ยังไม่มีดอกในระบบ <br>
+                        <a href="/add-buds" style="color: #4CAF50;">เพิ่มดอกที่คุณมี</a>
+                    </p>
+                `;
+                return;
+            }
+
+            budsList.innerHTML = buds.map(bud => `
+                <div class="bud-card" onclick="selectBud(${bud.id})" data-bud-id="${bud.id}">
+                    <div class="bud-name">
+                        ${bud.strain_name_th || 'ไม่ระบุ'} (${bud.strain_name_en || 'ไม่ระบุ'})
+                    </div>
+                    <div class="bud-details">
+                        ID: ${bud.id} | ผู้พัฒนา: ${bud.breeder || 'ไม่ระบุ'} | ประเภท: ${bud.strain_type || 'ไม่ระบุ'}
+                        <br>THC: ${bud.thc_percentage || 'ไม่ระบุ'}% | CBD: ${bud.cbd_percentage || 'ไม่ระบุ'}%
+                        <br>คะแนนเฉลี่ย: ${bud.avg_rating > 0 ? `${bud.avg_rating.toFixed(1)} (${bud.review_count} รีวิว)` : 'ยังไม่มีรีวิว'}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function selectBud(budId) {
+            // Remove previous selection
+            document.querySelectorAll('.bud-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+
+            // Add selection to clicked card
+            const selectedCard = document.querySelector(`[data-bud-id="${budId}"]`);
+            if (selectedCard) {
+                selectedCard.classList.add('selected');
+                selectedBudId = budId;
+                document.getElementById('joinBtn').disabled = false;
+            }
+        }
+
+        async function submitJoin() {
+            if (!selectedBudId) {
+                showAlert('กรุณาเลือกดอกที่ต้องการส่งเข้าประกวด', 'error');
+                return;
+            }
+
+            const submitButton = document.getElementById('joinBtn');
+            const originalText = submitButton.textContent;
+            
+            try {
+                submitButton.disabled = true;
+                submitButton.textContent = '⏳ กำลังดำเนินการ...';
+
+                const response = await fetch(`/api/activities/${activityId}/join`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        bud_id: selectedBudId,
+                        submission_description: document.getElementById('submissionDescription').value
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showAlert(data.message, 'success');
+                    setTimeout(() => {
+                        window.location.href = '/activities';
+                    }, 2000);
+                } else {
+                    showAlert(data.error || 'เกิดข้อผิดพลาดในการเข้าร่วม', 'error');
+                    submitButton.disabled = false;
+                    submitButton.textContent = originalText;
+                }
+            } catch (error) {
+                console.error('Error joining activity:', error);
+                showAlert('เกิดข้อผิดพลาดในการเข้าร่วม', 'error');
+                submitButton.disabled = false;
+                submitButton.textContent = originalText;
+            }
+        }
+
+        function getStatusText(status) {
+            const statusMap = {
+                'upcoming': 'เร็วๆ นี้',
+                'registration_open': 'เปิดรับสมัคร',
+                'registration_closed': 'ปิดรับสมัคร',
+                'judging': 'กำลังตัดสิน',
+                'completed': 'เสร็จสิ้น'
+            };
+            return statusMap[status] || status;
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'ไม่ระบุ';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('th-TH', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function showAlert(message, type) {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertClass = type === 'success' ? 'alert-success' : 'alert-error';
+            
+            alertContainer.innerHTML = `
+                <div class="alert ${alertClass}">
+                    ${message}
+                </div>
+            `;
+
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                alertContainer.innerHTML = '';
+            }, 5000);
+        }
+
+        // Load data on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadActivityInfo();
+        });
+    </script>
+</body>
+</html>

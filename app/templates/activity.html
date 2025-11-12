@@ -566,6 +566,8 @@
             flex-direction: column;
             gap: 8px;
             width: 100%;
+            padding: 0 8px;
+            box-sizing: border-box;
         }
 
         .item-list.reviews-list .item-card {
@@ -582,6 +584,7 @@
                 display: flex;
                 flex-direction: column;
                 gap: 12px;
+                padding: 0 10px;
             }
         }
 
@@ -594,6 +597,7 @@
                 display: flex;
                 flex-direction: column;
                 gap: 10px;
+                padding: 0 8px;
             }
         }
 
@@ -1505,6 +1509,7 @@
         let isLoadingReviews = false;
         let isLoadingFriendsReviews = false;
         let currentTab = 'myBuds';
+        const currentUserId = {{ session.get('user_id', 0) }};
 
         // Load user's buds data with improved performance
         async function loadBuds() {
@@ -1680,9 +1685,9 @@
                                 <div class="bud-detail"><strong>ประเภท:</strong> ${bud.strain_type || 'ไม่ระบุ'}</div>
                                 <div class="bud-detail"><strong>THC:</strong> ${bud.thc_percentage || 'ไม่ระบุ'}% | <strong>CBD:</strong> ${bud.cbd_percentage || 'ไม่ระบุ'}%</div>
                                 <div class="rating-section">
-                                    <span class="rating-stars">${'⭐'.repeat(Math.round(bud.avg_rating))}</span>
+                                    <span class="rating-stars">${'⭐'.repeat(Math.round(bud.avg_rating || 0))}</span>
                                     <span class="rating-text">
-                                        ${bud.avg_rating > 0 ? `${bud.avg_rating.toFixed(1)} (${bud.review_count} รีวิว)` : 'ยังไม่มีรีวิว'}
+                                        ${(bud.avg_rating && bud.avg_rating > 0) ? `${parseFloat(bud.avg_rating).toFixed(1)} (${bud.review_count || 0} รีวิว)` : 'ยังไม่มีรีวิว'}
                                     </span>
                                 </div>
                             </div>
@@ -1726,8 +1731,8 @@
                     ` (แก้ไขล่าสุด: ${formatDate(review.updated_at)})` : '';
 
                 // สร้าง avatar สำหรับคนรีวิว
-                const reviewerAvatar = review.reviewer_profile_image ?
-                    `<img src="${review.reviewer_profile_image}" alt="Profile" class="reviewer-avatar-img" onerror="if (this.dataset.fallbackUsed !== 'true') { this.dataset.fallbackUsed = 'true'; this.src = '/uploads/budtboy_avatar.png'; this.alt = 'Default Profile'; }">` :
+                const reviewerAvatar = (review.reviewer_image && review.reviewer_image.trim() !== '') ?
+                    `<img src="${review.reviewer_image}" alt="Profile" class="reviewer-avatar-img" onerror="if (this.dataset.fallbackUsed !== 'true') { this.dataset.fallbackUsed = 'true'; this.src = '/uploads/budtboy_avatar.png'; this.alt = 'Default Profile'; }">` :
                     (review.reviewer_name ? review.reviewer_name.charAt(0).toUpperCase() : '👤');
 
                 // Convert comma-separated strings to arrays
@@ -1838,11 +1843,16 @@
                                     ` : ''}
                                 </div>
 
-                                <!-- ปุ่ม Full Report -->
-                                <div style="margin-top: 10px; text-align: left;">
+                                <!-- ปุ่ม Full Report และ Edit Review -->
+                                <div style="margin-top: 10px; display: flex; gap: 10px; align-items: center;">
                                     <a href="/bud-report?id=${review.bud_reference_id}" class="full-report-btn">
                                         📊 Full Report
                                     </a>
+                                    ${review.reviewer_id === currentUserId ? `
+                                        <button class="action-btn secondary" onclick="editReview(${review.id})" style="padding: 8px 16px; font-size: 14px;">
+                                            ✏️ แก้ไขรีวิว
+                                        </button>
+                                    ` : ''}
                                 </div>
 
                             </div>
@@ -1873,6 +1883,12 @@
         function editBud(budId) {
             if (budId) {
                 window.location.href = `/edit-bud?id=${budId}`;
+            }
+        }
+
+        function editReview(reviewId) {
+            if (reviewId) {
+                window.location.href = `/edit-review?id=${reviewId}`;
             }
         }
 
@@ -2312,8 +2328,8 @@
                     ` (แก้ไขล่าสุด: ${formatDate(review.updated_at)})` : '';
 
                 // สร้าง avatar สำหรับคนรีวิว
-                const reviewerAvatar = review.reviewer_profile_image ?
-                    `<img src="${review.reviewer_profile_image}" alt="Profile" class="reviewer-avatar-img" onerror="if (this.dataset.fallbackUsed !== 'true') { this.dataset.fallbackUsed = 'true'; this.src = '/uploads/budtboy_avatar.png'; this.alt = 'Default Profile'; }">` :
+                const reviewerAvatar = (review.reviewer_image && review.reviewer_image.trim() !== '') ?
+                    `<img src="${review.reviewer_image}" alt="Profile" class="reviewer-avatar-img" onerror="if (this.dataset.fallbackUsed !== 'true') { this.dataset.fallbackUsed = 'true'; this.src = '/uploads/budtboy_avatar.png'; this.alt = 'Default Profile'; }">` :
                     (review.reviewer_name ? review.reviewer_name.charAt(0).toUpperCase() : '👤');
 
                 // Convert comma-separated strings to arrays
@@ -2424,11 +2440,16 @@
                                     ` : ''}
                                 </div>
 
-                                <!-- ปุ่ม Full Report -->
-                                <div style="margin-top: 10px; text-align: left;">
+                                <!-- ปุ่ม Full Report และ Edit Review -->
+                                <div style="margin-top: 10px; display: flex; gap: 10px; align-items: center;">
                                     <a href="/bud-report?id=${review.bud_reference_id}" class="full-report-btn">
                                         📊 Full Report
                                     </a>
+                                    ${review.reviewer_id === currentUserId ? `
+                                        <button class="action-btn secondary" onclick="editReview(${review.id})" style="padding: 8px 16px; font-size: 14px;">
+                                            ✏️ แก้ไขรีวิว
+                                        </button>
+                                    ` : ''}
                                 </div>
 
                             </div>

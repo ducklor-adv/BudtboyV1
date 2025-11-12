@@ -760,13 +760,13 @@
                                     ${bud.grade || 'ไม่ระบุ'}
                                 </span>
                             </td>
-                            <td>${bud.thc_percentage ? bud.thc_percentage.toFixed(1) + '%' : '-'}</td>
-                            <td>${bud.cbd_percentage ? bud.cbd_percentage.toFixed(1) + '%' : '-'}</td>
+                            <td>${bud.thc_percentage ? parseFloat(bud.thc_percentage).toFixed(1) + '%' : '-'}</td>
+                            <td>${bud.cbd_percentage ? parseFloat(bud.cbd_percentage).toFixed(1) + '%' : '-'}</td>
                             <td>${bud.grower_name || 'ไม่ระบุ'}</td>
                             <td>
                                 <div class="rating-display">
                                     <span class="stars">${ratingStars}</span>
-                                    <span class="rating-text">(${bud.avg_rating ? bud.avg_rating.toFixed(1) : '0'})</span>
+                                    <span class="rating-text">(${bud.avg_rating ? parseFloat(bud.avg_rating).toFixed(1) : '0'})</span>
                                 </div>
                             </td>
                             <td>${bud.review_count || 0}</td>

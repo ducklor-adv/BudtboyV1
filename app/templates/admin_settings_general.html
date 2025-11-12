@@ -329,6 +329,21 @@
                         <label for="adminEmail">อีเมลผู้ดูแลระบบ:</label>
                         <input type="email" id="adminEmail" name="adminEmail" required>
                     </div>
+
+                    <div class="form-group">
+                        <label for="siteLogo">โลโก้เว็บไซต์:</label>
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            <input type="file" id="siteLogoFile" accept="image/*" style="display: none;">
+                            <button type="button" id="uploadLogoBtn" style="padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                                📤 เลือกรูปโลโก้
+                            </button>
+                            <div id="logoPreview" style="margin-top: 10px;">
+                                <img id="logoPreviewImg" src="/attached_assets/budtboy_logo_20250907_064050.jpg" alt="Current Logo" style="max-width: 200px; max-height: 100px; border: 2px solid #e9ecef; border-radius: 8px; display: block;">
+                            </div>
+                            <input type="hidden" id="siteLogo" name="siteLogo" value="/attached_assets/budtboy_logo_20250907_064050.jpg">
+                            <small style="color: #666; font-size: 12px;">รองรับไฟล์ JPG, PNG (แนะนำขนาด: 200x100px)</small>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="form-section">
@@ -476,6 +491,22 @@
                 document.getElementById('showAuthVideo').addEventListener('change', (e) => {
                     // Show video toggle changed
                 });
+
+                // Logo upload handlers
+                const uploadLogoBtn = document.getElementById('uploadLogoBtn');
+                const siteLogoFile = document.getElementById('siteLogoFile');
+                const logoPreviewImg = document.getElementById('logoPreviewImg');
+
+                uploadLogoBtn.addEventListener('click', () => {
+                    siteLogoFile.click();
+                });
+
+                siteLogoFile.addEventListener('change', async (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        await this.uploadLogo(file);
+                    }
+                });
             }
 
             async loadSettings() {
@@ -498,6 +529,12 @@
                 document.getElementById('siteName').value = settings.siteName || 'Cannabis App';
                 document.getElementById('siteDescription').value = settings.siteDescription || '';
                 document.getElementById('adminEmail').value = settings.adminEmail || '';
+
+                // Logo
+                if (settings.siteLogo) {
+                    document.getElementById('siteLogo').value = settings.siteLogo;
+                    document.getElementById('logoPreviewImg').src = settings.siteLogo;
+                }
 
                 // Display settings
                 document.getElementById('defaultLanguage').value = settings.defaultLanguage || 'th';
@@ -535,6 +572,7 @@
                     siteName: formData.get('siteName'),
                     siteDescription: formData.get('siteDescription'),
                     adminEmail: formData.get('adminEmail'),
+                    siteLogo: document.getElementById('siteLogo').value,
                     defaultLanguage: formData.get('defaultLanguage'),
                     displayMode: formData.get('displayMode'),
                     itemsPerPage: parseInt(formData.get('itemsPerPage')),
@@ -571,6 +609,46 @@
                 } finally {
                     this.saveBtn.textContent = '💾 บันทึกการตั้งค่า';
                     this.saveBtn.disabled = false;
+                }
+            }
+
+            async uploadLogo(file) {
+                try {
+                    // Validate file type
+                    if (!file.type.startsWith('image/')) {
+                        this.showMessage('❌ กรุณาเลือกไฟล์รูปภาพเท่านั้น', 'error');
+                        return;
+                    }
+
+                    // Validate file size (max 2MB)
+                    if (file.size > 2 * 1024 * 1024) {
+                        this.showMessage('❌ ไฟล์รูปภาพต้องมีขนาดไม่เกิน 2MB', 'error');
+                        return;
+                    }
+
+                    this.showMessage('⏳ กำลังอัปโหลดโลโก้...', 'info');
+
+                    const formData = new FormData();
+                    formData.append('image', file);
+
+                    const response = await fetch('/api/upload-images', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok && result.success) {
+                        const logoUrl = result.image_urls[0];
+                        document.getElementById('siteLogo').value = logoUrl;
+                        document.getElementById('logoPreviewImg').src = logoUrl;
+                        this.showMessage('✅ อัปโหลดโลโก้สำเร็จ! กรุณากดบันทึกการตั้งค่า', 'success');
+                    } else {
+                        this.showMessage(`❌ อัปโหลดล้มเหลว: ${result.error || 'ไม่ทราบสาเหตุ'}`, 'error');
+                    }
+                } catch (error) {
+                    console.error('Error uploading logo:', error);
+                    this.showMessage('❌ เกิดข้อผิดพลาดในการอัปโหลด', 'error');
                 }
             }
 

@@ -33,13 +33,25 @@ def create_app(config_name='development'):
     os.makedirs(app.config['ATTACHED_ASSETS_FOLDER'], exist_ok=True)
 
     # Initialize database
-    db = Database(app.config['DATABASE_PATH'])
+    db_type = app.config.get('DATABASE_TYPE', 'sqlite')
+    if db_type == 'postgresql':
+        db = Database(
+            db_url=app.config['DATABASE_URL'],
+            db_type='postgresql'
+        )
+    else:
+        db = Database(
+            db_path=app.config['DATABASE_PATH'],
+            db_type='sqlite'
+        )
+
     db.init_db()
 
-    # Run migrations
-    db.migrate_add_referrer_approval()
-    db.migrate_add_activity_criteria()
-    db.migrate_fix_activity_status()
+    # Run migrations (SQLite only)
+    if db_type == 'sqlite':
+        db.migrate_add_referrer_approval()
+        db.migrate_add_activity_criteria()
+        db.migrate_fix_activity_status()
 
     app.db = db
 
@@ -97,6 +109,66 @@ def create_app(config_name='development'):
     app.register_blueprint(admin_bp)
     app.register_blueprint(api_bp)
 
+    # Add route for serving attached_assets (must be after blueprints)
+    from flask import send_file
+
+    @app.route('/attached_assets/<path:filename>')
+    def serve_attached_assets(filename):
+        """Serve files from attached_assets folder"""
+        folder = app.config['ATTACHED_ASSETS_FOLDER']
+        # Make sure the folder path is absolute
+        if not os.path.isabs(folder):
+            folder = os.path.abspath(folder)
+        full_path = os.path.join(folder, filename)
+
+        if not os.path.exists(full_path):
+            return {'error': 'File not found'}, 404
+
+        return send_file(full_path)
+
+    # Request logging middleware
+    @app.before_request
+    def log_request():
+        """Log all incoming requests"""
+        from flask import request
+        print(f"📥 {request.method} {request.path} - Query: {request.query_string.decode()}")
+
+    # Check if user without referrer is trying to access restricted pages
+    @app.before_request
+    def check_referrer_restriction():
+        """Block users without referrer from accessing pages except profile and auth"""
+        from flask import request, session, redirect, url_for
+
+        # Skip for static files and assets
+        if request.path.startswith('/static/') or request.path.startswith('/uploads/') or request.path.startswith('/attached_assets/'):
+            return
+
+        # Skip for auth routes
+        if request.path.startswith('/auth') or request.path.startswith('/signin') or request.path.startswith('/callback') or request.path.startswith('/logout'):
+            return
+
+        # Skip for API routes (we'll handle these separately)
+        if request.path.startswith('/api/'):
+            return
+
+        # Check if user is logged in
+        user_id = session.get('user_id')
+        if not user_id:
+            return
+
+        # Skip for first user (Budtboy) - always allow full access
+        if user_id == 1:
+            return
+
+        # Check if user has a referrer
+        user = db.execute_query('SELECT referred_by FROM users WHERE id = %s', (user_id,))
+        if user and user[0]['referred_by'] is None:
+            # User has no referrer - only allow profile page
+            allowed_paths = ['/profile', '/api/profile', '/api/profile/image', '/api/submit_referral_code']
+
+            if not any(request.path.startswith(path) for path in allowed_paths):
+                return redirect(url_for('main.profile'))
+
     # Security headers middleware
     @app.after_request
     def add_security_headers(response):
@@ -149,3 +221,4 @@ def create_app(config_name='development'):
         return {'error': 'Internal server error'}, 500
 
     return app
+

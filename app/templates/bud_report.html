@@ -1505,7 +1505,7 @@
 
                 // Determine reviewer avatar - use profile image if available, otherwise use first letter of name
                 let reviewerAvatar;
-                if (review.reviewer_image && review.reviewer_image.trim()) {
+                if (review.reviewer_image && review.reviewer_image.trim() !== '') {
                     reviewerAvatar = review.reviewer_image; // URL to image
                 } else if (review.reviewer_name) {
                     reviewerAvatar = review.reviewer_name.charAt(0).toUpperCase(); // First letter
@@ -1675,11 +1675,56 @@
         // Display contact info
         function displayContactInfo() {
             const contactContainer = document.getElementById('contactInfo');
+
+            // Helper function to create proper URL
+            function createContactLink(type, value) {
+                if (!value) return null;
+
+                switch(type) {
+                    case 'facebook':
+                        // If already a URL, use it; otherwise create facebook.com URL
+                        return value.startsWith('http') ? value : `https://facebook.com/${value}`;
+                    case 'line':
+                        // If starts with @, create line.me URL; if URL use it; otherwise create line.me URL
+                        if (value.startsWith('http')) return value;
+                        const lineId = value.startsWith('@') ? value.substring(1) : value;
+                        return `https://line.me/ti/p/~${lineId}`;
+                    case 'instagram':
+                        // If already a URL, use it; otherwise create instagram.com URL
+                        return value.startsWith('http') ? value : `https://instagram.com/${value}`;
+                    case 'phone':
+                        // Create tel: link for phone numbers
+                        return `tel:${value}`;
+                    default:
+                        return value;
+                }
+            }
+
             const contacts = [
-                { label: 'Facebook', value: budData.grower_contact_facebook, icon: '📘' },
-                { label: 'Line', value: budData.grower_contact_line, icon: '💬' },
-                { label: 'Instagram', value: budData.grower_contact_instagram, icon: '📷' },
-                { label: 'Phone', value: budData.grower_contact_phone, icon: '📞' }
+                {
+                    label: 'Facebook',
+                    value: budData.grower_contact_facebook,
+                    icon: '📘',
+                    url: createContactLink('facebook', budData.grower_contact_facebook)
+                },
+                {
+                    label: 'Line',
+                    value: budData.grower_contact_line,
+                    icon: '💬',
+                    url: createContactLink('line', budData.grower_contact_line)
+                },
+                {
+                    label: 'Instagram',
+                    value: budData.grower_contact_instagram,
+                    icon: '📷',
+                    url: createContactLink('instagram', budData.grower_contact_instagram)
+                },
+                {
+                    label: 'Phone',
+                    value: budData.grower_contact_phone,
+                    icon: '📞',
+                    url: createContactLink('phone', budData.grower_contact_phone)
+                }
             ];
 
             const validContacts = contacts.filter(contact => contact.value);
@@ -1693,7 +1738,9 @@
                 <div class="contact-item">
                     <span>${contact.icon}</span>
                     <strong>${contact.label}:</strong>
-                    <span>${contact.value}</span>
+                    <a href="${contact.url}" target="_blank" rel="noopener noreferrer" style="color: #1976d2; text-decoration: none; font-weight: 500;">
+                        ${contact.value}
+                    </a>
                 </div>
             `).join('');
         }

@@ -11,7 +11,9 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-please-change'
 
     # Database
-    DATABASE_PATH = os.environ.get('DATABASE_PATH', 'budtboy_local.db')
+    DATABASE_TYPE = os.environ.get('DATABASE_TYPE', 'sqlite')  # 'sqlite' or 'postgresql'
+    DATABASE_PATH = os.environ.get('DATABASE_PATH', 'budtboy_local.db')  # For SQLite
+    DATABASE_URL = os.environ.get('DATABASE_URL')  # For PostgreSQL
 
     # File Upload
     UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER', 'uploads')
@@ -23,7 +25,7 @@ class Config:
     PERMANENT_SESSION_LIFETIME = timedelta(days=7)
     SESSION_COOKIE_SECURE = False  # Set True in production with HTTPS
     SESSION_COOKIE_HTTPONLY = True
-    SESSION_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_SAMESITE = None  # Allow cross-site for OAuth callbacks
 
     # Email
     MAIL_SERVER = 'smtp.gmail.com'
@@ -63,6 +65,7 @@ class ProductionConfig(Config):
     TESTING = False
     SESSION_COOKIE_SECURE = True  # Require HTTPS
     FALLBACK_AUTH_ENABLED = False
+    DATABASE_TYPE = 'postgresql'  # Use PostgreSQL in production
 
 
 class TestingConfig(Config):

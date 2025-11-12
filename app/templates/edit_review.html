@@ -1115,8 +1115,15 @@
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
 
-                reviewData = await response.json();
+                const responseData = await response.json();
                 // API Response received
+                console.log('API Response:', responseData);
+
+                if (responseData.success && responseData.review) {
+                    reviewData = responseData.review;
+                } else {
+                    throw new Error('ไม่พบข้อมูลรีวิว');
+                }
 
                 // ซ่อน loading และแสดงฟอร์ม
                 document.getElementById('loadingContainer').style.display = 'none';
@@ -1134,48 +1141,76 @@
         function populateForm() {
             if (!reviewData) return;
 
+            console.log('Populating form with data:', reviewData);
+
             // แสดงข้อมูลดอก
             displayBudInfo();
 
             // ตั้งค่าคะแนน
-            setRating('overall', reviewData.overall_rating);
+            if (reviewData.overall_rating) {
+                setRating('overall', reviewData.overall_rating);
+            }
             if (reviewData.aroma_rating) {
                 setRating('aroma', reviewData.aroma_rating);
             }
 
             // ตั้งค่าข้อความ
-            document.getElementById('shortSummary').value = reviewData.short_summary || '';
-            document.getElementById('fullReview').value = reviewData.full_review_content || '';
-            document.getElementById('video-review-url').value = reviewData.video_review_url || '';
+            if (document.getElementById('shortSummary')) {
+                document.getElementById('shortSummary').value = reviewData.short_summary || '';
+            }
+            if (document.getElementById('fullReview')) {
+                document.getElementById('fullReview').value = reviewData.full_review_content || '';
+            }
+            if (document.getElementById('video-review-url')) {
+                document.getElementById('video-review-url').value = reviewData.video_review_url || '';
+            }
 
-            // ตั้งค่า aroma flavors
+            // ตั้งค่า aroma flavors - รองรับทั้ง string และ array
             if (reviewData.aroma_flavors) {
-                reviewData.aroma_flavors.forEach(aroma => {
+                const aromaArray = typeof reviewData.aroma_flavors === 'string'
+                    ? reviewData.aroma_flavors.split(',').map(s => s.trim()).filter(s => s)
+                    : reviewData.aroma_flavors;
+
+                console.log('Aroma flavors array:', aromaArray);
+                aromaArray.forEach(aroma => {
                     const checkbox = document.getElementById(`aroma_${aroma}`);
                     if (checkbox) {
                         checkbox.checked = true;
-                        checkbox.closest('.aroma-item').classList.add('selected');
+                        const aromaItem = checkbox.closest('.aroma-item');
+                        if (aromaItem) aromaItem.classList.add('selected');
                     }
                 });
             }
 
-            // ตั้งค่า effects
+            // ตั้งค่า effects - รองรับทั้ง string และ array
             if (reviewData.selected_effects) {
-                reviewData.selected_effects.forEach(effect => {
+                const effectsArray = typeof reviewData.selected_effects === 'string'
+                    ? reviewData.selected_effects.split(',').map(s => s.trim()).filter(s => s)
+                    : reviewData.selected_effects;
+
+                console.log('Effects array:', effectsArray);
+                effectsArray.forEach(effect => {
                     const checkboxes = document.querySelectorAll('input[type="checkbox"]');
                     checkboxes.forEach(checkbox => {
-                        if (checkbox.value === effect) {
+                        if (checkbox.value === effect || checkbox.getAttribute('data-effect') === effect) {
                             checkbox.checked = true;
-                            checkbox.closest('.effect-item').classList.add('selected');
+                            const effectItem = checkbox.closest('.effect-item');
+                            if (effectItem) effectItem.classList.add('selected');
                         }
                     });
                 });
             }
 
-            // ตั้งค่ารูปภาพเดิม
-            if (reviewData.review_images && reviewData.review_images.length > 0) {
-                currentImages = [...reviewData.review_images];
-                displayCurrentImages();
+            // ตั้งค่ารูปภาพเดิม - รองรับทั้ง string และ array
+            if (reviewData.review_images) {
+                const imagesArray = typeof reviewData.review_images === 'string'
+                    ? reviewData.review_images.split(',').map(s => s.trim()).filter(s => s)
+                    : reviewData.review_images;
+
+                if (imagesArray.length > 0) {
+                    currentImages = [...imagesArray];
+                    displayCurrentImages();
+                }
             }
 
             // Initialize event listeners
@@ -1385,7 +1420,9 @@
                 // Upload new images if any
                 let newImageUrls = [];
                 if (selectedImages.length > 0) {
+                    console.log('Uploading', selectedImages.length, 'new images...');
                     newImageUrls = await uploadImages();
+                    console.log('Upload result:', newImageUrls);
                 }
 
                 // Collect selected aroma flavors
@@ -1396,6 +1433,12 @@
                 const effectCheckboxes = document.querySelectorAll('.effect-item input[type="checkbox"]:checked');
                 const selectedEffectsArray = Array.from(effectCheckboxes).map(cb => cb.value);
 
+                // Combine current and new images
+                const allImageUrls = [...currentImages, ...newImageUrls];
+                console.log('Current images:', currentImages);
+                console.log('New image URLs:', newImageUrls);
+                console.log('All images to save:', allImageUrls);
+
                 const reviewUpdate = {
                     overall_rating: ratings.overall,
                     aroma_rating: ratings.aroma || null,
@@ -1403,9 +1446,11 @@
                     full_review_content: document.getElementById('fullReview').value.trim() || null,
                     selected_effects: selectedEffectsArray,
                     aroma_flavors: aromaFlavors,
-                    review_images: [...currentImages, ...newImageUrls],
+                    review_images: allImageUrls,
                     video_review_url: document.getElementById('video-review-url').value.trim() || null
                 };
+
+                console.log('Review update data:', reviewUpdate);
 
                 // Update review
                 const urlParams = new URLSearchParams(window.location.search);
@@ -1420,10 +1465,29 @@
                 });
 
                 if (response.ok) {
-                    showSuccess('แก้ไขรีวิวสำเร็จ!');
-                    setTimeout(() => {
+                    showSuccess('✅ บันทึกการแก้ไขแล้ว');
+
+                    // Hide submit button and show close button
+                    const submitBtn = document.getElementById('submitBtn');
+                    submitBtn.style.display = 'none';
+
+                    // Create close button
+                    const closeBtn = document.createElement('button');
+                    closeBtn.type = 'button';
+                    closeBtn.className = 'submit-btn';
+                    closeBtn.style.backgroundColor = '#6c757d';
+                    closeBtn.innerHTML = '🚪 ปิดหน้านี้';
+                    closeBtn.onclick = () => {
                         window.location.href = '/activity';
-                    }, 1500);
+                    };
+
+                    submitBtn.parentElement.appendChild(closeBtn);
+
+                    // Scroll to top to see success message
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                    // Don't restore submit button in finally block
+                    return;
                 } else {
                     const error = await response.json();
                     throw new Error(error.error || 'เกิดข้อผิดพลาด');
@@ -1432,7 +1496,8 @@
             } catch (error) {
                 console.error('Error updating review:', error);
                 showError(`ไม่สามารถแก้ไขรีวิวได้: ${error.message}`);
-            } finally {
+
+                // Restore submit button only on error
                 const submitBtn = document.getElementById('submitBtn');
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = '💾 บันทึกการแก้ไข';

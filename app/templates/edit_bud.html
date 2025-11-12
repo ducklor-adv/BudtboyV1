@@ -327,6 +327,7 @@
         /* Flavor Selector Styles */
         .aroma-selector {
             width: 100%;
+            position: relative;
         }
 
         .selected-flavors {
@@ -389,6 +390,7 @@
             max-height: 250px;
             overflow-y: auto;
             display: none;
+            margin-top: 5px;
         }
 
         .flavor-categories.active {
@@ -2512,6 +2514,22 @@
                 delete data.certificate_image_3;
                 delete data.certificate_image_4;
 
+                // Manually add aroma_flavor from hidden input (it may not be in FormData correctly)
+                const aromaFlavorInput = document.getElementById('aroma_flavor');
+                if (aromaFlavorInput) {
+                    data.aroma_flavor = aromaFlavorInput.value;
+                }
+
+                // Manually add effects from hidden inputs
+                const mentalPositiveInput = document.getElementById('mental_effects_positive');
+                const mentalNegativeInput = document.getElementById('mental_effects_negative');
+                const physicalPositiveInput = document.getElementById('physical_effects_positive');
+                const physicalNegativeInput = document.getElementById('physical_effects_negative');
+
+                if (mentalPositiveInput) data.mental_effects_positive = mentalPositiveInput.value;
+                if (mentalNegativeInput) data.mental_effects_negative = mentalNegativeInput.value;
+                if (physicalPositiveInput) data.physical_effects_positive = physicalPositiveInput.value;
+                if (physicalNegativeInput) data.physical_effects_negative = physicalNegativeInput.value;
 
                 // Keep deletion flags
                 // deleted_image_* and deleted_certificate_image_* fields will be included in data automatically
@@ -2917,64 +2935,86 @@
             const selectedFlavorsDiv = document.getElementById('selected-flavors');
             const flavorCategoriesDiv = document.querySelector('.flavor-categories');
             const hiddenInput = document.getElementById('aroma_flavor');
-            const flavorButtons = document.querySelectorAll('.flavor-btn');
 
             if (!selectedFlavorsDiv || !flavorCategoriesDiv || !hiddenInput) {
-                console.warn('Flavor selector elements not found');
                 return;
             }
 
-            selectedFlavorsDiv.addEventListener('click', function() {
-                const isActive = flavorCategoriesDiv.style.display === 'block';
-                flavorCategoriesDiv.style.display = isActive ? 'none' : 'block';
-            });
+            // Remove old handler if exists to avoid duplicates
+            if (selectedFlavorsDiv._flavorClickHandler) {
+                selectedFlavorsDiv.removeEventListener('click', selectedFlavorsDiv._flavorClickHandler);
+            }
 
-            document.addEventListener('click', function(e) {
-                if (!e.target.closest('.aroma-selector')) {
-                    flavorCategoriesDiv.style.display = 'none';
-                }
-            });
+            // Create and store new handler
+            selectedFlavorsDiv._flavorClickHandler = function(e) {
+                e.stopPropagation();
+                const currentDisplay = window.getComputedStyle(flavorCategoriesDiv).display;
+                flavorCategoriesDiv.style.display = currentDisplay === 'none' ? 'block' : 'none';
+            };
 
-            flavorButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const flavor = this.getAttribute('data-flavor');
+            selectedFlavorsDiv.addEventListener('click', selectedFlavorsDiv._flavorClickHandler);
+
+            // Close flavor categories when clicking outside (only add once)
+            if (!window.flavorClickHandlerAdded) {
+                document.addEventListener('click', function(e) {
+                    if (!e.target.closest('.aroma-selector')) {
+                        document.querySelectorAll('.flavor-categories').forEach(cat => {
+                            cat.style.display = 'none';
+                        });
+                    }
+                });
+                window.flavorClickHandlerAdded = true;
+            }
+
+            // Use event delegation to avoid duplicate handlers
+            if (!flavorCategoriesDiv._flavorButtonHandler) {
+                flavorCategoriesDiv._flavorButtonHandler = function(e) {
+                    const button = e.target.closest('.flavor-btn');
+                    if (!button) return;
+
+                    const flavor = button.getAttribute('data-flavor');
 
                     if (selectedFlavors.includes(flavor)) {
                         selectedFlavors = selectedFlavors.filter(f => f !== flavor);
-                        this.classList.remove('selected');
+                        button.classList.remove('selected');
                     } else {
                         selectedFlavors.push(flavor);
-                        this.classList.add('selected');
+                        button.classList.add('selected');
                     }
 
                     updateSelectedFlavorsDisplay();
-                });
-            });
+                };
+                flavorCategoriesDiv.addEventListener('click', flavorCategoriesDiv._flavorButtonHandler);
+            }
         }
 
         function updateSelectedFlavorsDisplay() {
             const selectedFlavorsDiv = document.getElementById('selected-flavors');
             const hiddenInput = document.getElementById('aroma_flavor');
 
-            if (!selectedFlavorsDiv || !hiddenInput) return;
+            if (!selectedFlavorsDiv || !hiddenInput) {
+                return;
+            }
 
+            // Update hidden input value
             hiddenInput.value = selectedFlavors.join(', ');
 
             if (selectedFlavors.length === 0) {
                 selectedFlavorsDiv.innerHTML = '<span class="placeholder">คลิกเพื่อเลือกกลิ่นและรส...</span>';
             } else {
-                const tagsHtml = selectedFlavors.map(flavor => 
-                    `<div class="flavor-tag">
+                const tagsHtml = selectedFlavors.map(flavor => {
+                    const escapedFlavor = flavor.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                    return `<div class="flavor-tag">
                         ${flavor}
-                        <button type="button" class="remove-btn" onclick="removeFlavor('${flavor}')">×</button>
-                    </div>`
-                ).join('');
+                        <button type="button" class="remove-btn" onclick="event.stopPropagation(); window.removeFlavor('${escapedFlavor}');">×</button>
+                    </div>`;
+                }).join('');
 
-                selectedFlavorsDiv.innerHTML = tagsHtml + 
-                    `<button type="button" class="clear-all-btn" onclick="clearAllFlavors()">ล้างทั้งหมด</button>`;
+                selectedFlavorsDiv.innerHTML = tagsHtml +
+                    `<button type="button" class="clear-all-btn" onclick="event.stopPropagation(); window.clearAllFlavors();">ล้างทั้งหมด</button>`;
             }
 
-            // Update button states
+            // Update button states in dropdown
             document.querySelectorAll('.flavor-btn').forEach(btn => {
                 const flavor = btn.getAttribute('data-flavor');
                 btn.classList.toggle('selected', selectedFlavors.includes(flavor));
@@ -3042,12 +3082,14 @@
             const effectButtons = categoriesDiv.querySelectorAll('.effect-btn');
 
             selectedDiv.addEventListener('click', function(e) {
+                e.stopPropagation(); // Prevent document click handler from immediately closing
                 document.querySelectorAll('.effects-categories').forEach(cat => {
                     if (cat !== categoriesDiv) {
                         cat.style.display = 'none';
                     }
                 });
-                const isActive = categoriesDiv.style.display === 'block';
+                const currentDisplay = window.getComputedStyle(categoriesDiv).display;
+                const isActive = currentDisplay === 'block';
                 categoriesDiv.style.display = isActive ? 'none' : 'block';
             });
 

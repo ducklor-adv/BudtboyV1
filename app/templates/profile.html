@@ -253,8 +253,11 @@
             border-radius: 8px;
             padding: 6px 10px;
             font-size: 14px;
-            width: 100%;
+            width: calc(100% - 30px);
             margin-top: 2px;
+            margin-left: 15px;
+            margin-right: 15px;
+            box-sizing: border-box;
         }
 
         .edit-select {
@@ -477,6 +480,7 @@
                 max-width: 100%;
                 margin: 10px 0 20px 0;
                 box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+                width: calc(100% - 0px);
             }
 
             .card-header {
@@ -556,6 +560,9 @@
             .edit-select {
                 padding: 8px 12px;
                 font-size: 15px;
+                width: calc(100% - 30px);
+                margin-left: 15px;
+                margin-right: 15px;
             }
 
             .save-cancel-btns {
@@ -595,12 +602,13 @@
 
         @media (max-width: 480px) {
             body {
-                padding: 5px 5px 90px 5px;
+                padding: 8px 8px 90px 8px;
             }
 
             .profile-card {
                 border-radius: 20px;
                 margin: 5px 0 15px 0;
+                width: calc(100% - 0px);
             }
 
             .card-header {
@@ -703,6 +711,9 @@
             .edit-select {
                 padding: 10px;
                 font-size: 14px;
+                width: calc(100% - 30px);
+                margin-left: 15px;
+                margin-right: 15px;
             }
 
             .save-cancel-btns {
@@ -786,6 +797,43 @@
                 </button>
             </div>
 
+            <!-- No Referrer Warning Box -->
+            <div id="no-referrer-box" style="display: none; background: #fff3cd; border: 2px solid #ffc107; border-radius: 12px; padding: 20px; margin: 20px; text-align: center;">
+                <div style="font-size: 40px; margin-bottom: 10px;">⚠️</div>
+                <div style="color: #856404; font-weight: bold; font-size: 16px; margin-bottom: 8px;">คุณไม่สามารถเข้าใช้งานระบบได้</div>
+                <div style="color: #856404; font-size: 14px; margin-bottom: 15px;">เนื่องจากคุณสมัครโดยไม่ผ่านผู้แนะนำ</div>
+                <div style="color: #856404; font-weight: bold; font-size: 14px; margin-bottom: 15px;">กรุณาใส่ Referral Link เพื่อค้นหาผู้แนะนำ</div>
+
+                <!-- Referral Code Input Form -->
+                <div style="background: white; border-radius: 8px; padding: 15px; margin-top: 15px;">
+                    <input type="text"
+                           id="referral-code-input"
+                           placeholder="วาง Referral Link ที่นี่ (http://localhost:5000/auth?ref=...)"
+                           style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; margin-bottom: 10px; font-size: 12px; box-sizing: border-box; word-break: break-all;">
+                    <button onclick="checkReferralCode()"
+                            style="width: 100%; padding: 10px; background: #4CAF50; color: white; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer;">
+                        🔍 ตรวจสอบ
+                    </button>
+                </div>
+
+                <!-- Referrer Info Display (hidden initially) -->
+                <div id="referrer-info-display" style="display: none; background: #e8f5e9; border: 1px solid #4CAF50; border-radius: 8px; padding: 15px; margin-top: 15px;">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 10px;">
+                        <div id="referrer-avatar-display" style="width: 50px; height: 50px; border-radius: 50%; overflow: hidden; background: #4CAF50; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; font-weight: bold;">
+                            ?
+                        </div>
+                        <div style="text-align: left;">
+                            <div style="color: #4CAF50; font-weight: bold; font-size: 14px;">🎉 ผู้แนะนำของคุณ</div>
+                            <div style="color: #2e7d32; font-weight: bold; font-size: 16px;" id="referrer-username-display">-</div>
+                        </div>
+                    </div>
+                    <button onclick="confirmReferrer()"
+                            style="width: 100%; padding: 10px; background: #27ae60; color: white; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 10px;">
+                        ✓ ยืนยันผู้แนะนำ
+                    </button>
+                </div>
+            </div>
+
             <ul class="profile-info" id="profileInfo" style="display: none;">
                 <li class="info-item">
                     <div class="info-icon">👤</div>
@@ -805,6 +853,26 @@
                         <div class="info-value">
                             <span id="email-display">-</span>
                             <input type="email" id="email-edit" class="edit-input" style="display: none;">
+                        </div>
+                    </div>
+                </li>
+
+                <li class="info-item">
+                    <div class="info-icon">👥</div>
+                    <div class="info-content">
+                        <div class="info-label">สถานะ Referrer</div>
+                        <div class="info-value" id="referrer-approval-status">
+                            <span style="color: #999;">ไม่มีผู้แนะนำ</span>
+                        </div>
+                    </div>
+                </li>
+
+                <li class="info-item">
+                    <div class="info-icon">👨‍💼</div>
+                    <div class="info-content">
+                        <div class="info-label">สถานะ Admin</div>
+                        <div class="info-value" id="admin-approval-status">
+                            <span style="color: #f39c12;">⏳ รอการอนุมัติ</span>
                         </div>
                     </div>
                 </li>
@@ -838,6 +906,10 @@
                                     <input type="checkbox" id="is_budtender_edit">
                                     <label>🏪 บัดเทนเดอร์</label>
                                 </div>
+                                <div class="user-type-checkbox">
+                                    <input type="checkbox" id="is_shop_edit">
+                                    <label>🏬 ร้านค้า</label>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -848,6 +920,93 @@
                     <div class="info-content">
                         <div class="info-label">ปีเกิด: <span id="birth-year-display" style="color: #333; font-weight: 500;">-</span></div>
                         <input type="number" id="birth-year-edit" class="edit-input" min="1900" max="2024" style="display: none;">
+                    </div>
+                </li>
+
+                <li class="info-item">
+                    <div class="info-icon">📍</div>
+                    <div class="info-content">
+                        <div class="info-label">จังหวัด: <span id="province-display" style="color: #333; font-weight: 500;">-</span></div>
+                        <select id="province-edit" class="edit-input" style="display: none;">
+                            <option value="">-- เลือกจังหวัด --</option>
+                            <option value="กระบี่">กระบี่</option>
+                            <option value="กรุงเทพมหานคร">กรุงเทพมหานคร</option>
+                            <option value="กาญจนบุรี">กาญจนบุรี</option>
+                            <option value="กาฬสินธุ์">กาฬสินธุ์</option>
+                            <option value="กำแพงเพชร">กำแพงเพชร</option>
+                            <option value="ขอนแก่น">ขอนแก่น</option>
+                            <option value="จันทบุรี">จันทบุรี</option>
+                            <option value="ฉะเชิงเทรา">ฉะเชิงเทรา</option>
+                            <option value="ชลบุรี">ชลบุรี</option>
+                            <option value="ชัยนาท">ชัยนาท</option>
+                            <option value="ชัยภูมิ">ชัยภูมิ</option>
+                            <option value="ชุมพร">ชุมพร</option>
+                            <option value="เชียงราย">เชียงราย</option>
+                            <option value="เชียงใหม่">เชียงใหม่</option>
+                            <option value="ตรัง">ตรัง</option>
+                            <option value="ตราด">ตราด</option>
+                            <option value="ตาก">ตาก</option>
+                            <option value="นครนายก">นครนายก</option>
+                            <option value="นครปฐม">นครปฐม</option>
+                            <option value="นครพนม">นครพนม</option>
+                            <option value="นครราชสีมา">นครราชสีมา</option>
+                            <option value="นครศรีธรรมราช">นครศรีธรรมราช</option>
+                            <option value="นครสวรรค์">นครสวรรค์</option>
+                            <option value="นนทบุรี">นนทบุรี</option>
+                            <option value="นราธิวาส">นราธิวาส</option>
+                            <option value="น่าน">น่าน</option>
+                            <option value="บึงกาฬ">บึงกาฬ</option>
+                            <option value="บุรีรัมย์">บุรีรัมย์</option>
+                            <option value="ปทุมธานี">ปทุมธานี</option>
+                            <option value="ประจวบคีรีขันธ์">ประจวบคีรีขันธ์</option>
+                            <option value="ปราจีนบุรี">ปราจีนบุรี</option>
+                            <option value="ปัตตานี">ปัตตานี</option>
+                            <option value="พระนครศรีอยุธยา">พระนครศรีอยุธยา</option>
+                            <option value="พะเยา">พะเยา</option>
+                            <option value="พังงา">พังงา</option>
+                            <option value="พัทลุง">พัทลุง</option>
+                            <option value="พิจิตร">พิจิตร</option>
+                            <option value="พิษณุโลก">พิษณุโลก</option>
+                            <option value="เพชรบุรี">เพชรบุรี</option>
+                            <option value="เพชรบูรณ์">เพชรบูรณ์</option>
+                            <option value="แพร่">แพร่</option>
+                            <option value="ภูเก็ต">ภูเก็ต</option>
+                            <option value="มหาสารคาม">มหาสารคาม</option>
+                            <option value="มุกดาหาร">มุกดาหาร</option>
+                            <option value="แม่ฮ่องสอน">แม่ฮ่องสอน</option>
+                            <option value="ยโสธร">ยโสธร</option>
+                            <option value="ยะลา">ยะลา</option>
+                            <option value="ร้อยเอ็ด">ร้อยเอ็ด</option>
+                            <option value="ระนอง">ระนอง</option>
+                            <option value="ระยอง">ระยอง</option>
+                            <option value="ราชบุรี">ราชบุรี</option>
+                            <option value="ลพบุรี">ลพบุรี</option>
+                            <option value="ลำปาง">ลำปาง</option>
+                            <option value="ลำพูน">ลำพูน</option>
+                            <option value="เลย">เลย</option>
+                            <option value="ศรีสะเกษ">ศรีสะเกษ</option>
+                            <option value="สกลนคร">สกลนคร</option>
+                            <option value="สงขลา">สงขลา</option>
+                            <option value="สตูล">สตูล</option>
+                            <option value="สมุทรปราการ">สมุทรปราการ</option>
+                            <option value="สมุทรสงคราม">สมุทรสงคราม</option>
+                            <option value="สมุทรสาคร">สมุทรสาคร</option>
+                            <option value="สระแก้ว">สระแก้ว</option>
+                            <option value="สระบุรี">สระบุรี</option>
+                            <option value="สิงห์บุรี">สิงห์บุรี</option>
+                            <option value="สุโขทัย">สุโขทัย</option>
+                            <option value="สุพรรณบุรี">สุพรรณบุรี</option>
+                            <option value="สุราษฎร์ธานี">สุราษฎร์ธานี</option>
+                            <option value="สุรินทร์">สุรินทร์</option>
+                            <option value="หนองคาย">หนองคาย</option>
+                            <option value="หนองบัวลำภู">หนองบัวลำภู</option>
+                            <option value="อ่างทอง">อ่างทอง</option>
+                            <option value="อำนาจเจริญ">อำนาจเจริญ</option>
+                            <option value="อุดรธานี">อุดรธานี</option>
+                            <option value="อุตรดิตถ์">อุตรดิตถ์</option>
+                            <option value="อุทัยธานี">อุทัยธานี</option>
+                            <option value="อุบลราชธานี">อุบลราชธานี</option>
+                        </select>
                     </div>
                 </li>
 
@@ -955,19 +1114,19 @@
 
     <!-- Bottom Navigation -->
     <nav class="bottom-nav">
-        <a href="/activity" class="nav-tab" onclick="return checkApprovalAndNavigate('/activity', event)">
+        <a href="/activity" class="nav-tab" id="nav-activity" onclick="return checkReferrerAndNavigate('/activity', event)">
             <span class="nav-icon" style="color: #4CAF50;">📋</span>
             <span class="nav-label">รายการของคุณ</span>
         </a>
-        <a href="/search-tool" class="nav-tab">
+        <a href="/search-tool" class="nav-tab" id="nav-search" onclick="return checkReferrerAndNavigate('/search-tool', event)">
             <span class="nav-icon" style="color: #4CAF50;">🔍</span>
             <span class="nav-label">ค้นหา</span>
         </a>
-        <a href="/report" class="nav-tab">
+        <a href="/report" class="nav-tab" id="nav-report" onclick="return checkReferrerAndNavigate('/report', event)">
             <span class="nav-icon" style="color: #4CAF50;">📊</span>
             <span class="nav-label">รายการทั้งหมด</span>
         </a>
-        <a href="/activities" class="nav-tab">
+        <a href="/activities" class="nav-tab" id="nav-activities" onclick="return checkReferrerAndNavigate('/activities', event)">
             <span class="nav-icon" style="color: #4CAF50;">🏆</span>
             <span class="nav-label">กิจกรรม</span>
         </a>
@@ -1084,12 +1243,35 @@
                 this.updateInputValue('username-edit', user.username || '');
                 this.updateInputValue('email-edit', user.email || '');
                 this.updateInputValue('birth-year-edit', user.birth_year || '');
+                this.updateInputValue('province-edit', user.province || '');
+
+                // Referrer approval status
+                const referrerApprovalStatus = document.getElementById('referrer-approval-status');
+                if (referrerApprovalStatus) {
+                    if (!user.referred_by) {
+                        referrerApprovalStatus.innerHTML = '<span style="color: #999;">ไม่มีผู้แนะนำ</span>';
+                    } else if (user.referrer_approved) {
+                        referrerApprovalStatus.innerHTML = '<span style="color: #27ae60;">✓ อนุมัติแล้ว</span>';
+                    } else {
+                        referrerApprovalStatus.innerHTML = '<span style="color: #f39c12;">⏳ รอการอนุมัติ</span>';
+                    }
+                }
+
+                // Admin approval status
+                const adminApprovalStatus = document.getElementById('admin-approval-status');
+                if (adminApprovalStatus) {
+                    if (user.is_approved) {
+                        adminApprovalStatus.innerHTML = '<span style="color: #27ae60;">✓ อนุมัติแล้ว</span>';
+                    } else {
+                        adminApprovalStatus.innerHTML = '<span style="color: #f39c12;">⏳ รอการอนุมัติ</span>';
+                    }
+                }
 
                 // Verification status
                 const verificationStatus = document.getElementById('verification-status');
                 if (verificationStatus) {
-                    verificationStatus.innerHTML = user.is_verified ? 
-                        '<span class="user-type-badge">ยืนยันแล้ว</span>' : 
+                    verificationStatus.innerHTML = user.is_verified ?
+                        '<span class="user-type-badge">ยืนยันแล้ว</span>' :
                         '<span style="color: #ff9800;">รอยืนยัน</span>';
                 }
 
@@ -1104,9 +1286,12 @@
                 }
 
                 // Birth year
-                const birthYearDisplay = user.birth_year ? 
+                const birthYearDisplay = user.birth_year ?
                     (user.birth_year + 543) + ' พ.ศ.' : 'ไม่ระบุ';
                 this.updateElement('birth-year-display', birthYearDisplay);
+
+                // Province
+                this.updateElement('province-display', user.province || 'ไม่ระบุ');
 
                 // User types
                 this.displayUserTypes(user);
@@ -1118,6 +1303,43 @@
 
                 // Avatar
                 this.updateAvatar(user);
+
+                // Check if user has no referrer - show warning box
+                this.checkReferrerStatus(user);
+            },
+
+            checkReferrerStatus(user) {
+                const noReferrerBox = document.getElementById('no-referrer-box');
+                const profileInfo = document.getElementById('profileInfo');
+
+                // Skip for first user (id = 1) - always show profile
+                if (user.id === 1) {
+                    if (noReferrerBox) {
+                        noReferrerBox.style.display = 'none';
+                    }
+                    if (profileInfo) {
+                        profileInfo.style.display = 'block';
+                    }
+                    return;
+                }
+
+                if (!user.referred_by) {
+                    // User has no referrer - show warning box and hide profile info
+                    if (noReferrerBox) {
+                        noReferrerBox.style.display = 'block';
+                    }
+                    if (profileInfo) {
+                        profileInfo.style.display = 'none';
+                    }
+                } else {
+                    // User has referrer - hide warning box and show profile info
+                    if (noReferrerBox) {
+                        noReferrerBox.style.display = 'none';
+                    }
+                    if (profileInfo) {
+                        profileInfo.style.display = 'block';
+                    }
+                }
             },
 
             displayUserTypes(user) {
@@ -1128,9 +1350,10 @@
                 if (user.is_consumer) userTypes.push('<span class="user-type-badge">👥 ผู้บริโภค</span>');
                 if (user.is_grower) userTypes.push('<span class="user-type-badge">🌱 ผู้ปลูก</span>');
                 if (user.is_budtender) userTypes.push('<span class="user-type-badge">🏪 บัดเทนเดอร์</span>');
+                if (user.is_shop) userTypes.push('<span class="user-type-badge">🏬 ร้านค้า</span>');
 
-                userTypesDiv.innerHTML = userTypes.length > 0 ? 
-                    userTypes.join(' ') : 
+                userTypesDiv.innerHTML = userTypes.length > 0 ?
+                    userTypes.join(' ') :
                     '<span style="color: #999;">ไม่มีประเภทที่ระบุ</span>';
             },
 
@@ -1138,6 +1361,7 @@
                 this.updateCheckbox('is_consumer_edit', user.is_consumer || false);
                 this.updateCheckbox('is_grower_edit', user.is_grower || false);
                 this.updateCheckbox('is_budtender_edit', user.is_budtender || false);
+                this.updateCheckbox('is_shop_edit', user.is_shop || false);
             },
 
             displayContactPoints(user) {
@@ -1488,6 +1712,7 @@
                 ['username-display', 'username-edit'],
                 ['email-display', 'email-edit'],
                 ['birth-year-display', 'birth-year-edit'],
+                ['province-display', 'province-edit'],
                 ['user-types-display', 'user-types-edit'],
                 ['contact-display', 'contact-edit']
             ];
@@ -1512,6 +1737,7 @@
                 ['username-display', 'username-edit'],
                 ['email-display', 'email-edit'],
                 ['birth-year-display', 'birth-year-edit'],
+                ['province-display', 'province-edit'],
                 ['user-types-display', 'user-types-edit'],
                 ['contact-display', 'contact-edit']
             ];
@@ -1540,9 +1766,11 @@
                 username: document.getElementById('username-edit')?.value || '',
                 email: document.getElementById('email-edit')?.value || '',
                 birth_year: document.getElementById('birth-year-edit')?.value || '',
+                province: document.getElementById('province-edit')?.value || '',
                 is_consumer: document.getElementById('is_consumer_edit')?.checked || false,
                 is_grower: document.getElementById('is_grower_edit')?.checked || false,
                 is_budtender: document.getElementById('is_budtender_edit')?.checked || false,
+                is_shop: document.getElementById('is_shop_edit')?.checked || false,
                 contact_facebook: document.getElementById('contact-facebook-edit')?.value || '',
                 contact_line: document.getElementById('contact-line-edit')?.value || '',
                 contact_instagram: document.getElementById('contact-instagram-edit')?.value || '',
@@ -1590,6 +1818,141 @@
                 return false;
             }
             return true;
+        }
+
+        function checkReferrerAndNavigate(url, event) {
+            if (!ProfileManager.state.currentUserData) {
+                event.preventDefault();
+                return false;
+            }
+
+            // Skip for first user (id = 1) - always allow
+            if (ProfileManager.state.currentUserData.id === 1) {
+                return checkApprovalAndNavigate(url, event);
+            }
+
+            // Check if user has a referrer
+            if (!ProfileManager.state.currentUserData.referred_by) {
+                event.preventDefault();
+                alert('คุณไม่สามารถเข้าใช้งานระบบได้\nเนื่องจากคุณสมัครโดยไม่ผ่านผู้แนะนำ\n\nกรุณาใส่ Referral Code ในหน้าโปรไฟล์');
+                return false;
+            }
+
+            // Check if user is approved
+            return checkApprovalAndNavigate(url, event);
+        }
+
+        // Global variable to store referrer info
+        let selectedReferrerCode = null;
+
+        // Check referral code
+        async function checkReferralCode() {
+            const input = document.getElementById('referral-code-input');
+            let referralInput = input.value.trim();
+
+            if (!referralInput) {
+                alert('กรุณาใส่ Referral Link หรือ Referral Code');
+                return;
+            }
+
+            // Extract referral code from URL if it's a full URL
+            let referralCode = referralInput;
+            if (referralInput.includes('ref=')) {
+                try {
+                    // Try to parse as URL
+                    let urlToParse = referralInput;
+
+                    // If it doesn't start with http, it might be just query string
+                    if (!referralInput.startsWith('http')) {
+                        urlToParse = 'http://dummy.com/?' + referralInput.split('?').pop();
+                    }
+
+                    const url = new URL(urlToParse);
+                    referralCode = url.searchParams.get('ref');
+
+                    if (!referralCode) {
+                        alert('ไม่พบ Referral Code ใน URL');
+                        return;
+                    }
+                } catch (e) {
+                    alert('รูปแบบ URL ไม่ถูกต้อง');
+                    return;
+                }
+            }
+
+            try {
+                const response = await fetch(`/api/referrer_info/${referralCode}`);
+                const data = await response.json();
+
+                if (data.success && data.referrer) {
+                    // Store the code
+                    selectedReferrerCode = referralCode;
+
+                    // Show referrer info
+                    const referrerUsername = document.getElementById('referrer-username-display');
+                    const referrerAvatar = document.getElementById('referrer-avatar-display');
+                    const referrerInfoDisplay = document.getElementById('referrer-info-display');
+
+                    if (referrerUsername) {
+                        referrerUsername.textContent = data.referrer.username;
+                    }
+
+                    if (referrerAvatar) {
+                        if (data.referrer.profile_image_url) {
+                            referrerAvatar.innerHTML = `<img src="${data.referrer.profile_image_url}" alt="${data.referrer.username}" style="width: 100%; height: 100%; object-fit: cover;">`;
+                        } else {
+                            referrerAvatar.textContent = data.referrer.username.charAt(0).toUpperCase();
+                        }
+                    }
+
+                    if (referrerInfoDisplay) {
+                        referrerInfoDisplay.style.display = 'block';
+                    }
+                } else {
+                    alert('ไม่พบ Referral Code นี้ กรุณาตรวจสอบอีกครั้ง');
+                    selectedReferrerCode = null;
+                }
+            } catch (error) {
+                alert('เกิดข้อผิดพลาดในการตรวจสอบ Referral Code');
+                selectedReferrerCode = null;
+            }
+        }
+
+        // Confirm referrer
+        async function confirmReferrer() {
+            if (!selectedReferrerCode) {
+                alert('กรุณาตรวจสอบ Referral Code ก่อน');
+                return;
+            }
+
+            if (!confirm('คุณต้องการยืนยันผู้แนะนำนี้ใช่หรือไม่?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/submit_referral_code', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        referral_code: selectedReferrerCode
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('ส่งคำขอเรียบร้อยแล้ว! กรุณารอผู้แนะนำอนุมัติ');
+                    // Reload profile
+                    ProfileManager.state.isProfileLoaded = false;
+                    ProfileManager.loadProfile();
+                } else {
+                    alert(data.error || 'เกิดข้อผิดพลาดในการส่งคำขอ');
+                }
+            } catch (error) {
+                alert('เกิดข้อผิดพลาดในการส่งคำขอ');
+            }
         }
 
         // Initialize when DOM is ready

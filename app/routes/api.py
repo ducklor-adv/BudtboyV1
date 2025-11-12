@@ -36,7 +36,7 @@ def get_profile():
 
     try:
         users = db.execute_query(
-            'SELECT * FROM users WHERE id = ?',
+            'SELECT * FROM users WHERE id = %s',
             (user_id,)
         )
 
@@ -46,6 +46,14 @@ def get_profile():
         user = dict(users[0])
         # Remove sensitive data
         user.pop('password_hash', None)
+
+        # Map database column names to frontend field names
+        user['contact_facebook'] = user.pop('facebook_id', None)
+        user['contact_line'] = user.pop('line_id', None)
+        user['contact_instagram'] = user.pop('instagram_id', None)
+        user['contact_twitter'] = user.pop('twitter_id', None)
+        user['contact_telegram'] = user.pop('telegram_id', None)
+        user['contact_phone'] = user.pop('phone_number', None)
 
         return jsonify({'success': True, 'user': user})
 
@@ -65,19 +73,40 @@ def update_profile():
     cache = get_cache()
 
     try:
-        # Build update query dynamically based on provided fields
-        allowed_fields = [
-            'username', 'birth_year', 'is_grower', 'is_budtender', 'is_consumer',
-            'facebook_id', 'line_id', 'instagram_id', 'twitter_id', 'telegram_id', 'phone_number'
-        ]
+        # Map frontend field names to database column names
+        field_mapping = {
+            'username': 'username',
+            'birth_year': 'birth_year',
+            'province': 'province',
+            'is_grower': 'is_grower',
+            'is_budtender': 'is_budtender',
+            'is_consumer': 'is_consumer',
+            'is_shop': 'is_shop',
+            'contact_facebook': 'facebook_id',
+            'contact_line': 'line_id',
+            'contact_instagram': 'instagram_id',
+            'contact_twitter': 'twitter_id',
+            'contact_telegram': 'telegram_id',
+            'contact_phone': 'phone_number'
+        }
 
         update_fields = []
         update_values = []
 
-        for field in allowed_fields:
-            if field in data:
-                update_fields.append(f"{field} = ?")
-                update_values.append(data[field])
+        for frontend_field, db_field in field_mapping.items():
+            if frontend_field in data:
+                value = data[frontend_field]
+                # Convert empty string to None for integer fields
+                if db_field == 'birth_year' and value == '':
+                    value = None
+                # Convert empty string to None for boolean fields
+                if db_field in ['is_grower', 'is_shop', 'is_consumer', 'is_budtender'] and value == '':
+                    value = None
+                # Convert empty string to None for text fields
+                if db_field == 'province' and value == '':
+                    value = None
+                update_fields.append(f"{db_field} = %s")
+                update_values.append(value)
 
         if not update_fields:
             return jsonify({'error': 'ไม่มีข้อมูลที่ต้องอัพเดท'}), 400
@@ -85,7 +114,7 @@ def update_profile():
         # Add user_id to values
         update_values.append(user_id)
 
-        query = f"UPDATE users SET {', '.join(update_fields)} WHERE id = ?"
+        query = f"UPDATE users SET {', '.join(update_fields)} WHERE id = %s"
         db.execute_update(query, tuple(update_values))
 
         # Clear cache
@@ -133,7 +162,7 @@ def upload_profile_image():
         db = get_db()
         profile_image_url = f'/uploads/{filename}'
         db.execute_update(
-            'UPDATE users SET profile_image_url = ? WHERE id = ?',
+            'UPDATE users SET profile_image_url = %s WHERE id = %s',
             (profile_image_url, user_id)
         )
 
@@ -169,15 +198,15 @@ def get_buds():
         params = []
 
         if grower_id:
-            query += ' AND grower_id = ?'
+            query += ' AND grower_id = %s'
             params.append(grower_id)
         else:
             # Default: show user's own buds
-            query += ' AND grower_id = ?'
+            query += ' AND grower_id = %s'
             params.append(user_id)
 
         if status:
-            query += ' AND status = ?'
+            query += ' AND status = %s'
             params.append(status)
 
         query += ' ORDER BY created_at DESC'
@@ -201,7 +230,7 @@ def handle_bud_detail(bud_id):
     if request.method == 'GET':
         try:
             buds = db.execute_query(
-                'SELECT * FROM buds_data WHERE id = ?',
+                'SELECT * FROM buds_data WHERE id = %s',
                 (bud_id,)
             )
 
@@ -223,7 +252,7 @@ def handle_bud_detail(bud_id):
         try:
             # Check if bud exists and belongs to user
             buds = db.execute_query(
-                'SELECT grower_id FROM buds_data WHERE id = ?',
+                'SELECT grower_id FROM buds_data WHERE id = %s',
                 (bud_id,)
             )
 
@@ -268,14 +297,24 @@ def handle_bud_detail(bud_id):
                 'certificate_image_3_url', 'certificate_image_4_url'
             ]
 
+            # Fields that can be empty (cleared)
+            clearable_fields = [
+                'aroma_flavor',
+                'mental_effects_positive', 'mental_effects_negative',
+                'physical_effects_positive', 'physical_effects_negative',
+                'recommended_time', 'description', 'youtube_url',
+                'effect', 'medical_use', 'grow_location', 'light_type',
+                'nutrients', 'training_method', 'batch_number'
+            ]
+
             for field in allowed_fields:
                 if field in data:
                     value = data[field]
-                    # Skip empty strings and None values for fields with CHECK constraints
-                    if value == '' or value is None:
+                    # Allow empty strings for clearable fields, skip for others
+                    if (value == '' or value is None) and field not in clearable_fields:
                         continue
-                    update_fields.append(f"{field} = ?")
-                    params.append(value)
+                    update_fields.append(f"{field} = %s")
+                    params.append(value if value != '' else None)
 
             if not update_fields:
                 return jsonify({'error': 'ไม่มีข้อมูลที่ต้องอัปเดต'}), 400
@@ -284,7 +323,7 @@ def handle_bud_detail(bud_id):
             params.append(bud_id)
 
             # Execute update
-            query = f"UPDATE buds_data SET {', '.join(update_fields)} WHERE id = ?"
+            query = f"UPDATE buds_data SET {', '.join(update_fields)} WHERE id = %s"
             db.execute_update(query, tuple(params))
 
             return jsonify({
@@ -308,7 +347,7 @@ def upload_bud_images(bud_id):
 
     try:
         # Check if bud exists and belongs to user
-        buds = db.execute_query('SELECT grower_id FROM buds_data WHERE id = ?', (bud_id,))
+        buds = db.execute_query('SELECT grower_id FROM buds_data WHERE id = %s', (bud_id,))
         if not buds:
             return jsonify({'error': 'ไม่พบข้อมูลดอก'}), 404
         if buds[0]['grower_id'] != user_id:
@@ -341,7 +380,7 @@ def upload_bud_images(bud_id):
                     # Store URL for update
                     image_url = f'/uploads/{filename}'
                     uploaded_images[f'image_{i}_url'] = image_url
-                    update_fields.append(f'image_{i}_url = ?')
+                    update_fields.append(f'image_{i}_url = %s')
                     params.append(image_url)
 
         # Process certificate images (certificate_image_1 to certificate_image_4)
@@ -366,13 +405,13 @@ def upload_bud_images(bud_id):
                     # Store URL for update
                     image_url = f'/uploads/{filename}'
                     uploaded_images[f'certificate_image_{i}_url'] = image_url
-                    update_fields.append(f'certificate_image_{i}_url = ?')
+                    update_fields.append(f'certificate_image_{i}_url = %s')
                     params.append(image_url)
 
         # Update database if any images were uploaded
         if update_fields:
             params.append(bud_id)
-            query = f"UPDATE buds_data SET {', '.join(update_fields)} WHERE id = ?"
+            query = f"UPDATE buds_data SET {', '.join(update_fields)} WHERE id = %s"
             db.execute_update(query, tuple(params))
 
             return jsonify({
@@ -400,15 +439,19 @@ def get_bud_info(bud_id):
     db = get_db()
 
     try:
-        # Get bud details with creator info
+        # Get bud details with creator info and contact info
         buds = db.execute_query('''
             SELECT
                 b.*,
                 u.username as grower_name,
-                u.profile_image_url as grower_profile_image
+                u.profile_image_url as grower_profile_image,
+                u.facebook_id as grower_contact_facebook,
+                u.line_id as grower_contact_line,
+                u.instagram_id as grower_contact_instagram,
+                u.phone_number as grower_contact_phone
             FROM buds_data b
             LEFT JOIN users u ON b.created_by = u.id
-            WHERE b.id = ?
+            WHERE b.id = %s
         ''', (bud_id,))
 
         if not buds:
@@ -421,7 +464,7 @@ def get_bud_info(bud_id):
             SELECT r.*, u.username as reviewer_name, u.profile_image_url as reviewer_image
             FROM reviews r
             LEFT JOIN users u ON r.reviewer_id = u.id
-            WHERE r.bud_reference_id = ?
+            WHERE r.bud_reference_id = %s
             ORDER BY r.created_at DESC
         ''', (bud_id,))
 
@@ -463,12 +506,13 @@ def create_bud():
 
     try:
         # Insert bud
+        # created_at has DEFAULT CURRENT_TIMESTAMP, so we don't need to pass it
         bud_id = db.execute_insert('''
             INSERT INTO buds_data (
                 strain_name_th, strain_name_en, breeder, strain_type,
                 thc_percentage, cbd_percentage, grade, aroma_flavor,
-                grower_id, status, created_at, created_by
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                grower_id, status, created_by
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         ''', (
             data.get('strain_name_th'),
             data.get('strain_name_en'),
@@ -480,7 +524,6 @@ def create_bud():
             data.get('aroma_flavor'),
             user_id,
             'available',
-            datetime.now(),
             user_id
         ))
 
@@ -505,7 +548,7 @@ def delete_bud(bud_id):
     try:
         # Check ownership
         buds = db.execute_query(
-            'SELECT grower_id FROM buds_data WHERE id = ?',
+            'SELECT grower_id FROM buds_data WHERE id = %s',
             (bud_id,)
         )
 
@@ -517,7 +560,7 @@ def delete_bud(bud_id):
             return jsonify({'error': 'คุณไม่มีสิทธิ์ลบข้อมูลนี้'}), 403
 
         # Delete
-        db.execute_update('DELETE FROM buds_data WHERE id = ?', (bud_id,))
+        db.execute_update('DELETE FROM buds_data WHERE id = %s', (bud_id,))
 
         return jsonify({'success': True, 'message': 'ลบข้อมูลสำเร็จ'})
 
@@ -543,7 +586,7 @@ def update_bud_status(bud_id):
 
         # Check if bud exists and belongs to user
         bud = db.execute_query(
-            'SELECT id, grower_id, status FROM buds_data WHERE id = ?',
+            'SELECT id, grower_id, status FROM buds_data WHERE id = %s',
             (bud_id,)
         )
 
@@ -555,7 +598,7 @@ def update_bud_status(bud_id):
 
         # Update status
         db.execute_update(
-            'UPDATE buds_data SET status = ? WHERE id = ?',
+            'UPDATE buds_data SET status = %s WHERE id = %s',
             (new_status, bud_id)
         )
 
@@ -585,29 +628,56 @@ def get_user_buds():
             buds = db.execute_query('''
                 SELECT
                     b.*,
-                    COALESCE(AVG(r.overall_rating), 0) as avg_rating,
-                    COUNT(r.id) as review_count
+                    COALESCE(r.avg_rating, 0) as avg_rating,
+                    COALESCE(r.review_count, 0) as review_count
                 FROM buds_data b
-                LEFT JOIN reviews r ON b.id = r.bud_reference_id
-                WHERE b.grower_id = ?
-                GROUP BY b.id
+                LEFT JOIN (
+                    SELECT
+                        bud_reference_id,
+                        AVG(overall_rating) as avg_rating,
+                        COUNT(*) as review_count
+                    FROM reviews
+                    GROUP BY bud_reference_id
+                ) r ON b.id = r.bud_reference_id
+                WHERE b.grower_id = %s
                 ORDER BY b.created_at DESC
             ''', (user_id,))
-        except:
+        except Exception as e:
+            print(f"Error with grower_id query: {e}")
             # Fallback to user_id if grower_id doesn't exist
             buds = db.execute_query('''
                 SELECT
                     b.*,
-                    COALESCE(AVG(r.overall_rating), 0) as avg_rating,
-                    COUNT(r.id) as review_count
+                    COALESCE(r.avg_rating, 0) as avg_rating,
+                    COALESCE(r.review_count, 0) as review_count
                 FROM buds_data b
-                LEFT JOIN reviews r ON b.id = r.bud_reference_id
-                WHERE b.user_id = ?
-                GROUP BY b.id
+                LEFT JOIN (
+                    SELECT
+                        bud_reference_id,
+                        AVG(overall_rating) as avg_rating,
+                        COUNT(*) as review_count
+                    FROM reviews
+                    GROUP BY bud_reference_id
+                ) r ON b.id = r.bud_reference_id
+                WHERE b.user_id = %s
                 ORDER BY b.created_at DESC
             ''', (user_id,))
 
         buds_list = dicts_from_rows(buds) if buds else []
+
+        # Ensure avg_rating is a float and review_count is an int
+        for bud in buds_list:
+            if 'avg_rating' in bud:
+                try:
+                    bud['avg_rating'] = float(bud['avg_rating']) if bud['avg_rating'] is not None else 0.0
+                except (ValueError, TypeError):
+                    bud['avg_rating'] = 0.0
+            if 'review_count' in bud:
+                try:
+                    bud['review_count'] = int(bud['review_count']) if bud['review_count'] is not None else 0
+                except (ValueError, TypeError):
+                    bud['review_count'] = 0
+
         return jsonify({'buds': buds_list})
 
     except Exception as e:
@@ -638,11 +708,11 @@ def get_reviews():
         params = []
 
         if bud_id:
-            query += ' AND r.bud_reference_id = ?'
+            query += ' AND r.bud_reference_id = %s'
             params.append(bud_id)
 
         if reviewer_id:
-            query += ' AND r.reviewer_id = ?'
+            query += ' AND r.reviewer_id = %s'
             params.append(reviewer_id)
 
         query += ' ORDER BY r.created_at DESC'
@@ -655,6 +725,110 @@ def get_reviews():
     except Exception as e:
         print(f"Get reviews error: {e}")
         return jsonify({'error': 'เกิดข้อผิดพลาด'}), 500
+
+
+@api_bp.route('/reviews/<int:review_id>', methods=['GET'])
+@api_login_required
+def get_review_by_id(review_id):
+    """Get a single review by ID"""
+    db = get_db()
+    user_id = session.get('user_id')
+
+    try:
+        # Get the review with bud information
+        review = db.execute_query('''
+            SELECT
+                r.*,
+                u.username as reviewer_name,
+                u.profile_image_url as reviewer_image,
+                b.strain_name_th,
+                b.strain_name_en,
+                b.breeder,
+                b.strain_type
+            FROM reviews r
+            LEFT JOIN users u ON r.reviewer_id = u.id
+            LEFT JOIN buds_data b ON r.bud_reference_id = b.id
+            WHERE r.id = %s
+        ''', (review_id,))
+
+        if not review:
+            return jsonify({'error': 'ไม่พบรีวิว'}), 404
+
+        review_dict = dict(review[0])
+
+        # Check if user owns this review
+        if review_dict.get('reviewer_id') != user_id:
+            return jsonify({'error': 'คุณไม่มีสิทธิ์เข้าถึงรีวิวนี้'}), 403
+
+        return jsonify({'success': True, 'review': review_dict})
+
+    except Exception as e:
+        print(f"Get review by ID error: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': 'เกิดข้อผิดพลาด'}), 500
+
+
+@api_bp.route('/reviews/<int:review_id>', methods=['PUT'])
+@api_login_required
+def update_review(review_id):
+    """Update an existing review"""
+    data = request.get_json()
+    user_id = session.get('user_id')
+    db = get_db()
+
+    try:
+        # Check if review exists and user owns it
+        existing_review = db.execute_query(
+            'SELECT id, reviewer_id FROM reviews WHERE id = %s',
+            (review_id,)
+        )
+
+        if not existing_review:
+            return jsonify({'error': 'ไม่พบรีวิว'}), 404
+
+        review = dict(existing_review[0])
+        if review['reviewer_id'] != user_id:
+            return jsonify({'error': 'คุณไม่มีสิทธิ์แก้ไขรีวิวนี้'}), 403
+
+        # Prepare update fields
+        update_fields = []
+        params = []
+
+        # Fields that can be updated
+        allowed_fields = [
+            'overall_rating', 'aroma_flavors', 'selected_effects',
+            'aroma_rating', 'full_review_content', 'review_images',
+            'video_review_url', 'short_summary'
+        ]
+
+        for field in allowed_fields:
+            if field in data:
+                value = data[field]
+                # Handle arrays - convert to comma-separated strings
+                if isinstance(value, list):
+                    value = ', '.join(str(v) for v in value) if value else None
+                update_fields.append(f"{field} = %s")
+                params.append(value)
+
+        if not update_fields:
+            return jsonify({'error': 'ไม่มีข้อมูลที่จะอัพเดท'}), 400
+
+        # Add updated_at timestamp
+        update_fields.append("updated_at = CURRENT_TIMESTAMP")
+        params.append(review_id)
+
+        # Execute update
+        query = f"UPDATE reviews SET {', '.join(update_fields)} WHERE id = %s"
+        db.execute_update(query, tuple(params))
+
+        return jsonify({'success': True, 'message': 'อัพเดทรีวิวสำเร็จ'})
+
+    except Exception as e:
+        print(f"Update review error: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': 'เกิดข้อผิดพลาดในการอัพเดท'}), 500
 
 
 @api_bp.route('/reviews', methods=['POST'])
@@ -701,13 +875,13 @@ def create_review():
         review_images_str = ', '.join(review_images_list) if review_images_list else None
 
         # Insert review
+        # created_at and updated_at have DEFAULT CURRENT_TIMESTAMP
         review_id = db.execute_insert('''
             INSERT INTO reviews (
                 bud_reference_id, reviewer_id, overall_rating,
                 aroma_flavors, selected_effects, aroma_rating,
-                full_review_content, review_images, video_review_url,
-                created_at, updated_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+                full_review_content, review_images, video_review_url
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         ''', (
             bud_reference_id, user_id, overall_rating,
             aroma_flavors_str, selected_effects_str, aroma_rating,
@@ -739,13 +913,13 @@ def get_user_reviews():
             SELECT
                 r.*,
                 u.username as reviewer_name,
-                u.profile_image_url as reviewer_profile_image,
+                u.profile_image_url as reviewer_image,
                 b.strain_name_th,
                 b.strain_name_en
             FROM reviews r
             LEFT JOIN users u ON r.reviewer_id = u.id
             LEFT JOIN buds_data b ON r.bud_reference_id = b.id
-            WHERE r.reviewer_id = ?
+            WHERE r.reviewer_id = %s
             ORDER BY r.created_at DESC
         ''', (user_id,))
 
@@ -765,15 +939,17 @@ def get_referrer_info(referral_code):
     try:
         # Get user by referral code with profile image
         user = db.execute_query(
-            'SELECT username, profile_image_url FROM users WHERE referral_code = ?',
+            'SELECT username, profile_image_url FROM users WHERE referral_code = %s',
             (referral_code,)
         )
 
         if user:
             return jsonify({
                 'success': True,
-                'username': user[0]['username'],
-                'profile_image_url': user[0]['profile_image_url']
+                'referrer': {
+                    'username': user[0]['username'],
+                    'profile_image_url': user[0]['profile_image_url']
+                }
             })
         else:
             return jsonify({
@@ -798,11 +974,11 @@ def get_friends_reviews():
         friends_rows = db.execute_query('''
             SELECT
                 CASE
-                    WHEN user_id = ? THEN friend_id
+                    WHEN user_id = %s THEN friend_id
                     ELSE user_id
                 END as friend_user_id
             FROM friends
-            WHERE (user_id = ? OR friend_id = ?)
+            WHERE (user_id = %s OR friend_id = %s)
               AND status = 'accepted'
         ''', (user_id, user_id, user_id))
 
@@ -813,12 +989,12 @@ def get_friends_reviews():
         friend_ids = [row['friend_user_id'] for row in friends_rows]
 
         # Get reviews from these friends with JOIN to get reviewer info and bud info
-        placeholders = ','.join('?' * len(friend_ids))
+        placeholders = ','.join('%s' * len(friend_ids))
         reviews = db.execute_query(f'''
             SELECT
                 r.*,
                 u.username as reviewer_name,
-                u.profile_image_url as reviewer_profile_image,
+                u.profile_image_url as reviewer_image,
                 b.strain_name_th,
                 b.strain_name_en
             FROM reviews r
@@ -849,7 +1025,7 @@ def get_activities():
             SELECT
                 a.*,
                 COUNT(DISTINCT ap.user_id) as participant_count,
-                MAX(CASE WHEN ap.user_id = ? THEN 1 ELSE 0 END) as user_joined
+                MAX(CASE WHEN ap.user_id = %s THEN 1 ELSE 0 END) as user_joined
             FROM activities a
             LEFT JOIN activity_participants ap ON a.id = ap.activity_id
             GROUP BY a.id
@@ -880,7 +1056,7 @@ def get_pending_friends_count():
         pending = db.execute_query('''
             SELECT COUNT(*) as count
             FROM friends
-            WHERE friend_id = ? AND status = 'pending'
+            WHERE friend_id = %s AND status = 'pending'
         ''', (user_id,))
 
         count = pending[0]['count'] if pending else 0
@@ -903,7 +1079,7 @@ def get_friends():
         referred_users = db.execute_query('''
             SELECT id, username, profile_image_url, referrer_approved, is_approved, created_at
             FROM users
-            WHERE referred_by = ?
+            WHERE referred_by = %s
             ORDER BY created_at DESC
         ''', (user_id,))
 
@@ -920,7 +1096,7 @@ def get_friends():
                 })
 
         # Get current user's referral code
-        current_user = db.execute_query('SELECT referral_code FROM users WHERE id = ?', (user_id,))
+        current_user = db.execute_query('SELECT referral_code FROM users WHERE id = %s', (user_id,))
         referral_code = current_user[0]['referral_code'] if current_user and current_user[0]['referral_code'] else ''
 
         return jsonify({
@@ -954,7 +1130,7 @@ def approve_referral():
         referred_user = db.execute_query('''
             SELECT id, username, referred_by, referrer_approved
             FROM users
-            WHERE id = ? AND referred_by = ?
+            WHERE id = %s AND referred_by = %s
         ''', (referred_user_id, user_id))
 
         if not referred_user:
@@ -964,12 +1140,13 @@ def approve_referral():
             return jsonify({'error': 'ผู้ใช้นี้ได้รับการอนุมัติแล้ว'}), 400
 
         # Approve the user
+        # Use CURRENT_TIMESTAMP for PostgreSQL compatibility
         from datetime import datetime
         db.execute_update('''
             UPDATE users
-            SET referrer_approved = 1, referrer_approved_at = ?
-            WHERE id = ?
-        ''', (datetime.now(), referred_user_id))
+            SET referrer_approved = TRUE, referrer_approved_at = CURRENT_TIMESTAMP
+            WHERE id = %s
+        ''', (referred_user_id,))
 
         return jsonify({
             'success': True,
@@ -1009,7 +1186,7 @@ def get_admin_stats():
         total_activities = activities_result[0]['count'] if activities_result else 0
 
         # Count pending users
-        pending_result = db.execute_query('SELECT COUNT(*) as count FROM users WHERE is_approved = 0')
+        pending_result = db.execute_query('SELECT COUNT(*) as count FROM users WHERE is_approved = FALSE')
         pending_users = pending_result[0]['count'] if pending_result else 0
 
         return jsonify({
@@ -1038,7 +1215,7 @@ def get_pending_users():
         users = db.execute_query('''
             SELECT id, username, email, created_at
             FROM users
-            WHERE is_approved = 0
+            WHERE is_approved = FALSE
             ORDER BY created_at DESC
         ''')
 
@@ -1084,36 +1261,52 @@ def get_all_users():
 @api_admin_required
 def delete_user(user_id):
     """Delete a user (admin only)"""
-    admin_id = session.get('user_id')
     db = get_db()
+    cache = get_cache()
 
     try:
-        # Check if trying to delete yourself
-        if user_id == admin_id:
-            return jsonify({'error': 'ไม่สามารถลบบัญชีของตัวเองได้'}), 403
-
         # Check if user exists
-        user = db.execute_query('SELECT id, username FROM users WHERE id = ?', (user_id,))
+        user = db.execute_query('SELECT id, username FROM users WHERE id = %s', (user_id,))
         if not user:
             return jsonify({'error': 'ไม่พบผู้ใช้'}), 404
 
         username = user[0]['username']
 
         # Delete user's related data first (to maintain referential integrity)
-        # Delete user's buds
-        db.execute_update('DELETE FROM buds_data WHERE grower_id = ?', (user_id,))
 
-        # Delete user's reviews
-        db.execute_update('DELETE FROM reviews WHERE user_id = ?', (user_id,))
+        # Delete user's reviews (use reviewer_id)
+        db.execute_update('DELETE FROM reviews WHERE reviewer_id = %s', (user_id,))
 
         # Delete user's activity participations
-        db.execute_update('DELETE FROM activity_participants WHERE user_id = ?', (user_id,))
+        db.execute_update('DELETE FROM activity_participants WHERE user_id = %s', (user_id,))
+
+        # Delete user's buds (check both grower_id and created_by)
+        db.execute_update('DELETE FROM buds_data WHERE grower_id = %s OR created_by = %s', (user_id, user_id))
+
+        # Delete user's friendships
+        db.execute_update('DELETE FROM friends WHERE user_id = %s OR friend_id = %s', (user_id, user_id))
+
+        # Delete user's referrals (use referrer_user_id and referred_user_id)
+        db.execute_update('DELETE FROM referrals WHERE referrer_user_id = %s OR referred_user_id = %s', (user_id, user_id))
 
         # Update users who were referred by this user (set referred_by to NULL)
-        db.execute_update('UPDATE users SET referred_by = NULL WHERE referred_by = ?', (user_id,))
+        db.execute_update('UPDATE users SET referred_by = NULL WHERE referred_by = %s', (user_id,))
+
+        # Delete email verifications
+        db.execute_update('DELETE FROM email_verifications WHERE user_id = %s', (user_id,))
+
+        # Delete password reset tokens
+        db.execute_update('DELETE FROM password_resets WHERE user_id = %s', (user_id,))
 
         # Delete the user
-        db.execute_update('DELETE FROM users WHERE id = ?', (user_id,))
+        db.execute_update('DELETE FROM users WHERE id = %s', (user_id,))
+
+        # Clear all related cache
+        cache.clear_pattern(f'profile_{user_id}')
+        cache.clear_pattern(f'user_{user_id}')
+        cache.clear_pattern('users_')
+        cache.clear_pattern('buds_')
+        cache.clear_pattern('activities_')
 
         return jsonify({
             'success': True,
@@ -1122,7 +1315,49 @@ def delete_user(user_id):
 
     except Exception as e:
         print(f"Delete user error: {e}")
-        return jsonify({'error': 'เกิดข้อผิดพลาดในการลบผู้ใช้'}), 500
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': f'เกิดข้อผิดพลาดในการลบผู้ใช้: {str(e)}'}), 500
+
+
+@api_bp.route('/admin/approve_user', methods=['POST'])
+@api_admin_required
+def approve_user():
+    """Approve a user (admin only)"""
+    db = get_db()
+
+    try:
+        data = request.get_json()
+        user_id = data.get('user_id')
+
+        if not user_id:
+            return jsonify({'error': 'ไม่ได้ระบุ user_id'}), 400
+
+        # Check if user exists
+        user = db.execute_query('SELECT id, username, is_approved FROM users WHERE id = %s', (user_id,))
+        if not user:
+            return jsonify({'error': 'ไม่พบผู้ใช้'}), 404
+
+        if user[0]['is_approved']:
+            return jsonify({'error': 'ผู้ใช้นี้ได้รับการอนุมัติแล้ว'}), 400
+
+        # Approve the user
+        db.execute_update('''
+            UPDATE users
+            SET is_approved = TRUE, approved_at = CURRENT_TIMESTAMP
+            WHERE id = %s
+        ''', (user_id,))
+
+        return jsonify({
+            'success': True,
+            'message': f'อนุมัติ {user[0]["username"]} เรียบร้อยแล้ว'
+        })
+
+    except Exception as e:
+        print(f"Approve user error: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': f'เกิดข้อผิดพลาด: {str(e)}'}), 500
 
 
 @api_bp.route('/all-buds-report', methods=['GET'])
@@ -1166,15 +1401,15 @@ def search_strains():
             strains = db.execute_query('''
                 SELECT DISTINCT strain_name_en as name
                 FROM buds_data
-                WHERE strain_name_en LIKE ?
-                LIMIT ?
+                WHERE strain_name_en LIKE %s
+                LIMIT %s
             ''', (f'%{query}%', limit))
         else:
             strains = db.execute_query('''
                 SELECT DISTINCT strain_name_th as name
                 FROM buds_data
-                WHERE strain_name_th LIKE ?
-                LIMIT ?
+                WHERE strain_name_th LIKE %s
+                LIMIT %s
             ''', (f'%{query}%', limit))
 
         results = [{'name': row['name']} for row in strains if row['name']]
@@ -1198,8 +1433,8 @@ def search_breeders():
         breeders = db.execute_query('''
             SELECT DISTINCT breeder
             FROM buds_data
-            WHERE breeder LIKE ?
-            LIMIT ?
+            WHERE breeder LIKE %s
+            LIMIT %s
         ''', (f'%{query}%', limit))
 
         results = [{'name': row['breeder']} for row in breeders if row['breeder']]
@@ -1226,56 +1461,56 @@ def search_buds():
 
         # Strain names
         if data.get('strain_name_th'):
-            conditions.append('strain_name_th LIKE ?')
+            conditions.append('strain_name_th LIKE %s')
             params.append(f"%{data['strain_name_th']}%")
 
         if data.get('strain_name_en'):
-            conditions.append('strain_name_en LIKE ?')
+            conditions.append('strain_name_en LIKE %s')
             params.append(f"%{data['strain_name_en']}%")
 
         # Breeder
         if data.get('breeder'):
-            conditions.append('breeder LIKE ?')
+            conditions.append('breeder LIKE %s')
             params.append(f"%{data['breeder']}%")
 
         # Strain type
         if data.get('strain_type'):
-            conditions.append('strain_type = ?')
+            conditions.append('strain_type = %s')
             params.append(data['strain_type'])
 
         # Grade
         if data.get('grade'):
-            conditions.append('grade = ?')
+            conditions.append('grade = %s')
             params.append(data['grade'])
 
         # THC range
         if data.get('thc_min'):
-            conditions.append('thc_percentage >= ?')
+            conditions.append('thc_percentage >= %s')
             params.append(float(data['thc_min']))
 
         if data.get('thc_max'):
-            conditions.append('thc_percentage <= ?')
+            conditions.append('thc_percentage <= %s')
             params.append(float(data['thc_max']))
 
         # CBD range
         if data.get('cbd_min'):
-            conditions.append('cbd_percentage >= ?')
+            conditions.append('cbd_percentage >= %s')
             params.append(float(data['cbd_min']))
 
         if data.get('cbd_max'):
-            conditions.append('cbd_percentage <= ?')
+            conditions.append('cbd_percentage <= %s')
             params.append(float(data['cbd_max']))
 
         # Aroma/Flavor
         if data.get('aroma_flavor'):
-            conditions.append('aroma_flavor LIKE ?')
+            conditions.append('aroma_flavor LIKE %s')
             params.append(f"%{data['aroma_flavor']}%")
 
         # Terpenes
         if data.get('terpenes'):
             terpene_conditions = []
             for terp in data['terpenes']:
-                terpene_conditions.append('(top_terpenes_1 LIKE ? OR top_terpenes_2 LIKE ? OR top_terpenes_3 LIKE ?)')
+                terpene_conditions.append('(top_terpenes_1 LIKE %s OR top_terpenes_2 LIKE %s OR top_terpenes_3 LIKE %s)')
                 params.extend([f"%{terp}%", f"%{terp}%", f"%{terp}%"])
             if terpene_conditions:
                 conditions.append(f"({' OR '.join(terpene_conditions)})")
@@ -1283,17 +1518,17 @@ def search_buds():
         # Effects
         if data.get('mental_effects_positive'):
             for effect in data['mental_effects_positive']:
-                conditions.append('mental_effects_positive LIKE ?')
+                conditions.append('mental_effects_positive LIKE %s')
                 params.append(f"%{effect}%")
 
         if data.get('physical_effects_positive'):
             for effect in data['physical_effects_positive']:
-                conditions.append('physical_effects_positive LIKE ?')
+                conditions.append('physical_effects_positive LIKE %s')
                 params.append(f"%{effect}%")
 
         # Recommended time
         if data.get('recommended_time'):
-            conditions.append('recommended_time = ?')
+            conditions.append('recommended_time = %s')
             params.append(data['recommended_time'])
 
         # Build final query
@@ -1337,6 +1572,7 @@ def get_admin_reviews():
             SELECT
                 r.*,
                 u.username as reviewer_name,
+                u.profile_image_url as reviewer_profile_image,
                 b.strain_name_th,
                 b.strain_name_en,
                 b.breeder
@@ -1396,19 +1632,20 @@ def update_auth_images():
             if key.startswith('auth_image_'):
                 # Check if exists
                 existing = db.execute_query(
-                    'SELECT key FROM admin_settings WHERE key = ?',
+                    'SELECT key FROM admin_settings WHERE key = %s',
                     (key,)
                 )
 
                 if existing:
                     db.execute_update(
-                        'UPDATE admin_settings SET value = ?, updated_at = ? WHERE key = ?',
-                        (value, datetime.now(), key)
+                        'UPDATE admin_settings SET value = %s, updated_at = CURRENT_TIMESTAMP WHERE key = %s',
+                        (value, key)
                     )
                 else:
+                    # updated_at has DEFAULT CURRENT_TIMESTAMP
                     db.execute_insert(
-                        'INSERT INTO admin_settings (key, value, updated_at) VALUES (?, ?, ?)',
-                        (key, value, datetime.now())
+                        'INSERT INTO admin_settings (key, value) VALUES (%s, %s)',
+                        (key, value)
                     )
 
         return jsonify({
@@ -1442,6 +1679,27 @@ def get_admin_settings():
         return jsonify({'error': 'เกิดข้อผิดพลาด'}), 500
 
 
+@api_bp.route('/admin/settings/general', methods=['GET'])
+@api_admin_required
+def get_general_settings():
+    """Get general settings"""
+    db = get_db()
+
+    try:
+        # Get all settings from database
+        settings = db.execute_query('SELECT key, value FROM admin_settings')
+        settings_dict = {row['key']: row['value'] for row in settings} if settings else {}
+
+        return jsonify({
+            'success': True,
+            'settings': settings_dict
+        })
+
+    except Exception as e:
+        print(f"Get general settings error: {e}")
+        return jsonify({'error': 'เกิดข้อผิดพลาด'}), 500
+
+
 @api_bp.route('/admin/update_settings', methods=['POST'])
 @api_admin_required
 def update_admin_settings():
@@ -1450,32 +1708,59 @@ def update_admin_settings():
     data = request.get_json()
 
     try:
-        # Update or insert settings
+        # Update or insert settings using UPSERT (PostgreSQL)
+        saved_count = 0
         for key, value in data.items():
-            # Check if exists
-            existing = db.execute_query(
-                'SELECT key FROM admin_settings WHERE key = ?',
-                (key,)
-            )
-
-            if existing:
-                db.execute_update(
-                    'UPDATE admin_settings SET value = ?, updated_at = ? WHERE key = ?',
-                    (str(value), datetime.now(), key)
-                )
-            else:
-                db.execute_insert(
-                    'INSERT INTO admin_settings (key, value, updated_at) VALUES (?, ?, ?)',
-                    (key, str(value), datetime.now())
-                )
+            db.execute_update('''
+                INSERT INTO admin_settings (key, value, updated_at)
+                VALUES (%s, %s, CURRENT_TIMESTAMP)
+                ON CONFLICT (key)
+                DO UPDATE SET value = EXCLUDED.value, updated_at = CURRENT_TIMESTAMP
+            ''', (key, str(value)))
+            saved_count += 1
 
         return jsonify({
             'success': True,
-            'message': 'บันทึกการตั้งค่าสำเร็จ'
+            'message': 'บันทึกการตั้งค่าสำเร็จ',
+            'saved_count': saved_count
         })
 
     except Exception as e:
         print(f"Update settings error: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': 'เกิดข้อผิดพลาด'}), 500
+
+
+@api_bp.route('/admin/settings/general', methods=['POST'])
+@api_admin_required
+def save_general_settings():
+    """Save general settings"""
+    db = get_db()
+    data = request.get_json()
+
+    try:
+        # Update or insert settings using UPSERT (PostgreSQL)
+        saved_count = 0
+        for key, value in data.items():
+            db.execute_update('''
+                INSERT INTO admin_settings (key, value, updated_at)
+                VALUES (%s, %s, CURRENT_TIMESTAMP)
+                ON CONFLICT (key)
+                DO UPDATE SET value = EXCLUDED.value, updated_at = CURRENT_TIMESTAMP
+            ''', (key, str(value)))
+            saved_count += 1
+
+        return jsonify({
+            'success': True,
+            'message': 'บันทึกการตั้งค่าสำเร็จ',
+            'saved_count': saved_count
+        })
+
+    except Exception as e:
+        print(f"Save general settings error: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'error': 'เกิดข้อผิดพลาด'}), 500
 
 
@@ -1516,6 +1801,7 @@ def create_activity():
 
     try:
         data = request.get_json()
+        print(f"[DEBUG] Received data: {data}")
 
         # Insert activity
         activity_id = db.execute_insert('''
@@ -1530,9 +1816,8 @@ def create_activity():
                 preferred_terpenes, allowed_status, min_thc, max_thc, min_cbd, max_cbd,
                 require_certificate, require_min_images, min_image_count,
                 require_min_reviews, min_review_count,
-                preferred_aromas, preferred_effects,
-                created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+                preferred_aromas, preferred_effects
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         ''', (
             data.get('name'),
             data.get('description'),
@@ -1593,18 +1878,18 @@ def update_activity(activity_id):
         # Update activity
         db.execute_update('''
             UPDATE activities SET
-                name = ?, description = ?, start_registration_date = ?, end_registration_date = ?,
-                max_participants = ?, status = ?, judging_criteria = ?,
-                first_prize_description = ?, first_prize_value = ?,
-                second_prize_description = ?, second_prize_value = ?,
-                third_prize_description = ?, third_prize_value = ?,
-                allowed_strain_types = ?, allowed_grow_methods = ?, allowed_grades = ?,
-                allowed_fertilizer_types = ?, allowed_recommended_times = ?, allowed_flowering_types = ?,
-                preferred_terpenes = ?, allowed_status = ?, min_thc = ?, max_thc = ?, min_cbd = ?, max_cbd = ?,
-                require_certificate = ?, require_min_images = ?, min_image_count = ?,
-                require_min_reviews = ?, min_review_count = ?,
-                preferred_aromas = ?, preferred_effects = ?
-            WHERE id = ?
+                name = %s, description = %s, start_registration_date = %s, end_registration_date = %s,
+                max_participants = %s, status = %s, judging_criteria = %s,
+                first_prize_description = %s, first_prize_value = %s,
+                second_prize_description = %s, second_prize_value = %s,
+                third_prize_description = %s, third_prize_value = %s,
+                allowed_strain_types = %s, allowed_grow_methods = %s, allowed_grades = %s,
+                allowed_fertilizer_types = %s, allowed_recommended_times = %s, allowed_flowering_types = %s,
+                preferred_terpenes = %s, allowed_status = %s, min_thc = %s, max_thc = %s, min_cbd = %s, max_cbd = %s,
+                require_certificate = %s, require_min_images = %s, min_image_count = %s,
+                require_min_reviews = %s, min_review_count = %s,
+                preferred_aromas = %s, preferred_effects = %s
+            WHERE id = %s
         ''', (
             data.get('name'),
             data.get('description'),
@@ -1661,7 +1946,7 @@ def delete_activity(activity_id):
 
     try:
         # Delete activity
-        db.execute_update('DELETE FROM activities WHERE id = ?', (activity_id,))
+        db.execute_update('DELETE FROM activities WHERE id = %s', (activity_id,))
 
         return jsonify({
             'success': True,
@@ -1684,7 +1969,7 @@ def get_activity_participants(activity_id):
     try:
         # Get activity details
         activity_rows = db.execute_query('''
-            SELECT * FROM activities WHERE id = ?
+            SELECT * FROM activities WHERE id = %s
         ''', (activity_id,))
 
         if not activity_rows:
@@ -1718,7 +2003,7 @@ def get_activity_participants(activity_id):
                 FROM activity_participants ap
                 LEFT JOIN users u ON ap.user_id = u.id
                 LEFT JOIN buds_data b ON ap.bud_id = b.id
-                WHERE ap.activity_id = ?
+                WHERE ap.activity_id = %s
                 ORDER BY ap.registered_at DESC
             ''', (activity_id,))
 
@@ -1760,13 +2045,16 @@ def get_my_activities():
                 b.strain_name_th,
                 b.strain_name_en,
                 b.image_1_url as bud_image,
-                COUNT(DISTINCT ap2.user_id) as total_participants
+                COALESCE(pc.participant_count, 0) as total_participants
             FROM activity_participants ap
             JOIN activities a ON ap.activity_id = a.id
             LEFT JOIN buds_data b ON ap.bud_id = b.id
-            LEFT JOIN activity_participants ap2 ON a.id = ap2.activity_id
-            WHERE ap.user_id = ?
-            GROUP BY a.id, ap.id
+            LEFT JOIN (
+                SELECT activity_id, COUNT(DISTINCT user_id) as participant_count
+                FROM activity_participants
+                GROUP BY activity_id
+            ) pc ON a.id = pc.activity_id
+            WHERE ap.user_id = %s
             ORDER BY ap.registered_at DESC
         ''', (user_id,))
 
@@ -1800,7 +2088,7 @@ def join_activity(activity_id):
 
         # Check if activity exists and is open for registration
         activity_rows = db.execute_query('''
-            SELECT * FROM activities WHERE id = ?
+            SELECT * FROM activities WHERE id = %s
         ''', (activity_id,))
 
         if not activity_rows:
@@ -1816,7 +2104,7 @@ def join_activity(activity_id):
         if activity['max_participants'] > 0:
             participant_count = db.execute_query('''
                 SELECT COUNT(*) as count FROM activity_participants
-                WHERE activity_id = ?
+                WHERE activity_id = %s
             ''', (activity_id,))
 
             if participant_count and participant_count[0]['count'] >= activity['max_participants']:
@@ -1825,7 +2113,7 @@ def join_activity(activity_id):
         # Check if user already joined
         existing = db.execute_query('''
             SELECT id FROM activity_participants
-            WHERE activity_id = ? AND user_id = ?
+            WHERE activity_id = %s AND user_id = %s
         ''', (activity_id, user_id))
 
         if existing:
@@ -1834,24 +2122,25 @@ def join_activity(activity_id):
         # Check if bud belongs to user (try grower_id first, fallback to user_id)
         try:
             bud_rows = db.execute_query('''
-                SELECT * FROM buds_data WHERE id = ? AND grower_id = ?
+                SELECT * FROM buds_data WHERE id = %s AND grower_id = %s
             ''', (bud_id, user_id))
         except:
             # Fallback to user_id if grower_id doesn't exist
             bud_rows = db.execute_query('''
-                SELECT * FROM buds_data WHERE id = ? AND user_id = ?
+                SELECT * FROM buds_data WHERE id = %s AND user_id = %s
             ''', (bud_id, user_id))
 
         if not bud_rows:
             return jsonify({'error': 'ไม่พบดอกที่เลือก หรือดอกนี้ไม่ใช่ของคุณ'}), 404
 
         # Insert participation record
+        # registered_at has DEFAULT CURRENT_TIMESTAMP
         from datetime import datetime
         db.execute_update('''
             INSERT INTO activity_participants
-            (activity_id, user_id, bud_id, registered_at, submission_description)
-            VALUES (?, ?, ?, ?, ?)
-        ''', (activity_id, user_id, bud_id, datetime.now(), submission_description))
+            (activity_id, user_id, bud_id, submission_description)
+            VALUES (%s, %s, %s, %s)
+        ''', (activity_id, user_id, bud_id, submission_description))
 
         return jsonify({
             'success': True,
@@ -1874,7 +2163,7 @@ def get_activity_report(activity_id):
     try:
         # Get activity details
         activity_rows = db.execute_query('''
-            SELECT * FROM activities WHERE id = ?
+            SELECT * FROM activities WHERE id = %s
         ''', (activity_id,))
 
         if not activity_rows:
@@ -1916,7 +2205,7 @@ def get_activity_report(activity_id):
                 FROM activity_participants ap
                 LEFT JOIN users u ON ap.user_id = u.id
                 LEFT JOIN buds_data b ON ap.bud_reference_id = b.id
-                WHERE ap.activity_id = ?
+                WHERE ap.activity_id = %s
                 ORDER BY ap.joined_at DESC
             ''', (activity_id,))
 
@@ -1979,7 +2268,107 @@ def asset_file(filename):
     return send_from_directory(current_app.config['ATTACHED_ASSETS_FOLDER'], filename)
 
 
-@api_bp.route('/attached_assets/<path:filename>')
-def attached_asset_file(filename):
-    """Serve attached asset files"""
-    return send_from_directory(current_app.config['ATTACHED_ASSETS_FOLDER'], filename)
+# ==================== Image Upload API ====================
+
+@api_bp.route('/upload-images', methods=['POST'])
+@api_login_required
+def upload_images():
+    """Upload multiple images and return their URLs"""
+    try:
+        if not request.files:
+            return jsonify({'error': 'ไม่พบไฟล์'}), 400
+
+        upload_folder = current_app.config['UPLOAD_FOLDER']
+        allowed_extensions = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+        os.makedirs(upload_folder, exist_ok=True)
+
+        uploaded_urls = []
+
+        # Get all files from request
+        for key in request.files:
+            file = request.files[key]
+            if file and file.filename:
+                # Check file extension inline
+                if '.' in file.filename and file.filename.rsplit('.', 1)[1].lower() in allowed_extensions:
+                    filename = generate_unique_filename(file.filename)
+                    filepath = os.path.join(upload_folder, filename)
+                    file.save(filepath)
+
+                    # Return URL path relative to uploads folder
+                    url = f'/uploads/{filename}'
+                    uploaded_urls.append(url)
+                    print(f"Uploaded image: {url}")
+                else:
+                    print(f"File {file.filename} not allowed - invalid extension")
+
+        if not uploaded_urls:
+            return jsonify({'error': 'ไม่มีไฟล์ที่ถูกต้อง'}), 400
+
+        return jsonify({
+            'success': True,
+            'image_urls': uploaded_urls,
+            'count': len(uploaded_urls)
+        })
+
+    except Exception as e:
+        print(f"Upload images error: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': f'เกิดข้อผิดพลาดในการอัพโหลด: {str(e)}'}), 500
+
+
+@api_bp.route('/submit_referral_code', methods=['POST'])
+@api_login_required
+def submit_referral_code():
+    """Submit referral code for existing user without referrer"""
+    db = get_db()
+    user_id = session.get('user_id')
+
+    try:
+        data = request.get_json()
+        referral_code = data.get('referral_code')
+
+        if not referral_code:
+            return jsonify({'error': 'ไม่ได้ระบุ Referral Code'}), 400
+
+        # Check if user already has a referrer
+        user = db.execute_query('SELECT referred_by FROM users WHERE id = %s', (user_id,))
+        if not user:
+            return jsonify({'error': 'ไม่พบผู้ใช้'}), 404
+
+        if user[0]['referred_by']:
+            return jsonify({'error': 'คุณมีผู้แนะนำอยู่แล้ว'}), 400
+
+        # Find referrer by referral code
+        referrer = db.execute_query(
+            'SELECT id FROM users WHERE referral_code = %s',
+            (referral_code,)
+        )
+
+        if not referrer:
+            return jsonify({'error': 'ไม่พบ Referral Code นี้'}), 404
+
+        referrer_id = referrer[0]['id']
+
+        # Cannot refer yourself
+        if referrer_id == user_id:
+            return jsonify({'error': 'คุณไม่สามารถใช้ Referral Code ของตัวเองได้'}), 400
+
+        # Update user's referred_by
+        db.execute_update(
+            'UPDATE users SET referred_by = %s WHERE id = %s',
+            (referrer_id, user_id)
+        )
+
+        print(f"✅ User {user_id} added referrer {referrer_id}")
+
+        return jsonify({
+            'success': True,
+            'message': 'เพิ่มผู้แนะนำสำเร็จ กรุณารอการอนุมัติ'
+        })
+
+    except Exception as e:
+        print(f"Submit referral code error: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': f'เกิดข้อผิดพลาด: {str(e)}'}), 500

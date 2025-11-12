@@ -412,6 +412,20 @@
                             </label>
                         </div>
                     </div>
+
+                    <div class="setting-row">
+                        <div class="setting-label">
+                            <div class="setting-title">วิธีการสมัครสมาชิก</div>
+                            <div class="setting-description">เลือกวิธีการลงทะเบียนสำหรับผู้ใช้ใหม่</div>
+                        </div>
+                        <div class="setting-control">
+                            <select class="select-control" id="signupMethod" name="signupMethod" style="width: 200px;">
+                                <option value="both">ทั้งสองแบบ (Email + Google)</option>
+                                <option value="email_only">Email เท่านั้น</option>
+                                <option value="google_only">Google Account เท่านั้น</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- User Approval Settings -->
@@ -567,6 +581,9 @@
                 if (settings.sessionTimeout) {
                     document.getElementById('sessionTimeout').value = settings.sessionTimeout;
                 }
+                if (settings.signupMethod) {
+                    document.getElementById('signupMethod').value = settings.signupMethod;
+                }
             }
 
             async handleSave(e) {
@@ -584,6 +601,7 @@
                 // Get other values
                 settings.registrationMode = document.getElementById('registrationMode').value;
                 settings.sessionTimeout = document.getElementById('sessionTimeout').value;
+                settings.signupMethod = document.getElementById('signupMethod').value;
 
                 try {
                     const response = await fetch('/api/admin/settings/general', {

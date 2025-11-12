@@ -1,10 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(mkdir:*)",
-      "Bash(curl:*)",
-      "Bash(python:*)",
-      "Bash(sqlite3:*)",
+      "Bash(\"/c/Program Files/PostgreSQL/18/bin/psql.exe\" -U budtboy_user -d budtboy_db -c \"SELECT id, username, email, is_approved, is_verified, referrer_approved, approved_at FROM users WHERE username = ''budtboy'';\")",
+      "Bash(\"/c/Program Files/PostgreSQL/18/bin/psql.exe\" -U budtboy_user -d budtboy_db -c \"SELECT id, username, email, is_approved, is_verified, referrer_approved FROM users WHERE id = 1;\")",
       "Bash(git add:*)"
     ],
     "deny": [],
